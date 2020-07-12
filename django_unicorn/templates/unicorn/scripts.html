@@ -1,7 +1,8 @@
 {% load static %}
 
 <script src="{% static 'js/debounce.js' %}"></script>
-<script src="{% static 'js/morphdom/2.6.1/morphdom-umd.js' %}"></script>
+{% comment %} <script src="{% static 'js/morphdom/2.6.1/morphdom-umd.js' %}"></script> {% endcomment %}
+<script src="{% static 'js/morphdom/2.6.1/morphdom-umd.min.js' %}"></script>
 
 <script>
     var messageUrl = "{% url 'django_unicorn:message' %}";
