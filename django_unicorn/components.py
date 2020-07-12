@@ -136,7 +136,7 @@ class Component:
     @staticmethod
     def _get_root_element(soup):
         for element in soup.contents:
-            if element.name:
+            if element.name and element.name == "div":
                 return element
 
         raise Exception("No root element found")
