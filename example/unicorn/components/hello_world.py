@@ -6,5 +6,5 @@ class HelloWorld(Component):
     is_checked = False
     thing = "🐙"
     things = [
-        "👾",
+        "alien",
     ]

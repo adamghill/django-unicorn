@@ -1,31 +1,39 @@
 <div>
     <div>
-        <input unicorn:model="name" type="text">
+        <label for="text">Text input</label><br />
+        <input unicorn:model="name" type="text" id="text">
         Hello {{ name|title }} 👋
     </div>
 
     <div>
-        <input type="checkbox" unicorn:model="is_checked">
-        Checked? {% if is_checked %}Yes!{% else %}Nope 🙁{% endif %}
+        <label for="check">Checkbox</label><br />
+        <input type="checkbox" unicorn:model="is_checked" id="check">
+        {% if is_checked %}Yes!{% else %}Nope 🙁{% endif %}
     </div>
 
     <div>
-        <select unicorn:model="thing">
+        <label for="select">Select</label>
+        <select unicorn:model="thing" id="select">
             <option>🐶</option>
             <option>🐙</option>
             <option>👾</option>
         </select>
 
-        Hi {{ thing }}
+        <p>
+            Hi {{ thing }}
+        </p>
     </div>
 
     <div>
-        <select unicorn:model="things" multiple>
-            <option>🐶</option>
-            <option>🐙</option>
-            <option>👾</option>
+        <label for="select-multiple">Multiple select</label>
+        <select unicorn:model="things" id="select-multiple" multiple>
+            <option value="doggo">🐶</option>
+            <option value="octopus">🐙</option>
+            <option value="alien">👾</option>
         </select>
 
-        Howdy {{ things|join:", " }}
+        <p>
+            Howdy {{ things|join:", " }}
+        </p>
     </div>
 </div>
