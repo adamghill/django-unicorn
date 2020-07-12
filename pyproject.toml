@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "django-unicorn"
+version = "0.1.0"
+description = "Magical fullstack framework for Django."
+authors = ["Adam Hill <unicorn@adamghill.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.6"
+django = ">=3.0.0"
+beautifulsoup4 = "^4.9.1"
+orjson = "^3.2.1"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.4.3"
+black = "^19.10b0"
+flake8 = "^3.8.3"
+isort = "^5.0.9"
+mypy = "<0.780"
+django-stubs = "^1.5.0"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"

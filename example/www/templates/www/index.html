@@ -1,0 +1,15 @@
+{% load unicorn %}
+
+<html>
+    <head>
+        {% unicorn_styles %}
+    </head>
+
+    <body>
+        {% csrf_token %}
+        {% unicorn_scripts %}
+
+        {% unicorn 'hello-world' %}
+    </body>
+
+</html>
