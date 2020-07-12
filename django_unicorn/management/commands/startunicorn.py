@@ -15,6 +15,13 @@ class {camel_case_component_name}(Component):
 
 """
 
+TEMPLATE_FILE = """
+<div>
+    <!-- put code here -->
+</div>
+
+"""
+
 
 class Command(BaseCommand):
     help = "Creates a new component for `django-unicorn`"
@@ -51,5 +58,5 @@ class Command(BaseCommand):
                 Path("unicorn/templates/unicorn").mkdir()
 
             template_path = Path(f"unicorn/templates/unicorn/{component_name}.html")
-            template_path.touch()
+            template_path.write_text(TEMPLATE_FILE)
             self.stdout.write(self.style.SUCCESS(f"Created {template_path}."))
