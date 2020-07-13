@@ -1,4 +1,5 @@
 from django import template
+from django.conf import settings
 
 from ..components import get_component_class
 
@@ -8,7 +9,7 @@ register = template.Library()
 
 @register.inclusion_tag("unicorn/scripts.html")
 def unicorn_scripts():
-    return {}
+    return {"debug": settings.DEBUG}
 
 
 @register.inclusion_tag("unicorn/styles.html")

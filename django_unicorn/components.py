@@ -113,7 +113,7 @@ class Component:
         root_element["unicorn:id"] = str(self.id)
 
         populate_script = soup.new_tag("script")
-        populate_script.string = f"populate('{str(self.id)}', '{component_name}', {frontend_context_variables});"
+        populate_script.string = f"Unicorn.populate('{str(self.id)}', '{component_name}', {frontend_context_variables});"
         root_element.append(populate_script)
 
         rendered_template = Component._desoupify(soup)
