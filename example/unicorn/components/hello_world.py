@@ -8,3 +8,4 @@ class HelloWorld(Component):
     things = [
         "alien",
     ]
+    pie = "cherry"

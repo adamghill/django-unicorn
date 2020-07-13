@@ -36,4 +36,15 @@
             Howdy {{ things|join:", " }}
         </p>
     </div>
+
+    <div>
+        <label>Radio buttons</label><br />
+        <input type="radio" unicorn:model="pie" name="pie" value="blueberry">Blueberry</input>
+        <input type="radio" unicorn:model="pie" name="pie" value="apple">Apple</input>
+        <input type="radio" unicorn:model="pie" name="pie" value="cherry">Cherry</input>
+
+        <p>
+            Delicious {{ pie|upper }} pie
+        </p>
+    </div>
 </div>

@@ -21,7 +21,15 @@ var Unicorn = (function () {
             var modelName = el.getAttribute("unicorn:model");
 
             if (data[modelName]) {
-                el.value = data[modelName];
+                if (el.type == "radio") {
+                    if (el.value == data[modelName]) {
+                        el.checked = true;
+                    }
+                } else if (el.type == "checkbox") {
+                    el.checked = true;
+                } else {
+                    el.value = data[modelName];
+                }
             }
 
             el.addEventListener("input", function (e) {
