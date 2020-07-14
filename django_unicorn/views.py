@@ -13,6 +13,12 @@ def message(request, component_name):
     data = body.get("data", {})
     checksum = body.get("checksum")
 
+    generated_checksum = hmac.new(
+        str.encode(settings.SECRET_KEY), orjson.dumps(data), digestmod="sha256",
+    ).hexdigest()
+
+    assert checksum == generated_checksum, "Checksum does not match"
+
     unicorn_id = body.get("id")
     Component = get_component_class(component_name)
     component = Component(unicorn_id)
@@ -34,17 +40,14 @@ def message(request, component_name):
             if hasattr(component, name):
                 setattr(component, name, value)
 
-    generated_checksum = hmac.new(
-        str.encode(settings.SECRET_KEY), orjson.dumps(data), digestmod="sha256",
-    ).hexdigest()
+            data[name] = value
 
-    assert checksum == generated_checksum, "Checksum does not match"
-
-    rendered_component = component.render(component_name)
+    rendered_component = component.render(component_name, include_component_init=False)
 
     res = {
         "id": unicorn_id,
         "dom": rendered_component,
+        "data": data,
     }
 
     return JsonResponse(res)

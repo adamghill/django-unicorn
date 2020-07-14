@@ -3,6 +3,7 @@ var Unicorn = (function () {
     var messageUrl = "";
     var csrfToken = getCsrfToken();
     var csrfTokenHeaderName = 'X-CSRFToken';
+    var data = {};
 
     public.init = function (_messageUrl) {
         messageUrl = _messageUrl;
@@ -17,7 +18,6 @@ var Unicorn = (function () {
             Error("No id found");
         }
 
-        var data = JSON.parse(componentRoot.getAttribute("unicorn:data"));
         var modelEls = componentRoot.querySelectorAll('[unicorn\\:model]');
 
         modelEls.forEach(function (el) {
@@ -40,6 +40,10 @@ var Unicorn = (function () {
             });
         });
     };
+
+    public.setData = function (_data) {
+        data = _data;
+    }
 
     function getCsrfToken() {
         var csrfElements = document.getElementsByName('csrfmiddlewaretoken');
@@ -74,7 +78,6 @@ var Unicorn = (function () {
         debounce(function () {
             var syncUrl = messageUrl + '/' + componentName;
             var value = getValue(el);
-            var data = JSON.parse(componentRoot.getAttribute("unicorn:data"));
             var checksum = componentRoot.getAttribute("unicorn:checksum")
 
             actionQueue = [{ type: "syncInput", payload: { name: modelName, value: value } }]
@@ -99,6 +102,7 @@ var Unicorn = (function () {
             })
                 .then(response => response.json())
                 .then(responseJson => {
+                    public.setData(responseJson.data);
                     var dom = responseJson.dom;
                     var morphChanges = { changed: [], added: [], removed: [] };
 
@@ -141,7 +145,7 @@ var Unicorn = (function () {
                         }
                     }
 
-                    morphdom(componentRoot, responseJson.dom, morphdomOptions);
+                    morphdom(componentRoot, dom, morphdomOptions);
                 });
         }, debounceTime)();
     }

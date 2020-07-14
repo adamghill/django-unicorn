@@ -84,10 +84,10 @@ class Component:
             "methods": self.__methods__(),
         }
 
-    def render(self, component_name):
-        return self.view(component_name)
+    def render(self, component_name, include_component_init=True):
+        return self.view(component_name, include_component_init=include_component_init)
 
-    def view(self, component_name, data={}):
+    def view(self, component_name, data={}, include_component_init=True):
         context = self.__context__()
         context_variables = {}
         context_variables.update(context["attributes"])
@@ -119,16 +119,16 @@ class Component:
         root_element = Component._get_root_element(soup)
         root_element["unicorn:id"] = str(self.id)
         root_element["unicorn:checksum"] = checksum
-        root_element["unicorn:data"] = frontend_context_variables
 
-        script = soup.new_tag("script")
-        init = {
-            "id": str(self.id),
-            "name": component_name,
-        }
-        init = orjson.dumps(init).decode("utf-8")
-        script.string = f"Unicorn.componentInit({init});"
-        root_element.append(script)
+        if include_component_init:
+            script = soup.new_tag("script")
+            init = {
+                "id": str(self.id),
+                "name": component_name,
+            }
+            init = orjson.dumps(init).decode("utf-8")
+            script.string = f"Unicorn.setData({frontend_context_variables}); Unicorn.componentInit({init});"
+            root_element.insert_after(script)
 
         rendered_template = Component._desoupify(soup)
         rendered_template = mark_safe(rendered_template)
