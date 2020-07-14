@@ -8,13 +8,16 @@ var Unicorn = (function () {
         messageUrl = _messageUrl;
     }
 
-    public.populate = function (unicornId, componentName, data) {
+    public.componentInit = function (args) {
+        var unicornId = args.id;
+        var componentName = args.name;
         var componentRoot = document.querySelector('[unicorn\\:id="' + unicornId + '"]');
 
         if (!componentRoot) {
             Error("No id found");
         }
 
+        var data = JSON.parse(componentRoot.getAttribute("unicorn:data"));
         var modelEls = componentRoot.querySelectorAll('[unicorn\\:model]');
 
         modelEls.forEach(function (el) {
@@ -33,7 +36,7 @@ var Unicorn = (function () {
             }
 
             el.addEventListener("input", function (e) {
-                eventListener(componentName, componentRoot, unicornId, el, modelName, data);
+                eventListener(componentName, componentRoot, unicornId, el, modelName);
             });
         });
     };
@@ -65,17 +68,22 @@ var Unicorn = (function () {
         return value;
     }
 
-    function eventListener(componentName, componentRoot, unicornId, el, modelName, data) {
+    function eventListener(componentName, componentRoot, unicornId, el, modelName) {
         var debounceTime = 250;
 
-        debounce(function (data) {
+        debounce(function () {
             var syncUrl = messageUrl + '/' + componentName;
             var value = getValue(el);
-            data[modelName] = value;
+            var data = JSON.parse(componentRoot.getAttribute("unicorn:data"));
+            var checksum = componentRoot.getAttribute("unicorn:checksum")
+
+            actionQueue = [{ type: "syncInput", payload: { name: modelName, value: value } }]
 
             var body = {
                 id: unicornId,
                 data: data,
+                checksum: checksum,
+                actionQueue: actionQueue,
             };
 
             var headers = {
@@ -135,7 +143,7 @@ var Unicorn = (function () {
 
                     morphdom(componentRoot, responseJson.dom, morphdomOptions);
                 });
-        }, debounceTime)(data);
+        }, debounceTime)();
     }
 
     return public;

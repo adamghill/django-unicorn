@@ -1,3 +1,4 @@
+import hmac
 import importlib
 import inspect
 import uuid
@@ -99,6 +100,12 @@ class Component:
             "utf-8"
         )
 
+        checksum = hmac.new(
+            str.encode(settings.SECRET_KEY),
+            str.encode(frontend_context_variables),
+            digestmod="sha256",
+        ).hexdigest()
+
         if settings.DEBUG:
             context_variables.update({"unicorn_debug": context})
 
@@ -111,10 +118,17 @@ class Component:
         soup = BeautifulSoup(rendered_template, features="html.parser")
         root_element = Component._get_root_element(soup)
         root_element["unicorn:id"] = str(self.id)
+        root_element["unicorn:checksum"] = checksum
+        root_element["unicorn:data"] = frontend_context_variables
 
-        populate_script = soup.new_tag("script")
-        populate_script.string = f"Unicorn.populate('{str(self.id)}', '{component_name}', {frontend_context_variables});"
-        root_element.append(populate_script)
+        script = soup.new_tag("script")
+        init = {
+            "id": str(self.id),
+            "name": component_name,
+        }
+        init = orjson.dumps(init).decode("utf-8")
+        script.string = f"Unicorn.componentInit({init});"
+        root_element.append(script)
 
         rendered_template = Component._desoupify(soup)
         rendered_template = mark_safe(rendered_template)
