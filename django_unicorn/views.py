@@ -5,7 +5,7 @@ from django.http import JsonResponse
 
 import orjson
 
-from .components import get_component_class
+from .components import Component
 
 
 def message(request, component_name):
@@ -21,8 +21,7 @@ def message(request, component_name):
         return JsonResponse({"error": "Checksum does not match"})
 
     unicorn_id = body.get("id")
-    Component = get_component_class(component_name)
-    component = Component(unicorn_id)
+    component = Component.create(component_name, id=unicorn_id)
 
     for (name, value) in data.items():
         if hasattr(component, name):
@@ -43,7 +42,7 @@ def message(request, component_name):
 
             data[name] = value
 
-    rendered_component = component.render(component_name, include_component_init=False)
+    rendered_component = component.render(include_component_init=False)
 
     res = {
         "id": unicorn_id,

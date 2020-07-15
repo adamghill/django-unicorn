@@ -24,24 +24,25 @@ def convert_to_camel_case(s):
     return "".join(word.title() for word in s.split("_"))
 
 
-def get_component_class(component_name):
-    # TODO: Handle the module not being found
-    module_name = convert_to_snake_case(component_name)
-    module = importlib.import_module(f"unicorn.components.{module_name}")
-
-    # TODO: Handle the class not being found
-    class_name = convert_to_camel_case(module_name)
-    component_class = getattr(module, class_name)
-
-    return component_class
-
-
 class Component:
-    def __init__(self, id=None):
+    def __init__(self, component_name, id=None):
         if not id:
             id = uuid.uuid4()
 
         self.id = id
+        self.component_name = component_name
+
+    @staticmethod
+    def create(component_name, id=None):
+        # TODO: Handle the module not being found
+        module_name = convert_to_snake_case(component_name)
+        module = importlib.import_module(f"unicorn.components.{module_name}")
+
+        # TODO: Handle the class not being found
+        class_name = convert_to_camel_case(module_name)
+        component_class = getattr(module, class_name)
+
+        return component_class(component_name, id=id)
 
     def __attributes__(self):
         """
@@ -84,15 +85,12 @@ class Component:
             "methods": self.__methods__(),
         }
 
-    def render(self, component_name, include_component_init=True):
-        return self.view(component_name, include_component_init=include_component_init)
-
-    def view(self, component_name, data={}, include_component_init=True):
+    def render(self, template_context={}, include_component_init=True):
         context = self.__context__()
         context_variables = {}
         context_variables.update(context["attributes"])
         context_variables.update(context["methods"])
-        context_variables.update(data)
+        context_variables.update(template_context)
 
         frontend_context_variables = {}
         frontend_context_variables.update(context["attributes"])
@@ -111,7 +109,7 @@ class Component:
 
         template_engine = Engine.get_default()
         # TODO: Handle looking in other directories for templates
-        template = template_engine.get_template(f"unicorn/{component_name}.html")
+        template = template_engine.get_template(f"unicorn/{self.component_name}.html")
         context = Context(context_variables, autoescape=True)
         rendered_template = template.render(context)
 
@@ -124,7 +122,7 @@ class Component:
             script = soup.new_tag("script")
             init = {
                 "id": str(self.id),
-                "name": component_name,
+                "name": self.component_name,
             }
             init = orjson.dumps(init).decode("utf-8")
             script.string = f"Unicorn.setData({frontend_context_variables}); Unicorn.componentInit({init});"

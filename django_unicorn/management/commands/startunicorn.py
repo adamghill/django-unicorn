@@ -10,8 +10,7 @@ from django_unicorn.components import Component
 
 
 class {camel_case_component_name}(Component):
-    def render(self, component_name):
-        return self.view(component_name)
+    pass
 
 """
 

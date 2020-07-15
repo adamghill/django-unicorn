@@ -12,6 +12,10 @@ class HelloWorld(Component):
     paragraph = ""
     state = ""
 
+    def render(self, *args, **kwargs):
+        template_context = {"component_name": "hello-world.html"}
+        return super().render(template_context=template_context, *args, **kwargs)
+
     def states(self):
         if not self.state:
             return []
