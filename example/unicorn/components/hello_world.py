@@ -9,3 +9,4 @@ class HelloWorld(Component):
         "alien",
     ]
     pie = "cherry"
+    paragraph = ""
