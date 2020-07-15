@@ -100,8 +100,17 @@ var Unicorn = (function () {
                 headers: headers,
                 body: JSON.stringify(body),
             })
-                .then(response => response.json())
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    }
+                })
                 .then(responseJson => {
+                    if (responseJson.error) {
+                        console.error(responseJson.error);
+                        return
+                    }
+
                     public.setData(responseJson.data);
                     var dom = responseJson.dom;
                     var morphChanges = { changed: [], added: [], removed: [] };

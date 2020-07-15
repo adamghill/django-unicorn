@@ -17,7 +17,8 @@ def message(request, component_name):
         str.encode(settings.SECRET_KEY), orjson.dumps(data), digestmod="sha256",
     ).hexdigest()
 
-    assert checksum == generated_checksum, "Checksum does not match"
+    if checksum != generated_checksum:
+        return JsonResponse({"error": "Checksum does not match"})
 
     unicorn_id = body.get("id")
     Component = get_component_class(component_name)
