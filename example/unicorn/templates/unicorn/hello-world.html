@@ -56,4 +56,21 @@
             Number of characters: {{ paragraph|length }}
         </p>
     </div>
+
+    <div>
+        <label>Typeahead</label><br />
+        <input type="text" unicorn:model="state" placeholder="State name"></input>
+
+        <p>
+            Matching states:
+
+            {% if states %}
+            <ul>
+            {% for s in states %}
+            <li>{{ s }}</li>
+            {% endfor %}
+            </ul>
+            {% endif %}
+        </p>
+    </div>
 </div>

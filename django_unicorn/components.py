@@ -51,7 +51,7 @@ class Component:
             member[0] for member in inspect.getmembers(self, lambda x: not callable(x))
         ]
         attribute_names = list(
-            filter(lambda name: Component._is_public_name(name), non_callables,)
+            filter(lambda name: self._is_public_name(name), non_callables,)
         )
 
         attributes = {}
@@ -69,7 +69,7 @@ class Component:
         # TODO: Should only take methods that only have self argument?
         member_methods = inspect.getmembers(self, inspect.ismethod)
         public_methods = filter(
-            lambda method: Component._is_public_name(method[0]), member_methods
+            lambda method: self._is_public_name(method[0]), member_methods
         )
         methods = {k: v for (k, v) in public_methods}
 
@@ -135,8 +135,7 @@ class Component:
 
         return rendered_template
 
-    @staticmethod
-    def _is_public_name(name):
+    def _is_public_name(self, name):
         """
         Determines if the name should be sent in the context.
         """
@@ -145,7 +144,12 @@ class Component:
             "render",
             "view",
         )
-        return not (name.startswith("_") or name in protected_names)
+        excludes = []
+
+        if hasattr(self, "Meta") and hasattr(self.Meta, "exclude"):
+            excludes = self.Meta.exclude
+
+        return not (name.startswith("_") or name in protected_names or name in excludes)
 
     @staticmethod
     def _get_root_element(soup):
