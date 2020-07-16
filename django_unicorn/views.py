@@ -37,10 +37,46 @@ def message(request, component_name):
             name = payload.get("name")
             value = payload.get("value")
 
-            if hasattr(component, name):
+            if name is not None and value is not None and hasattr(component, name):
                 setattr(component, name, value)
 
             data[name] = value
+        elif action_type == "callMethod":
+            name = payload.get("name")
+            params = []
+
+            if "(" in name and ")" in name:
+                param_idx = name.index("(")
+                params = name[param_idx:]
+
+                # Remove the arguments from the method name used later
+                name = name.replace(params, "")
+
+                # Remove paranthesis
+                params = params[1:-1]
+
+                # Rmeove extra quotes for strings
+                if params.startswith("'") and params.endswith("'"):
+                    params = params[1:-1]
+                elif params.startswith('"') and params.endswith('"'):
+                    params = params[1:-1]
+
+                # TODO: Handle kwargs
+                params = params.split(",")
+
+            if name is not None and hasattr(component, name):
+                func = getattr(component, name)
+
+                if params:
+                    func(*params)
+                else:
+                    func()
+
+                for (
+                    attribute_name,
+                    attribute_value,
+                ) in component.__attributes__().items():
+                    data[attribute_name] = attribute_value
 
     rendered_component = component.render(include_component_init=False)
 

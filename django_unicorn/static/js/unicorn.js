@@ -9,6 +9,15 @@ var Unicorn = (function () {
         messageUrl = _messageUrl;
     }
 
+    function setModelValues(componentRoot) {
+        var modelEls = componentRoot.querySelectorAll('[unicorn\\:model]');
+
+        modelEls.forEach(modelEl => {
+            var modelName = modelEl.getAttribute("unicorn:model");
+            setValue(modelEl, modelName);
+        });
+    }
+
     public.componentInit = function (args) {
         var unicornId = args.id;
         var componentName = args.name;
@@ -18,25 +27,24 @@ var Unicorn = (function () {
             Error("No id found");
         }
 
-        var modelEls = componentRoot.querySelectorAll('[unicorn\\:model]');
+        setModelValues(componentRoot);
 
-        modelEls.forEach(function (el) {
+        listen("input", "[unicorn\\:model]", (event, el) => {
             var modelName = el.getAttribute("unicorn:model");
+            var value = getValue(el);
+            var action = { type: "syncInput", payload: { name: modelName, value: value } };
 
-            if (data[modelName]) {
-                if (el.type == "radio") {
-                    if (el.value == data[modelName]) {
-                        el.checked = true;
-                    }
-                } else if (el.type == "checkbox") {
-                    el.checked = true;
-                } else {
-                    el.value = data[modelName];
-                }
-            }
+            eventListener(componentName, componentRoot, unicornId, action, () => {
+                setModelValues(componentRoot);
+            });
+        });
 
-            el.addEventListener("input", function (e) {
-                eventListener(componentName, componentRoot, unicornId, el, modelName);
+        listen("click", "[unicorn\\:click]", (event, el) => {
+            var methodName = el.getAttribute("unicorn:click");
+            var action = { type: "callMethod", payload: { name: methodName, params: [] } };
+
+            eventListener(componentName, componentRoot, unicornId, action, () => {
+                setModelValues(componentRoot);
             });
         });
     };
@@ -57,12 +65,12 @@ var Unicorn = (function () {
         var value = el.value;
 
         // Handle checkbox
-        if (el.type.toLowerCase() == 'checkbox') {
+        if (el.type.toLowerCase() == "checkbox") {
             value = el.checked;
         }
 
         // Handle multiple select options
-        if (el.type.toLowerCase() == 'select-multiple') {
+        if (el.type.toLowerCase() == "select-multiple") {
             value = [];
             for (var i = 0; i < el.selectedOptions.length; i++) {
                 value.push(el.selectedOptions[i].value);
@@ -72,15 +80,29 @@ var Unicorn = (function () {
         return value;
     }
 
-    function eventListener(componentName, componentRoot, unicornId, el, modelName) {
+    function setValue(el, modelName) {
+        if (data[modelName]) {
+            if (el.type.toLowerCase() == "radio") {
+                // Handle radio buttons
+                if (el.value == data[modelName]) {
+                    el.checked = true;
+                }
+            } else if (el.type.toLowerCase() == "checkbox") {
+                // Handle checkboxes
+                el.checked = true;
+            } else {
+                el.value = data[modelName];
+            }
+        }
+    }
+
+    function eventListener(componentName, componentRoot, unicornId, action, callback) {
         var debounceTime = 250;
 
         debounce(function () {
             var syncUrl = messageUrl + '/' + componentName;
-            var value = getValue(el);
-            var checksum = componentRoot.getAttribute("unicorn:checksum")
-
-            actionQueue = [{ type: "syncInput", payload: { name: modelName, value: value } }]
+            var checksum = componentRoot.getAttribute("unicorn:checksum");
+            var actionQueue = [action];
 
             var body = {
                 id: unicornId,
@@ -92,8 +114,8 @@ var Unicorn = (function () {
             var headers = {
                 'Accept': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest',
-            }
-            headers[csrfTokenHeaderName] = csrfToken
+            };
+            headers[csrfTokenHeaderName] = csrfToken;
 
             fetch(syncUrl, {
                 method: "POST",
@@ -155,6 +177,10 @@ var Unicorn = (function () {
                     }
 
                     morphdom(componentRoot, dom, morphdomOptions);
+
+                    if (callback && callback != undefined) {
+                        callback();
+                    }
                 });
         }, debounceTime)();
     }

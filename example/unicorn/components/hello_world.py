@@ -16,6 +16,15 @@ class HelloWorld(Component):
         template_context = {"component_name": "hello-world.html"}
         return super().render(template_context=template_context, *args, **kwargs)
 
+    def set_name(self, name=None):
+        if name:
+            self.name = name
+        else:
+            self.name = "Universe"
+
+    def clear_states(self):
+        self.state = ""
+
     def states(self):
         if not self.state:
             return []

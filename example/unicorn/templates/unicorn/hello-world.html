@@ -5,6 +5,10 @@
         <label for="text">Text input</label><br />
         <input unicorn:model="name" type="text" id="text">
         Hello {{ name|title }} 👋
+        <br />
+        
+        <button unicorn:click="set_name">set_name()</button>
+        <button unicorn:click="set_name('blob')">set_name('blob')</button>
     </div>
 
     <div>
@@ -72,6 +76,8 @@
             <li>{{ s }}</li>
             {% endfor %}
             </ul>
+
+            <button unicorn:click="clear_states">Clear States</button>
             {% endif %}
         </p>
     </div>
