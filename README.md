@@ -38,11 +38,11 @@ https://github.com/adamghill/django-unicorn/blob/master/demo.mp4
 1. To install in another project `pip install -e some_folder/django-unicorn` and follow install instructions above
 
 # Minify Javascript
-1. `npm install babel-cli babel-preset-env uglifyjs`
-1. `babel django_unicorn/static/js/unicorn.js django_unicorn/static/js/utils.js django_unicorn/static/js/morphdom/2.6.1/morphdom-umd.js django_unicorn/static/js/debounce.js | uglifyjs -o django_unicorn/static/js/unicorn.min.js -m -c`
+1. `npm install`
+1. `npm run-script build`
 
 # Bump version
-1. Minify Javascript
-1. Update `unicorn.min.js` file with new version
+1. `npm run-script build`
+1. Move `django_unicorn/static/js/unicorn.min.js` to appropriate folder for new version
 1. `poetry version major|minor|patch`
 1. `poetry publish --build`
