@@ -4,7 +4,7 @@ The magical fullstack framework for Django. ✨
 `django-unicorn` provides a way to use backend Django code and regular Django templates to create interactive experiences without investing in a separate frontend framework.
 
 # Why?
-Building server-side sites in Django with the ORM and template engine is so pleasant, but once you need more interactivity on the frontend, there are a lot more ambiguity. Should you build out an entire API in Django REST framework? Should you use React or Vue.js (or some) other framework?
+Building server-side sites in Django with the ORM and template engine is so pleasant, but once you need more interactivity on the frontend, there is a lot more ambiguity. Should you build out an entire API in Django REST framework? Should you use React or Vue.js (or some) other frontend framework?
 
 It seems like there should be an easier way to create interactive experiences.
 
@@ -36,3 +36,13 @@ https://github.com/adamghill/django-unicorn/blob/master/demo.mp4
 1. `poetry run example/manage.py runserver 0:8000`
 1. Go to `localhost:8000` in your browser
 1. To install in another project `pip install -e some_folder/django-unicorn` and follow install instructions above
+
+# Minify Javascript
+1. `npm install babel-cli babel-preset-env uglifyjs`
+1. `babel django_unicorn/static/js/unicorn.js django_unicorn/static/js/utils.js django_unicorn/static/js/morphdom/2.6.1/morphdom-umd.js django_unicorn/static/js/debounce.js | uglifyjs -o django_unicorn/static/js/unicorn.min.js -m -c`
+
+# Bump version
+1. Minify Javascript
+1. Update `unicorn.min.js` file with new version
+1. `poetry version major|minor|patch`
+1. `poetry publish --build`

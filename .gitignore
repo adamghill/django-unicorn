@@ -108,3 +108,5 @@ venv.bak/
 .DS_Store
 pip-wheel-metadata
 TODO.md
+
+node_modules/

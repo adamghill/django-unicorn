@@ -2,13 +2,13 @@
 
 {% if debug %}
 <script src="{% static 'js/morphdom/2.6.1/morphdom-umd.js' %}"></script>
-{% else %}
-<script src="{% static 'js/morphdom/2.6.1/morphdom-umd.min.js' %}"></script>
-{% endif %}
-
 <script src="{% static 'js/utils.js' %}"></script>
 <script src="{% static 'js/debounce.js' %}"></script>
 <script src="{% static 'js/unicorn.js' %}"></script>
+{% else %}
+<script src="{% static 'js/0.1.0/unicorn.min.js' %}"></script>
+{% endif %}
+
 <script>
     var url = "{% url 'django_unicorn:message' %}";
     Unicorn.init(url);

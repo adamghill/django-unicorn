@@ -1,24 +1,24 @@
 var Unicorn = (function () {
-    var public = {};  // contains methods exposed in the Unicorn object
+    var unicorn = {};  // contains methods exposed publicly in the Unicorn object
     var messageUrl = "";
     var csrfToken = getCsrfToken();
     var csrfTokenHeaderName = 'X-CSRFToken';
     var data = {};
 
-    public.init = function (_messageUrl) {
+    unicorn.init = function (_messageUrl) {
         messageUrl = _messageUrl;
     }
 
     function setModelValues(componentRoot) {
         var modelEls = componentRoot.querySelectorAll('[unicorn\\:model]');
 
-        modelEls.forEach(modelEl => {
+        modelEls.forEach(function (modelEl) {
             var modelName = modelEl.getAttribute("unicorn:model");
             setValue(modelEl, modelName);
         });
     }
 
-    public.componentInit = function (args) {
+    unicorn.componentInit = function (args) {
         var unicornId = args.id;
         var componentName = args.name;
         var componentRoot = document.querySelector('[unicorn\\:id="' + unicornId + '"]');
@@ -34,22 +34,22 @@ var Unicorn = (function () {
             var value = getValue(el);
             var action = { type: "syncInput", payload: { name: modelName, value: value } };
 
-            eventListener(componentName, componentRoot, unicornId, action, () => {
+            eventListener(componentName, componentRoot, unicornId, action, function () {
                 setModelValues(componentRoot);
             });
         });
 
-        listen("click", "[unicorn\\:click]", (event, el) => {
+        listen("click", "[unicorn\\:click]", function (event, el) {
             var methodName = el.getAttribute("unicorn:click");
             var action = { type: "callMethod", payload: { name: methodName, params: [] } };
 
-            eventListener(componentName, componentRoot, unicornId, action, () => {
+            eventListener(componentName, componentRoot, unicornId, action, function () {
                 setModelValues(componentRoot);
             });
         });
     };
 
-    public.setData = function (_data) {
+    unicorn.setData = function (_data) {
         data = _data;
     }
 
@@ -122,25 +122,25 @@ var Unicorn = (function () {
                 headers: headers,
                 body: JSON.stringify(body),
             })
-                .then(response => {
+                .then(function (response) {
                     if (response.ok) {
                         return response.json();
                     }
                 })
-                .then(responseJson => {
+                .then(function (responseJson) {
                     if (responseJson.error) {
                         console.error(responseJson.error);
                         return
                     }
 
-                    public.setData(responseJson.data);
+                    unicorn.setData(responseJson.data);
                     var dom = responseJson.dom;
                     var morphChanges = { changed: [], added: [], removed: [] };
 
                     var morphdomOptions = {
                         childrenOnly: false,
 
-                        getNodeKey: node => {
+                        getNodeKey: function (node) {
                             if (node.attributes) {
                                 var key = node.getAttribute("unicorn:key") || node.getAttribute("unicorn:id") || node.id;
 
@@ -154,11 +154,11 @@ var Unicorn = (function () {
                             }
                         },
 
-                        onNodeDiscarded: node => {
+                        onNodeDiscarded: function (node) {
                             morphChanges.removed.push(node)
                         },
 
-                        onBeforeElUpdated: (from, to) => {
+                        onBeforeElUpdated: function (from, to) {
                             // Because morphdom also supports vDom nodes, it uses isSameNode to detect
                             // sameness. When dealing with DOM nodes, we want isEqualNode, otherwise
                             // isSameNode will ALWAYS return false.
@@ -167,11 +167,11 @@ var Unicorn = (function () {
                             }
                         },
 
-                        onElUpdated: node => {
+                        onElUpdated: function (node) {
                             morphChanges.changed.push(node)
                         },
 
-                        onNodeAdded: node => {
+                        onNodeAdded: function (node) {
                             morphChanges.added.push(node)
                         }
                     }
@@ -185,5 +185,5 @@ var Unicorn = (function () {
         }, debounceTime)();
     }
 
-    return public;
+    return unicorn;
 }());
