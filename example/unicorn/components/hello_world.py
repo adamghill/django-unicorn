@@ -1,7 +1,9 @@
-from django_unicorn.components import Component
+from django_unicorn.components import UnicornView
 
 
-class HelloWorld(Component):
+class HelloWorldView(UnicornView):
+    template_name = "unicorn/hello-world.html"
+
     name = "World"
     is_checked = False
     thing = "🐙"
@@ -12,28 +14,7 @@ class HelloWorld(Component):
     paragraph = ""
     state = ""
 
-    def render(self, *args, **kwargs):
-        template_context = {"component_name": "hello-world.html"}
-        return super().render(template_context=template_context, *args, **kwargs)
-
-    def set_name(self, name=None):
-        if name:
-            self.name = name
-        else:
-            self.name = "Universe"
-
-    def clear_states(self):
-        self.state = ""
-
-    def states(self):
-        if not self.state:
-            return []
-
-        return filter(
-            lambda s: s.lower().startswith(self.state.lower()), self.all_states
-        )
-
-    all_states = (
+    ALL_STATES = (
         "Alabama",
         "Alaska",
         "Arizona",
@@ -86,5 +67,20 @@ class HelloWorld(Component):
         "Wyoming",
     )
 
+    def set_name(self, name=None):
+        if name:
+            self.name = name
+        else:
+            self.name = "Universe"
+
+    def clear_states(self):
+        self.state = ""
+
+    def states(self):
+        if not self.state:
+            return []
+
+        return [s for s in self.ALL_STATES if s.lower().startswith(self.state.lower())]
+
     class Meta:
-        exclude = ("all_states",)
+        exclude = ("ALL_STATES",)

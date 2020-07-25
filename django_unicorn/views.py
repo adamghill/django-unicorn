@@ -5,7 +5,7 @@ from django.http import JsonResponse
 
 import orjson
 
-from .components import Component
+from .components import UnicornView
 
 
 def message(request, component_name):
@@ -20,12 +20,12 @@ def message(request, component_name):
     if checksum != generated_checksum:
         return JsonResponse({"error": "Checksum does not match"})
 
-    unicorn_id = body.get("id")
-    component = Component.create(component_name, id=unicorn_id)
+    component_id = body.get("id")
+    view = UnicornView.create(component_id=component_id, component_name=component_name)
 
     for (name, value) in data.items():
-        if hasattr(component, name):
-            setattr(component, name, value)
+        if hasattr(view, name):
+            setattr(view, name, value)
 
     action_queue = body.get("actionQueue", [])
 
@@ -37,8 +37,8 @@ def message(request, component_name):
             name = payload.get("name")
             value = payload.get("value")
 
-            if name is not None and value is not None and hasattr(component, name):
-                setattr(component, name, value)
+            if name is not None and value is not None and hasattr(view, name):
+                setattr(view, name, value)
 
             data[name] = value
         elif action_type == "callMethod":
@@ -49,13 +49,13 @@ def message(request, component_name):
                 param_idx = name.index("(")
                 params = name[param_idx:]
 
-                # Remove the arguments from the method name used later
+                # Remove the arguments from the method name
                 name = name.replace(params, "")
 
                 # Remove paranthesis
                 params = params[1:-1]
 
-                # Rmeove extra quotes for strings
+                # Remove extra quotes for strings
                 if params.startswith("'") and params.endswith("'"):
                     params = params[1:-1]
                 elif params.startswith('"') and params.endswith('"'):
@@ -64,24 +64,21 @@ def message(request, component_name):
                 # TODO: Handle kwargs
                 params = params.split(",")
 
-            if name is not None and hasattr(component, name):
-                func = getattr(component, name)
+            if name is not None and hasattr(view, name):
+                func = getattr(view, name)
 
                 if params:
                     func(*params)
                 else:
                     func()
 
-                for (
-                    attribute_name,
-                    attribute_value,
-                ) in component.__attributes__().items():
+                for (attribute_name, attribute_value,) in view._attributes().items():
                     data[attribute_name] = attribute_value
 
-    rendered_component = component.render(include_component_init=False)
+    rendered_component = view.render()
 
     res = {
-        "id": unicorn_id,
+        "id": component_id,
         "dom": rendered_component,
         "data": data,
     }

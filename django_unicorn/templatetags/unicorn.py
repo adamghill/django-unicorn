@@ -1,7 +1,7 @@
 from django import template
 from django.conf import settings
 
-from ..components import Component
+from ..components import UnicornView
 
 
 register = template.Library()
@@ -40,8 +40,8 @@ class UnicornNode(template.Node):
         self.component_name = component_name
 
     def render(self, context):
-        component = Component.create(self.component_name)
-        rendered_component = component.render()
+        view = UnicornView.create(component_name=self.component_name)
+        rendered_component = view.render(init_js=True)
 
         return rendered_component
 
