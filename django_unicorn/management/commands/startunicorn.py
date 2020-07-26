@@ -6,10 +6,10 @@ from ...components import convert_to_camel_case, convert_to_snake_case
 
 
 COMPONENT_FILE = """
-from django_unicorn.components import Component
+from django_unicorn.components import UnicornView
 
 
-class {camel_case_component_name}(Component):
+class {camel_case_component_name}View(UnicornView):
     pass
 
 """
