@@ -4,6 +4,7 @@ import inspect
 import uuid
 
 from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 from django.template.response import TemplateResponse
 from django.utils.safestring import mark_safe
 from django.views.generic.base import TemplateView
@@ -134,12 +135,32 @@ class UnicornView(TemplateView):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+        assert self.component_name, "Component name is required"
+
         if "component_id" not in kwargs or not kwargs["component_id"]:
             self.component_id = str(uuid.uuid4())
 
         if "request" in kwargs:
             self.setup(kwargs["request"])
 
+        self._set_default_template_name()
+        self._set_caches()
+
+    def _set_default_template_name(self):
+        get_template_names_is_valid = False
+
+        try:
+            # Check for get_template_names by explicitly calling it since it
+            # is defined in TemplateResponseMixin, but throws ImproperlyConfigured.
+            self.get_template_names()
+            get_template_names_is_valid = True
+        except ImproperlyConfigured:
+            pass
+
+        if not self.template_name and not get_template_names_is_valid:
+            self.template_name = f"unicorn/{self.component_name}.html"
+
+    def _set_caches(self):
         self._methods_cache = self._methods()
         self._attribute_names_cache = self._attribute_names()
 
