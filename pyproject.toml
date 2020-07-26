@@ -6,6 +6,8 @@ authors = ["Adam Hill <unicorn@adamghill.com>"]
 license = "MIT"
 readme = "README.md"
 repository = "https://github.com/adamghill/django-unicorn/"
+homepage = "https://www.django-unicorn.com"
+keywords = ["django", "python", "javascript", "fullstack"]
 
 [tool.poetry.dependencies]
 python = "^3.6"
