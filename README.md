@@ -8,6 +8,9 @@ Building server-side sites in Django with the ORM and template engine is so plea
 
 It seems like there should be an easier way to create interactive experiences.
 
+# Site
+https://www.django-unicorn.com
+
 # Demo
 https://github.com/adamghill/django-unicorn/blob/master/demo.mp4
 
@@ -22,7 +25,7 @@ https://github.com/adamghill/django-unicorn/blob/master/demo.mp4
 # How to create a component
 1. `python manage.py startunicorn hello-world`
 1. Add `{% unicorn 'hello-world' %}` into the template you want to load the new `hello-world` component
-1. Take a look at `HelloWorld` class and `hello-world.html` template and update based on the `example` project
+1. Take a look at `hello_world` class and `hello-world.html` template
 
 # Current functionality
 - `unicorn_styles`, `unicorn_scripts`, `unicorn` template tags
@@ -35,7 +38,7 @@ https://github.com/adamghill/django-unicorn/blob/master/demo.mp4
 1. `poetry run example/manage.py migrate`
 1. `poetry run example/manage.py runserver 0:8000`
 1. Go to `localhost:8000` in your browser
-1. To install in another project `pip install -e some_folder/django-unicorn` and follow install instructions above
+1. To install in another project `pip install -e ../django-unicorn`
 
 # Minify Javascript
 1. `npm install`
@@ -43,6 +46,5 @@ https://github.com/adamghill/django-unicorn/blob/master/demo.mp4
 
 # Bump version
 1. `npm run-script build`
-1. Move `django_unicorn/static/js/unicorn.min.js` to appropriate folder for new version
 1. `poetry version major|minor|patch`
-1. `poetry publish --build`
+1. `poetry publish --build -r pypi -u __token__`
