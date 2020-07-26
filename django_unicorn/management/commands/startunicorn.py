@@ -5,20 +5,16 @@ from django.core.management.base import BaseCommand, CommandError
 from ...components import convert_to_camel_case, convert_to_snake_case
 
 
-COMPONENT_FILE = """
-from django_unicorn.components import UnicornView
+COMPONENT_FILE = """from django_unicorn.components import UnicornView
 
 
 class {camel_case_component_name}View(UnicornView):
     pass
-
 """
 
-TEMPLATE_FILE = """
-<div>
+TEMPLATE_FILE = """<div>
     <!-- put code here -->
 </div>
-
 """
 
 
@@ -54,6 +50,9 @@ class Command(BaseCommand):
 
             # Create template
             if not Path("unicorn/templates/unicorn").exists():
+                if not Path("unicorn/templates").exists():
+                    Path("unicorn/templates").mkdir()
+
                 Path("unicorn/templates/unicorn").mkdir()
 
             template_path = Path(f"unicorn/templates/unicorn/{component_name}.html")
