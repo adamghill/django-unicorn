@@ -8,6 +8,9 @@ Building server-side sites in Django with the ORM and template engine is so plea
 
 It seems like there should be an easier way to create interactive experiences.
 
+# A note on beta software
+`django-unicorn` is beta software and the API will likely change on the way to 1.0. All efforts will be made to include an easy upgrade path. 1.0.0 will signify that the API won't change until the next major release.
+
 # Site
 https://www.django-unicorn.com
 
