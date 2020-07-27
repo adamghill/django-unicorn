@@ -20,7 +20,7 @@ https://github.com/adamghill/django-unicorn/blob/master/demo.mp4
 # Install
 1. `git clone git@github.com:adamghill/django-unicorn.git`
 1. `pip install -e ../django-unicorn`
-1. Add `django-unicorn` and `unicorn` to `INSTALL_APPS` in your Django settings file
+1. Add `django_unicorn` and `unicorn` to `INSTALL_APPS` in your Django settings file
 1. Add `path("unicorn/", include("django_unicorn.urls")),` into your project's `urlpatterns` in `urls.py`
 1. Add `{% load unicorn %}` to the top of your base template file
 1. Add `{% unicorn_styles %}` and `{% unicorn_scripts %}` into your base HTML file
