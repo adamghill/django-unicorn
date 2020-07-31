@@ -67,7 +67,7 @@ def message(request, component_name):
             if name is not None and hasattr(view, name):
                 func = getattr(view, name)
 
-                if params:
+                if params and all(params):
                     func(*params)
                 else:
                     func()
