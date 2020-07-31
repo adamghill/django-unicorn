@@ -1,12 +1,6 @@
 var Unicorn = (function () {
     var unicorn = {};  // contains methods exposed publicly in the Unicorn object
     var messageUrl = "";
-    var csrfToken = getCsrfToken();
-
-    if (!csrfToken) {
-        console.error("CSRF token is missing. Do you need to add {% csrf_token %}?");
-    }
-
     var csrfTokenHeaderName = 'X-CSRFToken';
     var data = {};
 
@@ -59,11 +53,18 @@ var Unicorn = (function () {
     }
 
     function getCsrfToken() {
+        var csrfToken = "";
         var csrfElements = document.getElementsByName('csrfmiddlewaretoken');
 
         if (csrfElements.length > 0) {
-            return csrfElements[0].getAttribute('value');
+            csrfToken = csrfElements[0].getAttribute('value');
         }
+
+        if (!csrfToken) {
+            console.error("CSRF token is missing. Do you need to add {% csrf_token %}?");
+        }
+
+        return csrfToken;
     }
 
     function getValue(el) {
@@ -120,7 +121,7 @@ var Unicorn = (function () {
                 'Accept': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest',
             };
-            headers[csrfTokenHeaderName] = csrfToken;
+            headers[csrfTokenHeaderName] = getCsrfToken();
 
             fetch(syncUrl, {
                 method: "POST",
