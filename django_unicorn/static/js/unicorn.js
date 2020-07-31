@@ -8,12 +8,14 @@ var Unicorn = (function () {
         messageUrl = _messageUrl;
     }
 
-    function setModelValues(componentRoot) {
+    function setModelValues(componentRoot, elementIdToExclude) {
         var modelEls = componentRoot.querySelectorAll('[unicorn\\:model]');
 
         modelEls.forEach(function (modelEl) {
-            var modelName = modelEl.getAttribute("unicorn:model");
-            setValue(modelEl, modelName);
+            if (typeof elementIdToExclude === 'undefined' || modelEl.id != elementIdToExclude) {
+                var modelName = modelEl.getAttribute("unicorn:model");
+                setValue(modelEl, modelName);
+            }
         });
     }
 
@@ -31,10 +33,11 @@ var Unicorn = (function () {
         listen("input", "[unicorn\\:model]", (event, el) => {
             var modelName = el.getAttribute("unicorn:model");
             var value = getValue(el);
+            var id = el.id;
             var action = { type: "syncInput", payload: { name: modelName, value: value } };
 
             eventListener(componentName, componentRoot, unicornId, action, function () {
-                setModelValues(componentRoot);
+                setModelValues(componentRoot, id);
             });
         });
 
@@ -151,7 +154,6 @@ var Unicorn = (function () {
 
                     var morphdomOptions = {
                         childrenOnly: false,
-
                         getNodeKey: function (node) {
                             if (node.attributes) {
                                 var key = node.getAttribute("unicorn:key") || node.getAttribute("unicorn:id") || node.id;
@@ -165,24 +167,20 @@ var Unicorn = (function () {
                                 return node.id;
                             }
                         },
-
                         onNodeDiscarded: function (node) {
                             morphChanges.removed.push(node)
                         },
-
-                        onBeforeElUpdated: function (from, to) {
+                        onBeforeElUpdated: function (fromEl, toEl) {
                             // Because morphdom also supports vDom nodes, it uses isSameNode to detect
                             // sameness. When dealing with DOM nodes, we want isEqualNode, otherwise
                             // isSameNode will ALWAYS return false.
-                            if (from.isEqualNode(to)) {
+                            if (fromEl.isEqualNode(toEl)) {
                                 return false;
                             }
                         },
-
                         onElUpdated: function (node) {
                             morphChanges.changed.push(node)
                         },
-
                         onNodeAdded: function (node) {
                             morphChanges.added.push(node)
                         }
