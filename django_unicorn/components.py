@@ -101,7 +101,7 @@ class UnicornTemplateResponse(TemplateResponse):
                 "name": self.component_name,
             }
             init = orjson.dumps(init).decode("utf-8")
-            script.string = f"Unicorn.setData({self.frontend_context_variables}); Unicorn.componentInit({init});"
+            script.string = f"if (typeof Unicorn === 'undefined') {{ console.error('Unicorn is missing. Do you need {{% load unicorn %}} or {{% unicorn-scripts %}}?') }} else {{ Unicorn.setData({self.frontend_context_variables}); Unicorn.componentInit({init}); }}"
             root_element.insert_after(script)
 
         rendered_template = UnicornTemplateResponse._desoupify(soup)

@@ -2,6 +2,11 @@ var Unicorn = (function () {
     var unicorn = {};  // contains methods exposed publicly in the Unicorn object
     var messageUrl = "";
     var csrfToken = getCsrfToken();
+
+    if (!csrfToken) {
+        console.error("CSRF token is missing. Do you need to add {% csrf_token %}?");
+    }
+
     var csrfTokenHeaderName = 'X-CSRFToken';
     var data = {};
 
@@ -125,9 +130,15 @@ var Unicorn = (function () {
                 .then(function (response) {
                     if (response.ok) {
                         return response.json();
+                    } else {
+                        console.error("Error when getting response: " + response.statusText + " (" + response.status + ")");
                     }
                 })
                 .then(function (responseJson) {
+                    if (!responseJson) {
+                        return
+                    }
+
                     if (responseJson.error) {
                         console.error(responseJson.error);
                         return
