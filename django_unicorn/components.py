@@ -1,8 +1,8 @@
 import hmac
 import importlib
 import inspect
-import uuid
 
+import shortuuid
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.template.response import TemplateResponse
@@ -138,7 +138,7 @@ class UnicornView(TemplateView):
         assert self.component_name, "Component name is required"
 
         if "component_id" not in kwargs or not kwargs["component_id"]:
-            self.component_id = str(uuid.uuid4())
+            self.component_id = shortuuid.uuid()[:8]
 
         if "request" in kwargs:
             self.setup(kwargs["request"])
