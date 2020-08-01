@@ -96,14 +96,14 @@ class UnicornTemplateResponse(TemplateResponse):
         root_element["unicorn:checksum"] = checksum
 
         if self.init_js:
-            script = soup.new_tag("script")
+            script_tag = soup.new_tag("script")
             init_data = {
                 "id": self.component_id,
                 "name": self.component_name,
             }
             init = orjson.dumps(init_data).decode("utf-8")
-            script.string = f"if (typeof Unicorn === 'undefined') {{ console.error('Unicorn is missing. Do you need {{% load unicorn %}} or {{% unicorn-scripts %}}?') }} else {{ Unicorn.setData({self.frontend_context_variables}); Unicorn.componentInit({init}); }}"
-            root_element.insert_after(script)
+            script_tag.string = f"if (typeof Unicorn === 'undefined') {{ console.error('Unicorn is missing. Do you need {{% load unicorn %}} or {{% unicorn-scripts %}}?') }} else {{ Unicorn.setData({self.frontend_context_variables}); Unicorn.componentInit({init}); }}"
+            root_element.insert_after(script_tag)
 
         rendered_template = UnicornTemplateResponse._desoupify(soup)
         rendered_template = mark_safe(rendered_template)
