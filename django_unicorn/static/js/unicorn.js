@@ -8,9 +8,7 @@ var Unicorn = (function () {
         messageUrl = _messageUrl;
     }
 
-    function setModelValues(componentRoot, elementIdToExclude) {
-        var modelEls = componentRoot.querySelectorAll('[unicorn\\:model]');
-
+    function setModelValues(modelEls, elementIdToExclude) {
         modelEls.forEach(function (modelEl) {
             if (typeof elementIdToExclude === 'undefined' || modelEl.id != elementIdToExclude) {
                 var modelName = modelEl.getAttribute("unicorn:model");
@@ -23,12 +21,13 @@ var Unicorn = (function () {
         var unicornId = args.id;
         var componentName = args.name;
         var componentRoot = document.querySelector('[unicorn\\:id="' + unicornId + '"]');
+        var modelELs = componentRoot.querySelectorAll('[unicorn\\:model]');
 
         if (!componentRoot) {
             Error("No id found");
         }
 
-        setModelValues(componentRoot);
+        setModelValues(modelELs);
 
         listen("input", "[unicorn\\:model]", (event, el) => {
             var modelName = el.getAttribute("unicorn:model");
@@ -37,7 +36,7 @@ var Unicorn = (function () {
             var action = { type: "syncInput", payload: { name: modelName, value: value } };
 
             eventListener(componentName, componentRoot, unicornId, action, function () {
-                setModelValues(componentRoot, id);
+                setModelValues(modelELs, id);
             });
         });
 
@@ -46,7 +45,7 @@ var Unicorn = (function () {
             var action = { type: "callMethod", payload: { name: methodName, params: [] } };
 
             eventListener(componentName, componentRoot, unicornId, action, function () {
-                setModelValues(componentRoot);
+                setModelValues(modelELs);
             });
         });
     };
