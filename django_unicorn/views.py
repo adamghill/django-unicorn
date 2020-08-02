@@ -180,14 +180,17 @@ def message(request: HttpRequest, component_name: str) -> JsonResponse:
             if not call_method_name:
                 return JsonResponse({"error": "Missing 'name' key for callMethod"})
 
+            # Handle the special case of the reset action
             if call_method_name == "reset" or call_method_name == "reset()":
                 component = UnicornView.create(
                     component_id=component_id,
                     component_name=component_name,
                     skip_cache=True,
                 )
+                # Reset the data based on component's attributes
                 data = component._attributes()
-                continue
+
+                break
 
             (method_name, params) = _parse_call_method_name(call_method_name)
             _call_method_name(component, method_name, params, data)
