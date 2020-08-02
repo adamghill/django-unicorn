@@ -181,6 +181,13 @@ class UnicornView(TemplateView):
         self._methods_cache = self._methods()
         self._attribute_names_cache = self._attribute_names()
 
+    def mount(self):
+        """
+        A hook that will always get called when a component is created.
+        By default a no-op, components can override it if needed.
+        """
+        pass
+
     def render(self, init_js=False) -> str:
         """
         Renders a UnicornView component with the public properties available. Delegates to a
@@ -288,6 +295,7 @@ class UnicornView(TemplateView):
             "id",
             "component_id",
             "component_name",
+            "mount",
         )
         excludes = []
 
@@ -323,6 +331,11 @@ class UnicornView(TemplateView):
             component = views_cache[component_name](
                 component_name=component_name, component_id=component_id
             )
+            component.mount()
+
+            if component_id:
+                key = f"{component_name}-{component_id}"
+                constructed_views_cache[key] = component
 
             return component
 
@@ -367,13 +380,9 @@ class UnicornView(TemplateView):
                 component = component_class(
                     component_name=component_name, id=component_id
                 )
+                component.mount()
 
                 views_cache[component_name] = component_class
-
-                if component_id:
-                    constructed_views_cache[
-                        f"{component_name}-{component_id}"
-                    ] = component
 
                 return component
             except ModuleNotFoundError as e:
