@@ -22,6 +22,9 @@ https://www.django-unicorn.com
 1. Go to `localhost:8000` in your browser
 1. To install in another project `pip install -e ../django-unicorn`
 
+## Run unittests
+1. `poetry run pytest`
+
 ## Minify Javascript
 1. `npm install`
 1. `npm run-script build`
