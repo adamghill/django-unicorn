@@ -10,7 +10,7 @@ var Unicorn = (function () {
 
     function setModelValues(modelEls, elementIdToExclude) {
         modelEls.forEach(function (modelEl) {
-            if (typeof elementIdToExclude === 'undefined' || modelEl.id != elementIdToExclude) {
+            if (typeof elementIdToExclude === 'undefined' || !elementIdToExclude || modelEl.id != elementIdToExclude) {
                 var modelName = modelEl.getAttribute("unicorn:model");
                 setValue(modelEl, modelName);
             }
