@@ -7,11 +7,12 @@
         <input unicorn:model="name" type="text" id="text2">
         Hello {{ name|title }} 👋
         <br />
-        
+
         <button unicorn:click="set_name">set_name</button>
         <button unicorn:click="set_name()">set_name()</button>
         <button unicorn:click="set_name('')">set_name('')</button>
         <button unicorn:click="set_name('blob')">set_name('blob')</button>
+        <button unicorn:click="reset">reset</button>
     </div>
 
     <div>

@@ -176,8 +176,23 @@ def message(request: HttpRequest, component_name: str) -> JsonResponse:
             _set_attribute(component, payload, data)
         elif action_type == "callMethod":
             call_method_name = payload.get("name", "")
+
+            if not call_method_name:
+                return JsonResponse({"error": "Missing 'name' key for callMethod"})
+
+            if call_method_name == "reset" or call_method_name == "reset()":
+                component = UnicornView.create(
+                    component_id=component_id,
+                    component_name=component_name,
+                    skip_cache=True,
+                )
+                data = component._attributes()
+                continue
+
             (method_name, params) = _parse_call_method_name(call_method_name)
             _call_method_name(component, method_name, params, data)
+        else:
+            return JsonResponse({"error": f"Unknown action_type '{action_type}'"})
 
     rendered_component = component.render()
 

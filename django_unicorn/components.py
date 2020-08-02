@@ -297,7 +297,9 @@ class UnicornView(TemplateView):
         return not (name.startswith("_") or name in protected_names or name in excludes)
 
     @staticmethod
-    def create(component_name: str, component_id: str = None) -> "UnicornView":
+    def create(
+        component_name: str, component_id: str = None, skip_cache=False
+    ) -> "UnicornView":
         """
         Find and instantiate a component class based on `component_name`.
 
@@ -305,12 +307,13 @@ class UnicornView(TemplateView):
             param component_name: Name of the component. Used to locate the correct `UnicornView`
                 component class and template if necessary.
             param component_id: Id of the component. Will be created if not passed in.
+            param skip_cache: Force construction of component. Defaults to `False`.
         
         Returns:
             Instantiated `UnicornView` component.
             Raises `ComponentNotFoundError` if the component cannot be found.
         """
-        if component_id:
+        if component_id and not skip_cache:
             key = f"{component_name}-{component_id}"
 
             if key in constructed_views_cache:
@@ -320,10 +323,6 @@ class UnicornView(TemplateView):
             component = views_cache[component_name](
                 component_name=component_name, component_id=component_id
             )
-
-            if component_id:
-                key = f"{component_name}-{component_id}"
-                constructed_views_cache[key] = component
 
             return component
 
@@ -365,7 +364,9 @@ class UnicornView(TemplateView):
         for (class_name, module_name) in locations:
             try:
                 component_class = _get_component_class(module_name, class_name)
-                component = component_class(component_name=component_name, id=None)
+                component = component_class(
+                    component_name=component_name, id=component_id
+                )
 
                 views_cache[component_name] = component_class
 
