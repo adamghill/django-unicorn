@@ -10,7 +10,7 @@ var Unicorn = (function () {
 
     function setModelValues(modelEls, elementIdToExclude) {
         modelEls.forEach(function (modelEl) {
-            if (typeof elementIdToExclude === 'undefined' || !elementIdToExclude || modelEl.id != elementIdToExclude) {
+            if (typeof elementIdToExclude === "undefined" || !elementIdToExclude || modelEl.id != elementIdToExclude) {
                 var modelName = modelEl.getAttribute("unicorn:model");
                 setValue(modelEl, modelName);
             }
@@ -89,7 +89,7 @@ var Unicorn = (function () {
     }
 
     function setValue(el, modelName) {
-        if (data[modelName]) {
+        if (data.hasOwnProperty(modelName)) {
             if (el.type.toLowerCase() == "radio") {
                 // Handle radio buttons
                 if (el.value == data[modelName]) {
@@ -97,7 +97,7 @@ var Unicorn = (function () {
                 }
             } else if (el.type.toLowerCase() == "checkbox") {
                 // Handle checkboxes
-                el.checked = true;
+                el.checked = data[modelName];
             } else {
                 el.value = data[modelName];
             }
@@ -187,7 +187,7 @@ var Unicorn = (function () {
 
                     morphdom(componentRoot, dom, morphdomOptions);
 
-                    if (callback && callback != undefined) {
+                    if (callback && typeof callback === "function") {
                         callback();
                     }
                 });
