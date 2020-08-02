@@ -50,5 +50,5 @@ https://github.com/adamghill/django-unicorn/blob/master/demo.mp4
 # Bump version
 1. `npm run-script build`
 1. `poetry version major|minor|patch`
-1. Commit/push version bump
+1. Tag/commit/push version bump
 1. `poetry publish --build -r pypi -u __token__`
