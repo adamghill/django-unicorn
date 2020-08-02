@@ -2,6 +2,7 @@ import hmac
 from typing import Any, Dict, List, Tuple
 
 import orjson
+import shortuuid
 from django.conf import settings
 from django.http import HttpRequest, JsonResponse
 from django.views.decorators.csrf import csrf_protect
@@ -149,6 +150,7 @@ def message(request: HttpRequest, component_name: str) -> JsonResponse:
     generated_checksum = hmac.new(
         str.encode(settings.SECRET_KEY), orjson.dumps(data), digestmod="sha256",
     ).hexdigest()
+    generated_checksum = shortuuid.uuid(generated_checksum)[:8]
 
     if checksum != generated_checksum:
         return JsonResponse({"error": "Checksum does not match"})

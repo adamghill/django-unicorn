@@ -1,7 +1,7 @@
 import hmac
 import importlib
 import inspect
-from typing import Dict, Any, Callable, Optional, Type, Union
+from typing import Any, Callable, Dict, Optional, Type, Union
 
 import orjson
 import shortuuid
@@ -89,6 +89,7 @@ class UnicornTemplateResponse(TemplateResponse):
             str.encode(str(self.frontend_context_variables)),
             digestmod="sha256",
         ).hexdigest()
+        checksum = shortuuid.uuid(checksum)[:8]
 
         soup = BeautifulSoup(content, features="html.parser")
         root_element = UnicornTemplateResponse._get_root_element(soup)
