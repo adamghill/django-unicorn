@@ -1,4 +1,5 @@
 import hmac
+from functools import wraps
 from typing import Any, Dict, List, Tuple
 
 import orjson
@@ -9,6 +10,22 @@ from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_POST
 
 from .components import UnicornView
+
+
+class UnicornViewError(Exception):
+    pass
+
+
+def handle_error(view_func):
+    def wrapped_view(*args, **kwargs):
+        try:
+            return view_func(*args, **kwargs)
+        except UnicornViewError as e:
+            return JsonResponse({"error": str(e)})
+        except AssertionError as e:
+            return JsonResponse({"error": str(e)})
+
+    return wraps(view_func)(wrapped_view)
 
 
 def _set_attribute(component: UnicornView, payload: Dict, data: Dict) -> None:
@@ -104,9 +121,53 @@ def _call_method_name(
             data[attribute_name] = attribute_value
 
 
+class ComponentRequest:
+    """
+    Parses, validates, and stores all of the data from the message request.
+    """
+
+    def __init__(self, request):
+        self.body = {}
+
+        try:
+            self.body = orjson.loads(request.body)
+            assert self.body, "Invalid JSON body"
+        except orjson.JSONDecodeError as e:
+            raise UnicornViewError("Body could not be parsed") from e
+
+        self.data = self.body.get("data")
+        assert self.data is not None, "Missing data"  # data could theoretically be {}
+
+        self.id = self.body.get("id")
+        assert self.id, "Missing component id"
+
+        self.validate_checksum()
+
+        self.action_queue = self.body.get("actionQueue", [])
+
+    def validate_checksum(self):
+        """
+        Validates that the checksum in the request matches the data.
+
+        Returns:
+            Raises `AssertionError` if the checksums don't match.
+        """
+        checksum = self.body.get("checksum")
+        assert checksum, "Missing checksum"
+
+        generated_checksum = hmac.new(
+            str.encode(settings.SECRET_KEY),
+            orjson.dumps(self.data),
+            digestmod="sha256",
+        ).hexdigest()
+        generated_checksum = shortuuid.uuid(generated_checksum)[:8]
+        assert checksum == generated_checksum, "Checksum does not match"
+
+
+@handle_error
 @csrf_protect
 @require_POST
-def message(request: HttpRequest, component_name: str) -> JsonResponse:
+def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
     """
     Endpoint that instantiates the component and does the correct action
     (set an attribute or call a method) depending on the JSON payload in the body.
@@ -124,85 +185,49 @@ def message(request: HttpRequest, component_name: str) -> JsonResponse:
         }
     """
 
-    if not component_name:
-        return JsonResponse({"error": "Missing component name in url"})
+    assert component_name, "Missing component name in url"
 
-    body = {}
-
-    try:
-        body = orjson.loads(request.body)
-    except orjson.JSONDecodeError:
-        return JsonResponse({"error": "Body could not be parsed"})
-
-    if not body:
-        return JsonResponse({"error": "Invalid JSON body"})
-
-    data = body.get("data", {})
-
-    if not data:
-        return JsonResponse({"error": "Missing data"})
-
-    checksum = body.get("checksum", "")
-
-    if not checksum:
-        return JsonResponse({"error": "Missing checksum"})
-
-    generated_checksum = hmac.new(
-        str.encode(settings.SECRET_KEY), orjson.dumps(data), digestmod="sha256",
-    ).hexdigest()
-    generated_checksum = shortuuid.uuid(generated_checksum)[:8]
-
-    if checksum != generated_checksum:
-        return JsonResponse({"error": "Checksum does not match"})
-
-    component_id = body.get("id")
-
-    if not component_id:
-        return JsonResponse({"error": "Missing component id"})
+    component_request = ComponentRequest(request)
+    data = component_request.data
 
     component = UnicornView.create(
-        component_id=component_id, component_name=component_name
+        component_id=component_request.id, component_name=component_name
     )
 
     for (name, value) in data.items():
         if hasattr(component, name):
             setattr(component, name, value)
 
-    action_queue = body.get("actionQueue", [])
-
-    for action in action_queue:
+    for action in component_request.action_queue:
         action_type = action.get("type")
         payload = action.get("payload", {})
 
         if action_type == "syncInput":
-            _set_attribute(component, payload, data)
+            _set_attribute(component, payload, component_request.data)
         elif action_type == "callMethod":
             call_method_name = payload.get("name", "")
-
-            if not call_method_name:
-                return JsonResponse({"error": "Missing 'name' key for callMethod"})
+            assert call_method_name, "Missing 'name' key for callMethod"
 
             # Handle the special case of the reset action
             if call_method_name == "reset" or call_method_name == "reset()":
                 component = UnicornView.create(
-                    component_id=component_id,
+                    component_id=component_request.id,
                     component_name=component_name,
                     skip_cache=True,
                 )
                 # Reset the data based on component's attributes
                 data = component._attributes()
-
-                break
+                continue
 
             (method_name, params) = _parse_call_method_name(call_method_name)
             _call_method_name(component, method_name, params, data)
         else:
-            return JsonResponse({"error": f"Unknown action_type '{action_type}'"})
+            raise UnicornViewError(f"Unknown action_type '{action_type}'")
 
     rendered_component = component.render()
 
     res = {
-        "id": component_id,
+        "id": component_request.id,
         "dom": rendered_component,
         "data": data,
     }
