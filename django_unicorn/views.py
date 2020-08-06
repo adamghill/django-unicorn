@@ -83,15 +83,24 @@ def _parse_call_method_name(call_method_name: str) -> Tuple[str, List[Any]]:
         params = params_str.split(",")
 
         for idx, arg in enumerate(params):
-            # Remove extra quotes for strings
-            if (arg.startswith("'") and arg.endswith("'")) or (
-                arg.startswith('"') and arg.endswith('"')
-            ):
-                params[idx] = arg[1:-1]
+            params[idx] = _handle_arg(arg)
 
         # TODO: Handle kwargs
 
     return (method_name, params)
+
+
+def _handle_arg(arg):
+    """
+    Clean up arguments. Mostly used to handle strings.
+
+    Returns:
+        Cleaned up argument.
+    """
+    if (arg.startswith("'") and arg.endswith("'")) or (
+        arg.startswith('"') and arg.endswith('"')
+    ):
+        return arg[1:-1]
 
 
 def _call_method_name(
@@ -217,10 +226,17 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
                 )
                 # Reset the data based on component's attributes
                 data = component._attributes()
-                continue
+            elif "=" in call_method_name:
+                call_method_name_split = call_method_name.split("=")
+                property_name = call_method_name_split[0]
+                property_value = _handle_arg(call_method_name_split[1])
 
-            (method_name, params) = _parse_call_method_name(call_method_name)
-            _call_method_name(component, method_name, params, data)
+                if hasattr(component, property_name):
+                    setattr(component, property_name, property_value)
+                    data[property_name] = property_value
+            else:
+                (method_name, params) = _parse_call_method_name(call_method_name)
+                _call_method_name(component, method_name, params, data)
         else:
             raise UnicornViewError(f"Unknown action_type '{action_type}'")
 
