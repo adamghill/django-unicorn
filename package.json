@@ -5,6 +5,6 @@
         "uglify-js": "^3.10.0"
     },
     "scripts": {
-        "build": "babel django_unicorn/static/js/unicorn.js django_unicorn/static/js/utils.js django_unicorn/static/js/morphdom/2.6.1/morphdom-umd.js django_unicorn/static/js/debounce.js | uglifyjs -o django_unicorn/static/js/unicorn.min.js -m -c"
+        "build": "babel django_unicorn/static/js/unicorn.js django_unicorn/static/js/morphdom/2.6.1/morphdom-umd.js | uglifyjs -o django_unicorn/static/js/unicorn.min.js -m -c"
     }
 }

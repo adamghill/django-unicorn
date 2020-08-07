@@ -1,5 +1,5 @@
 var Unicorn = (function () {
-    var unicorn = {};  // contains methods exposed publicly in the Unicorn object
+    var unicorn = {};  // contains all methods exposed publicly in the Unicorn object
     var messageUrl = "";
     var csrfTokenHeaderName = 'X-CSRFToken';
     var data = {};
@@ -8,20 +8,11 @@ var Unicorn = (function () {
         messageUrl = _messageUrl;
     }
 
-    function setModelValues(modelEls, elementIdToExclude) {
-        modelEls.forEach(function (modelEl) {
-            if (typeof elementIdToExclude === "undefined" || !elementIdToExclude || modelEl.id != elementIdToExclude) {
-                var modelName = modelEl.getAttribute("unicorn:model");
-                setValue(modelEl, modelName);
-            }
-        });
-    }
-
     unicorn.componentInit = function (args) {
         var unicornId = args.id;
         var componentName = args.name;
-        var componentRoot = document.querySelector('[unicorn\\:id="' + unicornId + '"]');
-        var modelELs = componentRoot.querySelectorAll('[unicorn\\:model]');
+        var componentRoot = $('[unicorn\\:id="' + unicornId + '"]');
+        var modelELs = $$('[unicorn\\:model]', componentRoot);
 
         if (!componentRoot) {
             Error("No id found");
@@ -88,6 +79,15 @@ var Unicorn = (function () {
         return value;
     }
 
+    function setModelValues(modelEls, elementIdToExclude) {
+        modelEls.forEach(function (modelEl) {
+            if (typeof elementIdToExclude === "undefined" || !elementIdToExclude || modelEl.id != elementIdToExclude) {
+                var modelName = modelEl.getAttribute("unicorn:model");
+                setValue(modelEl, modelName);
+            }
+        });
+    }
+
     function setValue(el, modelName) {
         if (data.hasOwnProperty(modelName)) {
             if (el.type.toLowerCase() == "radio") {
@@ -149,25 +149,21 @@ var Unicorn = (function () {
 
                     unicorn.setData(responseJson.data);
                     var dom = responseJson.dom;
-                    var morphChanges = { changed: [], added: [], removed: [] };
 
                     var morphdomOptions = {
                         childrenOnly: false,
                         getNodeKey: function (node) {
                             if (node.attributes) {
-                                var key = node.getAttribute("unicorn:key") || node.getAttribute("unicorn:id") || node.id;
+                                var key = node.getAttribute("unicorn:id") || node.id;
 
                                 if (key) {
-                                    return node.getAttribute("unicorn:key") || node.getAttribute("unicorn:id") || node.id;
+                                    return key;
                                 }
                             }
 
                             if (node.id) {
                                 return node.id;
                             }
-                        },
-                        onNodeDiscarded: function (node) {
-                            morphChanges.removed.push(node)
                         },
                         onBeforeElUpdated: function (fromEl, toEl) {
                             // Because morphdom also supports vDom nodes, it uses isSameNode to detect
@@ -177,12 +173,6 @@ var Unicorn = (function () {
                                 return false;
                             }
                         },
-                        onElUpdated: function (node) {
-                            morphChanges.changed.push(node)
-                        },
-                        onNodeAdded: function (node) {
-                            morphChanges.added.push(node)
-                        }
                     }
 
                     morphdom(componentRoot, dom, morphdomOptions);
@@ -193,6 +183,58 @@ var Unicorn = (function () {
                 });
         }, debounceTime)();
     }
+
+    function $(selector, scope) {
+        if (scope == undefined) {
+            scope = document;
+        }
+    
+        return scope.querySelector(selector);
+    }
+    
+    function $$(selector, scope) {
+        if (scope == undefined) {
+            scope = document;
+        }
+    
+        return Array.from(scope.querySelectorAll(selector));
+    }
+    
+    function listen(type, selector, callback) {
+        document.addEventListener(type, function (event) {
+            var target = event.target.closest(selector);
+    
+            if (target) {
+                callback(event, target);
+            }
+        });
+    }
+
+    /*
+    Returns a function, that, as long as it continues to be invoked, will not
+    be triggered. The function will be called after it stops being called for
+    N milliseconds. If `immediate` is passed, trigger the function on the
+    leading edge, instead of the trailing.
+
+    Derived from underscore.js's implementation in https://davidwalsh.name/javascript-debounce-function.
+    */
+    function debounce(func, wait, immediate) {
+        var timeout;
+
+        return function () {
+            var context = this, args = arguments;
+            var later = function () {
+                timeout = null;
+                if (!immediate) func.apply(context, args);
+            };
+
+            var callNow = immediate && !timeout;
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+
+            if (callNow) func.apply(context, args);
+        };
+    };
 
     return unicorn;
 }());
