@@ -4,11 +4,14 @@
 
     <div>
         <label for="text">Text input</label><br />
-        <input unicorn:model="name" type="text" id="1">
-        <input unicorn:model="name" type="text" id="2">
-        <input unicorn:model="name" type="text" id="3">
+        <input unicorn:model="name" type="text" id="1" unicorn:key="blob3">
+        <input unicorn:model="name" type="text" id="2" unicorn:key="blob3">
+        <input unicorn:model="name" unicorn:keydown="set_name('something new')" type="text" id="3">
+        <input unicorn:model="name" unicorn:keydown="set_name('something new')" type="text" id="3">
         Hello {{ name|title }} 👋
         <br />
+
+        <input unicorn:keydown="set_name('something new')" type="text" id="3">
 
         <button unicorn:click="set_name">set_name</button>
         <button unicorn:click="set_name()">set_name()</button>
@@ -78,9 +81,9 @@
 
             {% if states %}
             <ul>
-            {% for s in states %}
-            <li>{{ s }}</li>
-            {% endfor %}
+                {% for s in states %}
+                <li>{{ s }}</li>
+                {% endfor %}
             </ul>
 
             <button unicorn:click="clear_states()">Clear States</button>

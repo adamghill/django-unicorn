@@ -12,33 +12,54 @@ var Unicorn = (function () {
         var unicornId = args.id;
         var componentName = args.name;
         var componentRoot = $('[unicorn\\:id="' + unicornId + '"]');
-        var modelELs = $$('[unicorn\\:model]', componentRoot);
 
         if (!componentRoot) {
             Error("No id found");
         }
 
-        setModelValues(modelELs);
+        var modelEls = [];
 
-        listen("input", "[unicorn\\:model]", (event, el) => {
-            var modelName = el.getAttribute("unicorn:model");
-            var value = getValue(el);
-            var id = el.id;
-            var action = { type: "syncInput", payload: { name: modelName, value: value } };
+        walk(componentRoot, (el) => {
+            if (el.isSameNode(componentRoot)) {
+                // Skip the component root element
+                return
+            }
 
-            eventListener(componentName, componentRoot, unicornId, action, function () {
-                setModelValues(modelELs, id);
-            });
+            for (var i = 0; i < el.attributes.length; i++) {
+                var attribute = el.attributes[i];
+                var unicornIdx = attribute.name.indexOf("unicorn:");
+
+                if (unicornIdx > -1) {
+                    if (attribute.name == "unicorn:model") {
+                        modelEls.push(el);
+
+                        el.addEventListener("input", function (event) {
+                            var modelName = el.getAttribute("unicorn:model");
+                            var value = getValue(el);
+                            var id = el.id;
+                            var action = { type: "syncInput", payload: { name: modelName, value: value } };
+
+                            eventListener(componentName, componentRoot, unicornId, action, function () {
+                                setModelValues(modelEls, id);
+                            });
+                        });
+                    } else {
+                        var eventType = attribute.name.replace("unicorn:", "");
+                        var methodName = attribute.value;
+
+                        el.addEventListener(eventType, function (event) {
+                            var action = { type: "callMethod", payload: { name: methodName, params: [] } };
+
+                            eventListener(componentName, componentRoot, unicornId, action, function () {
+                                setModelValues(modelEls);
+                            });
+                        });
+                    }
+                }
+            };
         });
 
-        listen("click", "[unicorn\\:click]", function (event, el) {
-            var methodName = el.getAttribute("unicorn:click");
-            var action = { type: "callMethod", payload: { name: methodName, params: [] } };
-
-            eventListener(componentName, componentRoot, unicornId, action, function () {
-                setModelValues(modelELs);
-            });
-        });
+        setModelValues(modelEls);
     };
 
     unicorn.setData = function (_data) {
@@ -58,6 +79,18 @@ var Unicorn = (function () {
         }
 
         return csrfToken;
+    }
+
+    /*
+    Traverse the DOM looking for child elements.
+    */
+    function walk(el, callback) {
+        var walker = document.createTreeWalker(el, NodeFilter.SHOW_ELEMENT, null, false);
+
+        while (walker.nextNode()) {
+            // TODO: Handle sub-components
+            callback(walker.currentNode);
+        }
     }
 
     function getValue(el) {
@@ -153,16 +186,14 @@ var Unicorn = (function () {
                     var morphdomOptions = {
                         childrenOnly: false,
                         getNodeKey: function (node) {
+                            // A node's unique identifier. Used to rearrange elements rather than
+                            // creating and destroying an element that already exists. 
                             if (node.attributes) {
-                                var key = node.getAttribute("unicorn:id") || node.id;
+                                var key = node.getAttribute("unicorn:key") || node.id;
 
                                 if (key) {
                                     return key;
                                 }
-                            }
-
-                            if (node.id) {
-                                return node.id;
                             }
                         },
                         onBeforeElUpdated: function (fromEl, toEl) {
@@ -188,26 +219,8 @@ var Unicorn = (function () {
         if (scope == undefined) {
             scope = document;
         }
-    
+
         return scope.querySelector(selector);
-    }
-    
-    function $$(selector, scope) {
-        if (scope == undefined) {
-            scope = document;
-        }
-    
-        return Array.from(scope.querySelectorAll(selector));
-    }
-    
-    function listen(type, selector, callback) {
-        document.addEventListener(type, function (event) {
-            var target = event.target.closest(selector);
-    
-            if (target) {
-                callback(event, target);
-            }
-        });
     }
 
     /*
