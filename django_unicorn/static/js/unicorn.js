@@ -33,21 +33,22 @@ var Unicorn = (function () {
                     if (attribute.name == "unicorn:model") {
                         modelEls.push(el);
 
-                        el.addEventListener("input", function (event) {
+                        el.addEventListener("input", event => {
                             var modelName = el.getAttribute("unicorn:model");
                             var value = getValue(el);
                             var id = el.id;
+                            var key = el.getAttribute("unicorn:key");
                             var action = { type: "syncInput", payload: { name: modelName, value: value } };
 
                             eventListener(componentName, componentRoot, unicornId, action, function () {
-                                setModelValues(modelEls, id);
+                                setModelValues(modelEls, { id: id, key: key });
                             });
                         });
                     } else {
                         var eventType = attribute.name.replace("unicorn:", "");
                         var methodName = attribute.value;
 
-                        el.addEventListener(eventType, function (event) {
+                        el.addEventListener(eventType, event => {
                             var action = { type: "callMethod", payload: { name: methodName, params: [] } };
 
                             eventListener(componentName, componentRoot, unicornId, action, function () {
@@ -112,9 +113,15 @@ var Unicorn = (function () {
         return value;
     }
 
-    function setModelValues(modelEls, elementIdToExclude) {
+    function setModelValues(modelEls, elementToExclude) {
+        if (typeof elementToExclude === "undefined" || !elementToExclude) {
+            elementToExclude = {};
+        }
+
         modelEls.forEach(function (modelEl) {
-            if (typeof elementIdToExclude === "undefined" || !elementIdToExclude || modelEl.id != elementIdToExclude) {
+            var modelKey = modelEl.getAttribute("unicorn:key");
+
+            if (modelEl.id != elementToExclude.id || modelKey != elementToExclude.key) {
                 var modelName = modelEl.getAttribute("unicorn:model");
                 setValue(modelEl, modelName);
             }

@@ -4,20 +4,21 @@
 
     <div>
         <label for="text">Text input</label><br />
-        <input unicorn:model="name" type="text" id="1" unicorn:key="blob3">
-        <input unicorn:model="name" type="text" id="2" unicorn:key="blob3">
-        <input unicorn:model="name" unicorn:keydown="set_name('something new')" type="text" id="3">
-        <input unicorn:model="name" unicorn:keydown="set_name('something new')" type="text" id="3">
-        Hello {{ name|title }} 👋
+        <input unicorn:model="name" type="text" id="nameId" unicorn:key="key1">
+        <input unicorn:model="name" type="text" id="nameId">
+        <input unicorn:model="name" type="text" id="nameId2">
+        <input unicorn:model="name" unicorn:keyup="set_name('something new')" type="text" id="nameId3">
+
         <br />
-
-        <input unicorn:keydown="set_name('something new')" type="text" id="3">
-
         <button unicorn:click="set_name">set_name</button>
         <button unicorn:click="set_name()">set_name()</button>
         <button unicorn:click="set_name('')">set_name('')</button>
         <button unicorn:click="set_name('blob')">set_name('blob')</button>
         <button unicorn:click="name='human'">name='human'</button>
+
+        <div>
+            Hello {{ name|title }} 👋
+        </div>
     </div>
 
     <div>
@@ -80,14 +81,14 @@
             Matching states:
 
             {% if states %}
-            <ul>
-                {% for s in states %}
-                <li>{{ s }}</li>
-                {% endfor %}
-            </ul>
+        <ul>
+            {% for s in states %}
+            <li>{{ s }}</li>
+            {% endfor %}
+        </ul>
 
-            <button unicorn:click="clear_states()">Clear States</button>
-            {% endif %}
+        <button unicorn:click="clear_states()">Clear States</button>
+        {% endif %}
         </p>
     </div>
 </div>
