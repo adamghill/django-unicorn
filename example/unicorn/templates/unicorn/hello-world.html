@@ -3,11 +3,24 @@
     <button unicorn:click="reset">Reset the component</button>
 
     <div>
-        <label for="text">Text input</label><br />
-        <input unicorn:model.lazy="name" type="text" id="nameId1" unicorn:key="key1" placeholder="lazy">
+        <h2>Text input</h2>
+
+        <label>Lazy</label>
+        <input unicorn:model.lazy="name" type="text" id="nameId1" unicorn:key="key1">
+        
+        <label>Debounce</label>
+        <input unicorn:model.debounce-1000="name" type="text" id="nameId1" unicorn:key="key1">
+
+        <label>unicorn:key</label>
         <input unicorn:model="name" type="text" id="nameId" unicorn:key="key1">
+
+        <label>Duplicate id</label>
         <input unicorn:model="name" type="text" id="nameId">
+
+        <label>Unique id</label>
         <input unicorn:model="name" type="text" id="nameId2">
+
+        <label>Keyup</label>
         <input unicorn:model="name" unicorn:keyup="set_name('something new')" type="text" id="nameId3">
 
         <br />
@@ -23,13 +36,13 @@
     </div>
 
     <div>
-        <label for="check">Checkbox</label><br />
+        <h2>Checkbox</h2>
         <input type="checkbox" unicorn:model="is_checked" id="check">
         {% if is_checked %}Yes! 🦄{% else %}Nope 🙁{% endif %}
     </div>
 
     <div>
-        <label for="select">Select</label>
+        <h2>Select</h2>
         <select unicorn:model="thing" id="select">
             <option>🐶</option>
             <option>🐙</option>
@@ -42,7 +55,7 @@
     </div>
 
     <div>
-        <label for="select-multiple">Multiple select</label>
+        <h2>Multiple select</h2>
         <select unicorn:model="things" id="select-multiple" multiple>
             <option value="doggo">🐶</option>
             <option value="octopus">🐙</option>
@@ -55,7 +68,7 @@
     </div>
 
     <div>
-        <label>Radio buttons</label><br />
+        <h2>Radio buttons</h2>
         <input type="radio" unicorn:model="pie" name="pie" value="blueberry"> Blueberry</input><br />
         <input type="radio" unicorn:model="pie" name="pie" value="apple"> Apple</input><br />
         <input type="radio" unicorn:model="pie" name="pie" value="cherry"> Cherry</input>
@@ -66,7 +79,7 @@
     </div>
 
     <div>
-        <label>Textarea</label><br />
+        <h2>Textarea</h2>
         <textarea unicorn:model="paragraph" id="textarea"></textarea>
 
         <p>
@@ -75,7 +88,7 @@
     </div>
 
     <div>
-        <label>Typeahead</label><br />
+        <h2>Typeahead</h2>
         <input type="text" unicorn:model="state" placeholder="State name" id="typeahead"></input>
 
         <p>

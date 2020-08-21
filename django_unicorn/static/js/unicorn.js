@@ -57,9 +57,13 @@ var Unicorn = (function () {
                         var attributeModifiers = {};
 
                         modifiers.forEach(modifier => {
-                            attributeModifiers[modifier] = true;
+                            if (modifier != "unicorn:model") {
+                                var modifierArgs = modifier.split("-");
+                                attributeModifiers[modifierArgs[0]] = modifierArgs.length > 1 ? modifierArgs[1] : true;
+                            }
                         })
                         var modelEventType = attributeModifiers.lazy ? "blur" : "input";
+                        var debounceTime = attributeModifiers.debounce ? parseInt(attributeModifiers.debounce) : 250;
 
                         el.addEventListener(modelEventType, event => {
                             var modelName = el.getAttribute(attributeName);
@@ -68,7 +72,7 @@ var Unicorn = (function () {
                             var key = el.getAttribute("unicorn:key");
                             var action = { type: "syncInput", payload: { name: modelName, value: value } };
 
-                            eventListener(componentName, componentRoot, unicornId, action, function () {
+                            eventListener(componentName, componentRoot, unicornId, action, debounceTime, function () {
                                 setModelValues(modelEls, { id: id, key: key });
                             });
                         });
@@ -79,7 +83,7 @@ var Unicorn = (function () {
                         el.addEventListener(eventType, event => {
                             var action = { type: "callMethod", payload: { name: methodName, params: [] } };
 
-                            eventListener(componentName, componentRoot, unicornId, action, function () {
+                            eventListener(componentName, componentRoot, unicornId, action, 0, function () {
                                 setModelValues(modelEls);
                             });
                         });
@@ -192,9 +196,7 @@ var Unicorn = (function () {
     /*
     Handles calling the message endpoint and merging the results into the document.
     */
-    function eventListener(componentName, componentRoot, unicornId, action, callback) {
-        var debounceTime = 250;
-
+    function eventListener(componentName, componentRoot, unicornId, action, debounceTime, callback) {
         debounce(function () {
             var syncUrl = messageUrl + '/' + componentName;
             var checksum = componentRoot.getAttribute("unicorn:checksum");
