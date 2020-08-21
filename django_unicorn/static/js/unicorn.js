@@ -4,10 +4,29 @@ var Unicorn = (function () {
     var csrfTokenHeaderName = 'X-CSRFToken';
     var data = {};
 
+    /*
+    Initializes the Unicorn object.
+    */
     unicorn.init = function (_messageUrl) {
         messageUrl = _messageUrl;
     }
 
+    /*
+    Gets the value of the `unicorn:model` attribute from an element even if there are modifiers.
+    */
+    function getModelName(el) {
+        for (var i = 0; i < el.attributes.length; i++) {
+            var attribute = el.attributes[i];
+
+            if (attribute.name.indexOf("unicorn:model") > -1) {
+                return el.getAttribute(attribute.name);
+            }
+        }
+    }
+
+    /*
+    Initializes the component.
+    */
     unicorn.componentInit = function (args) {
         var unicornId = args.id;
         var componentName = args.name;
@@ -30,11 +49,20 @@ var Unicorn = (function () {
                 var unicornIdx = attribute.name.indexOf("unicorn:");
 
                 if (unicornIdx > -1) {
-                    if (attribute.name == "unicorn:model") {
+                    if (attribute.name.indexOf("unicorn:model") > -1) {
                         modelEls.push(el);
 
-                        el.addEventListener("input", event => {
-                            var modelName = el.getAttribute("unicorn:model");
+                        var attributeName = attribute.name;
+                        var modifiers = attributeName.replace("unicorn:model.", "").split(".");
+                        var attributeModifiers = {};
+
+                        modifiers.forEach(modifier => {
+                            attributeModifiers[modifier] = true;
+                        })
+                        var modelEventType = attributeModifiers.lazy ? "blur" : "input";
+
+                        el.addEventListener(modelEventType, event => {
+                            var modelName = el.getAttribute(attributeName);
                             var value = getValue(el);
                             var id = el.id;
                             var key = el.getAttribute("unicorn:key");
@@ -63,10 +91,16 @@ var Unicorn = (function () {
         setModelValues(modelEls);
     };
 
+    /*
+    Sets the data on the Unicorn object.
+    */
     unicorn.setData = function (_data) {
         data = _data;
     }
 
+    /*
+    Get the CSRF token used by Django.
+    */
     function getCsrfToken() {
         var csrfToken = "";
         var csrfElements = document.getElementsByName('csrfmiddlewaretoken');
@@ -94,6 +128,9 @@ var Unicorn = (function () {
         }
     }
 
+    /*
+    Get a value from an element. Tries to deal with HTML weirdnesses.
+    */
     function getValue(el) {
         var value = el.value;
 
@@ -113,6 +150,11 @@ var Unicorn = (function () {
         return value;
     }
 
+    /*
+    Sets all model values.
+    
+    `elementToExclude`: Prevent a particular element from being updated. Object example: `{id: 'elementId', key: 'elementKey'}`.
+    */
     function setModelValues(modelEls, elementToExclude) {
         if (typeof elementToExclude === "undefined" || !elementToExclude) {
             elementToExclude = {};
@@ -122,12 +164,15 @@ var Unicorn = (function () {
             var modelKey = modelEl.getAttribute("unicorn:key");
 
             if (modelEl.id != elementToExclude.id || modelKey != elementToExclude.key) {
-                var modelName = modelEl.getAttribute("unicorn:model");
+                var modelName = getModelName(modelEl);
                 setValue(modelEl, modelName);
             }
         });
     }
 
+    /*
+    Sets the value of an element. Tries to deal with HTML weirdnesses.
+    */
     function setValue(el, modelName) {
         if (data.hasOwnProperty(modelName)) {
             if (el.type.toLowerCase() == "radio") {
@@ -144,6 +189,9 @@ var Unicorn = (function () {
         }
     }
 
+    /*
+    Handles calling the message endpoint and merging the results into the document.
+    */
     function eventListener(componentName, componentRoot, unicornId, action, callback) {
         var debounceTime = 250;
 
@@ -222,6 +270,9 @@ var Unicorn = (function () {
         }, debounceTime)();
     }
 
+    /*
+    A simple shortcut for querySelector that everyone loves.
+    */
     function $(selector, scope) {
         if (scope == undefined) {
             scope = document;
@@ -255,6 +306,14 @@ var Unicorn = (function () {
             if (callNow) func.apply(context, args);
         };
     };
+
+    /*
+    Stupid method because context switches are hard.
+    */
+    function print(msg) {
+        var args = [].slice.apply(arguments).slice(1);
+        console.log(msg, ...args);
+    }
 
     return unicorn;
 }());
