@@ -266,10 +266,13 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
                 component = UnicornView.create(
                     component_id=component_request.id,
                     component_name=component_name,
-                    skip_cache=True,
+                    use_cache=False,
                 )
-                # Reset the data based on component's attributes
-                component_request.data = component._attributes()
+
+                # Reset the data based on frontend context
+                component_request.data = orjson.loads(
+                    component.get_frontend_context_variables()
+                )
             elif "=" in call_method_name:
                 call_method_name_split = call_method_name.split("=")
                 property_name = call_method_name_split[0]

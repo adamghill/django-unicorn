@@ -310,9 +310,12 @@ class UnicornView(TemplateView):
         attributes = {}
 
         for attribute_name in attribute_names:
-            attributes[attribute_name] = object.__getattribute__(self, attribute_name)
+            attributes[attribute_name] = getattr(self, attribute_name)
 
         return attributes
+
+    def _set_property(self, name, value):
+        setattr(self, name, value)
 
     def _methods(self) -> Dict[str, Callable]:
         """
@@ -373,7 +376,7 @@ class UnicornView(TemplateView):
 
     @staticmethod
     def create(
-        component_name: str, component_id: str = None, skip_cache=False
+        component_name: str, component_id: str = None, use_cache=True
     ) -> "UnicornView":
         """
         Find and instantiate a component class based on `component_name`.
@@ -382,13 +385,13 @@ class UnicornView(TemplateView):
             param component_name: Name of the component. Used to locate the correct `UnicornView`
                 component class and template if necessary.
             param component_id: Id of the component. Will be created if not passed in.
-            param skip_cache: Force construction of component. Defaults to `False`.
+            param use_cache: Get component from cache or force construction of component. Defaults to `True`.
         
         Returns:
             Instantiated `UnicornView` component.
             Raises `ComponentNotFoundError` if the component cannot be found.
         """
-        if component_id and not skip_cache:
+        if component_id and use_cache:
             key = f"{component_name}-{component_id}"
 
             if key in constructed_views_cache:
@@ -399,6 +402,30 @@ class UnicornView(TemplateView):
                 component_name=component_name, component_id=component_id
             )
             component.mount()
+
+            if not use_cache:
+                #  Re-initializes custom classes so that `reset` magic method will "clear" them as expected
+
+                NON_CONSTRUCTABLE_TYPES = (
+                    str,
+                    int,
+                    dict,
+                    list,
+                    Model,
+                    QuerySet,
+                )
+                _attributes = component._attributes()
+
+                for attribute_name in _attributes:
+                    attribute = _attributes[attribute_name]
+
+                    # TODO: Not sure if there is a better way to do this. Could just check for UnicornField?
+                    if not any(
+                        filter(
+                            lambda t: isinstance(attribute, t), NON_CONSTRUCTABLE_TYPES
+                        )
+                    ):
+                        component._set_property(attribute_name, attribute.__class__())
 
             if component_id:
                 key = f"{component_name}-{component_id}"
