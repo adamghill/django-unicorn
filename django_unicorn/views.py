@@ -1,15 +1,16 @@
 import hmac
 from functools import wraps
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Tuple, Union
 
 import orjson
 import shortuuid
 from django.conf import settings
+from django.db.models import Model
 from django.http import HttpRequest, JsonResponse
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_POST
 
-from .components import UnicornView
+from .components import UnicornField, UnicornView
 
 
 class UnicornViewError(Exception):
@@ -28,7 +29,27 @@ def handle_error(view_func):
     return wraps(view_func)(wrapped_view)
 
 
-def _set_attribute(component: UnicornView, payload: Dict, data: Dict) -> None:
+def _set_property_from_data(
+    component_or_field: Union[UnicornView, UnicornField, Model], name: str, value
+) -> None:
+    """
+    Sets properties on the component based on passed-in data.
+    """
+    if hasattr(component_or_field, name):
+        field = getattr(component_or_field, name)
+
+        # UnicornField and Models are always a dictionary (can be nested)
+        if isinstance(field, UnicornField) or isinstance(field, Model):
+            for key in value.keys():
+                key_value = value[key]
+                _set_property_from_data(field, key, key_value)
+        else:
+            setattr(component_or_field, name, value)
+
+
+def _set_property_from_payload(
+    component: UnicornView, payload: Dict, data: Dict
+) -> None:
     """
     Sets properties on the component based on the payload.
     Also updates the data dictionary which gets set back as part of the payload.
@@ -39,17 +60,42 @@ def _set_attribute(component: UnicornView, payload: Dict, data: Dict) -> None:
         param data: Dictionary that gets sent back with the response.
     """
 
-    attribute_name = payload.get("name")
-    attribute_value = payload.get("value")
+    property_name = payload.get("name")
+    property_value = payload.get("value")
 
-    if (
-        attribute_name is not None
-        and attribute_value is not None
-        and hasattr(component, attribute_name)
-    ):
-        setattr(component, attribute_name, attribute_value)
+    if property_name is not None and property_value is not None:
+        """
+        Handles nested properties. For example, for the following component:
 
-    data[attribute_name] = attribute_value
+        class Author(UnicornField):
+            name = "Neil"
+
+        class TestView(UnicornView):
+            author = Author()
+        
+        `payload` would equal `{'name': 'author.name', 'value': 'Neil Gaiman'}`
+
+        The following code updates UnicornView.author.name based the payload's `author.name`.
+        """
+        property_name_parts = property_name.split(".")
+        component_or_field = component
+        data_or_dict = data  # Could be an internal portion of data that gets set
+
+        for (idx, property_name_part) in enumerate(property_name_parts):
+            if hasattr(component_or_field, property_name_part):
+                if idx == len(property_name_parts) - 1:
+                    setattr(component_or_field, property_name_part, property_value)
+                    data_or_dict[property_name_part] = property_value
+                else:
+                    component_or_field = getattr(component_or_field, property_name_part)
+                    data_or_dict = data_or_dict.get(property_name_part, {})
+            elif isinstance(component_or_field, dict):
+                if idx == len(property_name_parts) - 1:
+                    component_or_field[property_name_part] = property_value
+                    data_or_dict[property_name_part] = property_value
+                else:
+                    component_or_field = component_or_field[property_name_part]
+                    data_or_dict = data_or_dict.get(property_name_part, {})
 
 
 def _parse_call_method_name(call_method_name: str) -> Tuple[str, List[Any]]:
@@ -197,22 +243,20 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
     assert component_name, "Missing component name in url"
 
     component_request = ComponentRequest(request)
-    data = component_request.data
-
     component = UnicornView.create(
         component_id=component_request.id, component_name=component_name
     )
 
-    for (name, value) in data.items():
-        if hasattr(component, name):
-            setattr(component, name, value)
+    # Set component properties based on request data
+    for (name, value) in component_request.data.items():
+        _set_property_from_data(component, name, value)
 
     for action in component_request.action_queue:
         action_type = action.get("type")
         payload = action.get("payload", {})
 
         if action_type == "syncInput":
-            _set_attribute(component, payload, component_request.data)
+            _set_property_from_payload(component, payload, component_request.data)
         elif action_type == "callMethod":
             call_method_name = payload.get("name", "")
             assert call_method_name, "Missing 'name' key for callMethod"
@@ -225,7 +269,7 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
                     skip_cache=True,
                 )
                 # Reset the data based on component's attributes
-                data = component._attributes()
+                component_request.data = component._attributes()
             elif "=" in call_method_name:
                 call_method_name_split = call_method_name.split("=")
                 property_name = call_method_name_split[0]
@@ -233,10 +277,12 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
 
                 if hasattr(component, property_name):
                     setattr(component, property_name, property_value)
-                    data[property_name] = property_value
+                    component_request.data[property_name] = property_value
             else:
                 (method_name, params) = _parse_call_method_name(call_method_name)
-                _call_method_name(component, method_name, params, data)
+                _call_method_name(
+                    component, method_name, params, component_request.data
+                )
         else:
             raise UnicornViewError(f"Unknown action_type '{action_type}'")
 
@@ -245,7 +291,7 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
     res = {
         "id": component_request.id,
         "dom": rendered_component,
-        "data": data,
+        "data": component_request.data,
     }
 
     return JsonResponse(res)

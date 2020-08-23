@@ -33,6 +33,44 @@
         <div>
             Hello {{ name|title }} 👋
         </div>
+
+        <label>Dictionaries</label>
+        <input unicorn:model="dictionary.stuff" type="text" id="dictionaryTestStuff">
+        <input unicorn:model="dictionary.things.great" type="text" id="dictionaryTestStuff2">
+
+        <div>
+            dictionary.stuff: {{ dictionary.stuff }}<br />
+            dictionary.things.great: {{ dictionary.things.great }}<br />
+        </div>
+
+        <label>Nested property</label>
+        <input unicorn:model="author.name" type="text" id="authorNameId">
+        <input unicorn:model="author.person.gender" type="text" id="authorGenderId">
+
+        <div>
+            author.name: {{ author.name }}<br />
+            author.person.gender: {{ author.person.gender }}<br />
+        </div>
+
+        <label>Django models</label>
+        <input unicorn:model="book.title" type="text" id="bookId">
+
+        <div>
+            Book model: {{ book.title }} 👋
+        </div>
+
+        <label>Django queryset</label>
+        <input unicorn:model="books.0.title" type="text" id="booksId">
+
+        <div>
+            Book queryset
+
+            <ul>
+                {% for b in books %}
+                <li>Book in queryset: {{ b.title }}</li>
+                {% endfor %}
+            </ul>
+        </div>
     </div>
 
     <div>

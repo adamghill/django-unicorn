@@ -1,4 +1,17 @@
-from django_unicorn.components import UnicornView
+from django_unicorn.components import UnicornView, UnicornField
+
+from books.models import Book
+
+
+class Person(UnicornField):
+    def __init__(self):
+        self.gender = "male"
+
+
+class Author(UnicornField):
+    def __init__(self):
+        self.name = "Neil Gaiman"
+        self.person = Person()
 
 
 class HelloWorldView(UnicornView):
@@ -13,6 +26,10 @@ class HelloWorldView(UnicornView):
     pie = "cherry"
     paragraph = ""
     state = ""
+    author = Author()
+    dictionary = {"stuff": "here", "things": {"great": "yes"}}
+    book = Book.objects.get(title="The Sandman")
+    books = Book.objects.all()
 
     ALL_STATES = (
         "Alabama",

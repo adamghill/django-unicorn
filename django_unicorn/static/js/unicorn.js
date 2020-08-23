@@ -178,17 +178,29 @@ var Unicorn = (function () {
     Sets the value of an element. Tries to deal with HTML weirdnesses.
     */
     function setValue(el, modelName) {
-        if (data.hasOwnProperty(modelName)) {
-            if (el.type.toLowerCase() == "radio") {
-                // Handle radio buttons
-                if (el.value == data[modelName]) {
-                    el.checked = true;
+        var modelNamePieces = modelName.split(".");
+        // Get local version of data in case have to traverse into a nested property
+        var _data = data;
+
+        for (var i = 0; i < modelNamePieces.length; i++) {
+            var modelNamePiece = modelNamePieces[i];
+
+            if (_data.hasOwnProperty(modelNamePiece)) {
+                if (i == modelNamePieces.length - 1) {
+                    if (el.type.toLowerCase() === "radio") {
+                        // Handle radio buttons
+                        if (el.value == _data[modelNamePiece]) {
+                            el.checked = true;
+                        }
+                    } else if (el.type.toLowerCase() === "checkbox") {
+                        // Handle checkboxes
+                        el.checked = _data[modelNamePiece];
+                    } else {
+                        el.value = _data[modelNamePiece];
+                    }
+                } else {
+                    _data = _data[modelNamePiece];
                 }
-            } else if (el.type.toLowerCase() == "checkbox") {
-                // Handle checkboxes
-                el.checked = data[modelName];
-            } else {
-                el.value = data[modelName];
             }
         }
     }
