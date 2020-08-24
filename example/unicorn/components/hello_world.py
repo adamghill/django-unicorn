@@ -3,15 +3,15 @@ from django_unicorn.components import UnicornView, UnicornField
 from books.models import Book
 
 
-class Person(UnicornField):
-    def __init__(self):
-        self.gender = "male"
+class PublishDateField(UnicornField):
+    def __init__(self, year):
+        self.year = year
 
 
-class Author(UnicornField):
+class BookField(UnicornField):
     def __init__(self):
-        self.name = "Neil Gaiman"
-        self.person = Person()
+        self.title = "Neverwhere"
+        self.publish_date = PublishDateField(year=1996)
 
 
 class HelloWorldView(UnicornView):
@@ -26,9 +26,9 @@ class HelloWorldView(UnicornView):
     pie = "cherry"
     paragraph = ""
     state = ""
-    author = Author()
-    dictionary = {"stuff": "here", "things": {"great": "yes"}}
-    book = Book.objects.get(title="The Sandman")
+    unicorn_field = BookField()
+    dictionary = {"name": "dictionary", "nested": {"name": "nested dictionary"}}
+    book = Book(title="The Sandman")
     books = Book.objects.all()
 
     ALL_STATES = (

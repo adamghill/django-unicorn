@@ -5,23 +5,23 @@
     <div>
         <h2>Text input</h2>
 
-        <label>Lazy</label>
-        <input unicorn:model.lazy="name" type="text" id="nameId1" unicorn:key="key1">
-        
-        <label>Debounce</label>
-        <input unicorn:model.debounce-1000="name" type="text" id="nameId1" unicorn:key="key1">
-
         <label>unicorn:key</label>
-        <input unicorn:model="name" type="text" id="nameId" unicorn:key="key1">
+        <input unicorn:model="name" type="text" id="name" unicorn:key="key1">
 
         <label>Duplicate id</label>
-        <input unicorn:model="name" type="text" id="nameId">
+        <input unicorn:model="name" type="text" id="name">
 
         <label>Unique id</label>
-        <input unicorn:model="name" type="text" id="nameId2">
+        <input unicorn:model="name" type="text" id="uniqueName">
 
         <label>Keyup</label>
-        <input unicorn:model="name" unicorn:keyup="set_name('something new')" type="text" id="nameId3">
+        <input unicorn:model="name" unicorn:keyup="set_name('something new')" type="text" id="keyupName">
+
+        <label>Lazy</label>
+        <input unicorn:model.lazy="name" type="text" id="lazyName" unicorn:key="key1">
+        
+        <label>Debounce</label>
+        <input unicorn:model.debounce-1000="name" type="text" id="debounceName" unicorn:key="key1">
 
         <br />
         <button unicorn:click="set_name">set_name</button>
@@ -30,47 +30,50 @@
         <button unicorn:click="set_name('blob')">set_name('blob')</button>
         <button unicorn:click="name='human'">name='human'</button>
 
-        <div>
-            Hello {{ name|title }} 👋
-        </div>
-
+        <br />
+        Hello {{ name|title }} 👋
+    </div>
+    
+    <div>
         <label>Dictionaries</label>
-        <input unicorn:model="dictionary.stuff" type="text" id="dictionaryTestStuff">
-        <input unicorn:model="dictionary.things.great" type="text" id="dictionaryTestStuff2">
+        <input unicorn:model="dictionary.name" type="text" id="dictionary">
+        <input unicorn:model="dictionary.nested.name" type="text" id="nestedDictionary">
 
-        <div>
-            dictionary.stuff: {{ dictionary.stuff }}<br />
-            dictionary.things.great: {{ dictionary.things.great }}<br />
-        </div>
+        <br />
+        dictionary.name: {{ dictionary.name }}<br />
+        dictionary.nested.name: {{ dictionary.nested.name }}<br />
+    </div>
 
+    <div>
         <label>Nested property</label>
-        <input unicorn:model="author.name" type="text" id="authorNameId">
-        <input unicorn:model="author.person.gender" type="text" id="authorGenderId">
+        <input unicorn:model="unicorn_field.title" type="text" id="unicornField">
+        <input unicorn:model="unicorn_field.publish_date.year" type="text" id="nestedUnicornField">
 
-        <div>
-            author.name: {{ author.name }}<br />
-            author.person.gender: {{ author.person.gender }}<br />
-        </div>
+        <br />
+        unicorn_field.title: {{ unicorn_field.title }}<br />
+        unicorn_field.publish_date.year: {{ unicorn_field.publish_date.year }}<br />
+    </div>
 
+    <div>
         <label>Django models</label>
         <input unicorn:model="book.title" type="text" id="bookId">
 
-        <div>
-            Book model: {{ book.title }} 👋
-        </div>
+        <br />
+        book.title: {{ book.title }} 📖
+    </div>
 
-        <label>Django queryset</label>
-        <input unicorn:model="books.0.title" type="text" id="booksId">
+    <div>
+        <label>Django queryset (limited to readonly for now)</label>
+        <input unicorn:model="books.0.title" type="text" id="booksId" readonly>
 
-        <div>
-            Book queryset
+        <br />
+        Book queryset
 
-            <ul>
-                {% for b in books %}
-                <li>Book in queryset: {{ b.title }}</li>
-                {% endfor %}
-            </ul>
-        </div>
+        <ul>
+            {% for b in books %}
+            <li>Book in queryset: {{ b.title }}</li>
+            {% endfor %}
+        </ul>
     </div>
 
     <div>

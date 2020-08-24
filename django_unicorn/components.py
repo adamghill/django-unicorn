@@ -180,7 +180,7 @@ class UnicornView(TemplateView):
 
         try:
             # Check for get_template_names by explicitly calling it since it
-            # is defined in TemplateResponseMixin, but throws ImproperlyConfigured.
+            # is defined in TemplateResponseMixin, but can throw ImproperlyConfigured.
             self.get_template_names()
             get_template_names_is_valid = True
         except ImproperlyConfigured:
