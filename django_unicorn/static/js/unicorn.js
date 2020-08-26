@@ -72,7 +72,7 @@ var Unicorn = (function () {
                             var key = el.getAttribute("unicorn:key");
                             var action = { type: "syncInput", payload: { name: modelName, value: value } };
 
-                            eventListener(componentName, componentRoot, unicornId, action, debounceTime, function () {
+                            sendMessage(componentName, componentRoot, unicornId, action, debounceTime, function () {
                                 setModelValues(modelEls, { id: id, key: key });
                             });
                         });
@@ -83,7 +83,7 @@ var Unicorn = (function () {
                         el.addEventListener(eventType, event => {
                             var action = { type: "callMethod", payload: { name: methodName, params: [] } };
 
-                            eventListener(componentName, componentRoot, unicornId, action, 0, function () {
+                            sendMessage(componentName, componentRoot, unicornId, action, 0, function () {
                                 setModelValues(modelEls);
                             });
                         });
@@ -100,6 +100,41 @@ var Unicorn = (function () {
     */
     unicorn.setData = function (_data) {
         data = _data;
+    }
+
+    /*
+    Call an action on the specified component.
+    */
+    unicorn.call = function (componentName, methodName) {
+        var componentRoot = $('[unicorn\\:name="' + componentName + '"]');
+
+        if (!componentRoot) {
+            Error("No component found for: ", componentName);
+        }
+
+        var unicornId = componentRoot.getAttribute('unicorn:id');
+
+        if (!unicornId) {
+            Error("No id found");
+        }
+
+        var action = { type: "callMethod", payload: { name: methodName, params: [] } };
+        var modelEls = [];
+
+        walk(componentRoot, (el) => {
+            if (el.isSameNode(componentRoot)) {
+                // Skip the component root element
+                return
+            }
+
+            if (getModelName(el)) {
+                modelEls.push(el);
+            }
+        });
+
+        sendMessage(componentName, componentRoot, unicornId, action, 0, function () {
+            setModelValues(modelEls);
+        });
     }
 
     /*
@@ -208,7 +243,7 @@ var Unicorn = (function () {
     /*
     Handles calling the message endpoint and merging the results into the document.
     */
-    function eventListener(componentName, componentRoot, unicornId, action, debounceTime, callback) {
+    function sendMessage(componentName, componentRoot, unicornId, action, debounceTime, callback) {
         debounce(function () {
             var syncUrl = messageUrl + '/' + componentName;
             var checksum = componentRoot.getAttribute("unicorn:checksum");

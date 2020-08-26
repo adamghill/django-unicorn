@@ -109,6 +109,7 @@ class UnicornTemplateResponse(TemplateResponse):
         soup = BeautifulSoup(content, features="html.parser")
         root_element = UnicornTemplateResponse._get_root_element(soup)
         root_element["unicorn:id"] = self.component_id
+        root_element["unicorn:name"] = self.component_name
         root_element["unicorn:checksum"] = checksum
 
         if self.init_js:

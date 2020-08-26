@@ -150,7 +150,7 @@ def _handle_arg(arg):
 
 
 def _call_method_name(
-    component: UnicornView, method_name: str, params: List[Any], data: Dict
+    component: UnicornView, method_name: str, params: List[Any]
 ) -> None:
     """
     Calls the method name with parameters.
@@ -160,7 +160,6 @@ def _call_method_name(
         param component: Component to call method on.
         param method_name: Method name to call.
         param params: List of arguments for the method.
-        param data: Dictionary that gets sent back with the response.
     """
 
     if method_name is not None and hasattr(component, method_name):
@@ -170,10 +169,6 @@ def _call_method_name(
             func(*params)
         else:
             func()
-
-        # Re-set all attributes because they could have changed after the method call
-        for (attribute_name, attribute_value,) in component._attributes().items():
-            data[attribute_name] = attribute_value
 
 
 class ComponentRequest:
@@ -268,11 +263,6 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
                     component_name=component_name,
                     use_cache=False,
                 )
-
-                # Reset the data based on frontend context
-                component_request.data = orjson.loads(
-                    component.get_frontend_context_variables()
-                )
             elif "=" in call_method_name:
                 call_method_name_split = call_method_name.split("=")
                 property_name = call_method_name_split[0]
@@ -283,13 +273,14 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
                     component_request.data[property_name] = property_value
             else:
                 (method_name, params) = _parse_call_method_name(call_method_name)
-                _call_method_name(
-                    component, method_name, params, component_request.data
-                )
+                _call_method_name(component, method_name, params)
         else:
             raise UnicornViewError(f"Unknown action_type '{action_type}'")
 
     rendered_component = component.render()
+
+    # Re-load frontend context variables to deal with non-serializable properties
+    component_request.data = orjson.loads(component.get_frontend_context_variables())
 
     res = {
         "id": component_request.id,

@@ -22,6 +22,8 @@
 
             {% unicorn 'hello-world' %}
 
+            <button onclick="Unicorn.call('hello-world', 'set_name');">Arbitrary method call</button>
+
             {% comment %} {% unicorn 'unicorn.components.hello_world.HelloWorldView' %} {% endcomment %}
 
         </main>
