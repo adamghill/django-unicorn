@@ -244,7 +244,7 @@ var Unicorn = (function () {
     Handles calling the message endpoint and merging the results into the document.
     */
     function sendMessage(componentName, componentRoot, unicornId, action, debounceTime, callback) {
-        debounce(function () {
+        queue(function () {
             var syncUrl = messageUrl + '/' + componentName;
             var checksum = componentRoot.getAttribute("unicorn:checksum");
             var actionQueue = [action];
@@ -341,6 +341,10 @@ var Unicorn = (function () {
     function debounce(func, wait, immediate) {
         var timeout;
 
+        if (typeof immediate == undefined) {
+            immediate = true;
+        }
+
         return function () {
             var context = this, args = arguments;
             var later = function () {
@@ -354,6 +358,38 @@ var Unicorn = (function () {
 
             if (callNow) func.apply(context, args);
         };
+    };
+
+    /*
+    The function is executed the number of times it is called,
+    but there is a fixed wait time before each execution.
+    From https://medium.com/ghostcoder/debounce-vs-throttle-vs-queue-execution-bcde259768.
+    */
+    var funcQueue = [];
+    function queue(func, waitTime) {
+        var isWaiting;
+
+        var executeFunc = function (params) {
+            isWaiting = true;
+            func(params);
+            setTimeout(play, waitTime);
+        };
+
+        var play = function () {
+            isWaiting = false;
+            if (funcQueue.length) {
+                var params = funcQueue.shift();
+                executeFunc(params);
+            }
+        };
+
+        return function (params) {
+            if (isWaiting) {
+                funcQueue.push(params);
+            } else {
+                executeFunc(params);
+            }
+        }
     };
 
     /*
