@@ -32,8 +32,8 @@ https://www.django-unicorn.com
 ## Bump version
 1. `npm run-script build`
 1. `poetry version major|minor|patch`
-1. Tag/commit/push version bump
+1. Commit/tag/push version bump
 1. `poetry publish --build -r test -u __token__`
 1. Make sure test package can be installed as expected (https://test.pypi.org/project/django-unicorn/)
-1. `poetry publish --build -r pypi -u __token__`
+1. `poetry publish -r pypi -u __token__`
 1. Make sure live package can be installed as expected (https://pypi.org/project/django-unicorn/)

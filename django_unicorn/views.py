@@ -62,6 +62,7 @@ def _set_property_from_payload(
 
     property_name = payload.get("name")
     property_value = payload.get("value")
+    component.updating(property_name, property_value)
 
     if property_name is not None and property_value is not None:
         """
@@ -84,7 +85,8 @@ def _set_property_from_payload(
         for (idx, property_name_part) in enumerate(property_name_parts):
             if hasattr(component_or_field, property_name_part):
                 if idx == len(property_name_parts) - 1:
-                    setattr(component_or_field, property_name_part, property_value)
+                    _component = component_or_field
+                    _component._set_property(property_name_part, property_value)
                     data_or_dict[property_name_part] = property_value
                 else:
                     component_or_field = getattr(component_or_field, property_name_part)
@@ -96,6 +98,8 @@ def _set_property_from_payload(
                 else:
                     component_or_field = component_or_field[property_name_part]
                     data_or_dict = data_or_dict.get(property_name_part, {})
+
+    component.updated(property_name, property_value)
 
 
 def _parse_call_method_name(call_method_name: str) -> Tuple[str, List[Any]]:
@@ -245,6 +249,7 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
     # Set component properties based on request data
     for (name, value) in component_request.data.items():
         _set_property_from_data(component, name, value)
+    component.hydrate()
 
     for action in component_request.action_queue:
         action_type = action.get("type")
@@ -273,7 +278,9 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
                     component_request.data[property_name] = property_value
             else:
                 (method_name, params) = _parse_call_method_name(call_method_name)
+                component.calling(method_name, params)
                 _call_method_name(component, method_name, params)
+                component.called(method_name, params)
         else:
             raise UnicornViewError(f"Unknown action_type '{action_type}'")
 

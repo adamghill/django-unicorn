@@ -2,7 +2,7 @@ import hmac
 import importlib
 import inspect
 import logging
-from typing import Any, Callable, Dict, Optional, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Type, Union
 
 import orjson
 import shortuuid
@@ -158,6 +158,7 @@ class UnicornView(TemplateView):
     # Caches to reduce the amount of time introspecting the class
     _methods_cache = None
     _attribute_name_cache = None
+    _hook_methods_cache: List[str] = []
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -195,13 +196,43 @@ class UnicornView(TemplateView):
         Setup some initial "caches" to prevent Python from having to introspect
         a component UnicornView for methods and properties multiple times.
         """
-        self._methods_cache = self._methods()
         self._attribute_names_cache = self._attribute_names()
+        self._set_hook_methods_cache()
+        self._methods_cache = self._methods()
 
     def mount(self):
         """
-        A hook that will always get called when a component is created.
-        By default a no-op, components can override it if needed.
+        Hook that gets called when a component is first created.
+        """
+        pass
+
+    def hydrate(self):
+        """
+        Hook that gets called when a component's data is hydrated.
+        """
+        pass
+
+    def updating(self, name, value):
+        """
+        Hook that gets called when a component's data is about to get updated.
+        """
+        pass
+
+    def updated(self, name, value):
+        """
+        Hook that gets called when a component's data is updated.
+        """
+        pass
+
+    def calling(self, name, args):
+        """
+        Hook that gets called when a component's method is about to get called.
+        """
+        pass
+
+    def called(self, name, args):
+        """
+        Hook that gets called when a component's method is called.
         """
         pass
 
@@ -316,7 +347,15 @@ class UnicornView(TemplateView):
         return attributes
 
     def _set_property(self, name, value):
+        updating_function_name = f"updating_{name}"
+        if hasattr(self, updating_function_name):
+            getattr(self, updating_function_name)(value)
+
         setattr(self, name, value)
+
+        updated_function_name = f"updated_{name}"
+        if hasattr(self, updated_function_name):
+            getattr(self, updated_function_name)(value)
 
     def _methods(self) -> Dict[str, Callable]:
         """
@@ -335,6 +374,18 @@ class UnicornView(TemplateView):
         self._methods_cache = methods
 
         return methods
+
+    def _set_hook_methods_cache(self) -> None:
+        self._hook_methods_cache = []
+
+        for attribute_name in self._attribute_names_cache:
+            updating_function_name = f"updating_{attribute_name}"
+            updated_function_name = f"updated_{attribute_name}"
+            hook_function_names = [updating_function_name, updated_function_name]
+
+            for function_name in hook_function_names:
+                if hasattr(self, function_name):
+                    self._hook_methods_cache.append(function_name)
 
     def _is_public(self, name: str) -> bool:
         """
@@ -366,14 +417,25 @@ class UnicornView(TemplateView):
             "setup",
             "render",
             "fill",
+            # Component methods
             "mount",
+            "hydrate",
+            "updating",
+            "update",
+            "calling",
+            "called",
         )
         excludes = []
 
         if hasattr(self, "Meta") and hasattr(self.Meta, "exclude"):
             excludes = self.Meta.exclude
 
-        return not (name.startswith("_") or name in protected_names or name in excludes)
+        return not (
+            name.startswith("_")
+            or name in protected_names
+            or name in self._hook_methods_cache
+            or name in excludes
+        )
 
     @staticmethod
     def create(
@@ -402,7 +464,6 @@ class UnicornView(TemplateView):
             component = views_cache[component_name](
                 component_name=component_name, component_id=component_id
             )
-            component.mount()
 
             if not use_cache:
                 #  Re-initializes custom classes so that `reset` magic method will "clear" them as expected
@@ -427,6 +488,8 @@ class UnicornView(TemplateView):
                         )
                     ):
                         component._set_property(attribute_name, attribute.__class__())
+
+                component.hydrate()
 
             if component_id:
                 key = f"{component_name}-{component_id}"
@@ -476,6 +539,7 @@ class UnicornView(TemplateView):
                     component_name=component_name, id=component_id
                 )
                 component.mount()
+                component.hydrate()
 
                 views_cache[component_name] = component_class
 
