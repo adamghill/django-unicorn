@@ -85,8 +85,25 @@ def _set_property_from_payload(
         for (idx, property_name_part) in enumerate(property_name_parts):
             if hasattr(component_or_field, property_name_part):
                 if idx == len(property_name_parts) - 1:
-                    _component = component_or_field
-                    _component._set_property(property_name_part, property_value)
+                    if hasattr(component_or_field, "_set_property"):
+                        # Assume that `component_or_field` is a component
+                        component_or_field._set_property(
+                            property_name_part, property_value
+                        )
+                    else:
+                        # Handle calling the updating/updated method for nested properties
+                        property_name_snake_case = property_name.replace(".", "_")
+                        updating_function_name = f"updating_{property_name_snake_case}"
+                        updated_function_name = f"updated_{property_name_snake_case}"
+
+                        if hasattr(component, updating_function_name):
+                            getattr(component, updating_function_name)(property_value)
+
+                        setattr(component_or_field, property_name_part, property_value)
+
+                        if hasattr(component, updated_function_name):
+                            getattr(component, updated_function_name)(property_value)
+
                     data_or_dict[property_name_part] = property_value
                 else:
                     component_or_field = getattr(component_or_field, property_name_part)
