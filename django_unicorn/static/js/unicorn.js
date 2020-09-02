@@ -2,7 +2,7 @@ const Unicorn = (() => {
   const unicorn = {}; // contains all methods exposed publicly in the Unicorn object
   let messageUrl = "";
   const csrfTokenHeaderName = "X-CSRFToken";
-  let data = {};
+  const data = {};
 
   /*
   Checks if a string has the search text.
@@ -152,7 +152,7 @@ const Unicorn = (() => {
     }
 
     if (!csrfToken) {
-      Error("CSRF token is missing. Do you need to add {% csrf_token %}?");
+      throw Error("CSRF token is missing. Do you need to add {% csrf_token %}?");
     }
 
     return csrfToken;
@@ -169,7 +169,7 @@ const Unicorn = (() => {
 
       const body = {
         id: unicornId,
-        data,
+        data: data[unicornId],
         checksum,
         actionQueue,
       };
@@ -190,7 +190,7 @@ const Unicorn = (() => {
             return response.json();
           }
 
-          Error(`Error when getting response: ${response.statusText} (${response.status})`);
+          throw Error(`Error when getting response: ${response.statusText} (${response.status})`);
         })
         .then((responseJson) => {
           if (!responseJson) {
@@ -198,10 +198,13 @@ const Unicorn = (() => {
           }
 
           if (responseJson.error) {
-            Error(responseJson.error);
+            // TODO: Check for "Checksum does not match" error and try to fix it
+            throw Error(responseJson.error);
           }
 
-          unicorn.setData(responseJson.data);
+          // Set the data from the response
+          data[unicornId] = responseJson.data || {};
+
           const { dom } = responseJson;
 
           const morphdomOptions = {
@@ -262,10 +265,10 @@ const Unicorn = (() => {
   /*
   Sets the value of an element. Tries to deal with HTML weirdnesses.
   */
-  function setValue(el, modelName) {
+  function setValue(unicornId, el, modelName) {
     const modelNamePieces = modelName.split(".");
     // Get local version of data in case have to traverse into a nested property
-    let _data = data;
+    let _data = data[unicornId];
 
     for (let i = 0; i < modelNamePieces.length; i++) {
       const modelNamePiece = modelNamePieces[i];
@@ -295,7 +298,7 @@ const Unicorn = (() => {
 
   `elementToExclude`: Prevent a particular element from being updated. Object example: `{id: 'elementId', key: 'elementKey'}`.
   */
-  function setModelValues(modelEls, elementToExclude) {
+  function setModelValues(unicornId, modelEls, elementToExclude) {
     if (typeof elementToExclude === "undefined" || !elementToExclude) {
       elementToExclude = {};
     }
@@ -305,7 +308,7 @@ const Unicorn = (() => {
 
       if (modelEl.id !== elementToExclude.id || modelKey !== elementToExclude.key) {
         const modelName = getModelName(modelEl);
-        setValue(modelEl, modelName);
+        setValue(unicornId, modelEl, modelName);
       }
     });
   }
@@ -320,7 +323,7 @@ const Unicorn = (() => {
       if (err && typeof errCallback === "function") {
         errCallback(err);
       } else {
-        setModelValues(modelEls);
+        setModelValues(unicornId, modelEls);
       }
     });
   }
@@ -351,12 +354,12 @@ const Unicorn = (() => {
     const unicornId = args.id;
     const componentName = args.name;
     const componentRoot = $(`[unicorn\\:id="${unicornId}"]`);
+    const modelEls = [];
+    data[unicornId] = args.data;
 
     if (!componentRoot) {
-      Error("No id found");
+      throw Error("No id found");
     }
-
-    const modelEls = [];
 
     walk(componentRoot, (el) => {
       if (el.isSameNode(componentRoot)) {
@@ -381,8 +384,12 @@ const Unicorn = (() => {
               const key = el.getAttribute("unicorn:key");
               const action = { type: "syncInput", payload: { name: modelName, value } };
 
-              sendMessage(componentName, componentRoot, unicornId, action, debounceTime, () => {
-                setModelValues(modelEls, { id, key });
+              sendMessage(componentName, componentRoot, unicornId, action, debounceTime, (err) => {
+                if (err) {
+                  console.error(err);
+                } else {
+                  setModelValues(unicornId, modelEls, { id, key });
+                }
               });
             });
           } else if (attribute.isPoll) {
@@ -415,14 +422,7 @@ const Unicorn = (() => {
       }
     });
 
-    setModelValues(modelEls);
-  };
-
-  /*
-  Sets the data on the Unicorn object.
-  */
-  unicorn.setData = (_data) => {
-    data = _data;
+    setModelValues(unicornId, modelEls);
   };
 
   /*
@@ -433,13 +433,13 @@ const Unicorn = (() => {
     const modelEls = [];
 
     if (!componentRoot) {
-      Error("No component found for: ", componentName);
+      throw Error("No component found for: ", componentName);
     }
 
     const unicornId = componentRoot.getAttribute("unicorn:id");
 
     if (!unicornId) {
-      Error("No id found");
+      throw Error("No id found");
     }
 
     walk(componentRoot, (el) => {
