@@ -114,12 +114,13 @@ class UnicornTemplateResponse(TemplateResponse):
 
         if self.init_js:
             script_tag = soup.new_tag("script")
-            init_data = {
+            init = {
                 "id": self.component_id,
                 "name": self.component_name,
+                "data": orjson.loads(self.frontend_context_variables),
             }
-            init = orjson.dumps(init_data).decode("utf-8")
-            script_tag.string = f"if (typeof Unicorn === 'undefined') {{ console.error('Unicorn is missing. Do you need {{% load unicorn %}} or {{% unicorn-scripts %}}?') }} else {{ Unicorn.setData({self.frontend_context_variables}); Unicorn.componentInit({init}); }}"
+            init = orjson.dumps(init).decode("utf-8")
+            script_tag.string = f"if (typeof Unicorn === 'undefined') {{ console.error('Unicorn is missing. Do you need {{% load unicorn %}} or {{% unicorn-scripts %}}?') }} else {{ Unicorn.componentInit({init}); }}"
             root_element.insert_after(script_tag)
 
         rendered_template = UnicornTemplateResponse._desoupify(soup)
