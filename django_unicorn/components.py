@@ -159,6 +159,7 @@ class UnicornView(TemplateView):
     # Caches to reduce the amount of time introspecting the class
     _methods_cache = None
     _attribute_name_cache = None
+    _form_cache = None
     _hook_methods_cache: List[str] = []
 
     def __init__(self, **kwargs):
@@ -243,9 +244,10 @@ class UnicornView(TemplateView):
         UnicornTemplateResponse to actually render a response.
         """
         frontend_context_variables = self.get_frontend_context_variables()
+        include_errors = not init_js
 
         response = self.render_to_response(
-            context=self.get_context_data(),
+            context=self.get_context_data(include_errors=include_errors),
             component_name=self.component_name,
             component_id=self.component_id,
             frontend_context_variables=frontend_context_variables,
@@ -305,23 +307,77 @@ class UnicornView(TemplateView):
             raise TypeError
 
         frontend_context_variables = {}
-        frontend_context_variables.update(self._attributes())
+        attributes = self._attributes()
+        frontend_context_variables.update(attributes)
+
+        # Add cleaned values to `frontend_content_variables` based on the widget in form's fields
+        form = self._get_form(attributes)
+
+        if form:
+            for key in attributes.keys():
+                if key in form.fields:
+                    field = form.fields[key]
+
+                    if key in form.cleaned_data:
+                        cleaned_value = form.cleaned_data[key]
+                        value = field.widget.format_value(cleaned_value)
+                        frontend_context_variables[key] = value
+
         encoded_frontend_context_variables = orjson.dumps(
-            frontend_context_variables, default=_json_serializer
+            frontend_context_variables, default=_json_serializer,
         ).decode("utf-8")
 
         return encoded_frontend_context_variables
+
+    def _get_form(self, data, use_cache=True):
+        if self._form_cache and use_cache:
+            return self._form_cache
+
+        if hasattr(self, "form_class"):
+            try:
+                form = self.form_class(data)
+                form.is_valid()
+
+                self._form_cache = form
+                return form
+            except Exception as e:
+                logger.exception(e)
 
     def get_context_data(self, **kwargs):
         """
         Overrides the standard `get_context_data` to add in publicly available
         properties and methods.
         """
+        include_errors = False
+
+        if "include_errors" in kwargs:
+            include_errors = kwargs.pop("include_errors")
+
         context = super().get_context_data(**kwargs)
-        context.update(self._attributes())
+
+        attributes = self._attributes()
+        context.update(attributes)
         context.update(self._methods())
+        context.update({"unicorn": {}})
+
+        if include_errors:
+            errors = {"errors": self.get_errors(attributes)}
+            context["unicorn"].update(errors)
 
         return context
+
+    def get_errors(self, data=None):
+        # TODO: Handle form.non_field_errors()?
+
+        if not data:
+            data = self._attributes()
+
+        form = self._get_form(data, use_cache=False)
+
+        if form:
+            return form.errors.get_json_data(escape_html=True)
+
+        return {}
 
     def _attribute_names(self):
         """
@@ -348,6 +404,14 @@ class UnicornView(TemplateView):
         return attributes
 
     def _set_property(self, name, value):
+        # Get the correct value type by using the form if it is available
+        data = self._attributes()
+        data[name] = value
+        form = self._get_form(data, use_cache=False)
+
+        if form and name in form.fields and name in form.cleaned_data:
+            value = form.cleaned_data[name]
+
         updating_function_name = f"updating_{name}"
         if hasattr(self, updating_function_name):
             getattr(self, updating_function_name)(value)
@@ -406,9 +470,6 @@ class UnicornView(TemplateView):
             "template_name",
             "dispatch",
             "id",
-            "component_id",
-            "component_name",
-            "get_frontend_context_variables",
             "get",
             "get_context_data",
             "get_template_names",
@@ -416,15 +477,18 @@ class UnicornView(TemplateView):
             "http_method_not_allowed",
             "options",
             "setup",
-            "render",
             "fill",
             # Component methods
+            "component_id",
+            "component_name",
             "mount",
             "hydrate",
             "updating",
             "update",
             "calling",
             "called",
+            "get_errors",
+            "get_frontend_context_variables",
         )
         excludes = []
 

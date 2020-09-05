@@ -3,6 +3,7 @@ const Unicorn = (() => {
   let messageUrl = "";
   const csrfTokenHeaderName = "X-CSRFToken";
   const data = {};
+  const errors = {};
 
   /*
   Checks if a string has the search text.
@@ -12,7 +13,14 @@ const Unicorn = (() => {
   }
 
   /*
-  Encapsulate looking at element attributes for anything Unicorn-related.
+  Checks if an object is empty. Useful for check if a dictionary has any values.
+  */
+  function isEmpty(obj) {
+    return Object.keys(obj).length === 0 && obj.constructor === Object;
+  }
+
+  /*
+  Encapsulate DOM element attribute for Unicorn-related information.
   */
   class Attribute {
     constructor(attribute) {
@@ -23,12 +31,16 @@ const Unicorn = (() => {
       this.isModel = false;
       this.isPoll = false;
       this.isKey = false;
+      this.isError = false;
       this.modifiers = {};
       this.eventType = null;
 
       this.init();
     }
 
+    /*
+    Init the attribute.
+    */
     init() {
       if (contains(this.name, "unicorn:")) {
         this.isUnicorn = true;
@@ -39,6 +51,8 @@ const Unicorn = (() => {
           this.isPoll = true;
         } else if (contains(this.name, "unicorn:key")) {
           this.isKey = true;
+        } else if (contains(this.name, "unicorn:error:")) {
+          this.isError = true;
         } else {
           this.eventType = this.name.replace("unicorn:", "");
         }
@@ -55,24 +69,128 @@ const Unicorn = (() => {
   }
 
   /*
+  Encapsulate DOM element for Unicorn-related information.
+  */
+  class Element {
+    constructor(el) {
+      this.el = el;
+      this.init();
+    }
+
+    /*
+    Init the element.
+    */
+    init() {
+      this.id = this.el.id;
+      this.isUnicorn = false;
+      this.attributes = [];
+      this.value = this.getValue();
+
+      this.model = {};
+      this.poll = {};
+      this.action = {};
+
+      this.key = undefined;
+      this.errors = [];
+
+      for (let i = 0; i < this.el.attributes.length; i++) {
+        const attribute = new Attribute(this.el.attributes[i]);
+        this.attributes.push(attribute);
+
+        if (attribute.isUnicorn) {
+          this.isUnicorn = true;
+        }
+
+        if (attribute.isModel) {
+          this.model.name = attribute.value;
+          this.model.eventType = attribute.modifiers.lazy ? "blur" : "input";
+          this.model.debounceTime = attribute.modifiers.debounce ? parseInt(attribute.modifiers.debounce, 10) || -1 : -1;
+        } else if (attribute.isPoll) {
+          this.poll.method = attribute.value ? attribute.value : "refresh";
+          this.poll.timing = parseInt(Object.keys(attribute.modifiers)[0], 10) || 2000;
+        } else if (attribute.eventType) {
+          this.action.name = attribute.value;
+          this.action.eventType = attribute.eventType;
+        }
+
+        if (attribute.isKey) {
+          this.key = attribute.value;
+        }
+      }
+    }
+
+    /*
+    Focuses the element.
+    */
+    focus() {
+      this.el.focus();
+    }
+
+    /*
+    Gets the value from the element.
+    */
+    getValue() {
+      let { value } = this.el;
+
+      if (this.el.type) {
+        if (this.el.type.toLowerCase() === "checkbox") {
+          // Handle checkbox
+          value = this.el.checked;
+        } else if (this.el.type.toLowerCase() === "select-multiple") {
+          // Handle multiple select options
+          value = [];
+          for (let i = 0; i < this.el.selectedOptions.length; i++) {
+            value.push(this.el.selectedOptions[i].value);
+          }
+        }
+      }
+
+      return value;
+    }
+
+    /*
+    Set a value on the element.
+    */
+    setValue(val) {
+      if (this.el.type.toLowerCase() === "radio") {
+        // Handle radio buttons
+        if (this.el.value === val) {
+          this.el.checked = true;
+        }
+      } else if (this.el.type.toLowerCase() === "checkbox") {
+        // Handle checkboxes
+        this.el.checked = val;
+      } else {
+        this.el.value = val;
+      }
+    }
+
+    /*
+    Add an error to the element.
+    */
+    addError(error) {
+      this.errors.push(error);
+      this.el.setAttribute(`unicorn:error:${error.code}`, error.message);
+    }
+
+    /*
+    Remove all errors from the element.
+    */
+    removeErrors() {
+      this.errors.forEach((error) => {
+        this.el.removeAttribute(error.code);
+      });
+
+      this.errors = [];
+    }
+  }
+
+  /*
   Initializes the Unicorn object.
   */
   unicorn.init = (_messageUrl) => {
     messageUrl = _messageUrl;
   };
-
-  /*
-  Gets the value of the `unicorn:model` attribute from an element even if there are modifiers.
-  */
-  function getModelName(el) {
-    for (let i = 0; i < el.attributes.length; i++) {
-      const attribute = el.attributes[i];
-
-      if (attribute.name.indexOf("unicorn:model") > -1) {
-        return el.getAttribute(attribute.name);
-      }
-    }
-  }
 
   /*
   A simple shortcut for querySelector that everyone loves.
@@ -83,26 +201,6 @@ const Unicorn = (() => {
     }
 
     return scope.querySelector(selector);
-  }
-
-  /*
-  Get a value from an element. Tries to deal with HTML weirdnesses.
-  */
-  function getValue(el) {
-    let { value } = el;
-
-    if (el.type.toLowerCase() === "checkbox") {
-      // Handle checkbox
-      value = el.checked;
-    } else if (el.type.toLowerCase() === "select-multiple") {
-      // Handle multiple select options
-      value = [];
-      for (let i = 0; i < el.selectedOptions.length; i++) {
-        value.push(el.selectedOptions[i].value);
-      }
-    }
-
-    return value;
   }
 
   /*
@@ -141,27 +239,56 @@ const Unicorn = (() => {
   }
 
   /*
+  The function is executed the number of times it is called,
+  but there is a fixed wait time before each execution.
+  From https://medium.com/ghostcoder/debounce-vs-throttle-vs-queue-execution-bcde259768.
+  */
+  const funcQueue = [];
+  function queue(func, waitTime) {
+    let isWaiting;
+
+    const play = () => {
+      let params;
+      isWaiting = false;
+
+      if (funcQueue.length) {
+        params = funcQueue.shift();
+        executeFunc(params);
+      }
+    };
+
+    const executeFunc = (params) => {
+      isWaiting = true;
+      func(params);
+      setTimeout(play, waitTime);
+    };
+
+    return (params) => {
+      if (isWaiting) {
+        funcQueue.push(params);
+      } else {
+        executeFunc(params);
+      }
+    };
+  }
+
+  /*
   Get the CSRF token used by Django.
   */
   function getCsrfToken() {
-    let csrfToken = "";
     const csrfElements = document.getElementsByName("csrfmiddlewaretoken");
 
     if (csrfElements) {
-      csrfToken = csrfElements[0].getAttribute("value");
+      return csrfElements[0].getAttribute("value");
     }
 
-    if (!csrfToken) {
-      throw Error("CSRF token is missing. Do you need to add {% csrf_token %}?");
-    }
-
-    return csrfToken;
+    throw Error("CSRF token is missing. Do you need to add {% csrf_token %}?");
   }
 
   /*
   Handles calling the message endpoint and merging the results into the document.
   */
-  function sendMessage(componentName, componentRoot, unicornId, action, debounceTime, callback) {
+  function sendMessage(componentName, componentRoot, unicornId, modelEls, action, debounceTime, callback) {
     function _sendMessage() {
       const syncUrl = `${messageUrl}/${componentName}`;
       const checksum = componentRoot.getAttribute("unicorn:checksum");
@@ -202,9 +329,9 @@ const Unicorn = (() => {
             throw Error(responseJson.error);
           }
 
-          // Set the data from the response
+          // Get the data from the response
           data[unicornId] = responseJson.data || {};
-
+          errors[unicornId] = responseJson.errors || {};
           const { dom } = responseJson;
 
           const morphdomOptions = {
@@ -230,7 +357,30 @@ const Unicorn = (() => {
             },
           };
 
+          // Store elements so that errors can be re-added after morphdom
+          const elementsWithErrors = [];
+
+          // Remove any unicorn validation messages before trying to merge with morphdom
+          modelEls.forEach((element) => {
+            // Re-initialize elements to make sure they are up to date
+            element.init();
+
+            elementsWithErrors.push(element);
+            element.removeErrors();
+          });
+
+          // eslint-disable-next-line no-undef
           morphdom(componentRoot, dom, morphdomOptions);
+
+          // Add unicorn validation messages from errors
+          elementsWithErrors.forEach((element) => {
+            Object.keys(errors[unicornId]).forEach((modelName) => {
+              if (element.model.name === modelName) {
+                const error = errors[unicornId][modelName][0];
+                element.addError(error);
+              }
+            });
+          });
 
           if (callback && typeof callback === "function") {
             callback();
@@ -244,20 +394,21 @@ const Unicorn = (() => {
     }
 
     if (debounceTime === -1) {
-      debounce(_sendMessage, 250, true)();
+      // debounce(_sendMessage, 250, true)();
+      queue(_sendMessage, 250)();
     } else {
       debounce(_sendMessage, debounceTime, false)();
     }
   }
 
   /*
-  Traverse the DOM looking for child elements.
+  Traverses the DOM looking for child elements.
   */
   function walk(el, callback) {
     const walker = document.createTreeWalker(el, NodeFilter.SHOW_ELEMENT, null, false);
 
     while (walker.nextNode()) {
-      // TODO: Handle sub-components
+      // TODO: Handle sub-components?
       callback(walker.currentNode);
     }
   }
@@ -265,8 +416,8 @@ const Unicorn = (() => {
   /*
   Sets the value of an element. Tries to deal with HTML weirdnesses.
   */
-  function setValue(unicornId, el, modelName) {
-    const modelNamePieces = modelName.split(".");
+  function setValue(unicornId, element) {
+    const modelNamePieces = element.model.name.split(".");
     // Get local version of data in case have to traverse into a nested property
     let _data = data[unicornId];
 
@@ -275,17 +426,7 @@ const Unicorn = (() => {
 
       if (Object.prototype.hasOwnProperty.call(_data, modelNamePiece)) {
         if (i === modelNamePieces.length - 1) {
-          if (el.type.toLowerCase() === "radio") {
-            // Handle radio buttons
-            if (el.value === _data[modelNamePiece]) {
-              el.checked = true;
-            }
-          } else if (el.type.toLowerCase() === "checkbox") {
-            // Handle checkboxes
-            el.checked = _data[modelNamePiece];
-          } else {
-            el.value = _data[modelNamePiece];
-          }
+          element.setValue(_data[modelNamePiece]);
         } else {
           _data = _data[modelNamePiece];
         }
@@ -299,16 +440,17 @@ const Unicorn = (() => {
   `elementToExclude`: Prevent a particular element from being updated. Object example: `{id: 'elementId', key: 'elementKey'}`.
   */
   function setModelValues(unicornId, modelEls, elementToExclude) {
-    if (typeof elementToExclude === "undefined" || !elementToExclude) {
-      elementToExclude = {};
-    }
+    elementToExclude = elementToExclude || {};
 
-    modelEls.forEach((modelEl) => {
-      const modelKey = modelEl.getAttribute("unicorn:key");
+    modelEls.forEach((element) => {
+      // Focus on the element that is being excluded since that is what triggered the update.
+      // Prevents validation errors from stealing focus.
+      if (elementToExclude.modelName === element.model.name) {
+        element.focus();
+      }
 
-      if (modelEl.id !== elementToExclude.id || modelKey !== elementToExclude.key) {
-        const modelName = getModelName(modelEl);
-        setValue(unicornId, modelEl, modelName);
+      if (element.id !== elementToExclude.id || element.key !== elementToExclude.key) {
+        setValue(unicornId, element);
       }
     });
   }
@@ -316,10 +458,10 @@ const Unicorn = (() => {
   /*
   Calls the method for a particular component.
   */
-  function callMethod(componentName, componentRoot, unicornId, methodName, modelEls, errCallback) {
+  function callMethod(componentName, componentRoot, unicornId, modelEls, methodName, errCallback) {
     const action = { type: "callMethod", payload: { name: methodName, params: [] } };
 
-    sendMessage(componentName, componentRoot, unicornId, action, -1, (err) => {
+    sendMessage(componentName, componentRoot, unicornId, modelEls, action, -1, (err) => {
       if (err && typeof errCallback === "function") {
         errCallback(err);
       } else {
@@ -331,7 +473,7 @@ const Unicorn = (() => {
   /*
   Starts polling and handles stopping the polling if there is an error.
   */
-  function startPolling(componentName, componentRoot, unicornId, methodName, modelEls, pollTiming) {
+  function startPolling(componentName, componentRoot, unicornId, modelEls, poll) {
     let timer;
 
     function handleError(err) {
@@ -340,10 +482,10 @@ const Unicorn = (() => {
       }
     }
 
-    // Call the method before the timer kicks in
-    callMethod(componentName, componentRoot, unicornId, methodName, modelEls, handleError);
+    // Call the method once before the timer starts
+    callMethod(componentName, componentRoot, unicornId, modelEls, poll.method, handleError);
 
-    timer = setInterval(callMethod, pollTiming, componentName, componentRoot, unicornId, methodName, modelEls, handleError);
+    timer = setInterval(callMethod, poll.timing, componentName, componentRoot, unicornId, modelEls, poll.method, handleError);
     return timer;
   }
 
@@ -367,57 +509,41 @@ const Unicorn = (() => {
         return;
       }
 
-      for (let i = 0; i < el.attributes.length; i++) {
-        const attribute = new Attribute(el.attributes[i]);
+      const element = new Element(el);
 
-        if (attribute.isUnicorn) {
-          if (attribute.isModel) {
-            modelEls.push(el);
+      if (element.isUnicorn) {
+        if (!isEmpty(element.model)) {
+          modelEls.push(element);
 
-            const modelEventType = attribute.modifiers.lazy ? "blur" : "input";
-            const debounceTime = attribute.modifiers.debounce ? parseInt(attribute.modifiers.debounce, 10) || -1 : -1;
-            const modelName = attribute.value;
+          el.addEventListener(element.model.eventType, () => {
+            const action = { type: "syncInput", payload: { name: element.model.name, value: element.getValue() } };
 
-            el.addEventListener(modelEventType, () => {
-              const value = getValue(el);
-              const { id } = el;
-              const key = el.getAttribute("unicorn:key");
-              const action = { type: "syncInput", payload: { name: modelName, value } };
-
-              sendMessage(componentName, componentRoot, unicornId, action, debounceTime, (err) => {
-                if (err) {
-                  console.error(err);
-                } else {
-                  setModelValues(unicornId, modelEls, { id, key });
-                }
-              });
-            });
-          } else if (attribute.isPoll) {
-            const methodName = attribute.value ? attribute.value : "refresh";
-            let timer;
-            let pollTiming = 2000;
-
-            if (attribute.modifiers) {
-              pollTiming = parseInt(Object.keys(attribute.modifiers)[0], 10) || 2000;
-            }
-
-            // Only listen to visibility if browser supports it
-            document.addEventListener("visibilitychange", () => {
-              if (document.hidden) {
-                if (timer) {
-                  clearInterval(timer);
-                }
+            sendMessage(componentName, componentRoot, unicornId, modelEls, action, element.model.debounceTime, (err) => {
+              if (err) {
+                console.error(err);
               } else {
-                timer = startPolling(componentName, componentRoot, unicornId, methodName, modelEls, pollTiming);
+                setModelValues(unicornId, modelEls, { id: element.id, key: element.key, modelName: element.model.name });
               }
-            }, false);
-
-            timer = startPolling(componentName, componentRoot, unicornId, methodName, modelEls, pollTiming);
-          } else {
-            el.addEventListener(attribute.eventType, () => {
-              callMethod(componentName, componentRoot, unicornId, attribute.value, modelEls);
             });
-          }
+          });
+        } else if (!isEmpty(element.poll)) {
+          let timer;
+
+          document.addEventListener("visibilitychange", () => {
+            if (document.hidden) {
+              if (timer) {
+                clearInterval(timer);
+              }
+            } else {
+              timer = startPolling(componentName, componentRoot, unicornId, modelEls, element.poll);
+            }
+          }, false);
+
+          timer = startPolling(componentName, componentRoot, unicornId, modelEls, element.poll);
+        } else if (!isEmpty(element.action)) {
+          el.addEventListener(element.action.eventType, () => {
+            callMethod(componentName, componentRoot, unicornId, modelEls, element.action.name);
+          });
         }
       }
     });
@@ -448,12 +574,14 @@ const Unicorn = (() => {
         return;
       }
 
-      if (getModelName(el)) {
-        modelEls.push(el);
+      const element = new Element(el);
+
+      if (!isEmpty(element.model)) {
+        modelEls.push(element);
       }
     });
 
-    callMethod(componentName, componentRoot, unicornId, methodName, modelEls);
+    callMethod(componentName, componentRoot, unicornId, modelEls, methodName);
   };
 
   return unicorn;

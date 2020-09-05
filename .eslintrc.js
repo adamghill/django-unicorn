@@ -19,6 +19,7 @@ module.exports = {
     "no-underscore-dangle": 0,
     "no-param-reassign": 0,
     "object-curly-newline": ["error", { ObjectPattern: "never" }],
-    "no-plusplus": ["error", { allowForLoopAfterthoughts: true }]
+    "no-plusplus": ["error", { allowForLoopAfterthoughts: true }],
+    "max-classes-per-file": 0
   }
 };

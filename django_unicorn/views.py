@@ -1,6 +1,7 @@
 import hmac
 from functools import wraps
 from typing import Any, Dict, List, Tuple, Union
+from django.forms.forms import Form
 
 import orjson
 import shortuuid
@@ -30,11 +31,12 @@ def handle_error(view_func):
 
 
 def _set_property_from_data(
-    component_or_field: Union[UnicornView, UnicornField, Model], name: str, value
+    component_or_field: Union[UnicornView, UnicornField, Model], name: str, value,
 ) -> None:
     """
     Sets properties on the component based on passed-in data.
     """
+
     if hasattr(component_or_field, name):
         field = getattr(component_or_field, name)
 
@@ -44,7 +46,11 @@ def _set_property_from_data(
                 key_value = value[key]
                 _set_property_from_data(field, key, key_value)
         else:
-            setattr(component_or_field, name, value)
+            if hasattr(component_or_field, "_set_property"):
+                # Can assume that `component_or_field` is a component
+                component_or_field._set_property(name, value)
+            else:
+                setattr(component_or_field, name, value)
 
 
 def _set_property_from_payload(
@@ -86,7 +92,7 @@ def _set_property_from_payload(
             if hasattr(component_or_field, property_name_part):
                 if idx == len(property_name_parts) - 1:
                     if hasattr(component_or_field, "_set_property"):
-                        # Assume that `component_or_field` is a component
+                        # Can assume that `component_or_field` is a component
                         component_or_field._set_property(
                             property_name_part, property_value
                         )
@@ -278,12 +284,19 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
             call_method_name = payload.get("name", "")
             assert call_method_name, "Missing 'name' key for callMethod"
 
-            # Handle the special case of the reset action
             if call_method_name == "reset" or call_method_name == "reset()":
+                # Handle the reset special action
                 component = UnicornView.create(
                     component_id=component_request.id,
                     component_name=component_name,
                     use_cache=False,
+                )
+            elif call_method_name == "refresh" or call_method_name == "refresh()":
+                # Handle the refresh special action
+                component = UnicornView.create(
+                    component_id=component_request.id,
+                    component_name=component_name,
+                    use_cache=True,
                 )
             elif "=" in call_method_name:
                 call_method_name_split = call_method_name.split("=")
@@ -291,7 +304,9 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
                 property_value = _handle_arg(call_method_name_split[1])
 
                 if hasattr(component, property_name):
+                    component.calling(f"set_{property_name}", property_value)
                     setattr(component, property_name, property_value)
+                    component.called(f"set_{property_name}", property_value)
                     component_request.data[property_name] = property_value
             else:
                 (method_name, params) = _parse_call_method_name(call_method_name)
@@ -310,6 +325,7 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
         "id": component_request.id,
         "dom": rendered_component,
         "data": component_request.data,
+        "errors": component.get_errors(),
     }
 
     return JsonResponse(res)
