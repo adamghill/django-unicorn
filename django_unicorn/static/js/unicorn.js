@@ -2,8 +2,14 @@ const Unicorn = (() => {
   const unicorn = {}; // contains all methods exposed publicly in the Unicorn object
   let messageUrl = "";
   const csrfTokenHeaderName = "X-CSRFToken";
-  const data = {};
-  const errors = {};
+  const components = [];
+
+  /*
+  Initializes the Unicorn object.
+  */
+  unicorn.init = (_messageUrl) => {
+    messageUrl = _messageUrl;
+  };
 
   /*
   Checks if a string has the search text.
@@ -17,6 +23,17 @@ const Unicorn = (() => {
   */
   function isEmpty(obj) {
     return Object.keys(obj).length === 0 && obj.constructor === Object;
+  }
+
+  /*
+  A simple shortcut for querySelector that everyone loves.
+  */
+  function $(selector, scope) {
+    if (scope === undefined) {
+      scope = document;
+    }
+
+    return scope.querySelector(selector);
   }
 
   /*
@@ -116,6 +133,11 @@ const Unicorn = (() => {
         if (attribute.isKey) {
           this.key = attribute.value;
         }
+
+        if (attribute.isError) {
+          const code = attribute.name.replace("unicorn:name:", "");
+          this.errors.push({ code, message: attribute.value })
+        }
       }
     }
 
@@ -186,21 +208,32 @@ const Unicorn = (() => {
   }
 
   /*
-  Initializes the Unicorn object.
+  Encapsulate component.
   */
-  unicorn.init = (_messageUrl) => {
-    messageUrl = _messageUrl;
-  };
+  class Component {
+    constructor(args) {
+      this.id = args.id;
+      this.name = args.name;
+      this.data = args.data;
+      this.syncUrl = `${messageUrl}/${this.name}`;
 
-  /*
-  A simple shortcut for querySelector that everyone loves.
-  */
-  function $(selector, scope) {
-    if (scope === undefined) {
-      scope = document;
+      this.root = $(`[unicorn\\:id="${this.id}"]`);
+
+      if (!this.root) {
+        throw Error("No id found");
+      }
+
+      this.refreshChecksum();
+      this.modelEls = [];
+      this.errors = [];
     }
 
-    return scope.querySelector(selector);
+    /*
+    Refresh the checksum.
+    */
+    refreshChecksum() {
+      this.checksum = this.root.getAttribute("unicorn:checksum");
+    }
   }
 
   /*
@@ -288,16 +321,14 @@ const Unicorn = (() => {
   /*
   Handles calling the message endpoint and merging the results into the document.
   */
-  function sendMessage(componentName, componentRoot, unicornId, modelEls, action, debounceTime, callback) {
+  function sendMessage(component, action, debounceTime, callback) {
     function _sendMessage() {
-      const syncUrl = `${messageUrl}/${componentName}`;
-      const checksum = componentRoot.getAttribute("unicorn:checksum");
       const actionQueue = [action];
 
       const body = {
-        id: unicornId,
-        data: data[unicornId],
-        checksum,
+        id: component.id,
+        data: component.data,
+        checksum: component.checksum,
         actionQueue,
       };
 
@@ -307,7 +338,7 @@ const Unicorn = (() => {
       };
       headers[csrfTokenHeaderName] = getCsrfToken();
 
-      fetch(syncUrl, {
+      fetch(component.syncUrl, {
         method: "POST",
         headers,
         body: JSON.stringify(body),
@@ -329,10 +360,17 @@ const Unicorn = (() => {
             throw Error(responseJson.error);
           }
 
+          // Remove any unicorn validation messages before trying to merge with morphdom
+          component.modelEls.forEach((element) => {
+            // Re-initialize element to make sure it is up to date
+            element.init();
+            element.removeErrors();
+          });
+
           // Get the data from the response
-          data[unicornId] = responseJson.data || {};
-          errors[unicornId] = responseJson.errors || {};
-          const { dom } = responseJson;
+          component.data = responseJson.data || {};
+          component.errors = responseJson.errors || {};
+          const rerenderedComponent = responseJson.dom;
 
           const morphdomOptions = {
             childrenOnly: false,
@@ -357,26 +395,15 @@ const Unicorn = (() => {
             },
           };
 
-          // Store elements so that errors can be re-added after morphdom
-          const elementsWithErrors = [];
-
-          // Remove any unicorn validation messages before trying to merge with morphdom
-          modelEls.forEach((element) => {
-            // Re-initialize elements to make sure they are up to date
-            element.init();
-
-            elementsWithErrors.push(element);
-            element.removeErrors();
-          });
-
           // eslint-disable-next-line no-undef
-          morphdom(componentRoot, dom, morphdomOptions);
+          morphdom(component.root, rerenderedComponent, morphdomOptions);
+          component.refreshChecksum();
 
-          // Add unicorn validation messages from errors
-          elementsWithErrors.forEach((element) => {
-            Object.keys(errors[unicornId]).forEach((modelName) => {
+          // Refresh unicorn validation messages from errors
+          component.modelEls.forEach((element) => {
+            Object.keys(component.errors).forEach((modelName) => {
               if (element.model.name === modelName) {
-                const error = errors[unicornId][modelName][0];
+                const error = component.errors[modelName][0];
                 element.addError(error);
               }
             });
@@ -416,10 +443,10 @@ const Unicorn = (() => {
   /*
   Sets the value of an element. Tries to deal with HTML weirdnesses.
   */
-  function setValue(unicornId, element) {
+  function setValue(component, element) {
     const modelNamePieces = element.model.name.split(".");
     // Get local version of data in case have to traverse into a nested property
-    let _data = data[unicornId];
+    let _data = component.data;
 
     for (let i = 0; i < modelNamePieces.length; i++) {
       const modelNamePiece = modelNamePieces[i];
@@ -439,10 +466,10 @@ const Unicorn = (() => {
 
   `elementToExclude`: Prevent a particular element from being updated. Object example: `{id: 'elementId', key: 'elementKey'}`.
   */
-  function setModelValues(unicornId, modelEls, elementToExclude) {
+  function setModelValues(component, elementToExclude) {
     elementToExclude = elementToExclude || {};
 
-    modelEls.forEach((element) => {
+    component.modelEls.forEach((element) => {
       // Focus on the element that is being excluded since that is what triggered the update.
       // Prevents validation errors from stealing focus.
       if (elementToExclude.modelName === element.model.name) {
@@ -450,7 +477,7 @@ const Unicorn = (() => {
       }
 
       if (element.id !== elementToExclude.id || element.key !== elementToExclude.key) {
-        setValue(unicornId, element);
+        setValue(component, element);
       }
     });
   }
@@ -458,14 +485,14 @@ const Unicorn = (() => {
   /*
   Calls the method for a particular component.
   */
-  function callMethod(componentName, componentRoot, unicornId, modelEls, methodName, errCallback) {
+  function callMethod(component, methodName, errCallback) {
     const action = { type: "callMethod", payload: { name: methodName, params: [] } };
 
-    sendMessage(componentName, componentRoot, unicornId, modelEls, action, -1, (err) => {
+    sendMessage(component, action, -1, (err) => {
       if (err && typeof errCallback === "function") {
         errCallback(err);
       } else {
-        setModelValues(unicornId, modelEls);
+        setModelValues(component);
       }
     });
   }
@@ -473,7 +500,7 @@ const Unicorn = (() => {
   /*
   Starts polling and handles stopping the polling if there is an error.
   */
-  function startPolling(componentName, componentRoot, unicornId, modelEls, poll) {
+  function startPolling(component, poll) {
     let timer;
 
     function handleError(err) {
@@ -483,9 +510,9 @@ const Unicorn = (() => {
     }
 
     // Call the method once before the timer starts
-    callMethod(componentName, componentRoot, unicornId, modelEls, poll.method, handleError);
+    callMethod(component, poll.method, handleError);
 
-    timer = setInterval(callMethod, poll.timing, componentName, componentRoot, unicornId, modelEls, poll.method, handleError);
+    timer = setInterval(callMethod, poll.timing, component, poll.method, handleError);
     return timer;
   }
 
@@ -493,18 +520,11 @@ const Unicorn = (() => {
   Initializes the component.
   */
   unicorn.componentInit = (args) => {
-    const unicornId = args.id;
-    const componentName = args.name;
-    const componentRoot = $(`[unicorn\\:id="${unicornId}"]`);
-    const modelEls = [];
-    data[unicornId] = args.data;
+    const component = new Component(args);
+    components.push(component);
 
-    if (!componentRoot) {
-      throw Error("No id found");
-    }
-
-    walk(componentRoot, (el) => {
-      if (el.isSameNode(componentRoot)) {
+    walk(component.root, (el) => {
+      if (el.isSameNode(component.root)) {
         // Skip the component root element
         return;
       }
@@ -513,16 +533,16 @@ const Unicorn = (() => {
 
       if (element.isUnicorn) {
         if (!isEmpty(element.model)) {
-          modelEls.push(element);
+          component.modelEls.push(element);
 
           el.addEventListener(element.model.eventType, () => {
             const action = { type: "syncInput", payload: { name: element.model.name, value: element.getValue() } };
 
-            sendMessage(componentName, componentRoot, unicornId, modelEls, action, element.model.debounceTime, (err) => {
+            sendMessage(component, action, element.model.debounceTime, (err) => {
               if (err) {
                 console.error(err);
               } else {
-                setModelValues(unicornId, modelEls, { id: element.id, key: element.key, modelName: element.model.name });
+                setModelValues(component, { id: element.id, key: element.key, modelName: element.model.name });
               }
             });
           });
@@ -535,20 +555,20 @@ const Unicorn = (() => {
                 clearInterval(timer);
               }
             } else {
-              timer = startPolling(componentName, componentRoot, unicornId, modelEls, element.poll);
+              timer = startPolling(component, element.poll);
             }
           }, false);
 
-          timer = startPolling(componentName, componentRoot, unicornId, modelEls, element.poll);
+          timer = startPolling(component, element.poll);
         } else if (!isEmpty(element.action)) {
           el.addEventListener(element.action.eventType, () => {
-            callMethod(componentName, componentRoot, unicornId, modelEls, element.action.name);
+            callMethod(component, element.action.name);
           });
         }
       }
     });
 
-    setModelValues(unicornId, modelEls);
+    setModelValues(component);
   };
 
   /*
@@ -556,7 +576,7 @@ const Unicorn = (() => {
   */
   unicorn.call = (componentName, methodName) => {
     const componentRoot = $(`[unicorn\\:name="${componentName}"]`);
-    const modelEls = [];
+    // const modelEls = [];
 
     if (!componentRoot) {
       throw Error("No component found for: ", componentName);
@@ -568,6 +588,8 @@ const Unicorn = (() => {
       throw Error("No id found");
     }
 
+    const component = new Component({ id: unicornId, name: componentName, data: {} });
+
     walk(componentRoot, (el) => {
       if (el.isSameNode(componentRoot)) {
         // Skip the component root element
@@ -577,11 +599,11 @@ const Unicorn = (() => {
       const element = new Element(el);
 
       if (!isEmpty(element.model)) {
-        modelEls.push(element);
+        component.modelEls.push(element);
       }
     });
 
-    callMethod(componentName, componentRoot, unicornId, modelEls, methodName);
+    callMethod(component, methodName);
   };
 
   return unicorn;
