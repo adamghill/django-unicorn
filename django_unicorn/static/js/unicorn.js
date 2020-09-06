@@ -309,11 +309,16 @@ const Unicorn = (() => {
     constructor(args) {
       this.id = args.id;
       this.name = args.name;
+
+      if (contains(this.name, "")) {
+        const names = this.name.split(".");
+        this.name = names[names.length - 2];
+      }
+
       this.data = args.data;
       this.syncUrl = `${messageUrl}/${this.name}`;
 
       this.root = undefined;
-
       this.modelEls = [];
       this.errors = [];
 
