@@ -310,7 +310,7 @@ const Unicorn = (() => {
       this.id = args.id;
       this.name = args.name;
 
-      if (contains(this.name, "")) {
+      if (contains(this.name, ".")) {
         const names = this.name.split(".");
         this.name = names[names.length - 2];
       }
@@ -356,7 +356,6 @@ const Unicorn = (() => {
                 if (err) {
                   console.error(err);
                 } else {
-                  // this.setModelValues({ id: element.id, key: element.key, modelName: element.model.name });
                   this.setModelValues(element);
                 }
               });
