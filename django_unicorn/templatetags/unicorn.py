@@ -17,6 +17,11 @@ def unicorn_styles():
     return {}
 
 
+@register.inclusion_tag("unicorn/errors.html", takes_context=True)
+def unicorn_errors(context):
+    return {"unicorn": {"errors": context.get("unicorn", {}).get("errors", {})}}
+
+
 def unicorn(parser, token):
     try:
         (tag_name, component_name) = token.split_contents()

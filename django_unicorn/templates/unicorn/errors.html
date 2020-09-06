@@ -1,0 +1,13 @@
+{% if unicorn.errors.items %}
+<div class="unicorn-errors">
+    <ul>
+        {% for name, errors in unicorn.errors.items %}
+        NAME: {{name}}
+
+        {% for error in errors %}
+        <li class="unicorn-errors-{{ error.code }}">{{ error.message }}</li>
+        {% endfor %}
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
