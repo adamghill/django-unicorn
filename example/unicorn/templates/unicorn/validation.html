@@ -1,0 +1,46 @@
+{% load unicorn %}
+
+<div>
+    <style>
+        [unicorn\:error\:invalid] {
+            border: 1px solid red !important;
+        }
+        [unicorn\:error\:required] {
+            border: 1px solid red !important;
+        }
+
+        .error {
+            color: red;
+        }
+    </style>
+
+    <div>
+        {% unicorn_errors %}
+
+        <div>
+            <input unicorn:model="blob" type="text" id="blobId">
+            {{ blob }}
+        </div>
+
+        <div>
+            <input unicorn:model="number" type="text" id="numberId">
+            {{ number }}
+        </div>
+
+        <label for="now">Now</label>
+        <input unicorn:model="now" type="text" id="nowId" unicorn:key="now">
+        <span class="error" id="nowError">{{ unicorn.errors.now.0.message }}</span>
+        <br />
+        <br />
+
+        <p>
+            <strong>{% verbatim %}{{ now }}{% endverbatim %}</strong><br />
+            {{ now }}
+        </p>
+        
+        <p>
+            <strong>{% verbatim %}{{ now|date:"s" }}{% endverbatim %}</strong><br />
+            {{ now|date:"s" }}
+        </p>
+    </div>
+</div>

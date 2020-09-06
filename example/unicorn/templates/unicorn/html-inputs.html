@@ -1,0 +1,72 @@
+<div>
+    <div>
+        <h2>Checkbox</h2>
+        <input type="checkbox" unicorn:model="is_checked" id="check">
+        {% if is_checked %}Yes! 🦄{% else %}Nope 🙁{% endif %}
+    </div>
+
+    <div>
+        <h2>Select</h2>
+        <select unicorn:model="thing" id="select">
+            <option>🐶</option>
+            <option>🐙</option>
+            <option>👾</option>
+        </select>
+
+        <p>
+            Hi {{ thing }}
+        </p>
+    </div>
+
+    <div>
+        <h2>Multiple select</h2>
+        <select unicorn:model="things" id="select-multiple" multiple>
+            <option value="doggo">🐶</option>
+            <option value="octopus">🐙</option>
+            <option value="alien">👾</option>
+        </select>
+
+        <p>
+            Howdy {{ things|join:", " }}
+        </p>
+    </div>
+
+    <div>
+        <h2>Radio buttons</h2>
+        <input type="radio" unicorn:model="pie" name="pie" value="blueberry"> Blueberry</input><br />
+        <input type="radio" unicorn:model="pie" name="pie" value="apple"> Apple</input><br />
+        <input type="radio" unicorn:model="pie" name="pie" value="cherry"> Cherry</input>
+
+        <p>
+            Delicious {{ pie|upper }} pie
+        </p>
+    </div>
+
+    <div>
+        <h2>Textarea</h2>
+        <textarea unicorn:model="paragraph" id="textarea"></textarea>
+
+        <p>
+            Number of characters: {{ paragraph|length }}
+        </p>
+    </div>
+
+    <div>
+        <h2>Typeahead</h2>
+        <input type="text" unicorn:model="state" placeholder="State name" id="typeahead"></input>
+
+        <p>
+            Matching states:
+
+            {% if states %}
+        <ul>
+            {% for s in states %}
+            <li>{{ s }}</li>
+            {% endfor %}
+        </ul>
+
+        <button unicorn:click="clear_states()">Clear States</button>
+        {% endif %}
+        </p>
+    </div>
+</div>

@@ -1,0 +1,44 @@
+<div>    
+    <div>
+        <label>Dictionaries</label>
+        <input unicorn:model="dictionary.name" type="text" id="dictionary">
+        <input unicorn:model="dictionary.nested.name" type="text" id="nestedDictionary">
+
+        <br />
+        dictionary.name: {{ dictionary.name }}<br />
+        dictionary.nested.name: {{ dictionary.nested.name }}<br />
+    </div>
+
+    <div>
+        <label>Nested unicorn field property</label>
+        <input unicorn:model="unicorn_field.title" type="text" id="unicornField">
+        <input unicorn:model="unicorn_field.publish_date_field.year" type="text" id="nestedUnicornField">
+        <input unicorn:model="unicorn_field.publish_date" type="text" id="nestedDatetimeUnicornField">
+
+        <br />
+        unicorn_field.title: {{ unicorn_field.title }}<br />
+        unicorn_field.publish_date_field.year: {{ unicorn_field.publish_date_field.year }}<br />
+    </div>
+
+    <div>
+        <label>Django models</label>
+        <input unicorn:model="book.title" type="text" id="bookId">
+
+        <br />
+        book.title: {{ book.title }} 📖
+    </div>
+
+    <div>
+        <label>Django queryset (limited to readonly for now)</label>
+        <input unicorn:model="books.0.title" type="text" id="booksId" readonly>
+
+        <br />
+        Book queryset
+
+        <ul>
+            {% for b in books %}
+            <li>Book in queryset: {{ b.title }}</li>
+            {% endfor %}
+        </ul>
+    </div>    
+</div>

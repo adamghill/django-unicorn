@@ -1,0 +1,10 @@
+<div>
+    <button unicorn:click="reset">Reset the component</button>
+    <br />
+    <br />
+
+    <label></label>
+    <input unicorn:model="name" type="text" id="name" unicorn:key="key1">
+
+    Hello, {{ name|default:'World' }}!
+</div>

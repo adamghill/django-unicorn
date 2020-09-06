@@ -1,0 +1,42 @@
+{% load static unicorn %}
+
+<html>
+    <head>
+        <title>django-unicorn examples</title>
+        <link rel="stylesheet" href="{% static 'css/marx.min.css' %}">
+        <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+
+        {% unicorn_styles %}
+    </head>
+
+    <body>
+        <main>
+            {% csrf_token %}
+            {% unicorn_scripts %}
+
+            <h1>django-unicorn</h1>
+
+            <ul>
+                <li><a href="{% url 'www:index' %}">Index</a></li>
+                <li><a href="{% url 'www:template' 'text-inputs' %}">Text inputs</a></li>
+                <li><a href="{% url 'www:template' 'html-inputs' %}">Other inputs</a></li>
+                <li><a href="{% url 'www:template' 'objects' %}">Dictionaries, UnicornField, models, querysets</a></li>
+                <li><a href="{% url 'www:template' 'validation' %}">Validation</a></li>
+                <li><a href="{% url 'www:template' 'polling' %}">Polling</a></li>
+            </ul>
+
+            {% block content %}{% endblock content %}
+
+        </main>
+        <footer>
+            <strong>Standing on the shoulders of giants</strong>
+            <ul>
+                <li>Initial inspiration from <a href="https://laravel-livewire.com/">Livewire</a>, a Laravel full-stack framework in PHP</li> 
+                <li>Also <a href="https://github.com/phoenixframework/phoenix_live_view">LiveView</a>, a framework for Phoenix and Elixir</li>
+                <li><a href="https://github.com/patrick-steele-idem/morphdom">morphdom</a> does a lot of the heavy lifting</li>
+                <li>CSS from <a href="https://mblode.github.io/marx/">marx</a></li>
+            </ul>
+        </footer>
+    </body>
+
+</html>

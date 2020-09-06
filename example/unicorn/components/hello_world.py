@@ -1,103 +1,10 @@
 from django_unicorn.components import UnicornView, UnicornField
 
-from books.models import Book
-
-
-class PublishDateField(UnicornField):
-    def __init__(self, year):
-        self.year = year
-
-
-class BookField(UnicornField):
-    def __init__(self):
-        self.title = "Neverwhere"
-        self.publish_date = PublishDateField(year=1996)
-
 
 class HelloWorldView(UnicornView):
-    template_name = "unicorn/hello-world.html"
+    template_name = "unicorn/hello-world-test.html"
 
     name = "World"
-    is_checked = False
-    thing = "🐙"
-    things = [
-        "alien",
-    ]
-    pie = "cherry"
-    paragraph = ""
-    state = ""
-    unicorn_field = BookField()
-    dictionary = {"name": "dictionary", "nested": {"name": "nested dictionary"}}
-    book = Book(title="The Sandman")
-    books = Book.objects.all()
 
-    ALL_STATES = (
-        "Alabama",
-        "Alaska",
-        "Arizona",
-        "Arkansas",
-        "California",
-        "Colorado",
-        "Connecticut",
-        "Delaware",
-        "Florida",
-        "Georgia",
-        "Hawaii",
-        "Idaho",
-        "Illinois",
-        "Indiana",
-        "Iowa",
-        "Kansas",
-        "Kentucky",
-        "Louisiana",
-        "Maine",
-        "Maryland",
-        "Massachusetts",
-        "Michigan",
-        "Minnesota",
-        "Mississippi",
-        "Missouri",
-        "Montana",
-        "Nebraska",
-        "Nevada",
-        "New Hampshire",
-        "New Jersey",
-        "New Mexico",
-        "New York",
-        "North Carolina",
-        "North Dakota",
-        "Ohio",
-        "Oklahoma",
-        "Oregon",
-        "Pennsylvania",
-        "Rhode Island",
-        "South Carolina",
-        "South Dakota",
-        "Tennessee",
-        "Texas",
-        "Utah",
-        "Vermont",
-        "Virginia",
-        "Washington",
-        "West Virginia",
-        "Wisconsin",
-        "Wyoming",
-    )
-
-    def set_name(self, name=None):
-        if name:
-            self.name = name
-        else:
-            self.name = "Universe"
-
-    def clear_states(self):
-        self.state = ""
-
-    def states(self):
-        if not self.state:
-            return []
-
-        return [s for s in self.ALL_STATES if s.lower().startswith(self.state.lower())]
-
-    class Meta:
-        exclude = ("ALL_STATES",)
+    def set_name(self):
+        self.name = "set_name method called"
