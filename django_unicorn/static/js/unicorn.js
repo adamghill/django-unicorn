@@ -409,7 +409,7 @@ const Unicorn = (() => {
       // Call the method once before the timer starts
       this.callMethod(poll.method, handleError);
 
-      timer = setInterval(this.callMethod, poll.timing, poll.method, handleError);
+      timer = setInterval(this.callMethod.bind(this), poll.timing, poll.method, handleError);
       return timer;
     }
 
