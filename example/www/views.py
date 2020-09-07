@@ -1,4 +1,6 @@
+from django.http.response import Http404
 from django.shortcuts import render
+from django.template.exceptions import TemplateDoesNotExist
 
 
 def index(request):
@@ -6,4 +8,7 @@ def index(request):
 
 
 def template(request, name):
-    return render(request, f"www/{name}.html")
+    try:
+        return render(request, f"www/{name}.html")
+    except TemplateDoesNotExist:
+        raise Http404
