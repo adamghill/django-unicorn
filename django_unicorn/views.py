@@ -268,6 +268,10 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
     component = UnicornView.create(
         component_id=component_request.id, component_name=component_name
     )
+    validate_all_fields = False
+
+    # Get a copy of the data passed in to determine what fields are updated later
+    original_data = component_request.data.copy()
 
     # Set component properties based on request data
     for (name, value) in component_request.data.items():
@@ -298,6 +302,9 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
                     component_name=component_name,
                     use_cache=True,
                 )
+            elif call_method_name == "validate" or call_method_name == "validate()":
+                # Handle the validate special action
+                validate_all_fields = True
             elif "=" in call_method_name:
                 call_method_name_split = call_method_name.split("=")
                 property_name = call_method_name_split[0]
@@ -316,16 +323,24 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
         else:
             raise UnicornViewError(f"Unknown action_type '{action_type}'")
 
-    rendered_component = component.render()
-
     # Re-load frontend context variables to deal with non-serializable properties
     component_request.data = orjson.loads(component.get_frontend_context_variables())
+
+    updated_model_names = []
+
+    if not validate_all_fields:
+        for key, value in original_data.items():
+            if value != component_request.data[key]:
+                updated_model_names.append(key)
+
+    component.validate(model_names=updated_model_names)
+    rendered_component = component.render()
 
     res = {
         "id": component_request.id,
         "dom": rendered_component,
         "data": component_request.data,
-        "errors": component.get_errors(),
+        "errors": component.errors,
     }
 
     return JsonResponse(res)

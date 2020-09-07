@@ -4,30 +4,30 @@ const Unicorn = (() => {
   const csrfTokenHeaderName = "X-CSRFToken";
   const components = {};
 
-  /*
-  Initializes the Unicorn object.
-  */
+  /**
+   * Initializes the Unicorn object.
+   */
   unicorn.init = (_messageUrl) => {
     messageUrl = _messageUrl;
   };
 
-  /*
-  Checks if a string has the search text.
-  */
+  /**
+   * Checks if a string has the search text.
+   */
   function contains(str, search) {
     return str.indexOf(search) > -1;
   }
 
-  /*
-  Checks if an object is empty. Useful for check if a dictionary has any values.
-  */
+  /**
+   * Checks if an object is empty. Useful for check if a dictionary has any values.
+   */
   function isEmpty(obj) {
-    return Object.keys(obj).length === 0 && obj.constructor === Object;
+    return typeof obj === "undefined" || (Object.keys(obj).length === 0 && obj.constructor === Object);
   }
 
-  /*
-  A simple shortcut for querySelector that everyone loves.
-  */
+  /**
+   * A simple shortcut for querySelector that everyone loves.
+   */
   function $(selector, scope) {
     if (scope === undefined) {
       scope = document;
@@ -36,9 +36,9 @@ const Unicorn = (() => {
     return scope.querySelector(selector);
   }
 
-  /*
-  Get the CSRF token used by Django.
-  */
+  /**
+   * Get the CSRF token used by Django.
+   */
   function getCsrfToken() {
     const csrfElements = document.getElementsByName("csrfmiddlewaretoken");
 
@@ -49,14 +49,14 @@ const Unicorn = (() => {
     throw Error("CSRF token is missing. Do you need to add {% csrf_token %}?");
   }
 
-  /*
-  Returns a function, that, as long as it continues to be invoked, will not
-  be triggered. The function will be called after it stops being called for
-  N milliseconds. If `immediate` is passed, trigger the function on the
-  leading edge, instead of the trailing.
+  /**
+   * Returns a function, that, as long as it continues to be invoked, will not
+   * be triggered. The function will be called after it stops being called for
+   * N milliseconds. If `immediate` is passed, trigger the function on the
+   * leading edge, instead of the trailing.
 
-  Derived from underscore.js's implementation in https://davidwalsh.name/javascript-debounce-function.
-  */
+   * Derived from underscore.js's implementation in https://davidwalsh.name/javascript-debounce-function.
+   */
   function debounce(func, wait, immediate) {
     let timeout;
 
@@ -84,11 +84,11 @@ const Unicorn = (() => {
     };
   }
 
-  /*
-  The function is executed the number of times it is called,
-  but there is a fixed wait time before each execution.
-  From https://medium.com/ghostcoder/debounce-vs-throttle-vs-queue-execution-bcde259768.
-  */
+  /**
+   * The function is executed the number of times it is called,
+   * but there is a fixed wait time before each execution.
+   * From https://medium.com/ghostcoder/debounce-vs-throttle-vs-queue-execution-bcde259768.
+   */
   const funcQueue = [];
   function queue(func, waitTime) {
     let isWaiting;
@@ -118,9 +118,9 @@ const Unicorn = (() => {
     };
   }
 
-  /*
-  Traverses the DOM looking for child elements.
-  */
+  /**
+   * Traverses the DOM looking for child elements.
+   */
   function walk(el, callback) {
     const walker = document.createTreeWalker(el, NodeFilter.SHOW_ELEMENT, null, false);
 
@@ -130,9 +130,9 @@ const Unicorn = (() => {
     }
   }
 
-  /*
-  Encapsulate DOM element attribute for Unicorn-related information.
-  */
+  /**
+   * Encapsulate DOM element attribute for Unicorn-related information.
+   */
   class Attribute {
     constructor(attribute) {
       this.attribute = attribute;
@@ -149,9 +149,9 @@ const Unicorn = (() => {
       this.init();
     }
 
-    /*
-    Init the attribute.
-    */
+    /**
+     * Init the attribute.
+     */
     init() {
       if (contains(this.name, "unicorn:")) {
         this.isUnicorn = true;
@@ -179,18 +179,18 @@ const Unicorn = (() => {
     }
   }
 
-  /*
-  Encapsulate DOM element for Unicorn-related information.
-  */
+  /**
+   * Encapsulate DOM element for Unicorn-related information.
+   */
   class Element {
     constructor(el) {
       this.el = el;
       this.init();
     }
 
-    /*
-    Init the element.
-    */
+    /**
+     * Init the element.
+     */
     init() {
       this.id = this.el.id;
       this.isUnicorn = false;
@@ -231,21 +231,21 @@ const Unicorn = (() => {
 
         if (attribute.isError) {
           const code = attribute.name.replace("unicorn:name:", "");
-          this.errors.push({ code, message: attribute.value })
+          this.errors.push({ code, message: attribute.value });
         }
       }
     }
 
-    /*
-    Focuses the element.
-    */
+    /**
+     * Focuses the element.
+     */
     focus() {
       this.el.focus();
     }
 
-    /*
-    Gets the value from the element.
-    */
+    /**
+     * Gets the value from the element.
+     */
     getValue() {
       let { value } = this.el;
 
@@ -265,9 +265,9 @@ const Unicorn = (() => {
       return value;
     }
 
-    /*
-    Sets the value of an element. Tries to deal with HTML weirdnesses.
-    */
+    /**
+     * Sets the value of an element. Tries to deal with HTML weirdnesses.
+     */
     setValue(val) {
       if (this.el.type.toLowerCase() === "radio") {
         // Handle radio buttons
@@ -282,17 +282,17 @@ const Unicorn = (() => {
       }
     }
 
-    /*
-    Add an error to the element.
-    */
+    /**
+     * Add an error to the element.
+     */
     addError(error) {
       this.errors.push(error);
       this.el.setAttribute(`unicorn:error:${error.code}`, error.message);
     }
 
-    /*
-    Remove all errors from the element.
-    */
+    /**
+     * Remove all errors from the element.
+     */
     removeErrors() {
       this.errors.forEach((error) => {
         this.el.removeAttribute(error.code);
@@ -302,9 +302,9 @@ const Unicorn = (() => {
     }
   }
 
-  /*
-  Encapsulate component.
-  */
+  /**
+   * Encapsulate component.
+   */
   class Component {
     constructor(args) {
       this.id = args.id;
@@ -326,6 +326,9 @@ const Unicorn = (() => {
       this.setEventListeners();
     }
 
+    /**
+     * Initializes the Component.
+     */
     init() {
       this.root = $(`[unicorn\\:id="${this.id}"]`);
 
@@ -336,7 +339,13 @@ const Unicorn = (() => {
       this.refreshChecksum();
     }
 
-    setEventListeners() {
+    /**
+     * Sets event listeners on unicorn elements.
+     * @param {boolean} actionsOnly Used to add event listeners only `actions`. Required to re-add events when error validation is fired.
+     */
+    setEventListeners(actionsOnly) {
+      actionsOnly = actionsOnly || false;
+
       walk(this.root, (el) => {
         if (el.isSameNode(this.root)) {
           // Skip the component root element
@@ -346,7 +355,7 @@ const Unicorn = (() => {
         const element = new Element(el);
 
         if (element.isUnicorn) {
-          if (!isEmpty(element.model)) {
+          if (!isEmpty(element.model) && !actionsOnly) {
             this.modelEls.push(element);
 
             el.addEventListener(element.model.eventType, () => {
@@ -360,7 +369,7 @@ const Unicorn = (() => {
                 }
               });
             });
-          } else if (!isEmpty(element.poll)) {
+          } else if (!isEmpty(element.poll) && !actionsOnly) {
             let timer;
 
             document.addEventListener("visibilitychange", () => {
@@ -383,9 +392,9 @@ const Unicorn = (() => {
       });
     }
 
-    /*
-    Calls the method for a particular component.
-    */
+    /**
+     * Calls the method for a particular component.
+     */
     callMethod(methodName, errCallback) {
       const action = { type: "callMethod", payload: { name: methodName, params: [] } };
 
@@ -398,9 +407,9 @@ const Unicorn = (() => {
       });
     }
 
-    /*
-    Starts polling and handles stopping the polling if there is an error.
-    */
+    /**
+     * Starts polling and handles stopping the polling if there is an error.
+     */
     startPolling(poll) {
       let timer;
 
@@ -417,16 +426,17 @@ const Unicorn = (() => {
       return timer;
     }
 
-    /*
-    Refresh the checksum.
-    */
+    /**
+     * Refresh the checksum.
+     */
     refreshChecksum() {
       this.checksum = this.root.getAttribute("unicorn:checksum");
     }
 
-    /*
-    Sets the value of an element. Tries to deal with HTML weirdnesses.
-    */
+    /**
+     * Sets the value of an element. Tries to deal with HTML weirdnesses.
+     * @param {Element} element Element to set value to (value retrieved from `component.data`).
+     */
     setValue(element) {
       const modelNamePieces = element.model.name.split(".");
       // Get local version of data in case have to traverse into a nested property
@@ -445,11 +455,10 @@ const Unicorn = (() => {
       }
     }
 
-    /*
-    Sets all model values.
-
-    `elementToExclude`: Prevent a particular element from being updated. Object example: `{id: 'elementId', key: 'elementKey'}`.
-    */
+    /**
+     * Sets all model values.
+     * @param {Object} elementToExclude Prevent a particular element from being updated. Object example: `{id: 'elementId', key: 'elementKey'}`.
+     */
     setModelValues(elementToExclude) {
       elementToExclude = elementToExclude || {};
       let elementFocused = false;
@@ -476,9 +485,9 @@ const Unicorn = (() => {
       });
     }
 
-    /*
-    Calls the message endpoint and merges the results into the document.
-    */
+    /**
+     * Calls the message endpoint and merges the results into the document.
+     */
     sendMessage(action, debounceTime, callback) {
       function _sendMessage(_component) {
         const actionQueue = [action];
@@ -525,6 +534,9 @@ const Unicorn = (() => {
               element.removeErrors();
             });
 
+            // Get existing errors before reseting to any new errors
+            const previousErrors = _component.errors;
+
             // Get the data from the response
             _component.data = responseJson.data || {};
             _component.errors = responseJson.errors || {};
@@ -557,7 +569,13 @@ const Unicorn = (() => {
             morphdom(_component.root, rerenderedComponent, morphdomOptions);
             _component.refreshChecksum();
 
-            // Refresh unicorn validation messages from errors
+            // Re-add action event listeners when there were no errors before, but now there are errors
+            // Required because the action event listeners disappear when this happens
+            if (!isEmpty(_component.errors) && isEmpty(previousErrors)) {
+              _component.setEventListeners(true);
+            }
+
+            // Re-add unicorn validation messages from errors
             _component.modelEls.forEach((element) => {
               Object.keys(_component.errors).forEach((modelName) => {
                 if (element.model.name === modelName) {
@@ -587,9 +605,9 @@ const Unicorn = (() => {
     }
   }
 
-  /*
-  Initializes the component.
-  */
+  /**
+   * Initializes the component.
+   */
   unicorn.componentInit = (args) => {
     const component = new Component(args);
     component.init();
@@ -598,9 +616,9 @@ const Unicorn = (() => {
     component.setModelValues();
   };
 
-  /*
-  Call an action on the specified component.
-  */
+  /**
+   * Call an action on the specified component.
+   */
   unicorn.call = (componentName, methodName) => {
     let component;
 

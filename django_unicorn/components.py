@@ -173,6 +173,7 @@ class UnicornView(TemplateView):
         if "request" in kwargs:
             self.setup(kwargs["request"])
 
+        self.errors = {}
         self._set_default_template_name()
         self._set_caches()
 
@@ -242,12 +243,14 @@ class UnicornView(TemplateView):
         """
         Renders a UnicornView component with the public properties available. Delegates to a
         UnicornTemplateResponse to actually render a response.
+
+        Args:
+            param init_js: Whether or not to include the Javascript required to initialize the component.
         """
         frontend_context_variables = self.get_frontend_context_variables()
-        include_errors = not init_js
 
         response = self.render_to_response(
-            context=self.get_context_data(include_errors=include_errors),
+            context=self.get_context_data(),
             component_name=self.component_name,
             component_id=self.component_id,
             frontend_context_variables=frontend_context_variables,
@@ -348,36 +351,56 @@ class UnicornView(TemplateView):
         Overrides the standard `get_context_data` to add in publicly available
         properties and methods.
         """
-        include_errors = False
-
-        if "include_errors" in kwargs:
-            include_errors = kwargs.pop("include_errors")
 
         context = super().get_context_data(**kwargs)
 
         attributes = self._attributes()
         context.update(attributes)
         context.update(self._methods())
-        context.update({"unicorn": {}})
-
-        if include_errors:
-            errors = {"errors": self.get_errors(attributes)}
-            context["unicorn"].update(errors)
+        context.update({"unicorn": {"errors": self.errors}})
 
         return context
 
-    def get_errors(self, data=None):
+    def validate(self, model_names: List = None) -> Dict:
+        """
+        Validates the data using the `form_class` set on the component.
+
+        Args:
+            model_names: Only include validation errors for specified fields.
+        """
         # TODO: Handle form.non_field_errors()?
 
-        if not data:
-            data = self._attributes()
-
+        data = self._attributes()
         form = self._get_form(data, use_cache=False)
 
         if form:
-            return form.errors.get_json_data(escape_html=True)
+            form_errors = form.errors.get_json_data(escape_html=True)
 
-        return {}
+            if model_names:
+                # This code is confusing, but handles this use-case:
+                # the component has two models, one that starts with an error and one
+                # that is valid. Validating the valid one should not show an error for
+                # the invalid one. Only after the invalid field is updated, should the
+                # error show up and persist, even after updating the valid form.
+                if self.errors:
+                    keys_to_remove = []
+
+                    for key, value in self.errors.items():
+                        if key in form_errors:
+                            self.errors[key] = value
+                        else:
+                            keys_to_remove.append(key)
+
+                    for key in keys_to_remove:
+                        self.errors.pop(key)
+
+                for key, value in form_errors.items():
+                    if key in model_names:
+                        self.errors[key] = value
+            else:
+                self.errors.update(form_errors)
+
+        return self.errors
 
     def _attribute_names(self):
         """
@@ -487,8 +510,9 @@ class UnicornView(TemplateView):
             "update",
             "calling",
             "called",
-            "get_errors",
+            "validate",
             "get_frontend_context_variables",
+            "errors",
         )
         excludes = []
 
