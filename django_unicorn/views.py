@@ -326,14 +326,17 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
     # Re-load frontend context variables to deal with non-serializable properties
     component_request.data = orjson.loads(component.get_frontend_context_variables())
 
-    updated_model_names = []
+    if validate_all_fields:
+        component.validate()
+    else:
+        model_names_to_validate = []
 
-    if not validate_all_fields:
         for key, value in original_data.items():
             if value != component_request.data[key]:
-                updated_model_names.append(key)
+                model_names_to_validate.append(key)
 
-    component.validate(model_names=updated_model_names)
+        component.validate(model_names=model_names_to_validate)
+
     rendered_component = component.render()
 
     res = {

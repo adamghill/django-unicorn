@@ -18,8 +18,8 @@
         {% unicorn_errors %}
 
         <div>
-            <input unicorn:model="blob" type="text" id="blobId">
-            {{ blob }}
+            <input unicorn:model="text" type="text" id="textId">
+            {{ text }}
         </div>
 
         <div>
@@ -27,11 +27,11 @@
             {{ number }}
         </div>
 
-        <label for="now">Now</label>
-        <input unicorn:model="now" type="text" id="nowId" unicorn:key="now">
-        <span class="error" id="nowError">{{ unicorn.errors.now.0.message }}</span>
-        <br />
-        <br />
+        <div>
+            <label for="now">Now</label>
+            <input unicorn:model="now" type="text" id="nowId" unicorn:key="now">
+            <span class="error" id="nowError">{{ unicorn.errors.now.0.message }}</span>
+        </div>
 
         <p>
             <strong>{% verbatim %}{{ now }}{% endverbatim %}</strong><br />
@@ -43,6 +43,9 @@
             {{ now|date:"s" }}
         </p>
 
+        <button unicorn:click="set_text">set_text</button>
         <button unicorn:click="validate">Validate</button>
+        <button unicorn:click="reset">Reset</button>
+        <button unicorn:click="refresh">Refresh</button>
     </div>
 </div>

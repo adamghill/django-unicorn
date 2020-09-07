@@ -366,7 +366,7 @@ class UnicornView(TemplateView):
         Validates the data using the `form_class` set on the component.
 
         Args:
-            model_names: Only include validation errors for specified fields.
+            model_names: Only include validation errors for specified fields. If none, validate everything.
         """
         # TODO: Handle form.non_field_errors()?
 
@@ -376,7 +376,7 @@ class UnicornView(TemplateView):
         if form:
             form_errors = form.errors.get_json_data(escape_html=True)
 
-            if model_names:
+            if model_names is not None:
                 # This code is confusing, but handles this use-case:
                 # the component has two models, one that starts with an error and one
                 # that is valid. Validating the valid one should not show an error for
