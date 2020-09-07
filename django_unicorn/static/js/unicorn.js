@@ -401,6 +401,8 @@ const Unicorn = (() => {
       this.sendMessage(action, -1, (err) => {
         if (err && typeof errCallback === "function") {
           errCallback(err);
+        } else if (err) {
+          console.error(err);
         } else {
           this.setModelValues();
         }
@@ -414,7 +416,10 @@ const Unicorn = (() => {
       let timer;
 
       function handleError(err) {
-        if (err && timer) {
+        if (err) {
+          console.error(err)
+        }
+        if (timer) {
           clearInterval(timer);
         }
       }
@@ -636,7 +641,9 @@ const Unicorn = (() => {
       throw Error("No component found for: ", componentName);
     }
 
-    component.callMethod(methodName);
+    component.callMethod(methodName, (err) => {
+      console.error(err);
+    });
   };
 
   return unicorn;
