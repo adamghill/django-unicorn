@@ -439,11 +439,17 @@ class UnicornView(TemplateView):
         if hasattr(self, updating_function_name):
             getattr(self, updating_function_name)(value)
 
-        setattr(self, name, value)
+        try:
+            setattr(self, name, value)
 
-        updated_function_name = f"updated_{name}"
-        if hasattr(self, updated_function_name):
-            getattr(self, updated_function_name)(value)
+            updated_function_name = f"updated_{name}"
+
+            if hasattr(self, updated_function_name):
+                getattr(self, updated_function_name)(value)
+        except AttributeError:
+            logger.error(
+                f"'{name}' attribute on '{self.component_name}' component could not be set. Is it a @property without a setter?"
+            )
 
     def _methods(self) -> Dict[str, Callable]:
         """
@@ -556,27 +562,21 @@ class UnicornView(TemplateView):
 
             if not use_cache:
                 #  Re-initializes custom classes so that `reset` magic method will "clear" them as expected
-
-                NON_CONSTRUCTABLE_TYPES = (
-                    str,
-                    int,
-                    dict,
-                    list,
-                    Model,
-                    QuerySet,
-                )
                 _attributes = component._attributes()
 
                 for attribute_name in _attributes:
                     attribute = _attributes[attribute_name]
 
-                    # TODO: Not sure if there is a better way to do this. Could just check for UnicornField?
-                    if not any(
-                        filter(
-                            lambda t: isinstance(attribute, t), NON_CONSTRUCTABLE_TYPES
-                        )
-                    ):
-                        component._set_property(attribute_name, attribute.__class__())
+                    if isinstance(attribute, UnicornField):
+                        try:
+                            component._set_property(
+                                attribute_name, attribute.__class__()
+                            )
+                        except TypeError:
+                            logger.warn(
+                                f"Resetting '{attribute_name}' attribute failed because it could not be constructed."
+                            )
+                            pass
 
                 component.hydrate()
 
