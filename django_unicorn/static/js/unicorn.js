@@ -321,6 +321,7 @@ const Unicorn = (() => {
       this.root = undefined;
       this.modelEls = [];
       this.errors = [];
+      this.poll = {};
 
       this.init();
       this.setEventListeners();
@@ -346,6 +347,25 @@ const Unicorn = (() => {
     setEventListeners(actionsOnly) {
       actionsOnly = actionsOnly || false;
 
+      const rootElement = new Element(this.root);
+
+      if (rootElement.isUnicorn && !isEmpty(rootElement.poll) && !actionsOnly) {
+        this.poll = rootElement.poll;
+        this.poll.timer = null;
+
+        document.addEventListener("visibilitychange", () => {
+          if (document.hidden) {
+            if (this.poll.timer) {
+              clearInterval(this.poll.timer);
+            }
+          } else {
+            this.startPolling();
+          }
+        }, false);
+
+        this.startPolling();
+      }
+
       walk(this.root, (el) => {
         if (el.isSameNode(this.root)) {
           // Skip the component root element
@@ -369,20 +389,6 @@ const Unicorn = (() => {
                 }
               });
             });
-          } else if (!isEmpty(element.poll) && !actionsOnly) {
-            let timer;
-
-            document.addEventListener("visibilitychange", () => {
-              if (document.hidden) {
-                if (timer) {
-                  clearInterval(timer);
-                }
-              } else {
-                timer = this.startPolling(element.poll);
-              }
-            }, false);
-
-            timer = this.startPolling(element.poll);
           } else if (!isEmpty(element.action)) {
             el.addEventListener(element.action.eventType, () => {
               this.callMethod(element.action.name);
@@ -412,23 +418,22 @@ const Unicorn = (() => {
     /**
      * Starts polling and handles stopping the polling if there is an error.
      */
-    startPolling(poll) {
-      let timer;
+    startPolling() {
+      this.poll.timer = null;
 
       function handleError(err) {
         if (err) {
-          console.error(err)
+          console.error(err);
         }
-        if (timer) {
-          clearInterval(timer);
+        if (this.poll.timer) {
+          clearInterval(this.poll.timer);
         }
       }
 
       // Call the method once before the timer starts
-      this.callMethod(poll.method, handleError);
+      this.callMethod(this.poll.method, handleError);
 
-      timer = setInterval(this.callMethod.bind(this), poll.timing, poll.method, handleError);
-      return timer;
+      this.poll.timer = setInterval(this.callMethod.bind(this), this.poll.timing, this.poll.method, handleError);
     }
 
     /**
