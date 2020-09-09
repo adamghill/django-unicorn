@@ -204,6 +204,10 @@ const Unicorn = (() => {
       this.key = undefined;
       this.errors = [];
 
+      if (!this.el.attributes) {
+        return;
+      }
+
       for (let i = 0; i < this.el.attributes.length; i++) {
         const attribute = new Attribute(this.el.attributes[i]);
         this.attributes.push(attribute);
@@ -320,11 +324,75 @@ const Unicorn = (() => {
 
       this.root = undefined;
       this.modelEls = [];
-      this.errors = [];
+      this.errors = {};
       this.poll = {};
+      this.events = [];
+
+      this.modelEvents = {};
+      this.actionEvents = {};
 
       this.init();
-      this.setEventListeners();
+      this.refreshEventListeners();
+
+      const rootElement = new Element(this.root);
+
+      if (rootElement.isUnicorn && !isEmpty(rootElement.poll)) {
+        this.poll = rootElement.poll;
+        this.poll.timer = null;
+
+        document.addEventListener("visibilitychange", () => {
+          if (document.hidden) {
+            if (this.poll.timer) {
+              clearInterval(this.poll.timer);
+            }
+          } else {
+            this.startPolling();
+          }
+        }, false);
+
+        this.startPolling();
+      }
+
+      // Add event listeners to the actual element because they seem to stick around
+      // (attaching to document works for most events, but won't work for lazy/blur)
+      Object.keys(this.modelEvents).forEach((eventType) => {
+        this.modelEvents[eventType].forEach((element) => {
+          element.el.addEventListener(eventType, (event) => {
+            const targetElement = new Element(event.target);
+
+            if (targetElement && targetElement.isUnicorn && !isEmpty(targetElement.model)) {
+              // Use isSameNode (not isEqualNode) because we want to check the nodes reference the same object
+              if (targetElement.el.isSameNode(element.el)) {
+                const action = { type: "syncInput", payload: { name: element.model.name, value: element.getValue() } };
+
+                this.sendMessage(action, element.model.debounceTime, (err) => {
+                  if (err) {
+                    console.error(err);
+                  } else {
+                    this.setModelValues(element);
+                  }
+                });
+              }
+            }
+          });
+        });
+      });
+
+      // Add event listeners to the document for actions because validation errors can sometimes make them disappear
+      Object.keys(this.actionEvents).forEach((eventType) => {
+        document.addEventListener(eventType, (event) => {
+          const targetElement = new Element(event.target);
+
+          if (targetElement && targetElement.isUnicorn && !isEmpty(targetElement.action)) {
+            this.actionEvents[eventType].forEach((element) => {
+              // Use isSameNode (not isEqualNode) because we want to check the nodes reference the same object
+              if (targetElement.el.isSameNode(element.el)) {
+                this.callMethod(element.action.name);
+              }
+            });
+          }
+        });
+      });
     }
 
     /**
@@ -344,27 +412,9 @@ const Unicorn = (() => {
      * Sets event listeners on unicorn elements.
      * @param {boolean} actionsOnly Used to add event listeners only `actions`. Required to re-add events when error validation is fired.
      */
-    setEventListeners(actionsOnly) {
-      actionsOnly = actionsOnly || false;
-
-      const rootElement = new Element(this.root);
-
-      if (rootElement.isUnicorn && !isEmpty(rootElement.poll) && !actionsOnly) {
-        this.poll = rootElement.poll;
-        this.poll.timer = null;
-
-        document.addEventListener("visibilitychange", () => {
-          if (document.hidden) {
-            if (this.poll.timer) {
-              clearInterval(this.poll.timer);
-            }
-          } else {
-            this.startPolling();
-          }
-        }, false);
-
-        this.startPolling();
-      }
+    refreshEventListeners() {
+      this.modelEvents = {};
+      this.actionEvents = {};
 
       walk(this.root, (el) => {
         if (el.isSameNode(this.root)) {
@@ -375,24 +425,20 @@ const Unicorn = (() => {
         const element = new Element(el);
 
         if (element.isUnicorn) {
-          if (!isEmpty(element.model) && !actionsOnly) {
+          if (!isEmpty(element.model)) {
             this.modelEls.push(element);
 
-            el.addEventListener(element.model.eventType, () => {
-              const action = { type: "syncInput", payload: { name: element.model.name, value: element.getValue() } };
-
-              this.sendMessage(action, element.model.debounceTime, (err) => {
-                if (err) {
-                  console.error(err);
-                } else {
-                  this.setModelValues(element);
-                }
-              });
-            });
+            if (this.modelEvents[element.model.eventType]) {
+              this.modelEvents[element.model.eventType].push(element);
+            } else {
+              this.modelEvents[element.model.eventType] = [element];
+            }
           } else if (!isEmpty(element.action)) {
-            el.addEventListener(element.action.eventType, () => {
-              this.callMethod(element.action.name);
-            });
+            if (this.actionEvents[element.action.eventType]) {
+              this.actionEvents[element.action.eventType].push(element);
+            } else {
+              this.actionEvents[element.action.eventType] = [element];
+            }
           }
         }
       });
@@ -544,9 +590,6 @@ const Unicorn = (() => {
               element.removeErrors();
             });
 
-            // Get existing errors before reseting to any new errors
-            const previousErrors = _component.errors;
-
             // Get the data from the response
             _component.data = responseJson.data || {};
             _component.errors = responseJson.errors || {};
@@ -579,11 +622,8 @@ const Unicorn = (() => {
             morphdom(_component.root, rerenderedComponent, morphdomOptions);
             _component.refreshChecksum();
 
-            // Re-add action event listeners when there were no errors before, but now there are errors
-            // Required because the action event listeners disappear when this happens
-            if (!isEmpty(_component.errors) && isEmpty(previousErrors)) {
-              _component.setEventListeners(true);
-            }
+            // Reset all event listeners
+            _component.refreshEventListeners();
 
             // Re-add unicorn validation messages from errors
             _component.modelEls.forEach((element) => {
