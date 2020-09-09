@@ -278,6 +278,8 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
         _set_property_from_data(component, name, value)
     component.hydrate()
 
+    is_reset_called = False
+
     for action in component_request.action_queue:
         action_type = action.get("type")
         payload = action.get("payload", {})
@@ -295,6 +297,10 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
                     component_name=component_name,
                     use_cache=False,
                 )
+
+                #  Explicitly remove all errors and prevent validation from firing before render()
+                component.errors = {}
+                is_reset_called = True
             elif call_method_name == "refresh" or call_method_name == "refresh()":
                 # Handle the refresh special action
                 component = UnicornView.create(
@@ -326,16 +332,17 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
     # Re-load frontend context variables to deal with non-serializable properties
     component_request.data = orjson.loads(component.get_frontend_context_variables())
 
-    if validate_all_fields:
-        component.validate()
-    else:
-        model_names_to_validate = []
+    if not is_reset_called:
+        if validate_all_fields:
+            component.validate()
+        else:
+            model_names_to_validate = []
 
-        for key, value in original_data.items():
-            if value != component_request.data[key]:
-                model_names_to_validate.append(key)
+            for key, value in original_data.items():
+                if value != component_request.data[key]:
+                    model_names_to_validate.append(key)
 
-        component.validate(model_names=model_names_to_validate)
+            component.validate(model_names=model_names_to_validate)
 
     rendered_component = component.render()
 
