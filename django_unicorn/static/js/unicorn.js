@@ -165,16 +165,23 @@ const Unicorn = (() => {
         } else if (contains(this.name, "unicorn:error:")) {
           this.isError = true;
         } else {
-          this.eventType = this.name.replace("unicorn:", "");
+          const actionEventType = this.name.replace("unicorn:", "");
+
+          if (actionEventType !== "id" && actionEventType !== "name" && actionEventType !== "checksum") {
+            this.eventType = actionEventType;
+          }
         }
 
-        if (!this.eventType) {
-          // Find modifiers and any potential arguments
-          this.name.split(".").slice(1).forEach((modifier) => {
-            const modifierArgs = modifier.split("-");
-            this.modifiers[modifierArgs[0]] = modifierArgs.length > 1 ? modifierArgs[1] : true;
-          });
+        let potentialModifiers = this.name;
+        if (this.eventType) {
+          potentialModifiers = this.eventType;
         }
+
+        // Find modifiers and any potential arguments
+        potentialModifiers.split(".").slice(1).forEach((modifier) => {
+          const modifierArgs = modifier.split("-");
+          this.modifiers[modifierArgs[0]] = modifierArgs.length > 1 ? modifierArgs[1] : true;
+        });
       }
     }
   }
@@ -227,6 +234,14 @@ const Unicorn = (() => {
         } else if (attribute.eventType) {
           this.action.name = attribute.value;
           this.action.eventType = attribute.eventType;
+
+          if (attribute.modifiers) {
+            this.action.keycode = Object.keys(attribute.modifiers)[0];
+          }
+
+          if (this.action.keycode) {
+            this.action.eventType = this.action.eventType.replace(`.${this.action.keycode}`, "");
+          }
         }
 
         if (attribute.isKey) {
