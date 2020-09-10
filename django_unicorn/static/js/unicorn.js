@@ -160,7 +160,7 @@ const Unicorn = (() => {
           this.isModel = true;
         } else if (contains(this.name, "unicorn:poll")) {
           this.isPoll = true;
-        } else if (contains(this.name, "unicorn:key")) {
+        } else if (this.name === "unicorn:key") {
           this.isKey = true;
         } else if (contains(this.name, "unicorn:error:")) {
           this.isError = true;
@@ -410,7 +410,6 @@ const Unicorn = (() => {
 
     /**
      * Sets event listeners on unicorn elements.
-     * @param {boolean} actionsOnly Used to add event listeners only `actions`. Required to re-add events when error validation is fired.
      */
     refreshEventListeners() {
       this.modelEvents = {};
