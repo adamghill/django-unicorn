@@ -50,6 +50,17 @@ const Unicorn = (() => {
   }
 
   /**
+   * Converts a string to "kebab-case", aka lower-cased with hyphens.
+   * @param {string} str The string to be converted.
+   */
+  function toKebabCase(str) {
+    return str
+      .match(/[A-Z]{2,}(?=[A-Z][a-z]+[0-9]*|\b)|[A-Z]?[a-z]+[0-9]*|[A-Z]|[0-9]+/g)
+      .map((x) => x.toLowerCase())
+      .join("-");
+  }
+
+  /**
    * Returns a function, that, as long as it continues to be invoked, will not
    * be triggered. The function will be called after it stops being called for
    * N milliseconds. If `immediate` is passed, trigger the function on the
@@ -236,11 +247,11 @@ const Unicorn = (() => {
           this.action.eventType = attribute.eventType;
 
           if (attribute.modifiers) {
-            this.action.keycode = Object.keys(attribute.modifiers)[0];
+            this.action.key = Object.keys(attribute.modifiers)[0];
           }
 
-          if (this.action.keycode) {
-            this.action.eventType = this.action.eventType.replace(`.${this.action.keycode}`, "");
+          if (this.action.key) {
+            this.action.eventType = this.action.eventType.replace(`.${this.action.key}`, "");
           }
         }
 
@@ -393,7 +404,7 @@ const Unicorn = (() => {
         });
       });
 
-      // Add event listeners to the document for actions because validation errors can sometimes make them disappear
+      // Add event listeners at the document level because validation errors can sometimes remove them
       Object.keys(this.actionEvents).forEach((eventType) => {
         document.addEventListener(eventType, (event) => {
           const targetElement = new Element(event.target);
@@ -402,7 +413,13 @@ const Unicorn = (() => {
             this.actionEvents[eventType].forEach((element) => {
               // Use isSameNode (not isEqualNode) because we want to check the nodes reference the same object
               if (targetElement.el.isSameNode(element.el)) {
-                this.callMethod(element.action.name);
+                if (element.action.key) {
+                  if (element.action.key === toKebabCase(event.key)) {
+                    this.callMethod(element.action.name);
+                  }
+                } else {
+                  this.callMethod(element.action.name);
+                }
               }
             });
           }
@@ -447,7 +464,9 @@ const Unicorn = (() => {
             } else {
               this.modelEvents[element.model.eventType] = [element];
             }
-          } else if (!isEmpty(element.action)) {
+          }
+
+          if (!isEmpty(element.action)) {
             if (this.actionEvents[element.action.eventType]) {
               this.actionEvents[element.action.eventType].push(element);
             } else {

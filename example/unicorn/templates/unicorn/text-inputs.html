@@ -15,6 +15,9 @@
     <label>Keyup</label>
     <input unicorn:model="name" unicorn:keyup="set_name('something new')" type="text" id="keyupName">
 
+    <label>Keydown for escape key</label>
+    <input unicorn:model="name" unicorn:keydown.escape="name='ESCAPE!'" type="text" id="keydownEscapeName">
+
     <label>Lazy</label>
     <input unicorn:model.lazy="name" type="text" id="lazyName" unicorn:key="key1">
     
