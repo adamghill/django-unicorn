@@ -84,7 +84,9 @@ def test_get_frontend_context_variables(component):
 
 def test_get_context_data(component):
     context_data = component.get_context_data()
-    assert len(context_data) == 3  # `view` is added to context data by default
+    assert (
+        len(context_data) == 4
+    )  # `unicorn` and `view` are added to context data by default
     assert context_data.get("name") == "World"
     assert isinstance(context_data.get("get_name"), types.MethodType)
 

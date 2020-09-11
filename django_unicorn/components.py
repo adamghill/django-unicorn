@@ -519,6 +519,7 @@ class UnicornView(TemplateView):
             "validate",
             "get_frontend_context_variables",
             "errors",
+            "updated",
         )
         excludes = []
 
