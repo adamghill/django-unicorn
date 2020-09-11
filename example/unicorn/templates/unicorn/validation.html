@@ -18,34 +18,43 @@
         {% unicorn_errors %}
 
         <div>
+            <label>Plain text</label>
             <input unicorn:model="text" type="text" id="textId">
-            {{ text }}
+            {% verbatim %}{{ text }}{% endverbatim %}: {{ text }}
         </div>
-
+    
         <div>
+            <label>Number with validation</label>
             <input unicorn:model="number" type="text" id="numberId">
-            {{ number }}
+            {% verbatim %}{{ number }}{% endverbatim %}: {{ number }}
         </div>
 
         <div>
-            <label for="now">Now</label>
+            <label>Datetime attribute with validation</label>
             <input unicorn:model="now" type="text" id="nowId" unicorn:key="now">
-            <span class="error" id="nowError">{{ unicorn.errors.now.0.message }}</span>
+            <span class="error">{{ unicorn.errors.now.0.message }}</span>
+
+            <p>
+                {% verbatim %}{{ now }}{% endverbatim %}: {{ now }}
+            </p>
+            
+            <p>
+                {% verbatim %}{{ now|date:"s" }}{% endverbatim %}: {{ now|date:"s" }}
+            </p>
         </div>
 
-        <p>
-            <strong>{% verbatim %}{{ now }}{% endverbatim %}</strong><br />
-            {{ now }}
-        </p>
-        
-        <p>
-            <strong>{% verbatim %}{{ now|date:"s" }}{% endverbatim %}</strong><br />
-            {{ now|date:"s" }}
-        </p>
+        <div>
+            <label for="now_property">Datetime property with property setter</label>
+            <input unicorn:model="now_property" type="text" id="nowPropertyId" unicorn:key="nowProperty">
+            {% verbatim %}{{ now_property|date:"s" }}{% endverbatim %}: {{ now_property|date:"s" }}
+        </div>
 
-        <button unicorn:click="set_text">set_text</button>
-        <button unicorn:click="validate">Validate</button>
-        <button unicorn:click="reset">Reset</button>
-        <button unicorn:click="refresh">Refresh</button>
+        <div>
+            <button unicorn:click="set_text_no_validation">set_text_no_validation()</button>
+            <button unicorn:click="set_text_with_validation">set_text_with_validation()</button>
+            <button unicorn:click="validate">validate()</button>
+            <button unicorn:click="reset">reset()</button>
+            <button unicorn:click="refresh">refresh()</button>
+        </div>
     </div>
 </div>

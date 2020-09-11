@@ -12,5 +12,20 @@ class ValidationView(UnicornView):
     number = ""
     now = timezone.now()
 
-    def set_text(self):
-        self.text = "great"
+    _now_property = None
+
+    @property
+    def now_property(self):
+        self._now_property = timezone.now()
+        return self._now_property
+
+    @now_property.setter
+    def now_property(self, val):
+        self._now_property = val
+
+    def set_text_no_validation(self):
+        self.text = "no validation"
+
+    def set_text_with_validation(self):
+        self.text = "validation"
+        self.validate()
