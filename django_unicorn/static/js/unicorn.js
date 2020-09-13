@@ -354,6 +354,7 @@ const Unicorn = (() => {
       this.poll = {};
       this.events = [];
       this.actionQueue = [];
+      this.currentActionQueue = null;
 
       this.modelEvents = {};
       this.actionEvents = {};
@@ -582,11 +583,25 @@ const Unicorn = (() => {
      */
     sendMessage(debounceTime, callback) {
       function _sendMessage(_component) {
+        // Prevent network call when there isn't an action
+        if (_component.actionQueue.length === 0) {
+          return;
+        }
+
+        // Prevent newtwork call when the action queue gets repeated
+        if (_component.currentActionQueue === _component.actionQueue) {
+          return;
+        }
+
+        // Set the current action queue and clear the action queue in case another event happens
+        _component.currentActionQueue = _component.actionQueue;
+        _component.actionQueue = [];
+
         const body = {
           id: _component.id,
           data: _component.data,
           checksum: _component.checksum,
-          actionQueue: _component.actionQueue,
+          actionQueue: _component.currentActionQueue,
         };
 
         const headers = {
@@ -616,9 +631,6 @@ const Unicorn = (() => {
               // TODO: Check for "Checksum does not match" error and try to fix it
               throw Error(responseJson.error);
             }
-
-            // Refresh the action queue when a response works
-            _component.actionQueue = [];
 
             // Remove any unicorn validation messages before trying to merge with morphdom
             _component.modelEls.forEach((element) => {
@@ -674,11 +686,17 @@ const Unicorn = (() => {
               });
             });
 
+            // Clear the current action queue
+            _component.currentActionQueue = null;
+
             if (callback && typeof callback === "function") {
               callback();
             }
           })
           .catch((err) => {
+            _component.actionQueue = [];
+            _component.currentActionQueue = null;
+
             if (callback && typeof callback === "function") {
               callback(err);
             }
@@ -686,7 +704,7 @@ const Unicorn = (() => {
       }
 
       if (debounceTime === -1) {
-        debounce(_sendMessage, 250, true)(this);
+        debounce(_sendMessage, 250, false)(this);
         // queue(_sendMessage, 250)(this);
       } else {
         debounce(_sendMessage, debounceTime, false)(this);
