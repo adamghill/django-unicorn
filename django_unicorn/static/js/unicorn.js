@@ -352,82 +352,13 @@ const Unicorn = (() => {
       this.modelEls = [];
       this.errors = {};
       this.poll = {};
-      this.events = [];
       this.actionQueue = [];
       this.currentActionQueue = null;
-
-      this.modelEvents = {};
       this.actionEvents = {};
 
       this.init();
       this.refreshEventListeners();
-
-      const rootElement = new Element(this.root);
-
-      if (rootElement.isUnicorn && !isEmpty(rootElement.poll)) {
-        this.poll = rootElement.poll;
-        this.poll.timer = null;
-
-        document.addEventListener("visibilitychange", () => {
-          if (document.hidden) {
-            if (this.poll.timer) {
-              clearInterval(this.poll.timer);
-            }
-          } else {
-            this.startPolling();
-          }
-        }, false);
-
-        this.startPolling();
-      }
-
-      // Add event listeners to the actual element because they seem to stick around
-      // (attaching to document works for most events, but won't work for lazy/blur)
-      Object.keys(this.modelEvents).forEach((eventType) => {
-        this.modelEvents[eventType].forEach((element) => {
-          element.el.addEventListener(eventType, (event) => {
-            const targetElement = new Element(event.target);
-
-            if (targetElement && targetElement.isUnicorn && !isEmpty(targetElement.model)) {
-              // Use isSameNode (not isEqualNode) because we want to check the nodes reference the same object
-              if (targetElement.el.isSameNode(element.el)) {
-                const action = { type: "syncInput", payload: { name: element.model.name, value: element.getValue() } };
-                this.actionQueue.push(action);
-
-                this.sendMessage(element.model.debounceTime, (err) => {
-                  if (err) {
-                    console.error(err);
-                  } else {
-                    this.setModelValues(element);
-                  }
-                });
-              }
-            }
-          });
-        });
-      });
-
-      // Add event listeners at the document level because validation errors can sometimes remove them
-      Object.keys(this.actionEvents).forEach((eventType) => {
-        document.addEventListener(eventType, (event) => {
-          const targetElement = new Element(event.target);
-
-          if (targetElement && targetElement.isUnicorn && !isEmpty(targetElement.action)) {
-            this.actionEvents[eventType].forEach((element) => {
-              // Use isSameNode (not isEqualNode) because we want to check the nodes reference the same object
-              if (targetElement.el.isSameNode(element.el)) {
-                if (element.action.key) {
-                  if (element.action.key === toKebabCase(event.key)) {
-                    this.callMethod(element.action.name);
-                  }
-                } else {
-                  this.callMethod(element.action.name);
-                }
-              }
-            });
-          }
-        });
-      });
+      this.initPolling();
     }
 
     /**
@@ -444,10 +375,55 @@ const Unicorn = (() => {
     }
 
     /**
+     * Adds an action event listener to the document for each type of event (e.g. click, keyup, etc).
+     * Added at the document level because validation errors would sometimes remove the
+     * events when attached directly to the element.
+     */
+    addActionEventListener(eventType) {
+      document.addEventListener(eventType, (event) => {
+        const targetElement = new Element(event.target);
+
+        if (targetElement && targetElement.isUnicorn && !isEmpty(targetElement.action)) {
+          this.actionEvents[eventType].forEach((element) => {
+            // Use isSameNode (not isEqualNode) because we want to check the nodes reference the same object
+            if (targetElement.el.isSameNode(element.el)) {
+              if (element.action.key) {
+                if (element.action.key === toKebabCase(event.key)) {
+                  this.callMethod(element.action.name);
+                }
+              } else {
+                this.callMethod(element.action.name);
+              }
+            }
+          });
+        }
+      });
+    }
+
+    /**
+     * Adds a model event listener to the element.
+     * @param {Element} element Element that will get the event attached to.
+     * @param {string} eventType Event type to listen for.
+     */
+    addModelEventListener(element, eventType) {
+      element.el.addEventListener(eventType, () => {
+        const action = { type: "syncInput", payload: { name: element.model.name, value: element.getValue() } };
+        this.actionQueue.push(action);
+
+        this.sendMessage(element.model.debounceTime, (err) => {
+          if (err) {
+            console.error(err);
+          } else {
+            this.setModelValues(element);
+          }
+        });
+      });
+    }
+
+    /**
      * Sets event listeners on unicorn elements.
      */
     refreshEventListeners() {
-      this.modelEvents = {};
       this.actionEvents = {};
 
       walk(this.root, (el) => {
@@ -460,12 +436,9 @@ const Unicorn = (() => {
 
         if (element.isUnicorn) {
           if (!isEmpty(element.model)) {
-            this.modelEls.push(element);
-
-            if (this.modelEvents[element.model.eventType]) {
-              this.modelEvents[element.model.eventType].push(element);
-            } else {
-              this.modelEvents[element.model.eventType] = [element];
+            if (this.modelEls.filter((m) => m.el.isSameNode(element.el)).length === 0) {
+              this.modelEls.push(element);
+              this.addModelEventListener(element, element.model.eventType);
             }
           }
 
@@ -474,6 +447,7 @@ const Unicorn = (() => {
               this.actionEvents[element.action.eventType].push(element);
             } else {
               this.actionEvents[element.action.eventType] = [element];
+              this.addActionEventListener(element.action.eventType);
             }
           }
         }
@@ -496,6 +470,30 @@ const Unicorn = (() => {
           this.setModelValues();
         }
       });
+    }
+
+    /**
+     * Sets up polling if it is defined on the component's root.
+     */
+    initPolling() {
+      const rootElement = new Element(this.root);
+
+      if (rootElement.isUnicorn && !isEmpty(rootElement.poll)) {
+        this.poll = rootElement.poll;
+        this.poll.timer = null;
+
+        document.addEventListener("visibilitychange", () => {
+          if (document.hidden) {
+            if (this.poll.timer) {
+              clearInterval(this.poll.timer);
+            }
+          } else {
+            this.startPolling();
+          }
+        }, false);
+
+        this.startPolling();
+      }
     }
 
     /**
