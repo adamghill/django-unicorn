@@ -12,11 +12,6 @@ def unicorn_scripts():
     return {"debug": settings.DEBUG}
 
 
-@register.inclusion_tag("unicorn/styles.html")
-def unicorn_styles():
-    return {}
-
-
 @register.inclusion_tag("unicorn/errors.html", takes_context=True)
 def unicorn_errors(context):
     return {"unicorn": {"errors": context.get("unicorn", {}).get("errors", {})}}
