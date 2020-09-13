@@ -353,6 +353,7 @@ const Unicorn = (() => {
       this.errors = {};
       this.poll = {};
       this.events = [];
+      this.actionQueue = [];
 
       this.modelEvents = {};
       this.actionEvents = {};
@@ -390,8 +391,9 @@ const Unicorn = (() => {
               // Use isSameNode (not isEqualNode) because we want to check the nodes reference the same object
               if (targetElement.el.isSameNode(element.el)) {
                 const action = { type: "syncInput", payload: { name: element.model.name, value: element.getValue() } };
+                this.actionQueue.push(action);
 
-                this.sendMessage(action, element.model.debounceTime, (err) => {
+                this.sendMessage(element.model.debounceTime, (err) => {
                   if (err) {
                     console.error(err);
                   } else {
@@ -482,8 +484,9 @@ const Unicorn = (() => {
      */
     callMethod(methodName, errCallback) {
       const action = { type: "callMethod", payload: { name: methodName, params: [] } };
+      this.actionQueue.push(action);
 
-      this.sendMessage(action, -1, (err) => {
+      this.sendMessage(-1, (err) => {
         if (err && typeof errCallback === "function") {
           errCallback(err);
         } else if (err) {
@@ -577,15 +580,13 @@ const Unicorn = (() => {
     /**
      * Calls the message endpoint and merges the results into the document.
      */
-    sendMessage(action, debounceTime, callback) {
+    sendMessage(debounceTime, callback) {
       function _sendMessage(_component) {
-        const actionQueue = [action];
-
         const body = {
           id: _component.id,
           data: _component.data,
           checksum: _component.checksum,
-          actionQueue,
+          actionQueue: _component.actionQueue,
         };
 
         const headers = {
@@ -615,6 +616,9 @@ const Unicorn = (() => {
               // TODO: Check for "Checksum does not match" error and try to fix it
               throw Error(responseJson.error);
             }
+
+            // Refresh the action queue when a response works
+            _component.actionQueue = [];
 
             // Remove any unicorn validation messages before trying to merge with morphdom
             _component.modelEls.forEach((element) => {
@@ -653,6 +657,8 @@ const Unicorn = (() => {
 
             // eslint-disable-next-line no-undef
             morphdom(_component.root, rerenderedComponent, morphdomOptions);
+
+            // Refresh the checksum based on the new data
             _component.refreshChecksum();
 
             // Reset all event listeners
@@ -680,8 +686,8 @@ const Unicorn = (() => {
       }
 
       if (debounceTime === -1) {
-        // debounce(_sendMessage, 250, true)();
-        queue(_sendMessage, 250)(this);
+        debounce(_sendMessage, 250, true)(this);
+        // queue(_sendMessage, 250)(this);
       } else {
         debounce(_sendMessage, debounceTime, false)(this);
       }
