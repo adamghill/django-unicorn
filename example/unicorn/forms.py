@@ -2,6 +2,6 @@ from django import forms
 
 
 class ValidationForm(forms.Form):
-    now = forms.DateTimeField()
-    now_property = forms.DateTimeField()
+    text = forms.CharField(min_length=3, max_length=10)
+    date_time = forms.DateTimeField()
     number = forms.IntegerField()

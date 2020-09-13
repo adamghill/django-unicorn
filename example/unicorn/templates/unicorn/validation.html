@@ -26,30 +26,26 @@
         <div>
             <label>Number with validation</label>
             <input unicorn:model="number" type="text" id="numberId">
-            {% verbatim %}{{ number }}{% endverbatim %}: {{ number }}
+            {% verbatim %}{{ number }}{% endverbatim %}: {{ number }}<br />
+            <button unicorn:click="set_number(1)">set_number(1)</button>
         </div>
 
         <div>
             <label>Datetime attribute with validation</label>
-            <input unicorn:model="now" type="text" id="nowId" unicorn:key="now">
-            <span class="error">{{ unicorn.errors.now.0.message }}</span>
+            <input unicorn:model="date_time" type="text" id="dateTimeId" unicorn:key="dateTime">
+            <span class="error">{{ unicorn.errors.date_time.0.message }}</span>
 
             <p>
-                {% verbatim %}{{ now }}{% endverbatim %}: {{ now }}
+                {% verbatim %}{{ date_time }}{% endverbatim %}: {{ date_time }}
             </p>
             
             <p>
-                {% verbatim %}{{ now|date:"s" }}{% endverbatim %}: {{ now|date:"s" }}
+                {% verbatim %}{{ date_time|date:"s" }}{% endverbatim %}: {{ date_time|date:"s" }}
             </p>
         </div>
 
         <div>
-            <label for="now_property">Datetime property with property setter</label>
-            <input unicorn:model="now_property" type="text" id="nowPropertyId" unicorn:key="nowProperty">
-            {% verbatim %}{{ now_property|date:"s" }}{% endverbatim %}: {{ now_property|date:"s" }}
-        </div>
-
-        <div>
+            <a href="blob" unicorn:click.prevent="set_text_no_validation">set_text_no_validation()</a>
             <button unicorn:click="set_text_no_validation">set_text_no_validation()</button>
             <button unicorn:click="set_text_with_validation">set_text_with_validation()</button>
             <button unicorn:click="validate">validate()</button>

@@ -48,6 +48,8 @@
 
         <p>
             Number of characters: {{ paragraph|length }}
+
+            <button unicorn:click="paragraph=''">Clear textarea</button>
         </p>
     </div>
 
@@ -65,7 +67,7 @@
             {% endfor %}
         </ul>
 
-        <button unicorn:click="clear_states()">Clear States</button>
+        <button unicorn:click="clear_states">Clear States</button>
         {% endif %}
         </p>
     </div>
