@@ -29,3 +29,6 @@ class ObjectsView(UnicornView):
 
     def get_date(self):
         self.date_example = now()
+
+    def set_dictionary(self, val):
+        self.dictionary = val

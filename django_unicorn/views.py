@@ -1,7 +1,7 @@
 import hmac
+import logging
 from functools import wraps
-from typing import Any, Dict, List, Tuple, Union
-from django.forms.forms import Form
+from typing import Any, Dict, List, Union
 
 import orjson
 import shortuuid
@@ -12,10 +12,12 @@ from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_POST
 
 from .components import UnicornField, UnicornView
+from .errors import UnicornViewError
+from .call_method_parser import parse_args, parse_call_method_name
 
 
-class UnicornViewError(Exception):
-    pass
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
 def handle_error(view_func):
@@ -123,57 +125,6 @@ def _set_property_from_payload(
                     data_or_dict = data_or_dict.get(property_name_part, {})
 
     component.updated(property_name, property_value)
-
-
-def _parse_call_method_name(call_method_name: str) -> Tuple[str, List[Any]]:
-    """
-    Parses the method name from the request payload into a set of parameters to pass to a method.
-
-    Args:
-        param call_method_name: String representation of a method name with parameters, e.g. "set_name('Bob')"
-
-    Returns:
-        Tuple of method_name and a list of arguments.
-    """
-
-    method_name = call_method_name
-    params: List[Any] = []
-
-    if "(" in call_method_name and call_method_name.endswith(")"):
-        param_idx = call_method_name.index("(")
-        params_str = call_method_name[param_idx:]
-
-        # Remove the arguments from the method name
-        method_name = call_method_name.replace(params_str, "")
-
-        # Remove parenthesis
-        params_str = params_str[1:-1]
-
-        if params_str == "":
-            return (method_name, params)
-
-        # Split up mutiple args
-        params = params_str.split(",")
-
-        for idx, arg in enumerate(params):
-            params[idx] = _handle_arg(arg)
-
-        # TODO: Handle kwargs
-
-    return (method_name, params)
-
-
-def _handle_arg(arg):
-    """
-    Clean up arguments. Mostly used to handle strings.
-
-    Returns:
-        Cleaned up argument.
-    """
-    if (arg.startswith("'") and arg.endswith("'")) or (
-        arg.startswith('"') and arg.endswith('"')
-    ):
-        return arg[1:-1]
 
 
 def _call_method_name(
@@ -312,17 +263,18 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
                 # Handle the validate special action
                 validate_all_fields = True
             elif "=" in call_method_name:
-                call_method_name_split = call_method_name.split("=")
-                property_name = call_method_name_split[0]
-                property_value = _handle_arg(call_method_name_split[1])
+                equal_sign_idx = call_method_name.index("=")
+                property_name = call_method_name[:equal_sign_idx]
+                parsed_args = parse_args(call_method_name[equal_sign_idx + 1 :])
+                property_value = parsed_args[0] if parsed_args else None
 
-                if hasattr(component, property_name):
+                if hasattr(component, property_name) and property_value is not None:
                     component.calling(f"set_{property_name}", property_value)
                     setattr(component, property_name, property_value)
                     component.called(f"set_{property_name}", property_value)
                     component_request.data[property_name] = property_value
             else:
-                (method_name, params) = _parse_call_method_name(call_method_name)
+                (method_name, params) = parse_call_method_name(call_method_name)
                 component.calling(method_name, params)
                 _call_method_name(component, method_name, params)
                 component.called(method_name, params)
