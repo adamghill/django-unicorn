@@ -24,6 +24,9 @@
     <label>Debounce-1000</label>
     <input unicorn:model.debounce-1000="name" type="text" id="debounceName" unicorn:key="key1">
 
+    <label>Chained lazy and debounce-500</label>
+    <input unicorn:model.lazy.debounce-500="name" type="text" id="lazyDebounceName">
+
     <br />
     <button unicorn:click="set_name">set_name</button>
     <button unicorn:click="set_name()">set_name()</button>
