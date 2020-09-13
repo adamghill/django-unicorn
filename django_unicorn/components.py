@@ -159,7 +159,6 @@ class UnicornView(TemplateView):
     # Caches to reduce the amount of time introspecting the class
     _methods_cache = None
     _attribute_name_cache = None
-    _form_cache = None
     _hook_methods_cache: List[str] = []
 
     def __init__(self, **kwargs):
@@ -317,6 +316,8 @@ class UnicornView(TemplateView):
         form = self._get_form(attributes)
 
         if form:
+            form.is_valid()
+
             for key in attributes.keys():
                 if key in form.fields:
                     field = form.fields[key]
@@ -332,16 +333,12 @@ class UnicornView(TemplateView):
 
         return encoded_frontend_context_variables
 
-    def _get_form(self, data, use_cache=True):
-        if self._form_cache and use_cache:
-            return self._form_cache
-
+    def _get_form(self, data):
         if hasattr(self, "form_class"):
             try:
                 form = self.form_class(data)
                 form.is_valid()
 
-                self._form_cache = form
                 return form
             except Exception as e:
                 logger.exception(e)
@@ -371,7 +368,7 @@ class UnicornView(TemplateView):
         # TODO: Handle form.non_field_errors()?
 
         data = self._attributes()
-        form = self._get_form(data, use_cache=False)
+        form = self._get_form(data)
 
         if form:
             form_errors = form.errors.get_json_data(escape_html=True)
@@ -430,7 +427,7 @@ class UnicornView(TemplateView):
         # Get the correct value type by using the form if it is available
         data = self._attributes()
         data[name] = value
-        form = self._get_form(data, use_cache=False)
+        form = self._get_form(data)
 
         if form and name in form.fields and name in form.cleaned_data:
             value = form.cleaned_data[name]
