@@ -355,6 +355,7 @@ const Unicorn = (() => {
       this.actionQueue = [];
       this.currentActionQueue = null;
       this.actionEvents = {};
+      this.attachedEventTypes = [];
 
       this.init();
       this.refreshEventListeners();
@@ -410,11 +411,13 @@ const Unicorn = (() => {
         const action = { type: "syncInput", payload: { name: element.model.name, value: element.getValue() } };
         this.actionQueue.push(action);
 
-        this.sendMessage(element.model.debounceTime, (err) => {
+        this.sendMessage(element.model.debounceTime, (excludeElement, err) => {
           if (err) {
             console.error(err);
-          } else {
+          } else if (excludeElement) {
             this.setModelValues(element);
+          } else {
+            this.setModelValues();
           }
         });
       });
@@ -447,7 +450,11 @@ const Unicorn = (() => {
               this.actionEvents[element.action.eventType].push(element);
             } else {
               this.actionEvents[element.action.eventType] = [element];
-              this.addActionEventListener(element.action.eventType);
+
+              if (this.attachedEventTypes.filter((et) => et === element.action.eventType).length === 0) {
+                this.attachedEventTypes.push(element.action.eventType);
+                this.addActionEventListener(element.action.eventType);
+              }
             }
           }
         }
@@ -461,7 +468,7 @@ const Unicorn = (() => {
       const action = { type: "callMethod", payload: { name: methodName, params: [] } };
       this.actionQueue.push(action);
 
-      this.sendMessage(-1, (err) => {
+      this.sendMessage(-1, (_, err) => {
         if (err && typeof errCallback === "function") {
           errCallback(err);
         } else if (err) {
@@ -684,19 +691,31 @@ const Unicorn = (() => {
               });
             });
 
+            // Check if the current actionQueue contains a callMethod. Prevents excluding
+            // an element from getting a value set because calling a component function can
+            // potentially have side effects which have to be reflected on the current element.
+            let hasCallMethod = false;
+
+            _component.currentActionQueue.forEach((action) => {
+              if (action.type === "callMethod") {
+                hasCallMethod = true;
+              }
+            });
+
             // Clear the current action queue
             _component.currentActionQueue = null;
 
             if (callback && typeof callback === "function") {
-              callback();
+              callback(!hasCallMethod, null);
             }
           })
           .catch((err) => {
+            // Make sure to clear the current queues in case of an error
             _component.actionQueue = [];
             _component.currentActionQueue = null;
 
             if (callback && typeof callback === "function") {
-              callback(err);
+              callback(null, err);
             }
           });
       }
