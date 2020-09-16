@@ -14,6 +14,11 @@ class {camel_case_component_name}View(UnicornView):
 
 TEMPLATE_FILE = """<div>
     <!-- put code here -->
+    <div style="display:flex; ">
+  <img style="height:25px" src="https://static.djangoproject.com/img/logos/django-logo-positive.png">
+    <div>🦄</div>
+  </span>
+
 </div>
 """
 
