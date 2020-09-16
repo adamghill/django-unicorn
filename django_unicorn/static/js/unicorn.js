@@ -41,8 +41,7 @@ const Unicorn = (() => {
    */
   function getCsrfToken() {
     const csrfElements = document.getElementsByName("csrfmiddlewaretoken");
-
-    if (csrfElements) {
+    if (csrfElements && csrfElements.length > 0) {
       return csrfElements[0].getAttribute("value");
     }
 
