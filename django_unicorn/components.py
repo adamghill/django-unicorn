@@ -172,6 +172,7 @@ class UnicornView(TemplateView):
         if "request" in kwargs:
             self.setup(kwargs["request"])
 
+        self._validate_called = False
         self.errors = {}
         self._set_default_template_name()
         self._set_caches()
@@ -358,6 +359,9 @@ class UnicornView(TemplateView):
 
         return context
 
+    def is_valid(self, model_names: List = None) -> bool:
+        return len(self.validate(model_names).keys()) == 0
+
     def validate(self, model_names: List = None) -> Dict:
         """
         Validates the data using the `form_class` set on the component.
@@ -367,30 +371,35 @@ class UnicornView(TemplateView):
         """
         # TODO: Handle form.non_field_errors()?
 
+        if self._validate_called:
+            return self.errors
+
+        self._validate_called = True
+
         data = self._attributes()
         form = self._get_form(data)
 
         if form:
             form_errors = form.errors.get_json_data(escape_html=True)
 
+            # This code is confusing, but handles this use-case:
+            # the component has two models, one that starts with an error and one
+            # that is valid. Validating the valid one should not show an error for
+            # the invalid one. Only after the invalid field is updated, should the
+            # error show up and persist, even after updating the valid form.
+            if self.errors:
+                keys_to_remove = []
+
+                for key, value in self.errors.items():
+                    if key in form_errors:
+                        self.errors[key] = value
+                    else:
+                        keys_to_remove.append(key)
+
+                for key in keys_to_remove:
+                    self.errors.pop(key)
+
             if model_names is not None:
-                # This code is confusing, but handles this use-case:
-                # the component has two models, one that starts with an error and one
-                # that is valid. Validating the valid one should not show an error for
-                # the invalid one. Only after the invalid field is updated, should the
-                # error show up and persist, even after updating the valid form.
-                if self.errors:
-                    keys_to_remove = []
-
-                    for key, value in self.errors.items():
-                        if key in form_errors:
-                            self.errors[key] = value
-                        else:
-                            keys_to_remove.append(key)
-
-                    for key in keys_to_remove:
-                        self.errors.pop(key)
-
                 for key, value in form_errors.items():
                     if key in model_names:
                         self.errors[key] = value
@@ -514,6 +523,7 @@ class UnicornView(TemplateView):
             "calling",
             "called",
             "validate",
+            "is_valid",
             "get_frontend_context_variables",
             "errors",
             "updated",
@@ -551,7 +561,9 @@ class UnicornView(TemplateView):
             key = f"{component_name}-{component_id}"
 
             if key in constructed_views_cache:
-                return constructed_views_cache[key]
+                component = constructed_views_cache[key]
+                component._validate_called = False
+                return component
 
         if component_name in views_cache:
             component = views_cache[component_name](
@@ -582,6 +594,7 @@ class UnicornView(TemplateView):
                 key = f"{component_name}-{component_id}"
                 constructed_views_cache[key] = component
 
+            component._validate_called = False
             return component
 
         locations = []

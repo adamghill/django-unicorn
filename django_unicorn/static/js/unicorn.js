@@ -388,6 +388,11 @@ const Unicorn = (() => {
           this.actionEvents[eventType].forEach((element) => {
             // Use isSameNode (not isEqualNode) because we want to check the nodes reference the same object
             if (targetElement.el.isSameNode(element.el)) {
+              if (!isEmpty(targetElement.model) && targetElement.model.isLazy) {
+                const action = { type: "syncInput", payload: { name: targetElement.model.name, value: targetElement.getValue() } };
+                this.actionQueue.push(action);
+              }
+
               if (element.action.key) {
                 if (element.action.key === toKebabCase(event.key)) {
                   this.callMethod(element.action.name);
