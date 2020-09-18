@@ -1,0 +1,24 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "contributors": [
+    {
+      "login": "zodman",
+      "name": "Andres Vargas",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/44167?v=4",
+      "profile": "https://python3.ninja",
+      "contributions": [
+        "code"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "projectName": "django-unicorn",
+  "projectOwner": "adamghill",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "skipCi": true
+}
