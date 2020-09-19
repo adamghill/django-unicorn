@@ -40,7 +40,17 @@ const Unicorn = (() => {
    * Get the CSRF token used by Django.
    */
   function getCsrfToken() {
+    // Default to looking for the CSRF in the cookie
+    const cookieKey = "csrftoken=";
+    const csrfTokenCookie = document.cookie.split(";").filter((item) => item.trim().startsWith(cookieKey));
+
+    if (csrfTokenCookie.length > 0) {
+      return csrfTokenCookie[0].replace(cookieKey, "");
+    }
+
+    // Fall back to check for the CSRF hidden input
     const csrfElements = document.getElementsByName("csrfmiddlewaretoken");
+
     if (csrfElements && csrfElements.length > 0) {
       return csrfElements[0].getAttribute("value");
     }
