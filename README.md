@@ -31,6 +31,7 @@ https://www.django-unicorn.com
 ## Minify Javascript
 1. `npm install`
 1. `npm run-script build`
+1. See the size: `npm run-script build && ls -la django_unicorn/static/js/unicorn.min.js`
 
 ## Bump version
 1. `npm run-script build`
