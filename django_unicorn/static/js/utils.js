@@ -13,8 +13,8 @@ export function contains(str, search) {
 }
 
 /**
-   * A simple shortcut for querySelector that everyone loves.
-   */
+ * A simple shortcut for querySelector that everyone loves.
+ */
 export function $(selector, scope) {
   if (scope === undefined) {
     scope = document;
@@ -50,6 +50,10 @@ export function getCsrfToken() {
  * @param {string} str The string to be converted.
  */
 export function toKebabCase(str) {
+  if (!str) {
+    return "";
+  }
+
   return str
     .match(/[A-Z]{2,}(?=[A-Z][a-z]+[0-9]*|\b)|[A-Z]?[a-z]+[0-9]*|[A-Z]|[0-9]+/g)
     .map((x) => x.toLowerCase())
@@ -57,8 +61,8 @@ export function toKebabCase(str) {
 }
 
 /**
-   * Traverses the DOM looking for child elements.
-   */
+ * Traverses the DOM looking for child elements.
+ */
 export function walk(el, callback) {
   const walker = document.createTreeWalker(el, NodeFilter.SHOW_ELEMENT, null, false);
 
