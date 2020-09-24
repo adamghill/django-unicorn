@@ -48,13 +48,20 @@ export class Element {
       } else if (attribute.eventType) {
         this.action.name = attribute.value;
         this.action.eventType = attribute.eventType;
+        this.action.isPrevent = false;
+        this.action.isStop = false;
 
         if (attribute.modifiers) {
-          this.action.key = Object.keys(attribute.modifiers)[0];
-        }
-
-        if (this.action.key) {
-          this.action.eventType = this.action.eventType.replace(`.${this.action.key}`, "");
+          Object.keys(attribute.modifiers).forEach((modifier) => {
+            if (modifier === "prevent") {
+              this.action.isPrevent = true;
+            } else if (modifier === "stop") {
+              this.action.isStop = true;
+            } else {
+              // Assume the modifier is a keycode
+              this.action.key = modifier;
+            }
+          });
         }
       }
 

@@ -43,6 +43,7 @@ export class Attribute {
       }
 
       let potentialModifiers = this.name;
+
       if (this.eventType) {
         potentialModifiers = this.eventType;
       }
@@ -51,6 +52,11 @@ export class Attribute {
       potentialModifiers.split(".").slice(1).forEach((modifier) => {
         const modifierArgs = modifier.split("-");
         this.modifiers[modifierArgs[0]] = modifierArgs.length > 1 ? modifierArgs[1] : true;
+
+        // Remove any modifier from the event type
+        if (this.eventType) {
+          this.eventType = this.eventType.replace(`.${modifier}`, "");
+        }
       });
     }
   }

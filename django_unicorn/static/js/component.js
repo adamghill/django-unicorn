@@ -66,6 +66,14 @@ export class Component {
               this.actionQueue.push(action);
             }
 
+            if (element.action.isPrevent) {
+              event.preventDefault();
+            }
+
+            if (element.action.isStop) {
+              event.stopPropagation();
+            }
+
             if (element.action.key) {
               if (element.action.key === toKebabCase(event.key)) {
                 this.callMethod(element.action.name);
