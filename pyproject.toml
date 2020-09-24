@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "django-unicorn"
 version = "0.6.5"
-description = "A magical fullstack framework for Django."
+description = "A magical full-stack framework for Django."
 authors = ["Adam Hill <unicorn@adamghill.com>"]
 license = "MIT"
 readme = "README.md"
