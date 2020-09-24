@@ -23,19 +23,19 @@ export class Attribute {
    * Init the attribute.
    */
   init() {
-    if (contains(this.name, "unicorn:")) {
+    if (contains(this.name, "unicorn:") || contains(this.name, "uni:") || contains(this.name, "🦄:")) {
       this.isUnicorn = true;
 
-      if (contains(this.name, "unicorn:model")) {
+      if (contains(this.name, "unicorn:model") || contains(this.name, "uni:model") || contains(this.name, "🦄:model")) {
         this.isModel = true;
-      } else if (contains(this.name, "unicorn:poll")) {
+      } else if (contains(this.name, "unicorn:poll") || contains(this.name, "uni:poll") || contains(this.name, "🦄:poll")) {
         this.isPoll = true;
-      } else if (this.name === "unicorn:key") {
+      } else if (this.name === "unicorn:key" || this.name === "uni:key" || this.name === "🦄:key") {
         this.isKey = true;
-      } else if (contains(this.name, "unicorn:error:")) {
+      } else if (contains(this.name, "unicorn:error:") || contains(this.name, "uni:error:") || contains(this.name, "🦄:error:")) {
         this.isError = true;
       } else {
-        const actionEventType = this.name.replace("unicorn:", "");
+        const actionEventType = this.name.replace("unicorn:", "").replace("uni:", "").replace("🦄:", "");
 
         if (actionEventType !== "id" && actionEventType !== "name" && actionEventType !== "checksum") {
           this.eventType = actionEventType;

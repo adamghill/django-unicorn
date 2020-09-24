@@ -71,7 +71,7 @@ export class Element {
       }
 
       if (attribute.isError) {
-        const code = attribute.name.replace("unicorn:error:", "");
+        const code = attribute.name.replace("unicorn:error:", "").replace("uni:error", "").replace("🦄:error", "");
         this.errors.push({ code, message: attribute.value });
       }
     }

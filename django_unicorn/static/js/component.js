@@ -232,7 +232,7 @@ export class Component {
    * Refresh the checksum.
    */
   refreshChecksum() {
-    this.checksum = this.root.getAttribute("unicorn:checksum");
+    this.checksum = this.root.getAttribute("unicorn:checksum") || this.root.getAttribute("uni:checksum") || this.root.getAttribute("🦄:checksum");
   }
 
   /**
@@ -359,7 +359,7 @@ export class Component {
               // A node's unique identifier. Used to rearrange elements rather than
               // creating and destroying an element that already exists.
               if (node.attributes) {
-                const key = node.getAttribute("unicorn:key") || node.id;
+                const key = node.getAttribute("unicorn:key") || node.getAttribute("uni:key") || node.getAttribute("🦄:key") || node.id;
 
                 if (key) {
                   return key;

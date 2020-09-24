@@ -19,20 +19,20 @@
 
         <div>
             <label>Plain text</label>
-            <input unicorn:model="text" type="text" id="textId">
+            <input 🦄:model="text" type="text" id="textId">
             {% verbatim %}{{ text }}{% endverbatim %}: {{ text }}
         </div>
     
         <div>
             <label>Number with validation</label>
-            <input unicorn:model="number" type="text" id="numberId">
+            <input 🦄:model="number" type="text" id="numberId">
             {% verbatim %}{{ number }}{% endverbatim %}: {{ number }}<br />
-            <button unicorn:click="set_number(1)">set_number(1)</button>
+            <button 🦄:click="set_number(1)">set_number(1)</button>
         </div>
 
         <div>
             <label>Datetime attribute with validation</label>
-            <input unicorn:model="date_time" type="text" id="dateTimeId" unicorn:key="dateTime">
+            <input 🦄:model="date_time" type="text" id="dateTimeId" 🦄:key="dateTime">
             <span class="error">{{ unicorn.errors.date_time.0.message }}</span>
 
             <p>
@@ -45,8 +45,8 @@
         </div>
 
         <div>
-            <a href="blob" unicorn:click.prevent="text='prevent?'">set_text_no_validation()</a>
-            <button unicorn:click="set_text_no_validation">set_text_no_validation()</button>
+            <a href="blob" uni:click.prevent="text='prevent?'">set_text_no_validation()</a>
+            <button uni:click="set_text_no_validation">set_text_no_validation()</button>
             <button unicorn:click="set_text_with_validation">set_text_with_validation()</button>
             <button unicorn:click="validate">validate()</button>
             <button unicorn:click="reset">reset()</button>
