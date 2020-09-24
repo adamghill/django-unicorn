@@ -27,6 +27,7 @@ https://www.django-unicorn.com
 
 ## Run unittests
 1. `poetry run pytest`
+1. `npm run-script test`
 
 ## Minify Javascript
 1. `npm install`
