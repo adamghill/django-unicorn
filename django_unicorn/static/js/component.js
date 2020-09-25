@@ -95,6 +95,24 @@ export class Component {
   addModelEventListener(element, eventType) {
     element.el.addEventListener(eventType, () => {
       const action = { type: "syncInput", payload: { name: element.model.name, value: element.getValue() } };
+
+      if (element.model.isDefer) {
+        let foundAction = false;
+
+        this.actionQueue.forEach((a) => {
+          if (a.payload.name === element.model.name) {
+            a.payload.value = element.getValue();
+            foundAction = true;
+          }
+        });
+
+        if (!foundAction) {
+          this.actionQueue.push(action);
+        }
+
+        return;
+      }
+
       this.actionQueue.push(action);
 
       this.sendMessage(element.model.debounceTime, (excludeElement, err) => {
