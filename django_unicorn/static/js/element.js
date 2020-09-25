@@ -41,6 +41,7 @@ export class Element {
         this.model.name = attribute.value;
         this.model.eventType = attribute.modifiers.lazy ? "blur" : "input";
         this.model.isLazy = !!attribute.modifiers.lazy;
+        this.model.isDefer = !!attribute.modifiers.defer;
         this.model.debounceTime = attribute.modifiers.debounce ? parseInt(attribute.modifiers.debounce, 10) || -1 : -1;
       } else if (attribute.isPoll) {
         this.poll.method = attribute.value ? attribute.value : "refresh";
