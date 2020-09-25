@@ -1,0 +1,48 @@
+name: Python tests
+
+on: [push]
+
+jobs:
+
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.6, 3.7, 3.8]
+
+    steps:
+      - uses: actions/checkout@v1
+        with:
+          fetch-depth: 1
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Poetry
+        uses: dschep/install-poetry-action@v1.2
+      
+      - name: Cache Poetry virtualenv
+        uses: actions/cache@v1
+        id: cache
+        with:
+          path: ~/.virtualenvs${{ matrix.python-version }}
+          key: poetry-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            poetry-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
+
+      - name: Set Poetry config
+        run: |
+          poetry config virtualenvs.in-project false
+          poetry config virtualenvs.path ~/.virtualenvs${{ matrix.python-version }}
+
+      - name: Install Dependencies
+        run: poetry install
+        if: steps.cache.outputs.cache-hit != 'true'
+
+      - name: Code Quality
+        run: poetry run black . --check --exclude migrations
+
+      - name: Test with pytest
+        run: poetry run pytest
