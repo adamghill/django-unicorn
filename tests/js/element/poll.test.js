@@ -9,8 +9,8 @@ test("poll", (t) => {
   t.is(element.poll.timing, 2000);
 });
 
-test("poll.1000", (t) => {
-  const html = "<div unicorn:poll.1000='test()'></div>";
+test("poll-1000", (t) => {
+  const html = "<div unicorn:poll-1000='test()'></div>";
   const element = getElement(html);
 
   t.is(element.poll.timing, 1000);

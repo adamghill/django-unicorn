@@ -45,7 +45,13 @@ export class Element {
         this.model.debounceTime = attribute.modifiers.debounce ? parseInt(attribute.modifiers.debounce, 10) || -1 : -1;
       } else if (attribute.isPoll) {
         this.poll.method = attribute.value ? attribute.value : "refresh";
-        this.poll.timing = parseInt(Object.keys(attribute.modifiers)[0], 10) || 2000;
+        this.poll.timing = 2000;
+
+        const pollArgs = attribute.name.split("-").slice(1);
+
+        if (pollArgs.length > 0) {
+          this.poll.timing = parseInt(pollArgs[0], 10) || 2000;
+        }
       } else if (attribute.eventType) {
         const action = {};
         action.name = attribute.value;
