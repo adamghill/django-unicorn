@@ -10,7 +10,7 @@ test("contains", (t) => {
   Name: 
 </div>
   `;
-  let componentRoot = getEl(componentRootHtml);
+  const componentRoot = getEl(componentRootHtml);
 
   const rerenderedComponentHtml = `
 <div unicorn:id="5jypjiyb" unicorn:name="text-inputs" unicorn:checksum="GXzew3Km">

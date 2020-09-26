@@ -20,7 +20,7 @@ export class Element {
 
     this.model = {};
     this.poll = {};
-    this.action = {};
+    this.actions = [];
 
     this.key = undefined;
     this.errors = [];
@@ -47,23 +47,26 @@ export class Element {
         this.poll.method = attribute.value ? attribute.value : "refresh";
         this.poll.timing = parseInt(Object.keys(attribute.modifiers)[0], 10) || 2000;
       } else if (attribute.eventType) {
-        this.action.name = attribute.value;
-        this.action.eventType = attribute.eventType;
-        this.action.isPrevent = false;
-        this.action.isStop = false;
+        const action = {};
+        action.name = attribute.value;
+        action.eventType = attribute.eventType;
+        action.isPrevent = false;
+        action.isStop = false;
 
         if (attribute.modifiers) {
           Object.keys(attribute.modifiers).forEach((modifier) => {
             if (modifier === "prevent") {
-              this.action.isPrevent = true;
+              action.isPrevent = true;
             } else if (modifier === "stop") {
-              this.action.isStop = true;
+              action.isStop = true;
             } else {
               // Assume the modifier is a keycode
-              this.action.key = modifier;
+              action.key = modifier;
             }
           });
         }
+
+        this.actions.push(action);
       }
 
       if (attribute.isKey) {

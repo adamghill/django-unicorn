@@ -30,6 +30,9 @@
     <label>Chained lazy and debounce-500</label>
     <input unicorn:model.lazy.debounce-500="name" type="text" id="lazyDebounceName">
 
+    <label>Multiple actions</label>
+    <input unicorn:model="name" type="text" unicorn:keyup.enter="name='enter'" unicorn:keydown.escape="name=''"></input>
+
     <br />
     <button unicorn:click="set_name">set_name</button>
     <button unicorn:click="set_name()">set_name()</button>

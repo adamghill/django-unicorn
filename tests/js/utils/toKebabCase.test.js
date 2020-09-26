@@ -12,3 +12,7 @@ test("Escape to kebab case", (t) => {
 test("Null to empty string", (t) => {
   t.is(toKebabCase(null), "");
 });
+
+test("Empty string to empty string", (t) => {
+  t.is(toKebabCase(""), "");
+});

@@ -27,7 +27,7 @@ test("unicorn:id is not an action", (t) => {
   const element = getElement(html);
 
   t.true(element.isUnicorn);
-  t.deepEqual(element.action, {});
+  t.is(element.actions.length, 0);
 });
 
 test("unicorn:key is not an action", (t) => {
@@ -35,7 +35,7 @@ test("unicorn:key is not an action", (t) => {
   const element = getElement(html);
 
   t.true(element.isUnicorn);
-  t.deepEqual(element.action, {});
+  t.is(element.actions.length, 0);
 });
 
 test("unicorn:checksum is not an action", (t) => {
@@ -43,5 +43,5 @@ test("unicorn:checksum is not an action", (t) => {
   const element = getElement(html);
 
   t.true(element.isUnicorn);
-  t.deepEqual(element.action, {});
+  t.is(element.actions.length, 0);
 });

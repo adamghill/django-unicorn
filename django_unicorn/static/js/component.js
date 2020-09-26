@@ -82,7 +82,7 @@ export class Component {
     document.addEventListener(eventType, (event) => {
       const targetElement = new Element(event.target);
 
-      if (targetElement && targetElement.isUnicorn && !isEmpty(targetElement.action)) {
+      if (targetElement && targetElement.isUnicorn && targetElement.actions.length > 0) {
         this.actionEvents[eventType].forEach((element) => {
           // Use isSameNode (not isEqualNode) because we want to check the nodes reference the same object
           if (targetElement.el.isSameNode(element.el)) {
@@ -91,21 +91,23 @@ export class Component {
               this.actionQueue.push(action);
             }
 
-            if (element.action.isPrevent) {
-              event.preventDefault();
-            }
-
-            if (element.action.isStop) {
-              event.stopPropagation();
-            }
-
-            if (element.action.key) {
-              if (element.action.key === toKebabCase(event.key)) {
-                this.callMethod(element.action.name);
+            element.actions.forEach((action) => {
+              if (action.isPrevent) {
+                event.preventDefault();
               }
-            } else {
-              this.callMethod(element.action.name);
-            }
+
+              if (action.isStop) {
+                event.stopPropagation();
+              }
+
+              if (action.key) {
+                if (action.key === toKebabCase(event.key)) {
+                  this.callMethod(action.name);
+                }
+              } else {
+                this.callMethod(action.name);
+              }
+            });
           }
         });
       }
@@ -174,18 +176,18 @@ export class Component {
           }
         }
 
-        if (!isEmpty(element.action)) {
-          if (this.actionEvents[element.action.eventType]) {
-            this.actionEvents[element.action.eventType].push(element);
+        element.actions.forEach((action) => {
+          if (this.actionEvents[action.eventType]) {
+            this.actionEvents[action.eventType].push(element);
           } else {
-            this.actionEvents[element.action.eventType] = [element];
+            this.actionEvents[action.eventType] = [element];
 
-            if (this.attachedEventTypes.filter((et) => et === element.action.eventType).length === 0) {
-              this.attachedEventTypes.push(element.action.eventType);
-              this.addActionEventListener(element.action.eventType);
+            if (this.attachedEventTypes.filter((et) => et === action.eventType).length === 0) {
+              this.attachedEventTypes.push(action.eventType);
+              this.addActionEventListener(action.eventType);
             }
           }
-        }
+        });
       }
     });
   }
