@@ -2,7 +2,8 @@
     "dependencies": {},
     "scripts": {
         "build": "npx rollup -c",
-        "test": "npx ava \"tests/js/**\"",
+        "test": "npx ava",
+        "watch:test": "npx ava --watch",
         "test-chrome": "web-test-runner \"test/**/*.test.js\" --node-resolve",
         "test-browsers": "web-test-runner \"test/**/*.test.js\" --node-resolve --playwright --browsers chromium firefox webkit"
     },
@@ -20,6 +21,7 @@
         "eslint-config-airbnb-base": "^14.2.0",
         "eslint-plugin-import": "^2.22.0",
         "esm": "^3.2.25",
+        "jsdom": "^16.4.0",
         "rollup": "^2.27.1",
         "rollup-plugin-babel": "^4.3.3",
         "rollup-plugin-commonjs": "^10.1.0",
@@ -30,6 +32,11 @@
     "ava": {
         "require": [
             "esm"
-        ]
+        ],
+        "files": [
+            "tests/js/**",
+            "!tests/js/utils.js"
+        ],
+        "failFast": true
     }
 }

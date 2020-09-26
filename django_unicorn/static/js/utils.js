@@ -2,13 +2,17 @@
  * Checks if an object is empty. Useful for check if a dictionary has any values.
  */
 export function isEmpty(obj) {
-  return typeof obj === "undefined" || (Object.keys(obj).length === 0 && obj.constructor === Object);
+  return typeof obj === "undefined" || obj === null || (Object.keys(obj).length === 0 && obj.constructor === Object);
 }
 
 /**
  * Checks if a string has the search text.
  */
 export function contains(str, search) {
+  if (!str) {
+    return false;
+  }
+
   return str.indexOf(search) > -1;
 }
 

@@ -3,6 +3,31 @@ import { debounce } from "./delayers.js";
 import { Element } from "./element.js";
 import morphdom from "./morphdom/2.6.1/morphdom.js"
 
+export const MORPHDOM_OPTIONS = {
+  childrenOnly: false,
+  // eslint-disable-next-line consistent-return
+  getNodeKey(node) {
+    // A node's unique identifier. Used to rearrange elements rather than
+    // creating and destroying an element that already exists.
+    if (node.attributes) {
+      const key = node.getAttribute("unicorn:key") || node.id;
+
+      if (key) {
+        return key;
+      }
+    }
+  },
+  // eslint-disable-next-line consistent-return
+  onBeforeElUpdated(fromEl, toEl) {
+    // Because morphdom also supports vDom nodes, it uses isSameNode to detect
+    // sameness. When dealing with DOM nodes, we want isEqualNode, otherwise
+    // isSameNode will ALWAYS return false.
+    if (fromEl.isEqualNode(toEl)) {
+      return false;
+    }
+  },
+};
+
 /**
  * Encapsulate component.
  */
@@ -259,7 +284,8 @@ export class Component {
 
   /**
    * Sets all model values.
-   * @param {Object} elementToExclude Prevent a particular element from being updated. Object example: `{id: 'elementId', key: 'elementKey'}`.
+   * @param {Object} elementToExclude Prevent a particular element from being updated.
+   * Object example: `{id: 'elementId', key: 'elementKey'}`.
    */
   setModelValues(elementToExclude) {
     elementToExclude = elementToExclude || {};
@@ -353,31 +379,7 @@ export class Component {
           _component.errors = responseJson.errors || {};
           const rerenderedComponent = responseJson.dom;
 
-          const morphdomOptions = {
-            childrenOnly: false,
-            getNodeKey(node) {
-              // A node's unique identifier. Used to rearrange elements rather than
-              // creating and destroying an element that already exists.
-              if (node.attributes) {
-                const key = node.getAttribute("unicorn:key") || node.id;
-
-                if (key) {
-                  return key;
-                }
-              }
-            },
-            onBeforeElUpdated(fromEl, toEl) {
-              // Because morphdom also supports vDom nodes, it uses isSameNode to detect
-              // sameness. When dealing with DOM nodes, we want isEqualNode, otherwise
-              // isSameNode will ALWAYS return false.
-              if (fromEl.isEqualNode(toEl)) {
-                return false;
-              }
-            },
-          };
-
-          // eslint-disable-next-line no-undef
-          morphdom(_component.root, rerenderedComponent, morphdomOptions);
+          morphdom(_component.root, rerenderedComponent, MORPHDOM_OPTIONS);
 
           // Refresh the checksum based on the new data
           _component.refreshChecksum();
