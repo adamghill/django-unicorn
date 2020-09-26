@@ -46,10 +46,3 @@ test("model.lazy.debounce-500", (t) => {
   t.true(element.model.isLazy);
   t.is(element.model.debounceTime, 500);
 });
-
-test("getValue()", (t) => {
-  const html = "<input unicorn:model='name' value='test'></input>";
-  const element = getElement(html, "input");
-
-  t.is(element.value, "test");
-});
