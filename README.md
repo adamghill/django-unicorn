@@ -27,14 +27,14 @@ https://www.django-unicorn.com
 
 ## Run unittests
 1. `poetry run pytest`
-1. `npm run-script test`
+1. `npm run test`
 
 ## Minify Javascript
 1. `npm install`
-1. `npm run-script build`
+1. `npm run build`
 
 ## Bump version
-1. `npm run-script build`
+1. `npm run build`
 1. `poetry version major|minor|patch`
 1. Commit/tag/push version bump
 1. `poetry publish --build -r test -u __token__`
