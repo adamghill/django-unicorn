@@ -15,7 +15,7 @@ export default {
     resolve(),
     filesize(),
     terser({
-      mangle: false,
+      mangle: true,
     }),
     commonjs({
     }),
