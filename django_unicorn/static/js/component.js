@@ -46,6 +46,9 @@ export class Component {
     this.data = args.data;
     this.syncUrl = `${this.messageUrl}/${this.name}`;
 
+    this.document = args.document || document;
+    this.walker = args.walker || walk;
+
     this.root = undefined;
     this.modelEls = [];
     this.errors = {};
@@ -64,7 +67,7 @@ export class Component {
    * Initializes the Component.
    */
   init() {
-    this.root = $(`[unicorn\\:id="${this.id}"]`);
+    this.root = $(`[unicorn\\:id="${this.id}"]`, this.document);
 
     if (!this.root) {
       throw Error("No id found");
@@ -79,7 +82,7 @@ export class Component {
    * events when attached directly to the element.
    */
   addActionEventListener(eventType) {
-    document.addEventListener(eventType, (event) => {
+    this.document.addEventListener(eventType, (event) => {
       const targetElement = new Element(event.target);
 
       if (targetElement && targetElement.isUnicorn && targetElement.actions.length > 0) {
@@ -160,7 +163,7 @@ export class Component {
   refreshEventListeners() {
     this.actionEvents = {};
 
-    walk(this.root, (el) => {
+    this.walker(this.root, (el) => {
       if (el.isSameNode(this.root)) {
         // Skip the component root element
         return;
@@ -220,8 +223,8 @@ export class Component {
       this.poll = rootElement.poll;
       this.poll.timer = null;
 
-      document.addEventListener("visibilitychange", () => {
-        if (document.hidden) {
+      this.document.addEventListener("visibilitychange", () => {
+        if (this.document.hidden) {
           if (this.poll.timer) {
             clearInterval(this.poll.timer);
           }
@@ -239,13 +242,14 @@ export class Component {
    */
   startPolling() {
     this.poll.timer = null;
+    const { timer } = this.poll;
 
     function handleError(err) {
       if (err) {
         console.error(err);
       }
-      if (this.poll.timer) {
-        clearInterval(this.poll.timer);
+      if (timer) {
+        clearInterval(timer);
       }
     }
 
