@@ -2,6 +2,7 @@ from django import template
 from django.conf import settings
 
 from ..components import UnicornView
+from ..settings import get_setting
 
 
 register = template.Library()
@@ -9,7 +10,7 @@ register = template.Library()
 
 @register.inclusion_tag("unicorn/scripts.html")
 def unicorn_scripts():
-    return {"debug": settings.DEBUG}
+    return {"MINIFIED": get_setting("MINIFIED", not settings.DEBUG)}
 
 
 @register.inclusion_tag("unicorn/errors.html", takes_context=True)
