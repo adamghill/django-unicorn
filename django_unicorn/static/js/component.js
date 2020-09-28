@@ -86,31 +86,40 @@ export class Component {
       const targetElement = new Element(event.target);
 
       if (targetElement && targetElement.isUnicorn && targetElement.actions.length > 0) {
-        this.actionEvents[eventType].forEach((element) => {
+        this.actionEvents[eventType].forEach((actionEvent) => {
+          const { action } = actionEvent;
+          const { element } = actionEvent;
+
           // Use isSameNode (not isEqualNode) because we want to check the nodes reference the same object
           if (targetElement.el.isSameNode(element.el)) {
-            if (!isEmpty(targetElement.model) && targetElement.model.isLazy) {
-              const action = { type: "syncInput", payload: { name: targetElement.model.name, value: targetElement.getValue() } };
-              this.actionQueue.push(action);
+            // Add the value of any child element of the target that is a lazy model to the action queue
+            // Handles situations similar to https://github.com/livewire/livewire/issues/528
+            walk(element.el, (childEl) => {
+              const modelElsInTargetScope = this.modelEls.filter((e) => e.el.isSameNode(childEl));
+
+              modelElsInTargetScope.forEach((modelElement) => {
+                if (!isEmpty(modelElement.model) && modelElement.model.isLazy) {
+                  const actionForQueue = { type: "syncInput", payload: { name: modelElement.model.name, value: modelElement.getValue() } };
+                  this.actionQueue.push(actionForQueue);
+                }
+              });
+            });
+
+            if (action.isPrevent) {
+              event.preventDefault();
             }
 
-            element.actions.forEach((action) => {
-              if (action.isPrevent) {
-                event.preventDefault();
-              }
+            if (action.isStop) {
+              event.stopPropagation();
+            }
 
-              if (action.isStop) {
-                event.stopPropagation();
-              }
-
-              if (action.key) {
-                if (action.key === toKebabCase(event.key)) {
-                  this.callMethod(action.name);
-                }
-              } else {
+            if (action.key) {
+              if (action.key === toKebabCase(event.key)) {
                 this.callMethod(action.name);
               }
-            });
+            } else {
+              this.callMethod(action.name);
+            }
           }
         });
       }
@@ -180,10 +189,11 @@ export class Component {
         }
 
         element.actions.forEach((action) => {
+          // if (element.actions.length > 0) {
           if (this.actionEvents[action.eventType]) {
-            this.actionEvents[action.eventType].push(element);
+            this.actionEvents[action.eventType].push({ action, element });
           } else {
-            this.actionEvents[action.eventType] = [element];
+            this.actionEvents[action.eventType] = [{ action, element }];
 
             if (this.attachedEventTypes.filter((et) => et === action.eventType).length === 0) {
               this.attachedEventTypes.push(action.eventType);

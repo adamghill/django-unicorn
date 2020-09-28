@@ -3,7 +3,9 @@
 
     <div class="field has-addons">
         <p class="control">
-            <input class="input" type="text" unicorn:model.lazy="task" unicorn:keyup.enter="add" placeholder="New task" id="task"></input>
+            <form unicorn:submit.prevent="add">
+                <input class="input" type="text" unicorn:model.lazy="task" unicorn:keydown.escape="task=''" placeholder="New task" id="task"></input>
+            </form>
         </p>
         <p class="control">
             <button unicorn:click="add" class="button is-info">Add</button>&nbsp;&nbsp;
