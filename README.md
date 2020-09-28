@@ -1,7 +1,13 @@
 # django-unicorn
+
+![PyPI](https://img.shields.io/pypi/v/django-unicorn?color=blue&style=flat-square)
+
+![GitHub Release Date](https://img.shields.io/github/release-date/adamghill/django-unicorn?style=flat-square)
+
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 [![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
+
 The magical fullstack framework for Django. ✨
 
 `django-unicorn` provides a way to use backend Django code and regular Django templates to create interactive experiences without investing in a separate frontend framework.
