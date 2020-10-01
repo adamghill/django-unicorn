@@ -37,7 +37,11 @@ export class Attribute {
       } else {
         const actionEventType = this.name.replace("unicorn:", "");
 
-        if (actionEventType !== "id" && actionEventType !== "name" && actionEventType !== "checksum") {
+        if (
+          actionEventType !== "id" &&
+          actionEventType !== "name" &&
+          actionEventType !== "checksum"
+        ) {
           this.eventType = actionEventType;
         }
       }
@@ -49,15 +53,19 @@ export class Attribute {
       }
 
       // Find modifiers and any potential arguments
-      potentialModifiers.split(".").slice(1).forEach((modifier) => {
-        const modifierArgs = modifier.split("-");
-        this.modifiers[modifierArgs[0]] = modifierArgs.length > 1 ? modifierArgs[1] : true;
+      potentialModifiers
+        .split(".")
+        .slice(1)
+        .forEach((modifier) => {
+          const modifierArgs = modifier.split("-");
+          this.modifiers[modifierArgs[0]] =
+            modifierArgs.length > 1 ? modifierArgs[1] : true;
 
-        // Remove any modifier from the event type
-        if (this.eventType) {
-          this.eventType = this.eventType.replace(`.${modifier}`, "");
-        }
-      });
+          // Remove any modifier from the event type
+          if (this.eventType) {
+            this.eventType = this.eventType.replace(`.${modifier}`, "");
+          }
+        });
     }
   }
 }

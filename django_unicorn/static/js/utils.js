@@ -2,7 +2,11 @@
  * Checks if an object is empty. Useful for check if a dictionary has any values.
  */
 export function isEmpty(obj) {
-  return typeof obj === "undefined" || obj === null || (Object.keys(obj).length === 0 && obj.constructor === Object);
+  return (
+    typeof obj === "undefined" ||
+    obj === null ||
+    (Object.keys(obj).length === 0 && obj.constructor === Object)
+  );
 }
 
 /**
@@ -33,7 +37,9 @@ export function $(selector, scope) {
 export function getCsrfToken() {
   // Default to looking for the CSRF in the cookie
   const cookieKey = "csrftoken=";
-  const csrfTokenCookie = document.cookie.split(";").filter((item) => item.trim().startsWith(cookieKey));
+  const csrfTokenCookie = document.cookie
+    .split(";")
+    .filter((item) => item.trim().startsWith(cookieKey));
 
   if (csrfTokenCookie.length > 0) {
     return csrfTokenCookie[0].replace(cookieKey, "");
@@ -68,7 +74,12 @@ export function toKebabCase(str) {
  * Traverses the DOM looking for child elements.
  */
 export function walk(el, callback) {
-  const walker = document.createTreeWalker(el, NodeFilter.SHOW_ELEMENT, null, false);
+  const walker = document.createTreeWalker(
+    el,
+    NodeFilter.SHOW_ELEMENT,
+    null,
+    false
+  );
 
   while (walker.nextNode()) {
     // TODO: Handle sub-components?

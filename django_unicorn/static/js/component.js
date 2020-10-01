@@ -1,7 +1,14 @@
-import { $, contains, getCsrfToken, isEmpty, toKebabCase, walk } from "./utils.js";
+import {
+  $,
+  contains,
+  getCsrfToken,
+  isEmpty,
+  toKebabCase,
+  walk,
+} from "./utils.js";
 import { debounce } from "./delayers.js";
 import { Element } from "./element.js";
-import morphdom from "./morphdom/2.6.1/morphdom.js"
+import morphdom from "./morphdom/2.6.1/morphdom.js";
 
 export const MORPHDOM_OPTIONS = {
   childrenOnly: false,
@@ -85,7 +92,11 @@ export class Component {
     this.document.addEventListener(eventType, (event) => {
       const targetElement = new Element(event.target);
 
-      if (targetElement && targetElement.isUnicorn && targetElement.actions.length > 0) {
+      if (
+        targetElement &&
+        targetElement.isUnicorn &&
+        targetElement.actions.length > 0
+      ) {
         this.actionEvents[eventType].forEach((actionEvent) => {
           const { action } = actionEvent;
           const { element } = actionEvent;
@@ -95,11 +106,19 @@ export class Component {
             // Add the value of any child element of the target that is a lazy model to the action queue
             // Handles situations similar to https://github.com/livewire/livewire/issues/528
             walk(element.el, (childEl) => {
-              const modelElsInTargetScope = this.modelEls.filter((e) => e.el.isSameNode(childEl));
+              const modelElsInTargetScope = this.modelEls.filter((e) =>
+                e.el.isSameNode(childEl)
+              );
 
               modelElsInTargetScope.forEach((modelElement) => {
                 if (!isEmpty(modelElement.model) && modelElement.model.isLazy) {
-                  const actionForQueue = { type: "syncInput", payload: { name: modelElement.model.name, value: modelElement.getValue() } };
+                  const actionForQueue = {
+                    type: "syncInput",
+                    payload: {
+                      name: modelElement.model.name,
+                      value: modelElement.getValue(),
+                    },
+                  };
                   this.actionQueue.push(actionForQueue);
                 }
               });
@@ -133,7 +152,10 @@ export class Component {
    */
   addModelEventListener(element, eventType) {
     element.el.addEventListener(eventType, () => {
-      const action = { type: "syncInput", payload: { name: element.model.name, value: element.getValue() } };
+      const action = {
+        type: "syncInput",
+        payload: { name: element.model.name, value: element.getValue() },
+      };
 
       if (element.model.isDefer) {
         let foundAction = false;
@@ -182,7 +204,10 @@ export class Component {
 
       if (element.isUnicorn) {
         if (!isEmpty(element.model)) {
-          if (this.modelEls.filter((m) => m.el.isSameNode(element.el)).length === 0) {
+          if (
+            this.modelEls.filter((m) => m.el.isSameNode(element.el)).length ===
+            0
+          ) {
             this.modelEls.push(element);
             this.addModelEventListener(element, element.model.eventType);
           }
@@ -195,7 +220,10 @@ export class Component {
           } else {
             this.actionEvents[action.eventType] = [{ action, element }];
 
-            if (this.attachedEventTypes.filter((et) => et === action.eventType).length === 0) {
+            if (
+              this.attachedEventTypes.filter((et) => et === action.eventType)
+                .length === 0
+            ) {
               this.attachedEventTypes.push(action.eventType);
               this.addActionEventListener(action.eventType);
             }
@@ -209,7 +237,10 @@ export class Component {
    * Calls the method for a particular component.
    */
   callMethod(methodName, errCallback) {
-    const action = { type: "callMethod", payload: { name: methodName, params: [] } };
+    const action = {
+      type: "callMethod",
+      payload: { name: methodName, params: [] },
+    };
     this.actionQueue.push(action);
 
     this.sendMessage(-1, (_, err) => {
@@ -233,15 +264,19 @@ export class Component {
       this.poll = rootElement.poll;
       this.poll.timer = null;
 
-      this.document.addEventListener("visibilitychange", () => {
-        if (this.document.hidden) {
-          if (this.poll.timer) {
-            clearInterval(this.poll.timer);
+      this.document.addEventListener(
+        "visibilitychange",
+        () => {
+          if (this.document.hidden) {
+            if (this.poll.timer) {
+              clearInterval(this.poll.timer);
+            }
+          } else {
+            this.startPolling();
           }
-        } else {
-          this.startPolling();
-        }
-      }, false);
+        },
+        false
+      );
 
       this.startPolling();
     }
@@ -266,7 +301,12 @@ export class Component {
     // Call the method once before the timer starts
     this.callMethod(this.poll.method, handleError);
 
-    this.poll.timer = setInterval(this.callMethod.bind(this), this.poll.timing, this.poll.method, handleError);
+    this.poll.timer = setInterval(
+      this.callMethod.bind(this),
+      this.poll.timing,
+      this.poll.method,
+      handleError
+    );
   }
 
   /**
@@ -288,12 +328,20 @@ export class Component {
     for (let i = 0; i < modelNamePieces.length; i++) {
       const modelNamePiece = modelNamePieces[i];
 
+      if (_data == null) {
+        return;
+      }
+
       if (Object.prototype.hasOwnProperty.call(_data, modelNamePiece)) {
         if (i === modelNamePieces.length - 1) {
           element.setValue(_data[modelNamePiece]);
         } else {
           _data = _data[modelNamePiece];
         }
+      } else if (
+        Object.prototype.hasOwnProperty.call(_data.fields, modelNamePiece)
+      ) {
+        element.setValue(_data.fields[modelNamePiece]);
       }
     }
   }
@@ -313,7 +361,10 @@ export class Component {
       ["id", "key"].forEach((attr) => {
         this.modelEls.forEach((element) => {
           if (!elementFocused) {
-            if (elementToExclude[attr] && elementToExclude[attr] === element[attr]) {
+            if (
+              elementToExclude[attr] &&
+              elementToExclude[attr] === element[attr]
+            ) {
               element.focus();
               elementFocused = true;
             }
@@ -323,7 +374,10 @@ export class Component {
     }
 
     this.modelEls.forEach((element) => {
-      if (element.id !== elementToExclude.id || element.key !== elementToExclude.key) {
+      if (
+        element.id !== elementToExclude.id ||
+        element.key !== elementToExclude.key
+      ) {
         this.setValue(element);
       }
     });
@@ -371,7 +425,9 @@ export class Component {
             return response.json();
           }
 
-          throw Error(`Error when getting response: ${response.statusText} (${response.status})`);
+          throw Error(
+            `Error when getting response: ${response.statusText} (${response.status})`
+          );
         })
         .then((responseJson) => {
           if (!responseJson) {
