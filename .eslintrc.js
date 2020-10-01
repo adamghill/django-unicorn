@@ -1,12 +1,12 @@
 module.exports = {
   root: true,
   parserOptions: {
-    parser: "babel-eslint"
+    parser: "babel-eslint",
   },
   env: {
-    browser: true
+    browser: true,
   },
-  extends: ["airbnb-base"],
+  extends: ["airbnb-base", "prettier"],
   rules: {
     "no-console": "warn",
     quotes: ["error", "double"],
@@ -20,6 +20,6 @@ module.exports = {
     "no-param-reassign": 0,
     "object-curly-newline": ["error", { ObjectPattern: "never" }],
     "no-plusplus": ["error", { allowForLoopAfterthoughts: true }],
-    "max-classes-per-file": 0
-  }
+    "max-classes-per-file": 0,
+  },
 };
