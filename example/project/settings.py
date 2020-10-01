@@ -15,6 +15,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "books",
+    "coffee",
     "www",
     # Include django-unicorn package
     "django_unicorn",

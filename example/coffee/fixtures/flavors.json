@@ -1,0 +1,416 @@
+[
+  {
+    "model": "coffee.flavor",
+    "pk": 1,
+    "fields": {
+      "name": "Enzymatic-Flowery",
+      "label": "Flowery",
+      "parent": null
+    }
+  },
+  {
+    "model": "coffee.flavor",
+    "pk": 2,
+    "fields": {
+      "name": "Flowery-Floral",
+      "label": "Floral",
+      "parent": 1
+    }
+  },
+  {
+    "model": "coffee.flavor",
+    "pk": 3,
+    "fields": {
+      "name": "ids",
+      "label": "labels",
+      "parent": null
+    }
+  },
+  {
+    "model": "coffee.flavor",
+    "pk": 4,
+    "fields": {
+      "name": "Enzymatic-Fruity",
+      "label": "Fruity",
+      "parent": null
+    }
+  },
+  {
+    "model": "coffee.flavor",
+    "pk": 5,
+    "fields": {
+      "name": "Sugar Browning-Nutty",
+      "label": "Nutty",
+      "parent": null
+    }
+  },
+  {
+    "model": "coffee.flavor",
+    "pk": 6,
+    "fields": {
+      "name": "Sugar Browning-Chocolatey",
+      "label": "Chocolatey",
+      "parent": null
+    }
+  },
+  {
+    "model": "coffee.flavor",
+    "pk": 7,
+    "fields": {
+      "name": "Dry Distillation-Spicy",
+      "label": "Spicy",
+      "parent": null
+    }
+  },
+  {
+    "model": "coffee.flavor",
+    "pk": 8,
+    "fields": {
+      "name": "Bitter-Pungent",
+      "label": "Pungent",
+      "parent": null
+    }
+  },
+  {
+    "model": "coffee.flavor",
+    "pk": 9,
+    "fields": {
+      "name": "Salt-Sharp",
+      "label": "Sharp",
+      "parent": null
+    }
+  },
+  {
+    "model": "coffee.flavor",
+    "pk": 10,
+    "fields": {
+      "name": "Sweet-Mellow",
+      "label": "Mellow",
+      "parent": null
+    }
+  },
+  {
+    "model": "coffee.flavor",
+    "pk": 11,
+    "fields": {
+      "name": "Sour-Winey",
+      "label": "Winey",
+      "parent": null
+    }
+  },
+  {
+    "model": "coffee.flavor",
+    "pk": 12,
+    "fields": {
+      "name": "Flowery-Floral",
+      "label": "Floral",
+      "parent": 1
+    }
+  },
+  {
+    "model": "coffee.flavor",
+    "pk": 13,
+    "fields": {
+      "name": "Fruity-Citrus",
+      "label": "Citrus",
+      "parent": 4
+    }
+  },
+  {
+    "model": "coffee.flavor",
+    "pk": 14,
+    "fields": {
+      "name": "Herby-Alliaceous",
+      "label": "Alliaceous",
+      "parent": null
+    }
+  },
+  {
+    "model": "coffee.flavor",
+    "pk": 15,
+    "fields": {
+      "name": "Nutty-Nut-like",
+      "label": "Nut-like",
+      "parent": 5
+    }
+  },
+  {
+    "model": "coffee.flavor",
+    "pk": 16,
+    "fields": {
+      "name": "Carmelly-Candy-like",
+      "label": "Candy-like",
+      "parent": null
+    }
+  },
+  {
+    "model": "coffee.flavor",
+    "pk": 17,
+    "fields": {
+      "name": "Chocolatey-Chocolate-like",
+      "label": "Chocolate-like",
+      "parent": 6
+    }
+  },
+  {
+    "model": "coffee.flavor",
+    "pk": 18,
+    "fields": {
+      "name": "Resinous-Turpeny",
+      "label": "Turpeny",
+      "parent": null
+    }
+  },
+  {
+    "model": "coffee.flavor",
+    "pk": 19,
+    "fields": {
+      "name": "Spicy-Warming",
+      "label": "Warming",
+      "parent": 7
+    }
+  },
+  {
+    "model": "coffee.flavor",
+    "pk": 20,
+    "fields": {
+      "name": "Carbony-Smokey",
+      "label": "Smokey",
+      "parent": null
+    }
+  },
+  {
+    "model": "coffee.flavor",
+    "pk": 21,
+    "fields": {
+      "name": "Pungent-Creosol",
+      "label": "Creosol",
+      "parent": 8
+    }
+  },
+  {
+    "model": "coffee.flavor",
+    "pk": 22,
+    "fields": {
+      "name": "Harsh-Caustic",
+      "label": "Caustic",
+      "parent": null
+    }
+  },
+  {
+    "model": "coffee.flavor",
+    "pk": 23,
+    "fields": {
+      "name": "Sharp-Astringent",
+      "label": "Astringent",
+      "parent": 9
+    }
+  },
+  {
+    "model": "coffee.flavor",
+    "pk": 24,
+    "fields": {
+      "name": "Bland-Neutral",
+      "label": "Neutral",
+      "parent": null
+    }
+  },
+  {
+    "model": "coffee.flavor",
+    "pk": 25,
+    "fields": {
+      "name": "Mellow-Delicate",
+      "label": "Delicate",
+      "parent": 10
+    }
+  },
+  {
+    "model": "coffee.flavor",
+    "pk": 26,
+    "fields": {
+      "name": "Acidy-Nippy",
+      "label": "Nippy",
+      "parent": null
+    }
+  },
+  {
+    "model": "coffee.flavor",
+    "pk": 27,
+    "fields": {
+      "name": "Winey-Tangy",
+      "label": "Tangy",
+      "parent": 11
+    }
+  },
+  {
+    "model": "coffee.flavor",
+    "pk": 28,
+    "fields": {
+      "name": "Soury-Hard",
+      "label": "Hard",
+      "parent": null
+    }
+  },
+  {
+    "model": "coffee.flavor",
+    "pk": 29,
+    "fields": {
+      "name": "Floral-Coffee Blossom",
+      "label": "Coffee Blossom",
+      "parent": 2
+    }
+  },
+  {
+    "model": "coffee.flavor",
+    "pk": 30,
+    "fields": {
+      "name": "Fragrant-Cardamon Caraway",
+      "label": "Cardamon Caraway",
+      "parent": null
+    }
+  },
+  {
+    "model": "coffee.flavor",
+    "pk": 31,
+    "fields": {
+      "name": "Citrus-Lemon",
+      "label": "Lemon",
+      "parent": 13
+    }
+  },
+  {
+    "model": "coffee.flavor",
+    "pk": 32,
+    "fields": {
+      "name": "Berry-like-Apricot",
+      "label": "Apricot",
+      "parent": null
+    }
+  },
+  {
+    "model": "coffee.flavor",
+    "pk": 33,
+    "fields": {
+      "name": "Alliaceous-Onion",
+      "label": "Onion",
+      "parent": 14
+    }
+  },
+  {
+    "model": "coffee.flavor",
+    "pk": 34,
+    "fields": {
+      "name": "Leguminous-Cucumber",
+      "label": "Cucumber",
+      "parent": null
+    }
+  },
+  {
+    "model": "coffee.flavor",
+    "pk": 35,
+    "fields": {
+      "name": "Nut-like-Roasted Peanuts",
+      "label": "Roasted Peanuts",
+      "parent": 15
+    }
+  },
+  {
+    "model": "coffee.flavor",
+    "pk": 36,
+    "fields": {
+      "name": "Malt-like-Balsamic Rice",
+      "label": "Balsamic Rice",
+      "parent": null
+    }
+  },
+  {
+    "model": "coffee.flavor",
+    "pk": 37,
+    "fields": {
+      "name": "Candy-like-Roasted Hazelnut",
+      "label": "Roasted Hazelnut",
+      "parent": 16
+    }
+  },
+  {
+    "model": "coffee.flavor",
+    "pk": 38,
+    "fields": {
+      "name": "Syrup-like-Honey",
+      "label": "Honey",
+      "parent": null
+    }
+  },
+  {
+    "model": "coffee.flavor",
+    "pk": 39,
+    "fields": {
+      "name": "Chocolate-like-Bakers",
+      "label": "Bakers",
+      "parent": 17
+    }
+  },
+  {
+    "model": "coffee.flavor",
+    "pk": 40,
+    "fields": {
+      "name": "Vanilla-like-Swiss",
+      "label": "Swiss",
+      "parent": null
+    }
+  },
+  {
+    "model": "coffee.flavor",
+    "pk": 41,
+    "fields": {
+      "name": "Turpeny-Piney",
+      "label": "Piney",
+      "parent": 18
+    }
+  },
+  {
+    "model": "coffee.flavor",
+    "pk": 42,
+    "fields": {
+      "name": "Medicinal-Camphoric",
+      "label": "Camphoric",
+      "parent": null
+    }
+  },
+  {
+    "model": "coffee.flavor",
+    "pk": 43,
+    "fields": {
+      "name": "Warming-Cedar",
+      "label": "Cedar",
+      "parent": 19
+    }
+  },
+  {
+    "model": "coffee.flavor",
+    "pk": 44,
+    "fields": {
+      "name": "Pungent-Clove",
+      "label": "Clove",
+      "parent": null
+    }
+  },
+  {
+    "model": "coffee.flavor",
+    "pk": 45,
+    "fields": {
+      "name": "Smokey-Tarry",
+      "label": "Tarry",
+      "parent": 20
+    }
+  },
+  {
+    "model": "coffee.flavor",
+    "pk": 46,
+    "fields": {
+      "name": "Ashy-Burnt",
+      "label": "Burnt",
+      "parent": null
+    }
+  }
+]

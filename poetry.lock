@@ -77,6 +77,53 @@ d = ["aiohttp (>=3.3.2)", "aiohttp-cors"]
 
 [[package]]
 category = "dev"
+description = "A thin, practical wrapper around terminal coloring, styling, and positioning"
+name = "blessings"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+version = "1.7"
+
+[package.dependencies]
+six = "*"
+
+[[package]]
+category = "dev"
+description = "Fancy Interface to the Python Interpreter"
+name = "bpython"
+optional = false
+python-versions = "*"
+version = "0.19"
+
+[package.dependencies]
+curtsies = ">=0.1.18"
+greenlet = "*"
+pygments = "*"
+requests = "*"
+six = ">=1.5"
+
+[package.extras]
+jedi = ["jedi"]
+urwid = ["urwid"]
+watch = ["watchdog"]
+
+[[package]]
+category = "dev"
+description = "Python package for providing Mozilla's CA Bundle."
+name = "certifi"
+optional = false
+python-versions = "*"
+version = "2020.6.20"
+
+[[package]]
+category = "dev"
+description = "Universal encoding detector for Python 2 and 3"
+name = "chardet"
+optional = false
+python-versions = "*"
+version = "3.0.4"
+
+[[package]]
+category = "dev"
 description = "Composable command line interface toolkit"
 name = "click"
 optional = false
@@ -91,6 +138,18 @@ name = "colorama"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 version = "0.4.3"
+
+[[package]]
+category = "dev"
+description = "Curses-like terminal wrapper, with colored strings!"
+name = "curtsies"
+optional = false
+python-versions = "*"
+version = "0.3.4"
+
+[package.dependencies]
+blessings = ">=1.5"
+wcwidth = ">=0.1.4"
 
 [[package]]
 category = "main"
@@ -111,6 +170,20 @@ bcrypt = ["bcrypt"]
 
 [[package]]
 category = "dev"
+description = "A django library for mocking queryset functions in memory for testing"
+name = "django-mock-queries"
+optional = false
+python-versions = "*"
+version = "2.1.5"
+
+[package.dependencies]
+Django = "*"
+djangorestframework = "*"
+mock = "*"
+model-bakery = "1.0.2"
+
+[[package]]
+category = "dev"
 description = "Mypy stubs for Django"
 name = "django-stubs"
 optional = false
@@ -121,6 +194,17 @@ version = "1.5.0"
 django = "*"
 mypy = ">=0.770,<0.780"
 typing-extensions = "*"
+
+[[package]]
+category = "dev"
+description = "Web APIs for Django, made easy."
+name = "djangorestframework"
+optional = false
+python-versions = ">=3.5"
+version = "3.12.1"
+
+[package.dependencies]
+django = ">=2.2"
 
 [[package]]
 category = "dev"
@@ -138,6 +222,22 @@ pyflakes = ">=2.2.0,<2.3.0"
 [package.dependencies.importlib-metadata]
 python = "<3.8"
 version = "*"
+
+[[package]]
+category = "dev"
+description = "Lightweight in-process concurrent programming"
+name = "greenlet"
+optional = false
+python-versions = "*"
+version = "0.4.17"
+
+[[package]]
+category = "dev"
+description = "Internationalized Domain Names in Applications (IDNA)"
+name = "idna"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+version = "2.10"
 
 [[package]]
 category = "dev"
@@ -174,6 +274,30 @@ name = "mccabe"
 optional = false
 python-versions = "*"
 version = "0.6.1"
+
+[[package]]
+category = "dev"
+description = "Rolling backport of unittest.mock for all Pythons"
+name = "mock"
+optional = false
+python-versions = ">=3.6"
+version = "4.0.2"
+
+[package.extras]
+build = ["twine", "wheel", "blurb"]
+docs = ["sphinx"]
+test = ["pytest", "pytest-cov"]
+
+[[package]]
+category = "dev"
+description = "Smart object creation facility for Django."
+name = "model-bakery"
+optional = false
+python-versions = "*"
+version = "1.0.2"
+
+[package.dependencies]
+django = ">=1.11.0"
 
 [[package]]
 category = "dev"
@@ -277,6 +401,14 @@ version = "2.2.0"
 
 [[package]]
 category = "dev"
+description = "Pygments is a syntax highlighting package written in Python."
+name = "pygments"
+optional = false
+python-versions = ">=3.5"
+version = "2.7.1"
+
+[[package]]
+category = "dev"
 description = "Python parsing module"
 name = "pyparsing"
 optional = false
@@ -341,6 +473,24 @@ python-versions = "*"
 version = "2020.6.8"
 
 [[package]]
+category = "dev"
+description = "Python HTTP for Humans."
+name = "requests"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
+version = "2.24.0"
+
+[package.dependencies]
+certifi = ">=2017.4.17"
+chardet = ">=3.0.2,<4"
+idna = ">=2.5,<3"
+urllib3 = ">=1.21.1,<1.25.0 || >1.25.0,<1.25.1 || >1.25.1,<1.26"
+
+[package.extras]
+security = ["pyOpenSSL (>=0.14)", "cryptography (>=1.3.4)"]
+socks = ["PySocks (>=1.5.6,<1.5.7 || >1.5.7)", "win-inet-pton"]
+
+[[package]]
 category = "main"
 description = "A generator library for concise, unambiguous and URL-safe UUIDs."
 name = "shortuuid"
@@ -398,6 +548,19 @@ version = "3.7.4.2"
 
 [[package]]
 category = "dev"
+description = "HTTP library with thread-safe connection pooling, file post, and more."
+name = "urllib3"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, <4"
+version = "1.25.10"
+
+[package.extras]
+brotli = ["brotlipy (>=0.6.0)"]
+secure = ["certifi", "cryptography (>=1.3.4)", "idna (>=2.0.0)", "pyOpenSSL (>=0.14)", "ipaddress"]
+socks = ["PySocks (>=1.5.6,<1.5.7 || >1.5.7,<2.0)"]
+
+[[package]]
+category = "dev"
 description = "Measures the displayed width of unicode strings in a terminal"
 name = "wcwidth"
 optional = false
@@ -418,7 +581,8 @@ docs = ["sphinx", "jaraco.packaging (>=3.2)", "rst.linker (>=1.9)"]
 testing = ["jaraco.itertools", "func-timeout"]
 
 [metadata]
-content-hash = "bb9c0c12a7aa779d149517572e4c1603b77ff8a25e16ee813dd0511bd078655b"
+content-hash = "6ad7509d7c607aa607bf5e10e9f5d229f2db349298bf24948ff962ecc08654e3"
+lock-version = "1.0"
 python-versions = "^3.6"
 
 [metadata.files]
@@ -447,6 +611,23 @@ black = [
     {file = "black-19.10b0-py36-none-any.whl", hash = "sha256:1b30e59be925fafc1ee4565e5e08abef6b03fe455102883820fe5ee2e4734e0b"},
     {file = "black-19.10b0.tar.gz", hash = "sha256:c2edb73a08e9e0e6f65a0e6af18b059b8b1cdd5bef997d7a0b181df93dc81539"},
 ]
+blessings = [
+    {file = "blessings-1.7-py2-none-any.whl", hash = "sha256:caad5211e7ba5afe04367cdd4cfc68fa886e2e08f6f35e76b7387d2109ccea6e"},
+    {file = "blessings-1.7-py3-none-any.whl", hash = "sha256:b1fdd7e7a675295630f9ae71527a8ebc10bfefa236b3d6aa4932ee4462c17ba3"},
+    {file = "blessings-1.7.tar.gz", hash = "sha256:98e5854d805f50a5b58ac2333411b0482516a8210f23f43308baeb58d77c157d"},
+]
+bpython = [
+    {file = "bpython-0.19-py2.py3-none-any.whl", hash = "sha256:95d95783bfadfa0a25300a648de5aba4423b0ee76b034022a81dde2b5e853c00"},
+    {file = "bpython-0.19.tar.gz", hash = "sha256:476ce09a896c4d34bf5e56aca64650c56fdcfce45781a20dc1521221df8cc49c"},
+]
+certifi = [
+    {file = "certifi-2020.6.20-py2.py3-none-any.whl", hash = "sha256:8fc0819f1f30ba15bdb34cceffb9ef04d99f420f68eb75d901e9560b8749fc41"},
+    {file = "certifi-2020.6.20.tar.gz", hash = "sha256:5930595817496dd21bb8dc35dad090f1c2cd0adfaf21204bf6732ca5d8ee34d3"},
+]
+chardet = [
+    {file = "chardet-3.0.4-py2.py3-none-any.whl", hash = "sha256:fc323ffcaeaed0e0a02bf4d117757b98aed530d9ed4531e3e15460124c106691"},
+    {file = "chardet-3.0.4.tar.gz", hash = "sha256:84ab92ed1c4d4f16916e05906b6b75a6c0fb5db821cc65e70cbd64a3e2a5eaae"},
+]
 click = [
     {file = "click-7.1.2-py2.py3-none-any.whl", hash = "sha256:dacca89f4bfadd5de3d7489b7c8a566eee0d3676333fbb50030263894c38c0dc"},
     {file = "click-7.1.2.tar.gz", hash = "sha256:d2b5255c7c6349bc1bd1e59e08cd12acbbd63ce649f2588755783aa94dfb6b1a"},
@@ -455,17 +636,52 @@ colorama = [
     {file = "colorama-0.4.3-py2.py3-none-any.whl", hash = "sha256:7d73d2a99753107a36ac6b455ee49046802e59d9d076ef8e47b61499fa29afff"},
     {file = "colorama-0.4.3.tar.gz", hash = "sha256:e96da0d330793e2cb9485e9ddfd918d456036c7149416295932478192f4436a1"},
 ]
+curtsies = [
+    {file = "curtsies-0.3.4-py2.py3-none-any.whl", hash = "sha256:068db8e5d8a2f23b765d648a66dfa9445cf2412177126ae946a7357ade992640"},
+    {file = "curtsies-0.3.4.tar.gz", hash = "sha256:4ca543998d8bbba7185db099f8b7bb30baeb47426f7ac1a271e4d9ca8bbb2b05"},
+]
 django = [
     {file = "Django-3.0.8-py3-none-any.whl", hash = "sha256:5457fc953ec560c5521b41fad9e6734a4668b7ba205832191bbdff40ec61073c"},
     {file = "Django-3.0.8.tar.gz", hash = "sha256:31a5fbbea5fc71c99e288ec0b2f00302a0a92c44b13ede80b73a6a4d6d205582"},
+]
+django-mock-queries = [
+    {file = "django_mock_queries-2.1.5.tar.gz", hash = "sha256:0c5f51eaaaa9732c43a7af8c55a543542d747ea2780aecf6e7b0bbf29f20c083"},
 ]
 django-stubs = [
     {file = "django-stubs-1.5.0.tar.gz", hash = "sha256:b4c9042f2c2fcb89dc0fb37df070cce0f9bf93b39ae193847b6e5a392b13c430"},
     {file = "django_stubs-1.5.0-py3-none-any.whl", hash = "sha256:4a03df70e062f4133085efc461148d0934f36ccfd60a2b6d7bc35821f62008b6"},
 ]
+djangorestframework = [
+    {file = "djangorestframework-3.12.1-py3-none-any.whl", hash = "sha256:5c5071fcbad6dce16f566d492015c829ddb0df42965d488b878594aabc3aed21"},
+    {file = "djangorestframework-3.12.1.tar.gz", hash = "sha256:d54452aedebb4b650254ca092f9f4f5df947cb1de6ab245d817b08b4f4156249"},
+]
 flake8 = [
     {file = "flake8-3.8.3-py2.py3-none-any.whl", hash = "sha256:15e351d19611c887e482fb960eae4d44845013cc142d42896e9862f775d8cf5c"},
     {file = "flake8-3.8.3.tar.gz", hash = "sha256:f04b9fcbac03b0a3e58c0ab3a0ecc462e023a9faf046d57794184028123aa208"},
+]
+greenlet = [
+    {file = "greenlet-0.4.17-cp27-cp27m-manylinux1_x86_64.whl", hash = "sha256:75e4c27188f28149b74e7685809f9227410fd15432a4438fc48627f518577fa5"},
+    {file = "greenlet-0.4.17-cp27-cp27m-win32.whl", hash = "sha256:3af587e9813f9bd8be9212722321a5e7be23b2bc37e6323a90e592ab0c2ef117"},
+    {file = "greenlet-0.4.17-cp27-cp27m-win_amd64.whl", hash = "sha256:ccd62f09f90b2730150d82f2f2ffc34d73c6ce7eac234aed04d15dc8a3023994"},
+    {file = "greenlet-0.4.17-cp27-cp27mu-manylinux1_x86_64.whl", hash = "sha256:13037e2d7ab2145300676852fa069235512fdeba4ed1e3bb4b0677a04223c525"},
+    {file = "greenlet-0.4.17-cp35-cp35m-manylinux1_x86_64.whl", hash = "sha256:e495096e3e2e8f7192afb6aaeba19babc4fb2bdf543d7b7fed59e00c1df7f170"},
+    {file = "greenlet-0.4.17-cp35-cp35m-win32.whl", hash = "sha256:124a3ae41215f71dc91d1a3d45cbf2f84e46b543e5d60b99ecc20e24b4c8f272"},
+    {file = "greenlet-0.4.17-cp35-cp35m-win_amd64.whl", hash = "sha256:5494e3baeacc371d988345fbf8aa4bd15555b3077c40afcf1994776bb6d77eaf"},
+    {file = "greenlet-0.4.17-cp36-cp36m-manylinux1_x86_64.whl", hash = "sha256:bee111161420f341a346731279dd976be161b465c1286f82cc0779baf7b729e8"},
+    {file = "greenlet-0.4.17-cp36-cp36m-win32.whl", hash = "sha256:ac85db59aa43d78547f95fc7b6fd2913e02b9e9b09e2490dfb7bbdf47b2a4914"},
+    {file = "greenlet-0.4.17-cp36-cp36m-win_amd64.whl", hash = "sha256:4481002118b2f1588fa3d821936ffdc03db80ef21186b62b90c18db4ba5e743b"},
+    {file = "greenlet-0.4.17-cp37-cp37m-manylinux1_x86_64.whl", hash = "sha256:be7a79988b8fdc5bbbeaed69e79cfb373da9759242f1565668be4fb7f3f37552"},
+    {file = "greenlet-0.4.17-cp37-cp37m-win32.whl", hash = "sha256:97f2b01ab622a4aa4b3724a3e1fba66f47f054c434fbaa551833fa2b41e3db51"},
+    {file = "greenlet-0.4.17-cp37-cp37m-win_amd64.whl", hash = "sha256:d3436110ca66fe3981031cc6aff8cc7a40d8411d173dde73ddaa5b8445385e2d"},
+    {file = "greenlet-0.4.17-cp38-cp38-manylinux1_x86_64.whl", hash = "sha256:a34023b9eabb3525ee059f3bf33a417d2e437f7f17e341d334987d4091ae6072"},
+    {file = "greenlet-0.4.17-cp38-cp38-win32.whl", hash = "sha256:e66a824f44892bc4ec66c58601a413419cafa9cec895e63d8da889c8a1a4fa4a"},
+    {file = "greenlet-0.4.17-cp38-cp38-win_amd64.whl", hash = "sha256:47825c3a109f0331b1e54c1173d4e57fa000aa6c96756b62852bfa1af91cd652"},
+    {file = "greenlet-0.4.17-cp39-cp39-manylinux1_x86_64.whl", hash = "sha256:1023d7b43ca11264ab7052cb09f5635d4afdb43df55e0854498fc63070a0b206"},
+    {file = "greenlet-0.4.17.tar.gz", hash = "sha256:41d8835c69a78de718e466dd0e6bfd4b46125f21a67c3ff6d76d8d8059868d6b"},
+]
+idna = [
+    {file = "idna-2.10-py2.py3-none-any.whl", hash = "sha256:b97d804b1e9b523befed77c48dacec60e6dcb0b5391d57af6a65a312a90648c0"},
+    {file = "idna-2.10.tar.gz", hash = "sha256:b307872f855b18632ce0c21c5e45be78c0ea7ae4c15c828c20788b26921eb3f6"},
 ]
 importlib-metadata = [
     {file = "importlib_metadata-1.7.0-py2.py3-none-any.whl", hash = "sha256:dc15b2969b4ce36305c51eebe62d418ac7791e9a157911d58bfb1f9ccd8e2070"},
@@ -478,6 +694,14 @@ isort = [
 mccabe = [
     {file = "mccabe-0.6.1-py2.py3-none-any.whl", hash = "sha256:ab8a6258860da4b6677da4bd2fe5dc2c659cff31b3ee4f7f5d64e79735b80d42"},
     {file = "mccabe-0.6.1.tar.gz", hash = "sha256:dd8d182285a0fe56bace7f45b5e7d1a6ebcbf524e8f3bd87eb0f125271b8831f"},
+]
+mock = [
+    {file = "mock-4.0.2-py3-none-any.whl", hash = "sha256:3f9b2c0196c60d21838f307f5825a7b86b678cedc58ab9e50a8988187b4d81e0"},
+    {file = "mock-4.0.2.tar.gz", hash = "sha256:dd33eb70232b6118298d516bbcecd26704689c386594f0f3c4f13867b2c56f72"},
+]
+model-bakery = [
+    {file = "model_bakery-1.0.2-py2.py3-none-any.whl", hash = "sha256:c05901b60d0e9f1a2823af1cdcbce5d1c67dcc1d0e4b8da3d5b6f9ea5706597d"},
+    {file = "model_bakery-1.0.2.tar.gz", hash = "sha256:f0b94fde361abcabaf321c6bb62538aed3909c346ece35c628cb004ff1da6cdc"},
 ]
 more-itertools = [
     {file = "more-itertools-8.4.0.tar.gz", hash = "sha256:68c70cc7167bdf5c7c9d8f6954a7837089c6a36bf565383919bb595efb8a17e5"},
@@ -544,6 +768,10 @@ pyflakes = [
     {file = "pyflakes-2.2.0-py2.py3-none-any.whl", hash = "sha256:0d94e0e05a19e57a99444b6ddcf9a6eb2e5c68d3ca1e98e90707af8152c90a92"},
     {file = "pyflakes-2.2.0.tar.gz", hash = "sha256:35b2d75ee967ea93b55750aa9edbbf72813e06a66ba54438df2cfac9e3c27fc8"},
 ]
+pygments = [
+    {file = "Pygments-2.7.1-py3-none-any.whl", hash = "sha256:307543fe65c0947b126e83dd5a61bd8acbd84abec11f43caebaf5534cbc17998"},
+    {file = "Pygments-2.7.1.tar.gz", hash = "sha256:926c3f319eda178d1bd90851e4317e6d8cdb5e292a3386aac9bd75eca29cf9c7"},
+]
 pyparsing = [
     {file = "pyparsing-2.4.7-py2.py3-none-any.whl", hash = "sha256:ef9d7589ef3c200abe66653d3f1ab1033c3c419ae9b9bdb1240a85b024efc88b"},
     {file = "pyparsing-2.4.7.tar.gz", hash = "sha256:c203ec8783bf771a155b207279b9bccb8dea02d8f0c9e5f8ead507bc3246ecc1"},
@@ -582,6 +810,10 @@ regex = [
     {file = "regex-2020.6.8-cp38-cp38-win32.whl", hash = "sha256:97712e0d0af05febd8ab63d2ef0ab2d0cd9deddf4476f7aa153f76feef4b2754"},
     {file = "regex-2020.6.8-cp38-cp38-win_amd64.whl", hash = "sha256:6ad8663c17db4c5ef438141f99e291c4d4edfeaacc0ce28b5bba2b0bf273d9b5"},
     {file = "regex-2020.6.8.tar.gz", hash = "sha256:e9b64e609d37438f7d6e68c2546d2cb8062f3adb27e6336bc129b51be20773ac"},
+]
+requests = [
+    {file = "requests-2.24.0-py2.py3-none-any.whl", hash = "sha256:fe75cc94a9443b9246fc7049224f75604b113c36acb93f87b80ed42c44cbb898"},
+    {file = "requests-2.24.0.tar.gz", hash = "sha256:b3559a131db72c33ee969480840fff4bb6dd111de7dd27c8ee1f820f4f00231b"},
 ]
 shortuuid = [
     {file = "shortuuid-1.0.1-py3-none-any.whl", hash = "sha256:492c7402ff91beb1342a5898bd61ea953985bf24a41cd9f247409aa2e03c8f77"},
@@ -630,6 +862,10 @@ typing-extensions = [
     {file = "typing_extensions-3.7.4.2-py2-none-any.whl", hash = "sha256:f8d2bd89d25bc39dabe7d23df520442fa1d8969b82544370e03d88b5a591c392"},
     {file = "typing_extensions-3.7.4.2-py3-none-any.whl", hash = "sha256:6e95524d8a547a91e08f404ae485bbb71962de46967e1b71a0cb89af24e761c5"},
     {file = "typing_extensions-3.7.4.2.tar.gz", hash = "sha256:79ee589a3caca649a9bfd2a8de4709837400dfa00b6cc81962a1e6a1815969ae"},
+]
+urllib3 = [
+    {file = "urllib3-1.25.10-py2.py3-none-any.whl", hash = "sha256:e7983572181f5e1522d9c98453462384ee92a0be7fac5f1413a1e35c56cc0461"},
+    {file = "urllib3-1.25.10.tar.gz", hash = "sha256:91056c15fa70756691db97756772bb1eb9678fa585d9184f24534b100dc60f4a"},
 ]
 wcwidth = [
     {file = "wcwidth-0.2.5-py2.py3-none-any.whl", hash = "sha256:beb4802a9cebb9144e99086eff703a642a13d6a0052920003a230f3294bbe784"},

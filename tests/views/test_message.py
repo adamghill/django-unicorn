@@ -1,7 +1,7 @@
 import pytest
 from django.http import JsonResponse
 
-from django_unicorn.components import ComponentNotFoundError
+from django_unicorn.components import ComponentLoadError
 from django_unicorn.views import message
 
 
@@ -64,10 +64,10 @@ def test_message_no_component_id(client):
 def test_message_component_not_found(client):
     data = {"data": {}, "checksum": "FpZ5q8E2", "id": "asdf"}
 
-    with pytest.raises(ComponentNotFoundError) as e:
+    with pytest.raises(ComponentLoadError) as e:
         post_json(client, data)
 
     assert (
         e.exconly()
-        == "django_unicorn.components.ComponentNotFoundError: 'test' component could not be found."
+        == "django_unicorn.components.ComponentLoadError: 'test' component could not be loaded."
     )

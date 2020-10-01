@@ -16,6 +16,8 @@ from django.template.response import TemplateResponse
 from django.utils.safestring import mark_safe
 from django.views.generic.base import TemplateView
 
+from . import serializer
+
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +37,7 @@ class UnicornField:
         return self.__dict__
 
 
-class ComponentNotFoundError(Exception):
+class ComponentLoadError(Exception):
     pass
 
 
@@ -271,45 +273,6 @@ class UnicornView(TemplateView):
         Get publicly available properties and output them in a string-encoded JSON object.
         """
 
-        def _get_model_json(obj):
-            """
-            Serializes Django models.
-
-            Tried to use the Django serializer, but it failed for some field types.
-            """
-            model_field_names = [field.name for field in obj._meta.get_fields()]
-
-            model_json = {}
-            for field_name in model_field_names:
-                model_json[field_name] = getattr(obj, field_name)
-
-            return model_json
-
-        def _json_serializer(obj):
-            """
-            Handle the objects that the `orjson` deserializer can't handle automatically.
-
-            The types handled by `orjson` by default: dataclass, datetime, enum, float, int, numpy, str, uuid.
-            The types handled in this class: Django Model, Django QuerySet, any object with `to_json` method.
-
-            TODO: Investigate other ways to serialize objects automatically.
-            e.g. using DRF serializer: https://www.django-rest-framework.org/api-guide/serializers/#serializing-objects
-            """
-            if isinstance(obj, Model):
-                return _get_model_json(obj)
-            elif isinstance(obj, QuerySet):
-                queryset_json = []
-
-                for model in obj:
-                    model_json = _get_model_json(model)
-                    queryset_json.append(model_json)
-
-                return queryset_json
-            elif hasattr(obj, "to_json"):
-                return obj.to_json()
-
-            raise TypeError
-
         frontend_context_variables = {}
         attributes = self._attributes()
         frontend_context_variables.update(attributes)
@@ -329,9 +292,9 @@ class UnicornView(TemplateView):
                         value = field.widget.format_value(cleaned_value)
                         frontend_context_variables[key] = value
 
-        encoded_frontend_context_variables = orjson.dumps(
-            frontend_context_variables, default=_json_serializer,
-        ).decode("utf-8")
+        encoded_frontend_context_variables = serializer.dumps(
+            frontend_context_variables
+        )
 
         return encoded_frontend_context_variables
 
@@ -556,7 +519,7 @@ class UnicornView(TemplateView):
         
         Returns:
             Instantiated `UnicornView` component.
-            Raises `ComponentNotFoundError` if the component cannot be found.
+            Raises `ComponentLoadError` if the component could not be loaded.
         """
         if component_id and use_cache:
             key = f"{component_name}-{component_id}"
@@ -650,6 +613,6 @@ class UnicornView(TemplateView):
             except AttributeError as e:
                 last_exception = e
 
-        raise ComponentNotFoundError(
-            f"'{component_name}' component could not be found."
+        raise ComponentLoadError(
+            f"'{component_name}' component could not be loaded."
         ) from last_exception
