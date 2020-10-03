@@ -13,7 +13,9 @@ def _get_model_dict(obj: Any) -> dict:
     # Django's serialize always returns an array, so remove that from the string
     serialized_model = serialize("json", [obj])[1:-1]
     model_json = orjson.loads(serialized_model)
-    # model_json["_str"] = str(obj)
+    model_pk = model_json.get("pk")
+    model_json = model_json.get("fields")
+    model_json["pk"] = model_pk
 
     return model_json
 

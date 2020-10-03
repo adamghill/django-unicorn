@@ -1,4 +1,5 @@
 import hmac
+import pickle
 import importlib
 import inspect
 import logging
@@ -156,13 +157,16 @@ class UnicornTemplateResponse(TemplateResponse):
 
 class UnicornView(TemplateView):
     response_class = UnicornTemplateResponse
-    component_name = ""
+    component_name: str = ""
     request = None
 
     # Caches to reduce the amount of time introspecting the class
-    _methods_cache = None
-    _attribute_name_cache = None
+    _methods_cache: Dict[str, Callable] = {}
+    _attribute_names_cache: List[str] = []
     _hook_methods_cache: List[str] = []
+
+    # Dictionary with key: attribute name; value: pickled attribute value
+    _resettable_attributes_cache: Dict[str, Any] = {}
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -205,6 +209,26 @@ class UnicornView(TemplateView):
         self._attribute_names_cache = self._attribute_names()
         self._set_hook_methods_cache()
         self._methods_cache = self._methods()
+        self._set_resettable_attributes_cache()
+
+    def reset(self):
+        for (
+            attribute_name,
+            pickled_value,
+        ) in self._resettable_attributes_cache.items():
+            try:
+                attribute_value = pickle.loads(pickled_value)
+                self._set_property(attribute_name, attribute_value)
+            except TypeError:
+                logger.warn(
+                    f"Resetting '{attribute_name}' attribute failed because it could not be constructed."
+                )
+                pass
+            except pickle.PickleError:
+                logger.warn(
+                    f"Resetting '{attribute_name}' attribute failed because it could not be de-pickled."
+                )
+                pass
 
     def mount(self):
         """
@@ -246,7 +270,7 @@ class UnicornView(TemplateView):
         """
         Renders a UnicornView component with the public properties available. Delegates to a
         UnicornTemplateResponse to actually render a response.
-
+ 
         Args:
             param init_js: Whether or not to include the Javascript required to initialize the component.
         """
@@ -372,7 +396,7 @@ class UnicornView(TemplateView):
 
         return self.errors
 
-    def _attribute_names(self):
+    def _attribute_names(self) -> List[str]:
         """
         Gets publicly available attribute names. Cached in `_attribute_names_cache`.
         """
@@ -440,6 +464,9 @@ class UnicornView(TemplateView):
         return methods
 
     def _set_hook_methods_cache(self) -> None:
+        """
+        Caches the updating/updated attribute function names defined on the component.
+        """
         self._hook_methods_cache = []
 
         for attribute_name in self._attribute_names_cache:
@@ -450,6 +477,35 @@ class UnicornView(TemplateView):
             for function_name in hook_function_names:
                 if hasattr(self, function_name):
                     self._hook_methods_cache.append(function_name)
+
+    def _set_resettable_attributes_cache(self) -> None:
+        """
+        Caches the attributes that are "resettable" in `_resettable_attributes_cache`.
+        Cache is a dictionary with key: attribute name; value: pickled attribute value
+
+        Examples:
+            - `UnicornField`
+            - Django Models without a defined pk
+        """
+        self._resettable_attributes_cache = {}
+
+        for attribute_name, attribute_value in self._attributes().items():
+            if isinstance(attribute_value, UnicornField):
+                self._resettable_attributes_cache[attribute_name] = pickle.dumps(
+                    attribute_value
+                )
+            elif isinstance(attribute_value, Model):
+                if not attribute_value.pk:
+                    if attribute_name not in self._resettable_attributes_cache:
+                        try:
+                            self._resettable_attributes_cache[
+                                attribute_name
+                            ] = pickle.dumps(attribute_value)
+                        except pickle.PickleError:
+                            logger.warn(
+                                f"Caching '{attribute_name}' failed because it could not be pickled."
+                            )
+                            pass
 
     def _is_public(self, name: str) -> bool:
         """
@@ -480,6 +536,7 @@ class UnicornView(TemplateView):
             # Component methods
             "component_id",
             "component_name",
+            "reset",
             "mount",
             "hydrate",
             "updating",
@@ -534,31 +591,17 @@ class UnicornView(TemplateView):
                 component_name=component_name, component_id=component_id
             )
 
-            if not use_cache:
-                #  Re-initializes custom classes so that `reset` magic method will "clear" them as expected
-                _attributes = component._attributes()
+            #  Re-initializes classes so that `reset` magic method will "clear" them as expected
+            component.reset()
 
-                for attribute_name in _attributes:
-                    attribute = _attributes[attribute_name]
-
-                    if isinstance(attribute, UnicornField):
-                        try:
-                            component._set_property(
-                                attribute_name, attribute.__class__()
-                            )
-                        except TypeError:
-                            logger.warn(
-                                f"Resetting '{attribute_name}' attribute failed because it could not be constructed."
-                            )
-                            pass
-
-                component.hydrate()
+            component.hydrate()
 
             if component_id:
                 key = f"{component_name}-{component_id}"
                 constructed_views_cache[key] = component
 
             component._validate_called = False
+
             return component
 
         locations = []

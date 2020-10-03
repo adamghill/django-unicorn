@@ -338,9 +338,7 @@ export class Component {
         } else {
           _data = _data[modelNamePiece];
         }
-      } else if (
-        Object.prototype.hasOwnProperty.call(_data.fields, modelNamePiece)
-      ) {
+      } else {
         element.setValue(_data.fields[modelNamePiece]);
       }
     }

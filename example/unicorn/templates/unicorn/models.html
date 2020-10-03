@@ -1,8 +1,21 @@
 <div>
-    <input type="text" unicorn:model="flavor.name"></input>
-    <button unicorn:click="save">Save</button>
+    <input type="text" unicorn:model.defer="instance_flavor.name"></input>
+    <input type="text" unicorn:model.defer="instance_flavor.label"></input>
+    <input type="text" unicorn:model="instance_flavor.parent"></input>
+    <button unicorn:click="add_instance_flavor">Add Flavor (instance variable)</button>
+    <br /><br />
 
-    <!-- {% for flavor in flavors %}
-        {{ flavor.name }}<br />
-    {% endfor %} -->
+    <input type="text" unicorn:model.defer="class_flavor.name"></input>
+    <input type="text" unicorn:model.defer="class_flavor.label"></input>
+    <input type="text" unicorn:model="class_flavor.parent"></input>
+    <button unicorn:click="add_class_flavor">Add Flavor (class variable)</button>
+
+    <ul>
+    {% for flavor in flavors %}
+        <li>{{ flavor.name }}</li>
+    {% endfor %}
+    </ul>
+
+    <button unicorn:click="refresh">Refresh</button>
+    <button unicorn:click="reset">Reset</button>
 </div>

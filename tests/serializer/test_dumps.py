@@ -44,7 +44,7 @@ def test_list():
 
 def test_simple_model():
     simple_test_model = SimpleTestModel(id=1, name="abc")
-    expected = '{"simple_test_model":{"model":"tests.simpletestmodel","pk":1,"fields":{"name":"abc"}}}'
+    expected = '{"simple_test_model":{"name":"abc","pk":1}}'
 
     actual = serializer.dumps({"simple_test_model": simple_test_model})
 
@@ -54,7 +54,7 @@ def test_simple_model():
 def test_model_foreign_key():
     test_model_one = ComplicatedTestModel(id=1, name="abc")
     test_model_two = ComplicatedTestModel(id=2, name="def", parent=test_model_one)
-    expected = '{"test_model_two":{"model":"tests.complicatedtestmodel","pk":2,"fields":{"name":"def","parent":1}}}'
+    expected = '{"test_model_two":{"name":"def","parent":1,"pk":2}}'
 
     actual = serializer.dumps({"test_model_two": test_model_two})
 
@@ -65,7 +65,7 @@ def test_model_foreign_key_recurive_parents():
     test_model_one = ComplicatedTestModel(id=1, name="abc")
     test_model_two = ComplicatedTestModel(id=2, name="def", parent=test_model_one)
     test_model_one.parent = test_model_two
-    expected = '{"test_model_two":{"model":"tests.complicatedtestmodel","pk":2,"fields":{"name":"def","parent":1}}}'
+    expected = '{"test_model_two":{"name":"def","parent":1,"pk":2}}'
 
     actual = serializer.dumps({"test_model_two": test_model_two})
 
@@ -82,7 +82,7 @@ def test_dumps_queryset(db):
 
     flavors = Flavor.objects.all()
 
-    expected = '{"flavors":[{"model":"coffee.flavor","pk":1,"fields":{"name":"name1","label":"label1","parent":null}},{"model":"coffee.flavor","pk":2,"fields":{"name":"name2","label":"label2","parent":1}}]}'
+    expected = '{"flavors":[{"name":"name1","label":"label1","parent":null,"pk":1},{"name":"name2","label":"label2","parent":1,"pk":2}]}'
     actual = serializer.dumps({"flavors": flavors})
 
     assert expected == actual
@@ -92,10 +92,6 @@ def test_get_model_dict():
     flavor_one = Flavor(name="name1", label="label1")
     actual = serializer._get_model_dict(flavor_one)
 
-    expected = {
-        "model": "coffee.flavor",
-        "pk": None,
-        "fields": {"name": "name1", "label": "label1", "parent": None},
-    }
+    expected = {"pk": None, "name": "name1", "label": "label1", "parent": None}
 
     assert expected == actual
