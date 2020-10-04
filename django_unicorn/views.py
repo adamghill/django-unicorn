@@ -68,6 +68,7 @@ def _set_property_from_payload(
         param data: Dictionary that gets sent back with the response.
     """
 
+    property_pk = payload.get("pk")
     property_name = payload.get("name")
     property_value = payload.get("value")
     component.updating(property_name, property_value)
@@ -82,7 +83,7 @@ def _set_property_from_payload(
         class TestView(UnicornView):
             author = Author()
         
-        `payload` would equal `{'name': 'author.name', 'value': 'Neil Gaiman'}`
+        `payload` would be `{'name': 'author.name', 'value': 'Neil Gaiman'}`
 
         The following code updates UnicornView.author.name based the payload's `author.name`.
         """
@@ -116,6 +117,9 @@ def _set_property_from_payload(
                 else:
                     component_or_field = getattr(component_or_field, property_name_part)
                     data_or_dict = data_or_dict.get(property_name_part, {})
+
+                    if isinstance(component_or_field, Model) and property_pk:
+                        component_or_field.pk = property_pk
             elif isinstance(component_or_field, dict):
                 if idx == len(property_name_parts) - 1:
                     component_or_field[property_name_part] = property_value

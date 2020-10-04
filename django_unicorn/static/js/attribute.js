@@ -12,6 +12,8 @@ export class Attribute {
     this.isModel = false;
     this.isPoll = false;
     this.isKey = false;
+    this.isPK = false;
+    this.isValue = false;
     this.isError = false;
     this.modifiers = {};
     this.eventType = null;
@@ -32,6 +34,10 @@ export class Attribute {
         this.isPoll = true;
       } else if (this.name === "unicorn:key") {
         this.isKey = true;
+      } else if (this.name === "unicorn:pk") {
+        this.isPK = true;
+      } else if (this.name === "unicorn:value") {
+        this.isValue = true;
       } else if (contains(this.name, "unicorn:error:")) {
         this.isError = true;
       } else {

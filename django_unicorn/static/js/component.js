@@ -60,8 +60,11 @@ export class Component {
     this.modelEls = [];
     this.errors = {};
     this.poll = {};
+
     this.actionQueue = [];
     this.currentActionQueue = null;
+    this.lastTriggeringElement = null;
+
     this.actionEvents = {};
     this.attachedEventTypes = [];
 
@@ -115,6 +118,7 @@ export class Component {
                   const actionForQueue = {
                     type: "syncInput",
                     payload: {
+                      pk: modelElement.model.pk,
                       name: modelElement.model.name,
                       value: modelElement.getValue(),
                     },
@@ -154,37 +158,55 @@ export class Component {
     element.el.addEventListener(eventType, () => {
       const action = {
         type: "syncInput",
-        payload: { name: element.model.name, value: element.getValue() },
+        payload: {
+          pk: element.model.pk,
+          name: element.model.name,
+          value: element.getValue(),
+        },
       };
 
       if (element.model.isDefer) {
         let foundAction = false;
 
+        // Update the existing action with the current value
         this.actionQueue.forEach((a) => {
-          if (a.payload.name === element.model.name) {
+          if (
+            a.payload.name === element.model.name &&
+            a.payload.pk === element.model.pk
+          ) {
             a.payload.value = element.getValue();
             foundAction = true;
           }
         });
 
+        // Add a new action
         if (!foundAction) {
           this.actionQueue.push(action);
         }
+
+        this.lastTriggeringElement = element;
 
         return;
       }
 
       this.actionQueue.push(action);
 
-      this.sendMessage(element.model.debounceTime, (excludeElement, err) => {
-        if (err) {
-          console.error(err);
-        } else if (excludeElement) {
-          this.setModelValues(element);
-        } else {
-          this.setModelValues();
+      this.sendMessage(
+        element.model.debounceTime,
+        (triggeringElement, updatedPks, err) => {
+          // console.log("updatedPks 2", updatedPks);
+
+          if (err) {
+            console.error(err);
+          } else if (triggeringElement) {
+            // console.log("exclude element", element);
+            this.setModelValues(triggeringElement);
+          } else {
+            // console.log("do not exclude element");
+            this.setModelValues();
+          }
         }
-      });
+      );
     });
   }
 
@@ -243,13 +265,16 @@ export class Component {
     };
     this.actionQueue.push(action);
 
-    this.sendMessage(-1, (_, err) => {
+    this.sendMessage(-1, (triggeringElement, updatedPks, err) => {
       if (err && typeof errCallback === "function") {
         errCallback(err);
       } else if (err) {
         console.error(err);
       } else {
-        this.setModelValues();
+        console.log("callMethod", triggeringElement, updatedPks);
+        this.setModelValues(triggeringElement, updatedPks);
+        // console.log("call method, no exclsuionn", excludeElement);
+        // console.log("updatedPks 1", updatedPks);
       }
     });
   }
@@ -346,22 +371,23 @@ export class Component {
 
   /**
    * Sets all model values.
-   * @param {Object} elementToExclude Prevent a particular element from being updated.
-   * Object example: `{id: 'elementId', key: 'elementKey'}`.
+   * @param {Element} triggeringElement The element that triggered the event.
    */
-  setModelValues(elementToExclude) {
-    elementToExclude = elementToExclude || {};
+  setModelValues(triggeringElement, updatedPks) {
+    triggeringElement = triggeringElement || {};
     let elementFocused = false;
+
+    updatedPks = updatedPks || [];
 
     // Focus on the element that is being excluded since that is what triggered the update.
     // Prevents validation errors from stealing focus.
-    if (!isEmpty(elementToExclude) && !elementToExclude.model.isLazy) {
+    if (!isEmpty(triggeringElement) && !triggeringElement.model.isLazy) {
       ["id", "key"].forEach((attr) => {
         this.modelEls.forEach((element) => {
           if (!elementFocused) {
             if (
-              elementToExclude[attr] &&
-              elementToExclude[attr] === element[attr]
+              triggeringElement[attr] &&
+              triggeringElement[attr] === element[attr]
             ) {
               element.focus();
               elementFocused = true;
@@ -372,12 +398,51 @@ export class Component {
     }
 
     this.modelEls.forEach((element) => {
+      // console.log("element.modelKey()", element.modelKey());
+
+      // if (!isEmpty(triggeringElement)) {
+      //   console.log(
+      //     "triggeringElement.modelKey()",
+      //     triggeringElement.modelKey()
+      //   );
+      // }
+
       if (
-        element.id !== elementToExclude.id ||
-        element.key !== elementToExclude.key
+        !isEmpty(triggeringElement) &&
+        element.modelKey() === triggeringElement.modelKey()
       ) {
+        // Make sure that the unicorn:value is re-set so that the value doesn't get overriden
+        element.elementValue = element.getValue();
+        // this.setValue(element);
+      }
+
+      if (
+        element.id !== triggeringElement.id ||
+        element.key !== triggeringElement.key
+      ) {
+        // if (
+        //   typeof element.model.pk !== "undefined" &&
+        //   element.model.pk !== null &&
+        //   updatedPks.length === 1 &&
+        //   updatedPks[0] !== element.model.pk
+        // ) {
+        //   console.log("skip setting value on element because of pk", element);
+        // } else {
+        //   console.log("this.setValue(element)", element);
+        //   this.setValue(element);
+        // }
+
         this.setValue(element);
       }
+
+      // if (
+      //   !isEmpty(triggeringElement) &&
+      //   element.modelKey() === triggeringElement.modelKey()
+      // ) {
+      //   // Make sure that the unicorn:value is re-set so that the value doesn't get overriden
+      //   element.elementValue = element.getValue();
+      //   // this.setValue(element);
+      // }
     });
   }
 
@@ -467,31 +532,56 @@ export class Component {
             });
           });
 
+          const triggeringElement = _component.lastTriggeringElement;
+          _component.lastTriggeringElement = null;
+          console.log("triggeringElement", triggeringElement);
+
           // Check if the current actionQueue contains a callMethod. Prevents excluding
           // an element from getting a value set because calling a component function can
           // potentially have side effects which have to be reflected on the current element.
-          let hasCallMethod = false;
+          // let shouldExcludeTriggerElement = true;
 
-          _component.currentActionQueue.forEach((action) => {
-            if (action.type === "callMethod") {
-              hasCallMethod = true;
-            }
-          });
+          // _component.currentActionQueue.forEach((action) => {
+          //   if (action.type === "callMethod") {
+          //     shouldExcludeTriggerElement = false;
+          //   }
+          // });
+
+          const updatedPks = [];
+
+          // should I get this if it's a call or sync? What use is excludeElements if this is here?
+          if (triggeringElement) {
+            _component.currentActionQueue.forEach((action) => {
+              if (
+                typeof action.payload.pk !== "undefined" &&
+                action.payload.pk
+              ) {
+                updatedPks.push(action.payload.pk);
+              }
+            });
+          }
+
+          // if (triggeringElement && updatedPks.length > 0) {
+          //   triggeringElement = true;
+          // }
+
+          // console.log("updatedPks", updatedPks);
 
           // Clear the current action queue
           _component.currentActionQueue = null;
 
           if (callback && typeof callback === "function") {
-            callback(!hasCallMethod, null);
+            callback(triggeringElement, updatedPks, null);
           }
         })
         .catch((err) => {
           // Make sure to clear the current queues in case of an error
           _component.actionQueue = [];
           _component.currentActionQueue = null;
+          _component.lastTriggeringElement = null;
 
           if (callback && typeof callback === "function") {
-            callback(null, err);
+            callback(null, null, err);
           }
         });
     }

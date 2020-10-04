@@ -1,4 +1,5 @@
 import { Attribute } from "./attribute.js";
+import { isEmpty } from "./utils.js";
 
 /**
  * Encapsulate DOM element for Unicorn-related information.
@@ -22,6 +23,9 @@ export class Element {
     this.poll = {};
     this.actions = [];
 
+    // this.value = undefined;
+    this.elementValue = undefined;
+    this.pk = undefined;
     this.key = undefined;
     this.errors = [];
 
@@ -42,7 +46,9 @@ export class Element {
         this.model.eventType = attribute.modifiers.lazy ? "blur" : "input";
         this.model.isLazy = !!attribute.modifiers.lazy;
         this.model.isDefer = !!attribute.modifiers.defer;
-        this.model.debounceTime = attribute.modifiers.debounce ? parseInt(attribute.modifiers.debounce, 10) || -1 : -1;
+        this.model.debounceTime = attribute.modifiers.debounce
+          ? parseInt(attribute.modifiers.debounce, 10) || -1
+          : -1;
       } else if (attribute.isPoll) {
         this.poll.method = attribute.value ? attribute.value : "refresh";
         this.poll.timing = 2000;
@@ -79,9 +85,41 @@ export class Element {
         this.key = attribute.value;
       }
 
+      if (attribute.isPK) {
+        // Store the pk on the element for later; prevents the pk
+        // from being the only field on model which isn't useful
+        this.pk = attribute.value;
+      }
+
+      if (attribute.isValue) {
+        this.elementValue = attribute.value;
+
+        // console.log("set value,", attribute.value);
+
+        // this.setValue(attribute.value);
+        // this.value = attribute.value;
+      }
+
       if (attribute.isError) {
         const code = attribute.name.replace("unicorn:error:", "");
         this.errors.push({ code, message: attribute.value });
+      }
+    }
+
+    if (this.isUnicorn && !isEmpty(this.model)) {
+      // If the model field itself has a pk use that, otherwise look at parent elements for it
+      this.model.pk = this.pk;
+      let elToCheck = this.el.parentElement;
+
+      while (typeof this.model.pk === "undefined" || this.model.pk === null) {
+        this.model.pk = elToCheck.getAttribute("unicorn:pk");
+
+        if (elToCheck.getAttribute("unicorn:checksum")) {
+          // A litte hacky, but stop looking for a pk after you hit the beginning of the component
+          break;
+        }
+
+        elToCheck = elToCheck.parentElement;
       }
     }
   }
@@ -91,6 +129,19 @@ export class Element {
    */
   focus() {
     this.el.focus();
+  }
+
+  /**
+   * A key that takes into consideration the model name and pk.
+   */
+  modelKey() {
+    if (!isEmpty(this.model)) {
+      if (typeof this.model.pk !== "undefined") {
+        return `${this.model.name}:${this.model.pk}`;
+      }
+    }
+
+    return null;
   }
 
   /**
@@ -119,6 +170,10 @@ export class Element {
    * Sets the value of an element. Tries to deal with HTML weirdnesses.
    */
   setValue(val) {
+    if (this.elementValue) {
+      val = this.elementValue;
+    }
+
     if (this.el.type.toLowerCase() === "radio") {
       // Handle radio buttons
       if (this.el.value === val) {

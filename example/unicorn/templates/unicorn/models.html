@@ -1,21 +1,42 @@
 <div>
-    <input type="text" unicorn:model.defer="instance_flavor.name"></input>
+    <!-- <input type="text" unicorn:model.defer="instance_flavor.name"></input>
     <input type="text" unicorn:model.defer="instance_flavor.label"></input>
-    <input type="text" unicorn:model="instance_flavor.parent"></input>
-    <button unicorn:click="add_instance_flavor">Add Flavor (instance variable)</button>
-    <br /><br />
+    <input type="text" unicorn:model="instance_flavor.parent"></input> -->
+    <!-- <button unicorn:click="add_instance_flavor">Add Flavor (instance variable)</button>
+    <br /><br /> -->
 
-    <input type="text" unicorn:model.defer="class_flavor.name"></input>
+    <!-- <input type="text" unicorn:model.defer="class_flavor.name"></input>
     <input type="text" unicorn:model.defer="class_flavor.label"></input>
     <input type="text" unicorn:model="class_flavor.parent"></input>
-    <button unicorn:click="add_class_flavor">Add Flavor (class variable)</button>
+    <button unicorn:click="add_class_flavor">Add Flavor (class variable)</button> -->
 
-    <ul>
     {% for flavor in flavors %}
-        <li>{{ flavor.name }}</li>
-    {% endfor %}
-    </ul>
+    <div unicorn:pk="{{ flavor.pk }}">
+        <h3>{{ flavor.pk }}</h3>
 
+        <label>Name</label>
+        <input type="text" unicorn:model.defer="instance_flavor.name" unicorn:value="{{ flavor.name }}"></input>
+        
+        <label>Label</label>
+        <input type="text" unicorn:model.defer="instance_flavor.label" unicorn:value="{{ flavor.label }}"></input>
+
+        {% comment %}
+        <label>Parent</label>
+        <select>
+            <option value="" selected>None</option>
+            {% for available_flavor in available_flavors %}
+            <option value="{{ available_flavor.pk }}" {% if instance_flavor.parent.pk == available_flavor.pk %}selected{% endif %}>{{ available_flavor.name }}</option>
+            {% endfor %}
+        </select>
+        {% endcomment %}
+    </div>
+    {% endfor %}
+    <br />
+
+    <button unicorn:click="save">Save</button>
+
+    {% comment %}
     <button unicorn:click="refresh">Refresh</button>
     <button unicorn:click="reset">Reset</button>
+    {% endcomment %}
 </div>
