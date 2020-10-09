@@ -58,12 +58,13 @@ export class Component {
 
     this.root = undefined;
     this.modelEls = [];
+    this.dbEls = [];
     this.errors = {};
     this.poll = {};
 
     this.actionQueue = [];
     this.currentActionQueue = null;
-    this.lastTriggeringElement = null;
+    this.lastTriggeringElements = [];
 
     this.actionEvents = {};
     this.attachedEventTypes = [];
@@ -159,7 +160,6 @@ export class Component {
       const action = {
         type: "syncInput",
         payload: {
-          pk: element.model.pk,
           name: element.model.name,
           value: element.getValue(),
         },
@@ -170,11 +170,65 @@ export class Component {
 
         // Update the existing action with the current value
         this.actionQueue.forEach((a) => {
-          if (
-            a.payload.name === element.model.name &&
-            a.payload.pk === element.model.pk
-          ) {
+          if (a.payload.name === element.model.name) {
             a.payload.value = element.getValue();
+            foundAction = true;
+          }
+        });
+
+        // Add a new action
+        if (!foundAction) {
+          this.actionQueue.push(action);
+          this.lastTriggeringElements.push(element);
+        }
+
+        return;
+      }
+
+      this.actionQueue.push(action);
+      this.lastTriggeringElements.push(element);
+
+      this.sendMessage(
+        element.model.debounceTime,
+        (triggeringElements, _, err) => {
+          if (err) {
+            console.error(err);
+          } else {
+            this.setModelValues(triggeringElements);
+            this.setDbModelValues(triggeringElements);
+          }
+        }
+      );
+    });
+  }
+
+  addDbEventListener(element, eventType) {
+    element.el.addEventListener(eventType, () => {
+      if (!element.db.name || !element.db.pk) {
+        return;
+      }
+
+      const action = {
+        type: "dbInput",
+        payload: {
+          db: element.db.name,
+          pk: element.db.pk,
+          fields: {},
+        },
+      };
+
+      action.payload.fields[element.field.name] = element.getValue();
+
+      if (element.field.isDefer) {
+        let foundAction = false;
+
+        // Update the existing action with the current value
+        this.actionQueue.forEach((a) => {
+          if (
+            a.payload.db === element.db.name &&
+            a.payload.pk === element.db.pk
+          ) {
+            a.payload.fields[element.field.name] = element.getValue();
             foundAction = true;
           }
         });
@@ -184,26 +238,21 @@ export class Component {
           this.actionQueue.push(action);
         }
 
-        this.lastTriggeringElement = element;
+        this.lastTriggeringElements.push(element);
 
         return;
       }
 
       this.actionQueue.push(action);
+      this.lastTriggeringElements.push(element);
 
       this.sendMessage(
         element.model.debounceTime,
-        (triggeringElement, updatedPks, err) => {
-          // console.log("updatedPks 2", updatedPks);
-
+        (triggeringElements, dbUpdates, err) => {
           if (err) {
             console.error(err);
-          } else if (triggeringElement) {
-            // console.log("exclude element", element);
-            this.setModelValues(triggeringElement);
           } else {
-            // console.log("do not exclude element");
-            this.setModelValues();
+            this.setDbModelValues(triggeringElements, dbUpdates);
           }
         }
       );
@@ -215,6 +264,8 @@ export class Component {
    */
   refreshEventListeners() {
     this.actionEvents = {};
+    this.modelEls = [];
+    this.dbEls = [];
 
     this.walker(this.root, (el) => {
       if (el.isSameNode(this.root)) {
@@ -227,7 +278,7 @@ export class Component {
       if (element.isUnicorn) {
         if (!isEmpty(element.model)) {
           if (
-            this.modelEls.filter((m) => m.el.isSameNode(element.el)).length ===
+            this.modelEls.filter((e) => e.el.isSameNode(element.el)).length ===
             0
           ) {
             this.modelEls.push(element);
@@ -235,6 +286,16 @@ export class Component {
           }
         }
 
+        if (!isEmpty(element.db) && !isEmpty(element.field)) {
+          if (
+            this.dbEls.filter((e) => e.el.isSameNode(element.el)).length === 0
+          ) {
+            this.dbEls.push(element);
+            this.addDbEventListener(element, "input");
+          }
+        }
+
+        // if (!isEmpty(element.db))
         element.actions.forEach((action) => {
           // if (element.actions.length > 0) {
           if (this.actionEvents[action.eventType]) {
@@ -265,16 +326,14 @@ export class Component {
     };
     this.actionQueue.push(action);
 
-    this.sendMessage(-1, (triggeringElement, updatedPks, err) => {
+    this.sendMessage(-1, (triggeringElements, dbUpdates, err) => {
       if (err && typeof errCallback === "function") {
         errCallback(err);
       } else if (err) {
         console.error(err);
       } else {
-        console.log("callMethod", triggeringElement, updatedPks);
-        this.setModelValues(triggeringElement, updatedPks);
-        // console.log("call method, no exclsuionn", excludeElement);
-        // console.log("updatedPks 1", updatedPks);
+        this.setModelValues(triggeringElements);
+        this.setDbModelValues(triggeringElements);
       }
     });
   }
@@ -346,6 +405,11 @@ export class Component {
    * @param {Element} element Element to set value to (value retrieved from `component.data`).
    */
   setValue(element) {
+    if (isEmpty(element.model)) {
+      // Don't try to set the value if there isn't a model on the element
+      return;
+    }
+
     const modelNamePieces = element.model.name.split(".");
     // Get local version of data in case have to traverse into a nested property
     let _data = this.data;
@@ -363,86 +427,89 @@ export class Component {
         } else {
           _data = _data[modelNamePiece];
         }
-      } else {
-        element.setValue(_data.fields[modelNamePiece]);
       }
     }
   }
 
   /**
-   * Sets all model values.
-   * @param {Element} triggeringElement The element that triggered the event.
+   * Sets all db model values.
+   * @param {[Element]} triggeringElements The elements that triggered the event.
+   * @param {Element} dbUpdates Updates from the database.
    */
-  setModelValues(triggeringElement, updatedPks) {
-    triggeringElement = triggeringElement || {};
+  setDbModelValues(triggeringElements, dbUpdates) {
+    triggeringElements = triggeringElements || [];
+    dbUpdates = dbUpdates || {};
+
+    this.dbEls.forEach((element) => {
+      triggeringElements.forEach((triggeringElement) => {
+        if (!triggeringElement.el.isSameNode(element.el)) {
+          let valueUpdated = false;
+          Object.keys(dbUpdates).forEach((key) => {
+            if (element.dbKey() === key) {
+              Object.keys(dbUpdates[key]).forEach((fieldName) => {
+                if (element.field.name === fieldName) {
+                  element.setValue(dbUpdates[key][fieldName]);
+                  valueUpdated = true;
+                }
+              });
+            }
+          });
+
+          if (!valueUpdated) {
+            element.setValue("");
+          }
+        }
+      });
+    });
+  }
+
+  /**
+   * Sets all model values.
+   * @param {[Element]} triggeringElements The elements that triggered the event.
+   */
+  setModelValues(triggeringElements) {
+    triggeringElements = triggeringElements || [];
     let elementFocused = false;
 
-    updatedPks = updatedPks || [];
-
-    // Focus on the element that is being excluded since that is what triggered the update.
-    // Prevents validation errors from stealing focus.
-    if (!isEmpty(triggeringElement) && !triggeringElement.model.isLazy) {
-      ["id", "key"].forEach((attr) => {
-        this.modelEls.forEach((element) => {
-          if (!elementFocused) {
-            if (
-              triggeringElement[attr] &&
-              triggeringElement[attr] === element[attr]
-            ) {
-              element.focus();
-              elementFocused = true;
+    triggeringElements.forEach((triggeringElement) => {
+      // Focus on the element that is being excluded since that is what triggered the update.
+      // Prevents validation errors from stealing focus.
+      if (!isEmpty(triggeringElement) && !triggeringElement.model.isLazy) {
+        ["id", "key"].forEach((attr) => {
+          this.modelEls.forEach((element) => {
+            if (!elementFocused) {
+              if (
+                triggeringElement[attr] &&
+                triggeringElement[attr] === element[attr]
+              ) {
+                element.focus();
+                elementFocused = true;
+              }
             }
-          }
+          });
         });
-      });
-    }
+      }
+    });
+
+    this.dbEls.forEach((element) => {
+      this.setValue(element);
+    });
 
     this.modelEls.forEach((element) => {
-      // console.log("element.modelKey()", element.modelKey());
+      let shouldSetValue = false;
 
-      // if (!isEmpty(triggeringElement)) {
-      //   console.log(
-      //     "triggeringElement.modelKey()",
-      //     triggeringElement.modelKey()
-      //   );
-      // }
+      triggeringElements.forEach((triggeringElement) => {
+        if (
+          element.id !== triggeringElement.id ||
+          element.key !== triggeringElement.key
+        ) {
+          shouldSetValue = true;
+        }
+      });
 
-      if (
-        !isEmpty(triggeringElement) &&
-        element.modelKey() === triggeringElement.modelKey()
-      ) {
-        // Make sure that the unicorn:value is re-set so that the value doesn't get overriden
-        element.elementValue = element.getValue();
-        // this.setValue(element);
-      }
-
-      if (
-        element.id !== triggeringElement.id ||
-        element.key !== triggeringElement.key
-      ) {
-        // if (
-        //   typeof element.model.pk !== "undefined" &&
-        //   element.model.pk !== null &&
-        //   updatedPks.length === 1 &&
-        //   updatedPks[0] !== element.model.pk
-        // ) {
-        //   console.log("skip setting value on element because of pk", element);
-        // } else {
-        //   console.log("this.setValue(element)", element);
-        //   this.setValue(element);
-        // }
-
+      if (shouldSetValue) {
         this.setValue(element);
       }
-
-      // if (
-      //   !isEmpty(triggeringElement) &&
-      //   element.modelKey() === triggeringElement.modelKey()
-      // ) {
-      //   // Make sure that the unicorn:value is re-set so that the value doesn't get overriden
-      //   element.elementValue = element.getValue();
-      //   // this.setValue(element);
-      // }
     });
   }
 
@@ -456,7 +523,7 @@ export class Component {
         return;
       }
 
-      // Prevent newtwork call when the action queue gets repeated
+      // Prevent network call when the action queue gets repeated
       if (_component.currentActionQueue === _component.actionQueue) {
         return;
       }
@@ -532,53 +599,23 @@ export class Component {
             });
           });
 
-          const triggeringElement = _component.lastTriggeringElement;
-          _component.lastTriggeringElement = null;
-          console.log("triggeringElement", triggeringElement);
-
-          // Check if the current actionQueue contains a callMethod. Prevents excluding
-          // an element from getting a value set because calling a component function can
-          // potentially have side effects which have to be reflected on the current element.
-          // let shouldExcludeTriggerElement = true;
-
-          // _component.currentActionQueue.forEach((action) => {
-          //   if (action.type === "callMethod") {
-          //     shouldExcludeTriggerElement = false;
-          //   }
-          // });
-
-          const updatedPks = [];
-
-          // should I get this if it's a call or sync? What use is excludeElements if this is here?
-          if (triggeringElement) {
-            _component.currentActionQueue.forEach((action) => {
-              if (
-                typeof action.payload.pk !== "undefined" &&
-                action.payload.pk
-              ) {
-                updatedPks.push(action.payload.pk);
-              }
-            });
-          }
-
-          // if (triggeringElement && updatedPks.length > 0) {
-          //   triggeringElement = true;
-          // }
-
-          // console.log("updatedPks", updatedPks);
+          const triggeringElements = _component.lastTriggeringElements;
+          _component.lastTriggeringElements = [];
 
           // Clear the current action queue
           _component.currentActionQueue = null;
 
+          const dbUpdates = responseJson.db || {};
+
           if (callback && typeof callback === "function") {
-            callback(triggeringElement, updatedPks, null);
+            callback(triggeringElements, dbUpdates, null);
           }
         })
         .catch((err) => {
           // Make sure to clear the current queues in case of an error
           _component.actionQueue = [];
           _component.currentActionQueue = null;
-          _component.lastTriggeringElement = null;
+          _component.lastTriggeringElements = [];
 
           if (callback && typeof callback === "function") {
             callback(null, null, err);

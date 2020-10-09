@@ -1,3 +1,4 @@
+from django_unicorn.db import DbModel
 from django_unicorn.components import UnicornView
 
 from coffee.models import Flavor
@@ -6,10 +7,10 @@ from coffee.models import Flavor
 class ModelsView(UnicornView):
     flavors = Flavor.objects.none()
     class_flavor = Flavor()
-    # available_flavors = Flavor.objects.none()
 
     def __init__(self, **kwargs):
         self.instance_flavor = Flavor()
+        self.new_flavor = Flavor()
         super().__init__(**kwargs)
 
     def hydrate(self):
@@ -17,16 +18,17 @@ class ModelsView(UnicornView):
 
     def add_instance_flavor(self):
         self.instance_flavor.save()
-        # self.instance_flavor = Flavor()
         self.reset()
 
     def add_class_flavor(self):
         self.class_flavor.save()
-        # self.class_flavor = Flavor()
         self.reset()
 
     def save(self):
         self.instance_flavor.save()
+
+    def save_new_flavor(self):
+        self.new_flavor.save()
 
     def available_flavors(self):
         flavors = Flavor.objects.all()
@@ -35,3 +37,6 @@ class ModelsView(UnicornView):
             return flavors.exclude(pk=self.instance_flavor.pk)
 
         return flavors
+
+    class Meta:
+        db_models = [DbModel("flavor", Flavor)]

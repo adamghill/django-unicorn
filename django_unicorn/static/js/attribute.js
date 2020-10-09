@@ -10,10 +10,10 @@ export class Attribute {
     this.value = this.attribute.value;
     this.isUnicorn = false;
     this.isModel = false;
+    this.isField = false;
     this.isPoll = false;
     this.isKey = false;
     this.isPK = false;
-    this.isValue = false;
     this.isError = false;
     this.modifiers = {};
     this.eventType = null;
@@ -25,19 +25,22 @@ export class Attribute {
    * Init the attribute.
    */
   init() {
+    // TODO: Change the contains to startswith
     if (contains(this.name, "unicorn:")) {
       this.isUnicorn = true;
 
       if (contains(this.name, "unicorn:model")) {
         this.isModel = true;
+      } else if (contains(this.name, "unicorn:field")) {
+        this.isField = true;
+      } else if (contains(this.name, "unicorn:db")) {
+        this.isDb = true;
       } else if (contains(this.name, "unicorn:poll")) {
         this.isPoll = true;
       } else if (this.name === "unicorn:key") {
         this.isKey = true;
       } else if (this.name === "unicorn:pk") {
         this.isPK = true;
-      } else if (this.name === "unicorn:value") {
-        this.isValue = true;
       } else if (contains(this.name, "unicorn:error:")) {
         this.isError = true;
       } else {

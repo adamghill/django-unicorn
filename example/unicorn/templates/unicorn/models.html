@@ -10,27 +10,47 @@
     <input type="text" unicorn:model="class_flavor.parent"></input>
     <button unicorn:click="add_class_flavor">Add Flavor (class variable)</button> -->
 
-    {% for flavor in flavors %}
-    <div unicorn:pk="{{ flavor.pk }}">
-        <h3>{{ flavor.pk }}</h3>
-
-        <label>Name</label>
-        <input type="text" unicorn:model.defer="instance_flavor.name" unicorn:value="{{ flavor.name }}"></input>
-        
-        <label>Label</label>
-        <input type="text" unicorn:model.defer="instance_flavor.label" unicorn:value="{{ flavor.label }}"></input>
-
-        {% comment %}
-        <label>Parent</label>
-        <select>
-            <option value="" selected>None</option>
-            {% for available_flavor in available_flavors %}
-            <option value="{{ available_flavor.pk }}" {% if instance_flavor.parent.pk == available_flavor.pk %}selected{% endif %}>{{ available_flavor.name }}</option>
-            {% endfor %}
-        </select>
-        {% endcomment %}
+    <div>
+        <div>
+            <h3>New</h3>
+            <div>
+                <label>Name</label>
+                <input type="text" unicorn:model.defer="new_flavor.label"></input>
+            </div>
+            <div>
+                <label>Label</label>
+                <input type="text" unicorn:model.defer="new_flavor.label"></input>
+            </div>
+        </div>
+        <button unicorn:click="save_new_flavor">Add New Flavor</button>
     </div>
-    {% endfor %}
+    
+    <div unicorn:db="flavor">
+        {% for flavor in flavors %}
+        <div unicorn:pk="{{ flavor.pk }}">
+            <h3>{{ flavor.pk }}</h3>
+            <div>
+                <label>Name</label>
+                <input type="text" unicorn:field.defer="name" value="{{ flavor.name }}"></input>
+            </div>
+            
+            <div>
+                <label>Label</label>
+                <input type="text" unicorn:field.defer="label" value="{{ flavor.label }}"></input>
+            </div>
+
+            {% comment %}
+            <label>Parent</label>
+            <select>
+                <option value="" selected>None</option>
+                {% for available_flavor in available_flavors %}
+                <option value="{{ available_flavor.pk }}" {% if instance_flavor.parent.pk == available_flavor.pk %}selected{% endif %}>{{ available_flavor.name }}</option>
+                {% endfor %}
+            </select>
+            {% endcomment %}
+        </div>
+        {% endfor %}
+    </div>
     <br />
 
     <button unicorn:click="save">Save</button>

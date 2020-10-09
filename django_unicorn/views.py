@@ -68,7 +68,6 @@ def _set_property_from_payload(
         param data: Dictionary that gets sent back with the response.
     """
 
-    property_pk = payload.get("pk")
     property_name = payload.get("name")
     property_value = payload.get("value")
     component.updating(property_name, property_value)
@@ -117,9 +116,6 @@ def _set_property_from_payload(
                 else:
                     component_or_field = getattr(component_or_field, property_name_part)
                     data_or_dict = data_or_dict.get(property_name_part, {})
-
-                    if isinstance(component_or_field, Model) and property_pk:
-                        component_or_field.pk = property_pk
             elif isinstance(component_or_field, dict):
                 if idx == len(property_name_parts) - 1:
                     component_or_field[property_name_part] = property_value
@@ -235,12 +231,49 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
 
     is_reset_called = False
 
+    db_updates = {}
+
     for action in component_request.action_queue:
         action_type = action.get("type")
         payload = action.get("payload", {})
 
         if action_type == "syncInput":
             _set_property_from_payload(component, payload, component_request.data)
+        elif action_type == "dbInput":
+            pk = payload.get("pk")
+            db_model_name = payload.get("db")
+            fields = payload.get("fields", {})
+
+            assert hasattr(component, "Meta") and hasattr(
+                component.Meta, "db_models"
+            ), f"Missing Meta.db_models list in component"
+
+            DbModel = None
+            db_defaults = {}
+
+            for m in component.Meta.db_models:
+                if m.name == db_model_name:
+                    DbModel = m.model_class
+                    db_defaults = m.defaults
+                    break
+
+            assert DbModel, f"Missing {db_model_name} in Meta.db_models"
+            assert issubclass(
+                DbModel, Model
+            ), "Model class must be an instance of `django.db.models.Model"
+
+            if fields:
+                fields_to_update = db_defaults
+                fields_to_update.update(fields)
+
+                if pk:
+                    DbModel.objects.filter(pk=pk).update(**fields_to_update)
+                else:
+                    instance = DbModel(**fields_to_update)
+                    instance.save()
+                    pk = instance.pk
+
+                db_updates[f"{db_model_name}:{pk}"] = fields
         elif action_type == "callMethod":
             call_method_name = payload.get("name", "")
             assert call_method_name, "Missing 'name' key for callMethod"
@@ -307,6 +340,7 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
         "dom": rendered_component,
         "data": component_request.data,
         "errors": component.errors,
+        "db": db_updates,
     }
 
     return JsonResponse(res)
