@@ -7,10 +7,11 @@ from django.db.models import Model, QuerySet
 
 def _get_model_dict(obj: Any) -> dict:
     """
-    Serializes Django models.
+    Serializes Django models. Uses the built-in Django JSON serializer, but moves the data around to
+    remove some unnecessary information and make the structure more compact.
     """
 
-    # Django's serialize always returns an array, so remove that from the string
+    # Django's serialize always returns an array, so remove the brackets from the string
     serialized_model = serialize("json", [obj])[1:-1]
     model_json = orjson.loads(serialized_model)
     model_pk = model_json.get("pk")
@@ -47,6 +48,12 @@ def _json_serializer(obj):
 
 
 def dumps(data: dict) -> str:
+    """
+    Converts the passed-in dictionary to a string representation.
+
+    Handles the following objects: dataclass, datetime, enum, float, int, numpy, str, uuid,
+    Django Model, Django QuerySet, any object with `to_json` method.
+    """
     dumped_data = orjson.dumps(data, default=_json_serializer).decode("utf-8")
 
     return dumped_data
