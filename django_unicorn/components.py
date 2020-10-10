@@ -12,7 +12,7 @@ from bs4.element import Tag
 from bs4.formatter import HTMLFormatter
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-from django.db.models import Model, QuerySet
+from django.db.models import Model
 from django.template.response import TemplateResponse
 from django.utils.safestring import mark_safe
 from django.views.generic.base import TemplateView

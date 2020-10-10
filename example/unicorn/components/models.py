@@ -6,14 +6,22 @@ from coffee.models import Flavor
 
 class ModelsView(UnicornView):
     flavors = Flavor.objects.none()
+
+    # Demonstrates how to use an instantiated model; class attributes get stored on
+    # the class, so django-unicorn handles clearing this with `_resettable_attributes_cache`
+    # in components.py
     class_flavor = Flavor()
 
     def __init__(self, **kwargs):
+        # Demonstrates how to use an instance variable on the class
         self.instance_flavor = Flavor()
-        self.new_flavor = Flavor()
+
+        # super() `has` to be called at the end
         super().__init__(**kwargs)
 
     def hydrate(self):
+        # Using `hydrate` is the best way to make sure that QuerySets
+        # are re-queried every time the component is loaded
         self.flavors = Flavor.objects.all().order_by("-id")[:2]
 
     def add_instance_flavor(self):
@@ -23,12 +31,6 @@ class ModelsView(UnicornView):
     def add_class_flavor(self):
         self.class_flavor.save()
         self.reset()
-
-    def save(self):
-        self.instance_flavor.save()
-
-    def save_new_flavor(self):
-        self.new_flavor.save()
 
     def available_flavors(self):
         flavors = Flavor.objects.all()

@@ -119,11 +119,32 @@ export class Component {
                   const actionForQueue = {
                     type: "syncInput",
                     payload: {
-                      pk: modelElement.model.pk,
                       name: modelElement.model.name,
                       value: modelElement.getValue(),
                     },
                   };
+                  this.actionQueue.push(actionForQueue);
+                }
+              });
+
+              const dbElsInTargetScope = this.dbEls.filter((e) =>
+                e.el.isSameNode(childEl)
+              );
+
+              dbElsInTargetScope.forEach((dbElement) => {
+                if (!isEmpty(dbElement.model) && dbElement.model.isLazy) {
+                  const actionForQueue = {
+                    type: "dbInput",
+                    payload: {
+                      db: dbElement.db.name,
+                      pk: dbElement.db.pk,
+                      fields: {},
+                    },
+                  };
+                  actionForQueue.payload.fields[
+                    dbElement.field.name
+                  ] = dbElement.getValue();
+
                   this.actionQueue.push(actionForQueue);
                 }
               });
@@ -208,6 +229,8 @@ export class Component {
         return;
       }
 
+      this.lastTriggeringElements.push(element);
+
       const action = {
         type: "dbInput",
         payload: {
@@ -238,13 +261,10 @@ export class Component {
           this.actionQueue.push(action);
         }
 
-        this.lastTriggeringElements.push(element);
-
         return;
       }
 
       this.actionQueue.push(action);
-      this.lastTriggeringElements.push(element);
 
       this.sendMessage(
         element.model.debounceTime,
@@ -291,7 +311,7 @@ export class Component {
             this.dbEls.filter((e) => e.el.isSameNode(element.el)).length === 0
           ) {
             this.dbEls.push(element);
-            this.addDbEventListener(element, "input");
+            this.addDbEventListener(element, element.field.eventType);
           }
         }
 
