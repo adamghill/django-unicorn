@@ -10,7 +10,7 @@
     <input type="text" unicorn:model="class_flavor.parent"></input>
     <button unicorn:click="add_class_flavor">Add Flavor (class variable)</button> -->
 
-    <div>
+    <!-- <div>
         <div>
             <h3>New</h3>
             <div>
@@ -23,7 +23,7 @@
             </div>
         </div>
         <button unicorn:click="save_new_flavor">Add New Flavor</button>
-    </div>
+    </div> -->
     
     <div unicorn:db="flavor">
         {% for flavor in flavors %}
@@ -31,12 +31,16 @@
             <h3>{{ flavor.pk }}</h3>
             <div>
                 <label>Name</label>
-                <input type="text" unicorn:field.defer="name" value="{{ flavor.name }}"></input>
+                <input type="text" unicorn:field.lazy="name" value="{{ flavor.name }}"></input>
+                <br />
+                {{ flavor.name }}
             </div>
             
             <div>
                 <label>Label</label>
-                <input type="text" unicorn:field.defer="label" value="{{ flavor.label }}"></input>
+                <input type="text" unicorn:field="label" value="{{ flavor.label }}"></input>
+                <br />
+                {{ flavor.label }}
             </div>
 
             {% comment %}
@@ -53,7 +57,7 @@
     </div>
     <br />
 
-    <button unicorn:click="save">Save</button>
+    <!-- <button unicorn:click="save">Save</button> -->
 
     {% comment %}
     <button unicorn:click="refresh">Refresh</button>

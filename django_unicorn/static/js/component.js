@@ -440,26 +440,23 @@ export class Component {
     triggeringElements = triggeringElements || [];
     dbUpdates = dbUpdates || {};
 
-    this.dbEls.forEach((element) => {
-      triggeringElements.forEach((triggeringElement) => {
-        if (!triggeringElement.el.isSameNode(element.el)) {
-          let valueUpdated = false;
-          Object.keys(dbUpdates).forEach((key) => {
-            if (element.dbKey() === key) {
-              Object.keys(dbUpdates[key]).forEach((fieldName) => {
-                if (element.field.name === fieldName) {
-                  element.setValue(dbUpdates[key][fieldName]);
-                  valueUpdated = true;
-                }
-              });
-            }
-          });
+    const lastTriggeringElement = triggeringElements.slice(-1)[0];
 
-          if (!valueUpdated) {
-            element.setValue("");
+    this.dbEls.forEach((element) => {
+      if (
+        typeof lastTriggeringElement === "undefined" ||
+        !lastTriggeringElement.el.isSameNode(element.el)
+      ) {
+        Object.keys(dbUpdates).forEach((key) => {
+          if (element.dbKey() === key) {
+            Object.keys(dbUpdates[key]).forEach((fieldName) => {
+              if (element.field.name === fieldName) {
+                element.setValue(dbUpdates[key][fieldName]);
+              }
+            });
           }
-        }
-      });
+        });
+      }
     });
   }
 
@@ -469,18 +466,24 @@ export class Component {
    */
   setModelValues(triggeringElements) {
     triggeringElements = triggeringElements || [];
-    let elementFocused = false;
 
-    triggeringElements.forEach((triggeringElement) => {
-      // Focus on the element that is being excluded since that is what triggered the update.
-      // Prevents validation errors from stealing focus.
-      if (!isEmpty(triggeringElement) && !triggeringElement.model.isLazy) {
+    // Focus on the last element on what triggered the update.
+    // Prevents validation errors from stealing focus.
+    if (triggeringElements.length > 0) {
+      let elementFocused = false;
+      const lastTriggeringElement = triggeringElements.slice(-1)[0];
+
+      if (
+        typeof lastTriggeringElement !== "undefined" &&
+        !isEmpty(lastTriggeringElement.model) &&
+        !lastTriggeringElement.model.isLazy
+      ) {
         ["id", "key"].forEach((attr) => {
           this.modelEls.forEach((element) => {
             if (!elementFocused) {
               if (
-                triggeringElement[attr] &&
-                triggeringElement[attr] === element[attr]
+                lastTriggeringElement[attr] &&
+                lastTriggeringElement[attr] === element[attr]
               ) {
                 element.focus();
                 elementFocused = true;
@@ -489,25 +492,20 @@ export class Component {
           });
         });
       }
-    });
-
-    this.dbEls.forEach((element) => {
-      this.setValue(element);
-    });
+    }
 
     this.modelEls.forEach((element) => {
       let shouldSetValue = false;
 
       triggeringElements.forEach((triggeringElement) => {
-        if (
-          element.id !== triggeringElement.id ||
-          element.key !== triggeringElement.key
-        ) {
+        if (!element.el.isSameNode(triggeringElement.el)) {
           shouldSetValue = true;
         }
       });
 
-      if (shouldSetValue) {
+      // Set the value if there are no triggering elements (happens on initial page load)
+      // or when the model element doesn't match one of the triggering elements
+      if (shouldSetValue || triggeringElements.length === 0) {
         this.setValue(element);
       }
     });
