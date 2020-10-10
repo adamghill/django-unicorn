@@ -1,7 +1,12 @@
-import { $, contains, isEmpty, toKebabCase, walk } from "./utils.js";
+import { $, contains, isEmpty, walk } from "./utils.js";
 import { debounce } from "./delayers.js";
 import { Element } from "./element.js";
 import { send } from "./messageSender.js";
+import {
+  addActionEventListener,
+  addDbEventListener,
+  addModelEventListener,
+} from "./eventListeners.js";
 
 /**
  * Encapsulate component.
@@ -56,198 +61,6 @@ export class Component {
   }
 
   /**
-   * Adds an action event listener to the document for each type of event (e.g. click, keyup, etc).
-   * Added at the document level because validation errors would sometimes remove the
-   * events when attached directly to the element.
-   */
-  addActionEventListener(eventType) {
-    this.document.addEventListener(eventType, (event) => {
-      const targetElement = new Element(event.target);
-
-      if (
-        targetElement &&
-        targetElement.isUnicorn &&
-        targetElement.actions.length > 0
-      ) {
-        this.actionEvents[eventType].forEach((actionEvent) => {
-          const { action } = actionEvent;
-          const { element } = actionEvent;
-
-          // Use isSameNode (not isEqualNode) because we want to check the nodes reference the same object
-          if (targetElement.el.isSameNode(element.el)) {
-            // Add the value of any child element of the target that is a lazy model to the action queue
-            // Handles situations similar to https://github.com/livewire/livewire/issues/528
-            walk(element.el, (childEl) => {
-              const modelElsInTargetScope = this.modelEls.filter((e) =>
-                e.el.isSameNode(childEl)
-              );
-
-              modelElsInTargetScope.forEach((modelElement) => {
-                if (!isEmpty(modelElement.model) && modelElement.model.isLazy) {
-                  const actionForQueue = {
-                    type: "syncInput",
-                    payload: {
-                      name: modelElement.model.name,
-                      value: modelElement.getValue(),
-                    },
-                  };
-                  this.actionQueue.push(actionForQueue);
-                }
-              });
-
-              const dbElsInTargetScope = this.dbEls.filter((e) =>
-                e.el.isSameNode(childEl)
-              );
-
-              dbElsInTargetScope.forEach((dbElement) => {
-                if (!isEmpty(dbElement.model) && dbElement.model.isLazy) {
-                  const actionForQueue = {
-                    type: "dbInput",
-                    payload: {
-                      db: dbElement.db.name,
-                      pk: dbElement.db.pk,
-                      fields: {},
-                    },
-                  };
-                  actionForQueue.payload.fields[
-                    dbElement.field.name
-                  ] = dbElement.getValue();
-
-                  this.actionQueue.push(actionForQueue);
-                }
-              });
-            });
-
-            if (action.isPrevent) {
-              event.preventDefault();
-            }
-
-            if (action.isStop) {
-              event.stopPropagation();
-            }
-
-            if (action.key) {
-              if (action.key === toKebabCase(event.key)) {
-                this.callMethod(action.name);
-              }
-            } else {
-              this.callMethod(action.name);
-            }
-          }
-        });
-      }
-    });
-  }
-
-  /**
-   * Adds a model event listener to the element.
-   * @param {Element} element Element that will get the event attached to.
-   * @param {string} eventType Event type to listen for.
-   */
-  addModelEventListener(element, eventType) {
-    element.el.addEventListener(eventType, () => {
-      const action = {
-        type: "syncInput",
-        payload: {
-          name: element.model.name,
-          value: element.getValue(),
-        },
-      };
-
-      if (element.model.isDefer) {
-        let foundAction = false;
-
-        // Update the existing action with the current value
-        this.actionQueue.forEach((a) => {
-          if (a.payload.name === element.model.name) {
-            a.payload.value = element.getValue();
-            foundAction = true;
-          }
-        });
-
-        // Add a new action
-        if (!foundAction) {
-          this.actionQueue.push(action);
-          this.lastTriggeringElements.push(element);
-        }
-
-        return;
-      }
-
-      this.actionQueue.push(action);
-      this.lastTriggeringElements.push(element);
-
-      this.sendMessage(
-        element.model.debounceTime,
-        (triggeringElements, _, err) => {
-          if (err) {
-            console.error(err);
-          } else {
-            this.setModelValues(triggeringElements);
-            this.setDbModelValues(triggeringElements);
-          }
-        }
-      );
-    });
-  }
-
-  addDbEventListener(element, eventType) {
-    element.el.addEventListener(eventType, () => {
-      if (!element.db.name || !element.db.pk) {
-        return;
-      }
-
-      this.lastTriggeringElements.push(element);
-
-      const action = {
-        type: "dbInput",
-        payload: {
-          db: element.db.name,
-          pk: element.db.pk,
-          fields: {},
-        },
-      };
-
-      action.payload.fields[element.field.name] = element.getValue();
-
-      if (element.field.isDefer) {
-        let foundAction = false;
-
-        // Update the existing action with the current value
-        this.actionQueue.forEach((a) => {
-          if (
-            a.payload.db === element.db.name &&
-            a.payload.pk === element.db.pk
-          ) {
-            a.payload.fields[element.field.name] = element.getValue();
-            foundAction = true;
-          }
-        });
-
-        // Add a new action
-        if (!foundAction) {
-          this.actionQueue.push(action);
-        }
-
-        return;
-      }
-
-      this.actionQueue.push(action);
-
-      this.sendMessage(
-        element.model.debounceTime,
-        (triggeringElements, dbUpdates, err) => {
-          if (err) {
-            console.error(err);
-          } else {
-            this.setDbModelValues(triggeringElements, dbUpdates);
-          }
-        }
-      );
-    });
-  }
-
-  /**
    * Sets event listeners on unicorn elements.
    */
   refreshEventListeners() {
@@ -270,7 +83,7 @@ export class Component {
             0
           ) {
             this.modelEls.push(element);
-            this.addModelEventListener(element, element.model.eventType);
+            addModelEventListener(this, element, element.model.eventType);
           }
         }
 
@@ -279,7 +92,7 @@ export class Component {
             this.dbEls.filter((e) => e.el.isSameNode(element.el)).length === 0
           ) {
             this.dbEls.push(element);
-            this.addDbEventListener(element, element.field.eventType);
+            addDbEventListener(this, element, element.field.eventType);
           }
         }
 
@@ -294,7 +107,7 @@ export class Component {
                 .length === 0
             ) {
               this.attachedEventTypes.push(action.eventType);
-              this.addActionEventListener(action.eventType);
+              addActionEventListener(this, action.eventType);
             }
           }
         });
@@ -312,7 +125,7 @@ export class Component {
     };
     this.actionQueue.push(action);
 
-    this.sendMessage(-1, (triggeringElements, dbUpdates, err) => {
+    this.queueMessage(-1, (triggeringElements, _, err) => {
       if (err && typeof errCallback === "function") {
         errCallback(err);
       } else if (err) {
@@ -498,12 +311,11 @@ export class Component {
   }
 
   /**
-   * Calls the message endpoint and merges the results into the document.
+   * Queues the `messageSender.send` call.
    */
-  sendMessage(debounceTime, callback) {
+  queueMessage(debounceTime, callback) {
     if (debounceTime === -1) {
       debounce(send, 250, false)(this, callback);
-      // queue(_sendMessage, 250)(this);
     } else {
       debounce(send, debounceTime, false)(this, callback);
     }

@@ -2,6 +2,9 @@ import { getCsrfToken } from "./utils.js";
 import morphdom from "./morphdom/2.6.1/morphdom.js";
 import { MORPHDOM_OPTIONS } from "./morphdom/2.6.1/options.js";
 
+/**
+ * Calls the message endpoint and merges the results into the document.
+ */
 export function send(component, callback) {
   // Prevent network call when there isn't an action
   if (component.actionQueue.length === 0) {
