@@ -6,4 +6,3 @@ class DbModel:
         self.name = name
         self.model_class = model_class
         self.defaults = defaults
-
