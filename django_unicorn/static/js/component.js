@@ -1,39 +1,7 @@
-import {
-  $,
-  contains,
-  getCsrfToken,
-  isEmpty,
-  toKebabCase,
-  walk,
-} from "./utils.js";
+import { $, contains, isEmpty, toKebabCase, walk } from "./utils.js";
 import { debounce } from "./delayers.js";
 import { Element } from "./element.js";
-import morphdom from "./morphdom/2.6.1/morphdom.js";
-
-export const MORPHDOM_OPTIONS = {
-  childrenOnly: false,
-  // eslint-disable-next-line consistent-return
-  getNodeKey(node) {
-    // A node's unique identifier. Used to rearrange elements rather than
-    // creating and destroying an element that already exists.
-    if (node.attributes) {
-      const key = node.getAttribute("unicorn:key") || node.id;
-
-      if (key) {
-        return key;
-      }
-    }
-  },
-  // eslint-disable-next-line consistent-return
-  onBeforeElUpdated(fromEl, toEl) {
-    // Because morphdom also supports vDom nodes, it uses isSameNode to detect
-    // sameness. When dealing with DOM nodes, we want isEqualNode, otherwise
-    // isSameNode will ALWAYS return false.
-    if (fromEl.isEqualNode(toEl)) {
-      return false;
-    }
-  },
-};
+import { send } from "./messageSender.js";
 
 /**
  * Encapsulate component.
@@ -315,9 +283,7 @@ export class Component {
           }
         }
 
-        // if (!isEmpty(element.db))
         element.actions.forEach((action) => {
-          // if (element.actions.length > 0) {
           if (this.actionEvents[action.eventType]) {
             this.actionEvents[action.eventType].push({ action, element });
           } else {
@@ -535,117 +501,11 @@ export class Component {
    * Calls the message endpoint and merges the results into the document.
    */
   sendMessage(debounceTime, callback) {
-    function _sendMessage(_component) {
-      // Prevent network call when there isn't an action
-      if (_component.actionQueue.length === 0) {
-        return;
-      }
-
-      // Prevent network call when the action queue gets repeated
-      if (_component.currentActionQueue === _component.actionQueue) {
-        return;
-      }
-
-      // Set the current action queue and clear the action queue in case another event happens
-      _component.currentActionQueue = _component.actionQueue;
-      _component.actionQueue = [];
-
-      const body = {
-        id: _component.id,
-        data: _component.data,
-        checksum: _component.checksum,
-        actionQueue: _component.currentActionQueue,
-      };
-
-      const headers = {
-        Accept: "application/json",
-        "X-Requested-With": "XMLHttpRequest",
-      };
-      headers[_component.csrfTokenHeaderName] = getCsrfToken();
-
-      fetch(_component.syncUrl, {
-        method: "POST",
-        headers,
-        body: JSON.stringify(body),
-      })
-        .then((response) => {
-          if (response.ok) {
-            return response.json();
-          }
-
-          throw Error(
-            `Error when getting response: ${response.statusText} (${response.status})`
-          );
-        })
-        .then((responseJson) => {
-          if (!responseJson) {
-            return;
-          }
-
-          if (responseJson.error) {
-            // TODO: Check for "Checksum does not match" error and try to fix it
-            throw Error(responseJson.error);
-          }
-
-          // Remove any unicorn validation messages before trying to merge with morphdom
-          _component.modelEls.forEach((element) => {
-            // Re-initialize element to make sure it is up to date
-            element.init();
-            element.removeErrors();
-          });
-
-          // Get the data from the response
-          _component.data = responseJson.data || {};
-          _component.errors = responseJson.errors || {};
-          const rerenderedComponent = responseJson.dom;
-
-          morphdom(_component.root, rerenderedComponent, MORPHDOM_OPTIONS);
-
-          // Refresh the checksum based on the new data
-          _component.refreshChecksum();
-
-          // Reset all event listeners
-          _component.refreshEventListeners();
-
-          // Re-add unicorn validation messages from errors
-          _component.modelEls.forEach((element) => {
-            Object.keys(_component.errors).forEach((modelName) => {
-              if (element.model.name === modelName) {
-                const error = _component.errors[modelName][0];
-                element.addError(error);
-              }
-            });
-          });
-
-          const triggeringElements = _component.lastTriggeringElements;
-          _component.lastTriggeringElements = [];
-
-          // Clear the current action queue
-          _component.currentActionQueue = null;
-
-          const dbUpdates = responseJson.db || {};
-
-          if (callback && typeof callback === "function") {
-            callback(triggeringElements, dbUpdates, null);
-          }
-        })
-        .catch((err) => {
-          // Make sure to clear the current queues in case of an error
-          _component.actionQueue = [];
-          _component.currentActionQueue = null;
-          _component.lastTriggeringElements = [];
-
-          if (callback && typeof callback === "function") {
-            callback(null, null, err);
-          }
-        });
-    }
-
     if (debounceTime === -1) {
-      debounce(_sendMessage, 250, false)(this);
+      debounce(send, 250, false)(this, callback);
       // queue(_sendMessage, 250)(this);
     } else {
-      debounce(_sendMessage, debounceTime, false)(this);
+      debounce(send, debounceTime, false)(this, callback);
     }
   }
 }
