@@ -1,5 +1,5 @@
 import test from "ava";
-import { MORPHDOM_OPTIONS } from "../../../django_unicorn/static/js/component.js"
+import { MORPHDOM_OPTIONS } from "../../../django_unicorn/static/js/morphdom/2.6.1/options.js";
 import morphdom from "../../../django_unicorn/static/js/morphdom/2.6.1/morphdom.js";
 import { getEl } from "../utils.js";
 
