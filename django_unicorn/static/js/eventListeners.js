@@ -126,7 +126,7 @@ export function addModelEventListener(component, element, eventType) {
     component.actionQueue.push(action);
     component.lastTriggeringElements.push(element);
 
-    component.sendMessage(
+    component.queueMessage(
       element.model.debounceTime,
       (triggeringElements, _, err) => {
         if (err) {
@@ -189,7 +189,7 @@ export function addDbEventListener(component, element, eventType) {
 
     component.actionQueue.push(action);
 
-    component.sendMessage(
+    component.queueMessage(
       element.model.debounceTime,
       (triggeringElements, dbUpdates, err) => {
         if (err) {
