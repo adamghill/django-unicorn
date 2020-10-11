@@ -236,13 +236,11 @@ export class Component {
     triggeringElements = triggeringElements || [];
     dbUpdates = dbUpdates || {};
 
-    const lastTriggeringElement = triggeringElements.slice(-1)[0];
-
     this.dbEls.forEach((element) => {
-      if (
-        typeof lastTriggeringElement === "undefined" ||
-        !lastTriggeringElement.el.isSameNode(element.el)
-      ) {
+      if (element.db.pk === "") {
+        // Empty string for the PK implies that the model is not associated to an actual model instance
+        element.setValue("");
+      } else {
         Object.keys(dbUpdates).forEach((key) => {
           if (element.dbKey() === key) {
             Object.keys(dbUpdates[key]).forEach((fieldName) => {

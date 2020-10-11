@@ -8,9 +8,9 @@
         <label>Label</label>
         <input type="text" unicorn:model.defer="instance_flavor.label"></input>
 
+        <br />
         <button unicorn:click="add_instance_flavor">Add Flavor (instance variable)</button>
     </div>
-    <br /><br />
 
     <div>
         <h3>New Flavor (class attribute)</h3>
@@ -21,15 +21,44 @@
         <label>Label</label>
         <input type="text" unicorn:model.defer="class_flavor.label"></input>
 
+        <br />
         <button unicorn:click="add_class_flavor">Add Flavor (class attribute)</button>
     </div>
     
     <div unicorn:db="flavor">
+        <div unicorn:pk="">
+            <h3>New flavor with blank PK</h3>
+            <div>
+                <label>Name</label>
+                <input type="text" unicorn:field.defer="name" value="{{ flavor.name }}"></input>
+                
+                <strong>Name</strong> {{ flavor.name }}
+            </div>
+            
+            <div>
+                <label>Label</label>
+                <input type="text" unicorn:field.defer="label" value="{{ flavor.label }}"></input>
+                
+                <strong>Label</strong> {{ flavor.label }}
+            </div>
+
+            {% comment %}
+            <label>Parent</label>
+            <select>
+                <option value="" selected>None</option>
+                {% for available_flavor in available_flavors %}
+                <option value="{{ available_flavor.pk }}" {% if instance_flavor.parent.pk == available_flavor.pk %}selected{% endif %}>{{ available_flavor.name }}</option>
+                {% endfor %}
+            </select>
+            {% endcomment %}
+        </div>
+        <br />
+
         <h3>Last 2 added flavors</h3>
 
         {% for flavor in flavors %}
         <div unicorn:pk="{{ flavor.pk }}">
-            <h4>{{ flavor.pk }}</h4>
+            <h4>PK: {{ flavor.pk }}</h4>
             <div>
                 <label>Name</label>
                 <input type="text" unicorn:field.defer="name" value="{{ flavor.name }}"></input>
