@@ -103,6 +103,12 @@ export function addModelEventListener(component, element, eventType) {
       },
     };
 
+    if (
+      !component.lastTriggeringElements.some((e) => e.el.isSameNode(element.el))
+    ) {
+      component.lastTriggeringElements.push(element);
+    }
+
     if (element.model.isDefer) {
       let foundAction = false;
 
@@ -117,14 +123,12 @@ export function addModelEventListener(component, element, eventType) {
       // Add a new action
       if (!foundAction) {
         component.actionQueue.push(action);
-        component.lastTriggeringElements.push(element);
       }
 
       return;
     }
 
     component.actionQueue.push(action);
-    component.lastTriggeringElements.push(element);
 
     component.queueMessage(
       element.model.debounceTime,
@@ -148,11 +152,19 @@ export function addModelEventListener(component, element, eventType) {
  */
 export function addDbEventListener(component, element, eventType) {
   element.el.addEventListener(eventType, () => {
-    if (!element.db.name || !element.db.pk) {
+    if (
+      !element.db.name ||
+      typeof element.db.pk === "undefined" ||
+      element.db.pk == null
+    ) {
       return;
     }
 
-    component.lastTriggeringElements.push(element);
+    if (
+      !component.lastTriggeringElements.some((e) => e.el.isSameNode(element.el))
+    ) {
+      component.lastTriggeringElements.push(element);
+    }
 
     const action = {
       type: "dbInput",

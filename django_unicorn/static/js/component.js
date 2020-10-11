@@ -88,9 +88,7 @@ export class Component {
         }
 
         if (!isEmpty(element.db) && !isEmpty(element.field)) {
-          if (
-            this.dbEls.filter((e) => e.el.isSameNode(element.el)).length === 0
-          ) {
+          if (!this.dbEls.some((e) => e.el.isSameNode(element.el))) {
             this.dbEls.push(element);
             addDbEventListener(this, element, element.field.eventType);
           }
@@ -103,8 +101,7 @@ export class Component {
             this.actionEvents[action.eventType] = [{ action, element }];
 
             if (
-              this.attachedEventTypes.filter((et) => et === action.eventType)
-                .length === 0
+              !this.attachedEventTypes.some((et) => et === action.eventType)
             ) {
               this.attachedEventTypes.push(action.eventType);
               addActionEventListener(this, action.eventType);
