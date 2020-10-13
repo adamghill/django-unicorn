@@ -25,19 +25,19 @@
         <button unicorn:click="add_class_flavor">Add Flavor (class attribute)</button>
     </div>
     
-    <div unicorn:db="flavor">
+    <div unicorn:model="flavors" unicorn:db="flavor">
         <div unicorn:pk="">
             <h3>New flavor with blank PK</h3>
             <div>
                 <label>Name</label>
-                <input type="text" unicorn:field.defer="name" value="{{ flavor.name }}"></input>
+                <input type="text" unicorn:field.defer="name"></input>
                 
                 <strong>Name</strong> {{ flavor.name }}
             </div>
             
             <div>
                 <label>Label</label>
-                <input type="text" unicorn:field.defer="label" value="{{ flavor.label }}"></input>
+                <input type="text" unicorn:field.defer="label"></input>
                 
                 <strong>Label</strong> {{ flavor.label }}
             </div>
@@ -61,14 +61,14 @@
             <h4>PK: {{ flavor.pk }}</h4>
             <div>
                 <label>Name</label>
-                <input type="text" unicorn:field.defer="name" value="{{ flavor.name }}"></input>
+                <input type="text" unicorn:field.defer="name"></input>
                 
                 <strong>Name</strong> {{ flavor.name }}
             </div>
             
             <div>
                 <label>Label</label>
-                <input type="text" unicorn:field.defer="label" value="{{ flavor.label }}"></input>
+                <input type="text" unicorn:field.defer="label"></input>
                 
                 <strong>Label</strong> {{ flavor.label }}
             </div>

@@ -1,4 +1,4 @@
-import { Component } from "./component.js"
+import { Component } from "./component.js";
 
 let messageUrl = "";
 const csrfTokenHeaderName = "X-CSRFToken";
@@ -23,6 +23,7 @@ export function componentInit(args) {
   components[component.id] = component;
 
   component.setModelValues();
+  component.setDbModelValues();
 }
 
 /**

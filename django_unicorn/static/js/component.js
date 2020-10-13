@@ -41,6 +41,8 @@ export class Component {
 
     this.actionEvents = {};
     this.attachedEventTypes = [];
+    this.attachedModelEvents = [];
+    this.attachedDbEvents = [];
 
     this.init();
     this.refreshEventListeners();
@@ -77,20 +79,32 @@ export class Component {
       const element = new Element(el);
 
       if (element.isUnicorn) {
-        if (!isEmpty(element.model)) {
-          if (
-            this.modelEls.filter((e) => e.el.isSameNode(element.el)).length ===
-            0
-          ) {
-            this.modelEls.push(element);
-            addModelEventListener(this, element, element.model.eventType);
+        if (
+          !isEmpty(element.field) &&
+          !(isEmpty(element.db) && isEmpty(element.model))
+        ) {
+          if (!this.attachedDbEvents.some((e) => e.el.isSameNode(element.el))) {
+            this.attachedDbEvents.push(element);
+            addDbEventListener(this, element.el, element.field.eventType);
           }
-        }
 
-        if (!isEmpty(element.db) && !isEmpty(element.field)) {
           if (!this.dbEls.some((e) => e.el.isSameNode(element.el))) {
             this.dbEls.push(element);
-            addDbEventListener(this, element, element.field.eventType);
+          }
+        } else if (
+          !isEmpty(element.model) &&
+          isEmpty(element.db) &&
+          isEmpty(element.field)
+        ) {
+          if (
+            !this.attachedModelEvents.some((e) => e.el.isSameNode(element.el))
+          ) {
+            this.attachedModelEvents.push(element);
+            addModelEventListener(this, element, element.model.eventType);
+          }
+
+          if (!this.modelEls.some((e) => e.el.isSameNode(element.el))) {
+            this.modelEls.push(element);
           }
         }
 
@@ -129,7 +143,7 @@ export class Component {
         console.error(err);
       } else {
         this.setModelValues(triggeringElements);
-        this.setDbModelValues(triggeringElements);
+        this.setDbModelValues();
       }
     });
   }
@@ -229,11 +243,10 @@ export class Component {
 
   /**
    * Sets all db model values.
-   * @param {[Element]} triggeringElements The elements that triggered the event.
    * @param {Element} dbUpdates Updates from the database.
    */
-  setDbModelValues(triggeringElements, dbUpdates) {
-    triggeringElements = triggeringElements || [];
+  setDbModelValues(dbUpdates) {
+    // TOOD: Remove dbUpdates?
     dbUpdates = dbUpdates || {};
 
     this.dbEls.forEach((element) => {
@@ -241,13 +254,21 @@ export class Component {
         // Empty string for the PK implies that the model is not associated to an actual model instance
         element.setValue("");
       } else {
-        Object.keys(dbUpdates).forEach((key) => {
-          if (element.dbKey() === key) {
-            Object.keys(dbUpdates[key]).forEach((fieldName) => {
-              if (element.field.name === fieldName) {
-                element.setValue(dbUpdates[key][fieldName]);
-              }
-            });
+        if (typeof element.model.name === "undefined") {
+          throw Error("Setting a field value requires a model to be set");
+        }
+
+        let datas = this.data[element.model.name];
+
+        // Force the data to be an array if it isn't already for the next step
+        if (!Array.isArray(datas)) {
+          datas = [datas];
+        }
+
+        datas.forEach((model) => {
+          // Convert the model's pk to a string because it will always be a string on the element
+          if (model.pk.toString() === element.db.pk) {
+            element.setValue(model[element.field.name]);
           }
         });
       }

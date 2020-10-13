@@ -110,13 +110,14 @@ export class Element {
     // Look in parent elements if the db.pk or db.name is missing
     if (this.isUnicorn && !isEmpty(this.field)) {
       const dbAttrs = ["pk", "name"];
+      let elToCheck = this;
 
       dbAttrs.forEach((attr) => {
-        let elToCheck = this;
+        elToCheck = this;
 
         while (typeof this.db[attr] === "undefined" || this.db[attr] == null) {
           if (elToCheck.el.getAttribute("unicorn:checksum")) {
-            // A litte hacky, but stop looking for a pk after you hit the beginning of the component
+            // A litte hacky, but stop looking after you hit the beginning of the component
             break;
           }
 
@@ -130,6 +131,27 @@ export class Element {
           elToCheck = elToCheck.parent;
         }
       });
+
+      elToCheck = this;
+
+      while (
+        typeof this.model.name === "undefined" ||
+        this.model.name == null
+      ) {
+        if (elToCheck.el.getAttribute("unicorn:checksum")) {
+          // A litte hacky, but stop looking after you hit the beginning of the component
+          break;
+        }
+
+        if (
+          elToCheck.isUnicorn &&
+          typeof elToCheck.model.name !== "undefined"
+        ) {
+          this.model.name = elToCheck.model.name;
+        }
+
+        elToCheck = elToCheck.parent;
+      }
     }
   }
 
@@ -181,6 +203,10 @@ export class Element {
    * Sets the value of an element. Tries to deal with HTML weirdnesses.
    */
   setValue(val) {
+    if (typeof this.el.type === "undefined") {
+      return;
+    }
+
     if (this.el.type.toLowerCase() === "radio") {
       // Handle radio buttons
       if (this.el.value === val) {

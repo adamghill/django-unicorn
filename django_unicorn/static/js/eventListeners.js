@@ -52,6 +52,7 @@ export function addActionEventListener(component, eventType) {
                 const actionForQueue = {
                   type: "dbInput",
                   payload: {
+                    model: dbElement.model.name,
                     db: dbElement.db.name,
                     pk: dbElement.db.pk,
                     fields: {},
@@ -137,7 +138,7 @@ export function addModelEventListener(component, element, eventType) {
           console.error(err);
         } else {
           component.setModelValues(triggeringElements);
-          component.setDbModelValues(triggeringElements);
+          component.setDbModelValues();
         }
       }
     );
@@ -147,13 +148,17 @@ export function addModelEventListener(component, element, eventType) {
 /**
  * Adds a db event listener to the element.
  * @param {Component} component Component that contains the element.
- * @param {Element} element Element that will get the event attached to.
+ * @param {DOM Element} el DOM `Element` that will get the event attached.
  * @param {string} eventType Event type to listen for.
  */
-export function addDbEventListener(component, element, eventType) {
-  element.el.addEventListener(eventType, () => {
+export function addDbEventListener(component, el, eventType) {
+  el.addEventListener(eventType, (event) => {
+    const element = new Element(event.target);
+
     if (
-      !element.db.name ||
+      ((typeof element.db.name === "undefined" || element.db.name == null) &&
+        (typeof element.model.name === "undefined" ||
+          element.model.name == null)) ||
       typeof element.db.pk === "undefined" ||
       element.db.pk == null
     ) {
@@ -169,6 +174,7 @@ export function addDbEventListener(component, element, eventType) {
     const action = {
       type: "dbInput",
       payload: {
+        model: element.model.name,
         db: element.db.name,
         pk: element.db.pk,
         fields: {},
@@ -201,15 +207,12 @@ export function addDbEventListener(component, element, eventType) {
 
     component.actionQueue.push(action);
 
-    component.queueMessage(
-      element.model.debounceTime,
-      (triggeringElements, dbUpdates, err) => {
-        if (err) {
-          console.error(err);
-        } else {
-          component.setDbModelValues(triggeringElements, dbUpdates);
-        }
+    component.queueMessage(element.model.debounceTime, (_, dbUpdates, err) => {
+      if (err) {
+        console.error(err);
+      } else {
+        component.setDbModelValues(dbUpdates);
       }
-    );
+    });
   });
 }

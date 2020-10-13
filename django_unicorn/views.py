@@ -241,26 +241,44 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
             _set_property_from_payload(component, payload, component_request.data)
         elif action_type == "dbInput":
             pk = payload.get("pk")
-            db_model_name = payload.get("db")
-            fields = payload.get("fields", {})
 
-            assert hasattr(component, "Meta") and hasattr(
-                component.Meta, "db_models"
-            ), f"Missing Meta.db_models list in component"
+            # Find model
+            model = payload.get("model")
+            db_model_name = payload.get("db")
 
             DbModel = None
             db_defaults = {}
 
-            for m in component.Meta.db_models:
-                if m.name == db_model_name:
-                    DbModel = m.model_class
-                    db_defaults = m.defaults
-                    break
+            if model:
+                model_class = getattr(component, model)
 
-            assert DbModel, f"Missing {db_model_name} in Meta.db_models"
+                if hasattr(model_class, "model"):
+                    DbModel = model_class.model
+
+                    for m in component.Meta.db_models:
+                        if m.model_class == model_class.model:
+                            db_defaults = m.defaults
+                            break
+
+            if not DbModel and db_model_name:
+                assert hasattr(component, "Meta") and hasattr(
+                    component.Meta, "db_models"
+                ), f"Missing Meta.db_models list in component"
+
+                for m in component.Meta.db_models:
+                    if m.name == db_model_name:
+                        DbModel = m.model_class
+                        db_defaults = m.defaults
+                        break
+
+            fields = payload.get("fields", {})
+
+            assert (
+                DbModel
+            ), f"Missing {model}.model and {db_model_name} in Meta.db_models"
             assert issubclass(
                 DbModel, Model
-            ), "Model class must be an instance of `django.db.models.Model"
+            ), "Model must be an instance of `django.db.models.Model"
 
             if fields:
                 fields_to_update = db_defaults
