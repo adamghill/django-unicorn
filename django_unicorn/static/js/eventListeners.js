@@ -133,7 +133,7 @@ export function addModelEventListener(component, element, eventType) {
 
     component.queueMessage(
       element.model.debounceTime,
-      (triggeringElements, _, err) => {
+      (triggeringElements, err) => {
         if (err) {
           console.error(err);
         } else {
@@ -207,11 +207,11 @@ export function addDbEventListener(component, el, eventType) {
 
     component.actionQueue.push(action);
 
-    component.queueMessage(element.model.debounceTime, (_, dbUpdates, err) => {
+    component.queueMessage(element.model.debounceTime, (_, err) => {
       if (err) {
         console.error(err);
       } else {
-        component.setDbModelValues(dbUpdates);
+        component.setDbModelValues();
       }
     });
   });

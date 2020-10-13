@@ -231,8 +231,6 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
 
     is_reset_called = False
 
-    db_updates = {}
-
     for action in component_request.action_queue:
         action_type = action.get("type")
         payload = action.get("payload", {})
@@ -290,8 +288,6 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
                     instance = DbModel(**fields_to_update)
                     instance.save()
                     pk = instance.pk
-
-                db_updates[f"{db_model_name}:{pk}"] = fields
         elif action_type == "callMethod":
             call_method_name = payload.get("name", "")
             assert call_method_name, "Missing 'name' key for callMethod"
@@ -358,7 +354,6 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
         "dom": rendered_component,
         "data": component_request.data,
         "errors": component.errors,
-        "db": db_updates,
     }
 
     return JsonResponse(res)

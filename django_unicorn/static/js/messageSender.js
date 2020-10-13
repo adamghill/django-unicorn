@@ -93,10 +93,8 @@ export function send(component, callback) {
       // Clear the current action queue
       component.currentActionQueue = null;
 
-      const dbUpdates = responseJson.db || {};
-
       if (callback && typeof callback === "function") {
-        callback(triggeringElements, dbUpdates, null);
+        callback(triggeringElements, null);
       }
     })
     .catch((err) => {

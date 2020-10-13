@@ -136,7 +136,7 @@ export class Component {
     };
     this.actionQueue.push(action);
 
-    this.queueMessage(-1, (triggeringElements, _, err) => {
+    this.queueMessage(-1, (triggeringElements, err) => {
       if (err && typeof errCallback === "function") {
         errCallback(err);
       } else if (err) {
@@ -243,12 +243,8 @@ export class Component {
 
   /**
    * Sets all db model values.
-   * @param {Element} dbUpdates Updates from the database.
    */
-  setDbModelValues(dbUpdates) {
-    // TOOD: Remove dbUpdates?
-    dbUpdates = dbUpdates || {};
-
+  setDbModelValues() {
     this.dbEls.forEach((element) => {
       if (element.db.pk === "") {
         // Empty string for the PK implies that the model is not associated to an actual model instance
