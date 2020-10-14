@@ -1,4 +1,5 @@
 import { Component } from "./component.js";
+import { hasValue } from "./utils.js";
 
 let messageUrl = "";
 const csrfTokenHeaderName = "X-CSRFToken";
@@ -33,7 +34,7 @@ export function call(componentName, methodName) {
   let component;
 
   Object.keys(components).forEach((id) => {
-    if (typeof component === "undefined") {
+    if (hasValue(component)) {
       const _component = components[id];
 
       if (_component.name === componentName) {

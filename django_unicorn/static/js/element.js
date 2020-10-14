@@ -1,5 +1,5 @@
 import { Attribute } from "./attribute.js";
-import { isEmpty } from "./utils.js";
+import { isEmpty, hasValue } from "./utils.js";
 
 /**
  * Encapsulate DOM element for Unicorn-related information.
@@ -166,11 +166,7 @@ export class Element {
    * A key that takes into consideration the db name and pk.
    */
   dbKey() {
-    if (
-      !isEmpty(this.db) &&
-      typeof this.db.pk !== "undefined" &&
-      typeof this.db.name !== "undefined"
-    ) {
+    if (hasValue(this.db) && hasValue(this.db.pk) && hasValue(this.db.name)) {
       return `${this.db.name}:${this.db.pk}`;
     }
 
@@ -203,7 +199,7 @@ export class Element {
    * Sets the value of an element. Tries to deal with HTML weirdnesses.
    */
   setValue(val) {
-    if (typeof this.el.type === "undefined") {
+    if (isEmpty(this.el.type)) {
       return;
     }
 

@@ -1,5 +1,5 @@
 /**
- * Checks if an object is empty. Useful for check if a dictionary has any values.
+ * Checks if an object is empty. Useful to check if a dictionary has a value.
  */
 export function isEmpty(obj) {
   return (
@@ -7,6 +7,13 @@ export function isEmpty(obj) {
     obj === null ||
     (Object.keys(obj).length === 0 && obj.constructor === Object)
   );
+}
+
+/**
+ * Checks if an object has a value.
+ */
+export function hasValue(obj) {
+  return !isEmpty(obj);
 }
 
 /**
