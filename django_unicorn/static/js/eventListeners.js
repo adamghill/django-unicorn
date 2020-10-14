@@ -91,11 +91,13 @@ export function addActionEventListener(component, eventType) {
 /**
  * Adds a model event listener to the element.
  * @param {Component} component Component that contains the element.
- * @param {Element} element Element that will get the event attached to.
+ * @param {DOM Element} el DOM Element that will get the event attached.
  * @param {string} eventType Event type to listen for.
  */
-export function addModelEventListener(component, element, eventType) {
-  element.el.addEventListener(eventType, () => {
+export function addModelEventListener(component, el, eventType) {
+  el.addEventListener(eventType, (event) => {
+    const element = new Element(event.target);
+
     const action = {
       type: "syncInput",
       payload: {

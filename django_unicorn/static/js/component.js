@@ -100,7 +100,7 @@ export class Component {
             !this.attachedModelEvents.some((e) => e.el.isSameNode(element.el))
           ) {
             this.attachedModelEvents.push(element);
-            addModelEventListener(this, element, element.model.eventType);
+            addModelEventListener(this, element.el, element.model.eventType);
           }
 
           if (!this.modelEls.some((e) => e.el.isSameNode(element.el))) {
