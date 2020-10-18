@@ -1,5 +1,5 @@
 import { Attribute } from "./attribute.js";
-import { isEmpty, hasValue } from "./utils.js";
+import { isEmpty, generateDbKey, hasValue } from "./utils.js";
 
 /**
  * Encapsulate DOM element for Unicorn-related information.
@@ -30,7 +30,7 @@ export class Element {
     this.db = {};
     this.field = {};
 
-    this.key = undefined;
+    this.key = null;
     this.errors = [];
 
     if (!this.el.attributes) {
@@ -112,19 +112,17 @@ export class Element {
       const dbAttrs = ["pk", "name"];
       let elToCheck = this;
 
+      // Look for `db.pk` and `db.name`
       dbAttrs.forEach((attr) => {
         elToCheck = this;
 
-        while (typeof this.db[attr] === "undefined" || this.db[attr] == null) {
+        while (isEmpty(this.db[attr])) {
           if (elToCheck.el.getAttribute("unicorn:checksum")) {
             // A litte hacky, but stop looking after you hit the beginning of the component
             break;
           }
 
-          if (
-            elToCheck.isUnicorn &&
-            typeof elToCheck.db[attr] !== "undefined"
-          ) {
+          if (elToCheck.isUnicorn && hasValue(elToCheck.db[attr])) {
             this.db[attr] = elToCheck.db[attr];
           }
 
@@ -132,21 +130,16 @@ export class Element {
         }
       });
 
+      // Look for model.name
       elToCheck = this;
 
-      while (
-        typeof this.model.name === "undefined" ||
-        this.model.name == null
-      ) {
+      while (isEmpty(this.model.name)) {
         if (elToCheck.el.getAttribute("unicorn:checksum")) {
           // A litte hacky, but stop looking after you hit the beginning of the component
           break;
         }
 
-        if (
-          elToCheck.isUnicorn &&
-          typeof elToCheck.model.name !== "undefined"
-        ) {
+        if (elToCheck.isUnicorn && hasValue(elToCheck.model.name)) {
           this.model.name = elToCheck.model.name;
         }
 
@@ -166,11 +159,16 @@ export class Element {
    * A key that takes into consideration the db name and pk.
    */
   dbKey() {
-    if (hasValue(this.db) && hasValue(this.db.pk) && hasValue(this.db.name)) {
-      return `${this.db.name}:${this.db.pk}`;
-    }
+    return generateDbKey(this);
+  }
 
-    return null;
+  /**
+   * Check if another `Element` is the same as this `Element`.
+   * @param {Element} other
+   */
+  isSame(other) {
+    // Use isSameNode (not isEqualNode) because we want to check the nodes reference the same object
+    return this.el.isSameNode(other.el);
   }
 
   /**

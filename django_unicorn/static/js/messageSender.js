@@ -1,4 +1,4 @@
-import { getCsrfToken } from "./utils.js";
+import { getCsrfToken, isFunction } from "./utils.js";
 import morphdom from "./morphdom/2.6.1/morphdom.js";
 import { MORPHDOM_OPTIONS } from "./morphdom/2.6.1/options.js";
 
@@ -93,7 +93,7 @@ export function send(component, callback) {
       // Clear the current action queue
       component.currentActionQueue = null;
 
-      if (callback && typeof callback === "function") {
+      if (isFunction(callback)) {
         callback(triggeringElements, null);
       }
     })
@@ -103,7 +103,7 @@ export function send(component, callback) {
       component.currentActionQueue = null;
       component.lastTriggeringElements = [];
 
-      if (callback && typeof callback === "function") {
+      if (isFunction(callback)) {
         callback(null, null, err);
       }
     });

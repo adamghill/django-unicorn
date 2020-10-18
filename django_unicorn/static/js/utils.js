@@ -17,6 +17,25 @@ export function hasValue(obj) {
 }
 
 /**
+ * Checks if an object is a function.
+ */
+export function isFunction(obj) {
+  return obj && typeof obj === "function";
+}
+
+/**
+ * Makes a dbKey based on the passed-in object.
+ * @param {*} obj
+ */
+export function generateDbKey(obj) {
+  if (hasValue(obj.db) && hasValue(obj.db.pk) && hasValue(obj.db.name)) {
+    return `${obj.db.name}:${obj.db.pk}`;
+  }
+
+  return null;
+}
+
+/**
  * Checks if a string has the search text.
  */
 export function contains(str, search) {

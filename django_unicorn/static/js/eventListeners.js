@@ -1,4 +1,4 @@
-import { isEmpty, toKebabCase, walk } from "./utils.js";
+import { generateDbKey, isEmpty, toKebabCase, walk } from "./utils.js";
 import { Element } from "./element.js";
 
 /**
@@ -21,8 +21,7 @@ export function addActionEventListener(component, eventType) {
         const { action } = actionEvent;
         const { element } = actionEvent;
 
-        // Use isSameNode (not isEqualNode) because we want to check the nodes reference the same object
-        if (targetElement.el.isSameNode(element.el)) {
+        if (targetElement.isSame(element)) {
           // Add the value of any child element of the target that is a lazy model to the action queue
           // Handles situations similar to https://github.com/livewire/livewire/issues/528
           walk(element.el, (childEl) => {
@@ -106,9 +105,7 @@ export function addModelEventListener(component, el, eventType) {
       },
     };
 
-    if (
-      !component.lastTriggeringElements.some((e) => e.el.isSameNode(element.el))
-    ) {
+    if (!component.lastTriggeringElements.some((e) => e.isSame(element))) {
       component.lastTriggeringElements.push(element);
     }
 
@@ -158,18 +155,13 @@ export function addDbEventListener(component, el, eventType) {
     const element = new Element(event.target);
 
     if (
-      ((typeof element.db.name === "undefined" || element.db.name == null) &&
-        (typeof element.model.name === "undefined" ||
-          element.model.name == null)) ||
-      typeof element.db.pk === "undefined" ||
-      element.db.pk == null
+      (isEmpty(element.db.name) && isEmpty(element.model.name)) ||
+      isEmpty(element.db.pk)
     ) {
       return;
     }
 
-    if (
-      !component.lastTriggeringElements.some((e) => e.el.isSameNode(element.el))
-    ) {
+    if (!component.lastTriggeringElements.some((e) => e.isSame(element))) {
       component.lastTriggeringElements.push(element);
     }
 
@@ -177,8 +169,7 @@ export function addDbEventListener(component, el, eventType) {
       type: "dbInput",
       payload: {
         model: element.model.name,
-        db: element.db.name,
-        pk: element.db.pk,
+        db: element.db,
         fields: {},
       },
     };
@@ -190,10 +181,7 @@ export function addDbEventListener(component, el, eventType) {
 
       // Update the existing action with the current value
       component.actionQueue.forEach((a) => {
-        if (
-          a.payload.db === element.db.name &&
-          a.payload.pk === element.db.pk
-        ) {
+        if (generateDbKey(a.payload) === element.dbKey()) {
           a.payload.fields[element.field.name] = element.getValue();
           foundAction = true;
         }

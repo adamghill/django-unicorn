@@ -238,11 +238,10 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
         if action_type == "syncInput":
             _set_property_from_payload(component, payload, component_request.data)
         elif action_type == "dbInput":
-            pk = payload.get("pk")
-
-            # Find model
             model = payload.get("model")
-            db_model_name = payload.get("db")
+            db = payload.get("db", {})
+            db_model_name = db.get("name")
+            pk = db.get("pk")
 
             DbModel = None
             db_defaults = {}

@@ -1,4 +1,4 @@
-import { $, contains, isEmpty, walk } from "./utils.js";
+import { $, contains, hasValue, isEmpty, walk } from "./utils.js";
 import { debounce } from "./delayers.js";
 import { Element } from "./element.js";
 import { send } from "./messageSender.js";
@@ -80,30 +80,28 @@ export class Component {
 
       if (element.isUnicorn) {
         if (
-          !isEmpty(element.field) &&
-          !(isEmpty(element.db) && isEmpty(element.model))
+          hasValue(element.field) &&
+          (hasValue(element.db) || hasValue(element.model))
         ) {
-          if (!this.attachedDbEvents.some((e) => e.el.isSameNode(element.el))) {
+          if (!this.attachedDbEvents.some((e) => e.isSame(element))) {
             this.attachedDbEvents.push(element);
             addDbEventListener(this, element.el, element.field.eventType);
           }
 
-          if (!this.dbEls.some((e) => e.el.isSameNode(element.el))) {
+          if (!this.dbEls.some((e) => e.isSame(element))) {
             this.dbEls.push(element);
           }
         } else if (
-          !isEmpty(element.model) &&
+          hasValue(element.model) &&
           isEmpty(element.db) &&
           isEmpty(element.field)
         ) {
-          if (
-            !this.attachedModelEvents.some((e) => e.el.isSameNode(element.el))
-          ) {
+          if (!this.attachedModelEvents.some((e) => e.isSame(element))) {
             this.attachedModelEvents.push(element);
             addModelEventListener(this, element.el, element.model.eventType);
           }
 
-          if (!this.modelEls.some((e) => e.el.isSameNode(element.el))) {
+          if (!this.modelEls.some((e) => e.isSame(element))) {
             this.modelEls.push(element);
           }
         }
@@ -154,7 +152,7 @@ export class Component {
   initPolling() {
     const rootElement = new Element(this.root);
 
-    if (rootElement.isUnicorn && !isEmpty(rootElement.poll)) {
+    if (rootElement.isUnicorn && hasValue(rootElement.poll)) {
       this.poll = rootElement.poll;
       this.poll.timer = null;
 
@@ -250,7 +248,7 @@ export class Component {
         // Empty string for the PK implies that the model is not associated to an actual model instance
         element.setValue("");
       } else {
-        if (typeof element.model.name === "undefined") {
+        if (isEmpty(element.model.name)) {
           throw Error("Setting a field value requires a model to be set");
         }
 
@@ -285,8 +283,8 @@ export class Component {
       const lastTriggeringElement = triggeringElements.slice(-1)[0];
 
       if (
-        typeof lastTriggeringElement !== "undefined" &&
-        !isEmpty(lastTriggeringElement.model) &&
+        hasValue(lastTriggeringElement) &&
+        hasValue(lastTriggeringElement.model) &&
         !lastTriggeringElement.model.isLazy
       ) {
         ["id", "key"].forEach((attr) => {
@@ -309,7 +307,7 @@ export class Component {
       let shouldSetValue = false;
 
       triggeringElements.forEach((triggeringElement) => {
-        if (!element.el.isSameNode(triggeringElement.el)) {
+        if (!element.isSame(triggeringElement)) {
           shouldSetValue = true;
         }
       });
