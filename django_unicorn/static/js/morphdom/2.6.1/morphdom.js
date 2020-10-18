@@ -9,7 +9,10 @@ function morphAttrs(fromNode, toNode) {
   var fromValue;
 
   // document-fragments dont have attributes so lets not do anything
-  if (toNode.nodeType === DOCUMENT_FRAGMENT_NODE || fromNode.nodeType === DOCUMENT_FRAGMENT_NODE) {
+  if (
+    toNode.nodeType === DOCUMENT_FRAGMENT_NODE ||
+    fromNode.nodeType === DOCUMENT_FRAGMENT_NODE
+  ) {
     return;
   }
 
@@ -25,7 +28,7 @@ function morphAttrs(fromNode, toNode) {
       fromValue = fromNode.getAttributeNS(attrNamespaceURI, attrName);
 
       if (fromValue !== attrValue) {
-        if (attr.prefix === 'xmlns') {
+        if (attr.prefix === "xmlns") {
           attrName = attr.name; // It's not allowed to set an attribute with the XMLNS namespace without specifying the `xmlns` prefix
         }
         fromNode.setAttributeNS(attrNamespaceURI, attrName, attrValue);
@@ -63,14 +66,15 @@ function morphAttrs(fromNode, toNode) {
 }
 
 var range; // Create a range object for efficently rendering strings to elements.
-var NS_XHTML = 'http://www.w3.org/1999/xhtml';
+var NS_XHTML = "http://www.w3.org/1999/xhtml";
 
-var doc = typeof document === 'undefined' ? undefined : document;
-var HAS_TEMPLATE_SUPPORT = !!doc && 'content' in doc.createElement('template');
-var HAS_RANGE_SUPPORT = !!doc && doc.createRange && 'createContextualFragment' in doc.createRange();
+var doc = typeof document === "undefined" ? undefined : document;
+var HAS_TEMPLATE_SUPPORT = !!doc && "content" in doc.createElement("template");
+var HAS_RANGE_SUPPORT =
+  !!doc && doc.createRange && "createContextualFragment" in doc.createRange();
 
 function createFragmentFromTemplate(str) {
-  var template = doc.createElement('template');
+  var template = doc.createElement("template");
   template.innerHTML = str;
   return template.content.childNodes[0];
 }
@@ -86,7 +90,7 @@ function createFragmentFromRange(str) {
 }
 
 function createFragmentFromWrap(str) {
-  var fragment = doc.createElement('body');
+  var fragment = doc.createElement("body");
   fragment.innerHTML = str;
   return fragment.childNodes[0];
 }
@@ -139,9 +143,11 @@ function compareNodeNames(fromEl, toEl) {
   // need to normalize the tag name before comparing. Normal HTML elements that are
   // in the "http://www.w3.org/1999/xhtml"
   // are converted to upper case
-  if (fromCodeStart <= 90 && toCodeStart >= 97) { // from is upper and to is lower
+  if (fromCodeStart <= 90 && toCodeStart >= 97) {
+    // from is upper and to is lower
     return fromNodeName === toNodeName.toUpperCase();
-  } else if (toCodeStart <= 90 && fromCodeStart >= 97) { // to is upper and from is lower
+  } else if (toCodeStart <= 90 && fromCodeStart >= 97) {
+    // to is upper and from is lower
     return toNodeName === fromNodeName.toUpperCase();
   } else {
     return false;
@@ -158,9 +164,9 @@ function compareNodeNames(fromEl, toEl) {
  * @return {Element}
  */
 function createElementNS(name, namespaceURI) {
-  return !namespaceURI || namespaceURI === NS_XHTML ?
-    doc.createElement(name) :
-    doc.createElementNS(namespaceURI, name);
+  return !namespaceURI || namespaceURI === NS_XHTML
+    ? doc.createElement(name)
+    : doc.createElementNS(namespaceURI, name);
 }
 
 /**
@@ -180,7 +186,7 @@ function syncBooleanAttrProp(fromEl, toEl, name) {
   if (fromEl[name] !== toEl[name]) {
     fromEl[name] = toEl[name];
     if (fromEl[name]) {
-      fromEl.setAttribute(name, '');
+      fromEl.setAttribute(name, "");
     } else {
       fromEl.removeAttribute(name);
     }
@@ -192,17 +198,17 @@ var specialElHandlers = {
     var parentNode = fromEl.parentNode;
     if (parentNode) {
       var parentName = parentNode.nodeName.toUpperCase();
-      if (parentName === 'OPTGROUP') {
+      if (parentName === "OPTGROUP") {
         parentNode = parentNode.parentNode;
         parentName = parentNode && parentNode.nodeName.toUpperCase();
       }
-      if (parentName === 'SELECT' && !parentNode.hasAttribute('multiple')) {
-        if (fromEl.hasAttribute('selected') && !toEl.selected) {
+      if (parentName === "SELECT" && !parentNode.hasAttribute("multiple")) {
+        if (fromEl.hasAttribute("selected") && !toEl.selected) {
           // Workaround for MS Edge bug where the 'selected' attribute can only be
           // removed if set to a non-empty value:
           // https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/12087679/
-          fromEl.setAttribute('selected', 'selected');
-          fromEl.removeAttribute('selected');
+          fromEl.setAttribute("selected", "selected");
+          fromEl.removeAttribute("selected");
         }
         // We have to reset select element's selectedIndex to -1, otherwise setting
         // fromEl.selected using the syncBooleanAttrProp below has no effect.
@@ -210,7 +216,7 @@ var specialElHandlers = {
         parentNode.selectedIndex = -1;
       }
     }
-    syncBooleanAttrProp(fromEl, toEl, 'selected');
+    syncBooleanAttrProp(fromEl, toEl, "selected");
   },
   /**
    * The "value" attribute is special for the <input> element since it sets
@@ -219,15 +225,15 @@ var specialElHandlers = {
    * initial value.  Similar for the "checked" attribute, and "disabled".
    */
   INPUT: function (fromEl, toEl) {
-    syncBooleanAttrProp(fromEl, toEl, 'checked');
-    syncBooleanAttrProp(fromEl, toEl, 'disabled');
+    syncBooleanAttrProp(fromEl, toEl, "checked");
+    syncBooleanAttrProp(fromEl, toEl, "disabled");
 
     if (fromEl.value !== toEl.value) {
       fromEl.value = toEl.value;
     }
 
-    if (!toEl.hasAttribute('value')) {
-      fromEl.removeAttribute('value');
+    if (!toEl.hasAttribute("value")) {
+      fromEl.removeAttribute("value");
     }
   },
 
@@ -243,7 +249,10 @@ var specialElHandlers = {
       // node value and vise versa. This ignores an empty update.
       var oldValue = firstChild.nodeValue;
 
-      if (oldValue == newValue || (!newValue && oldValue == fromEl.placeholder)) {
+      if (
+        oldValue == newValue ||
+        (!newValue && oldValue == fromEl.placeholder)
+      ) {
         return;
       }
 
@@ -251,7 +260,7 @@ var specialElHandlers = {
     }
   },
   SELECT: function (fromEl, toEl) {
-    if (!toEl.hasAttribute('multiple')) {
+    if (!toEl.hasAttribute("multiple")) {
       var selectedIndex = -1;
       var i = 0;
       // We have to loop through children of fromEl, not toEl since nodes can be moved
@@ -263,12 +272,12 @@ var specialElHandlers = {
       var nodeName;
       while (curChild) {
         nodeName = curChild.nodeName && curChild.nodeName.toUpperCase();
-        if (nodeName === 'OPTGROUP') {
+        if (nodeName === "OPTGROUP") {
           optgroup = curChild;
           curChild = optgroup.firstChild;
         } else {
-          if (nodeName === 'OPTION') {
-            if (curChild.hasAttribute('selected')) {
+          if (nodeName === "OPTION") {
+            if (curChild.hasAttribute("selected")) {
               selectedIndex = i;
               break;
             }
@@ -284,7 +293,7 @@ var specialElHandlers = {
 
       fromEl.selectedIndex = selectedIndex;
     }
-  }
+  },
 };
 
 var ELEMENT_NODE = 1;
@@ -292,25 +301,28 @@ var DOCUMENT_FRAGMENT_NODE$1 = 11;
 var TEXT_NODE = 3;
 var COMMENT_NODE = 8;
 
-function noop() { }
+function noop() {}
 
 function defaultGetNodeKey(node) {
   if (node) {
-    return (node.getAttribute && node.getAttribute('id')) || node.id;
+    return (node.getAttribute && node.getAttribute("id")) || node.id;
   }
 }
 
 function morphdomFactory(morphAttrs) {
-
   return function morphdom(fromNode, toNode, options) {
     if (!options) {
       options = {};
     }
 
-    if (typeof toNode === 'string') {
-      if (fromNode.nodeName === '#document' || fromNode.nodeName === 'HTML' || fromNode.nodeName === 'BODY') {
+    if (typeof toNode === "string") {
+      if (
+        fromNode.nodeName === "#document" ||
+        fromNode.nodeName === "HTML" ||
+        fromNode.nodeName === "BODY"
+      ) {
         var toNodeHtml = toNode;
-        toNode = doc.createElement('html');
+        toNode = doc.createElement("html");
         toNode.innerHTML = toNodeHtml;
       } else {
         toNode = toElement(toNode);
@@ -339,7 +351,6 @@ function morphdomFactory(morphAttrs) {
       if (node.nodeType === ELEMENT_NODE) {
         var curChild = node.firstChild;
         while (curChild) {
-
           var key = undefined;
 
           if (skipKeyedNodes && (key = getNodeKey(curChild))) {
@@ -411,7 +422,10 @@ function morphdomFactory(morphAttrs) {
     // }
 
     function indexTree(node) {
-      if (node.nodeType === ELEMENT_NODE || node.nodeType === DOCUMENT_FRAGMENT_NODE$1) {
+      if (
+        node.nodeType === ELEMENT_NODE ||
+        node.nodeType === DOCUMENT_FRAGMENT_NODE$1
+      ) {
         var curChild = node.firstChild;
         while (curChild) {
           var key = getNodeKey(curChild);
@@ -501,7 +515,7 @@ function morphdomFactory(morphAttrs) {
         }
       }
 
-      if (fromEl.nodeName !== 'TEXTAREA') {
+      if (fromEl.nodeName !== "TEXTAREA") {
         morphChildren(fromEl, toEl);
       } else {
         if (fromEl.innerHTML != toEl.innerHTML) {
@@ -532,7 +546,10 @@ function morphdomFactory(morphAttrs) {
         while (curFromNodeChild) {
           fromNextSibling = curFromNodeChild.nextSibling;
 
-          if (curToNodeChild.isSameNode && curToNodeChild.isSameNode(curFromNodeChild)) {
+          if (
+            curToNodeChild.isSameNode &&
+            curToNodeChild.isSameNode(curFromNodeChild)
+          ) {
             curToNodeChild = toNextSibling;
             curFromNodeChild = fromNextSibling;
             continue outer;
@@ -583,7 +600,11 @@ function morphdomFactory(morphAttrs) {
                       } else {
                         // NOTE: we skip nested keyed nodes from being removed since there is
                         //       still a chance they will be matched up later
-                        removeNode(curFromNodeChild, fromEl, true /* skip keyed nodes */);
+                        removeNode(
+                          curFromNodeChild,
+                          fromEl,
+                          true /* skip keyed nodes */
+                        );
                       }
 
                       curFromNodeChild = matchingFromEl;
@@ -599,7 +620,9 @@ function morphdomFactory(morphAttrs) {
                 isCompatible = false;
               }
 
-              isCompatible = isCompatible !== false && compareNodeNames(curFromNodeChild, curToNodeChild);
+              isCompatible =
+                isCompatible !== false &&
+                compareNodeNames(curFromNodeChild, curToNodeChild);
               if (isCompatible) {
                 // We found compatible DOM elements so transform
                 // the current "from" node to match the current
@@ -607,8 +630,10 @@ function morphdomFactory(morphAttrs) {
                 // MORPH
                 morphEl(curFromNodeChild, curToNodeChild);
               }
-
-            } else if (curFromNodeType === TEXT_NODE || curFromNodeType == COMMENT_NODE) {
+            } else if (
+              curFromNodeType === TEXT_NODE ||
+              curFromNodeType == COMMENT_NODE
+            ) {
               // Both nodes being compared are Text or Comment nodes
               isCompatible = true;
               // Simply update nodeValue on the original node to
@@ -616,7 +641,6 @@ function morphdomFactory(morphAttrs) {
               if (curFromNodeChild.nodeValue !== curToNodeChild.nodeValue) {
                 curFromNodeChild.nodeValue = curToNodeChild.nodeValue;
               }
-
             }
           }
 
@@ -651,7 +675,11 @@ function morphdomFactory(morphAttrs) {
         // our "to node" and we exhausted all of the children "from"
         // nodes. Therefore, we will just append the current "to" node
         // to the end
-        if (curToNodeKey && (matchingFromEl = fromNodesLookup[curToNodeKey]) && compareNodeNames(matchingFromEl, curToNodeChild)) {
+        if (
+          curToNodeKey &&
+          (matchingFromEl = fromNodesLookup[curToNodeKey]) &&
+          compareNodeNames(matchingFromEl, curToNodeChild)
+        ) {
           fromEl.appendChild(matchingFromEl);
           // MORPH
           morphEl(matchingFromEl, curToNodeChild);
@@ -663,7 +691,9 @@ function morphdomFactory(morphAttrs) {
             }
 
             if (curToNodeChild.actualize) {
-              curToNodeChild = curToNodeChild.actualize(fromEl.ownerDocument || doc);
+              curToNodeChild = curToNodeChild.actualize(
+                fromEl.ownerDocument || doc
+              );
             }
             fromEl.appendChild(curToNodeChild);
             handleNodeAdded(curToNodeChild);
@@ -693,13 +723,20 @@ function morphdomFactory(morphAttrs) {
         if (toNodeType === ELEMENT_NODE) {
           if (!compareNodeNames(fromNode, toNode)) {
             onNodeDiscarded(fromNode);
-            morphedNode = moveChildren(fromNode, createElementNS(toNode.nodeName, toNode.namespaceURI));
+            morphedNode = moveChildren(
+              fromNode,
+              createElementNS(toNode.nodeName, toNode.namespaceURI)
+            );
           }
         } else {
           // Going from an element node to a text node
           morphedNode = toNode;
         }
-      } else if (morphedNodeType === TEXT_NODE || morphedNodeType === COMMENT_NODE) { // Text or comment node
+      } else if (
+        morphedNodeType === TEXT_NODE ||
+        morphedNodeType === COMMENT_NODE
+      ) {
+        // Text or comment node
         if (toNodeType === morphedNodeType) {
           if (morphedNode.nodeValue !== toNode.nodeValue) {
             morphedNode.nodeValue = toNode.nodeValue;
