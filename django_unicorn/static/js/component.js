@@ -1,4 +1,4 @@
-import { $, contains, hasValue, isEmpty, walk } from "./utils.js";
+import { $, contains, hasValue, isEmpty, isFunction, walk } from "./utils.js";
 import { debounce } from "./delayers.js";
 import { Element } from "./element.js";
 import { send } from "./messageSender.js";
@@ -135,7 +135,7 @@ export class Component {
     this.actionQueue.push(action);
 
     this.queueMessage(-1, (triggeringElements, err) => {
-      if (err && typeof errCallback === "function") {
+      if (err && isFunction(errCallback)) {
         errCallback(err);
       } else if (err) {
         console.error(err);
