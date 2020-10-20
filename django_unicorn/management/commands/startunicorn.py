@@ -13,7 +13,7 @@ class {camel_case_component_name}View(UnicornView):
 """
 
 TEMPLATE_FILE = """<div>
-    <!-- put code here -->
+    <!-- put 🦄 component code here -->
 </div>
 """
 
@@ -58,3 +58,9 @@ class Command(BaseCommand):
             template_path = Path(f"unicorn/templates/unicorn/{component_name}.html")
             template_path.write_text(TEMPLATE_FILE)
             self.stdout.write(self.style.SUCCESS(f"Created {template_path}."))
+
+            self.stdout.write(
+                self.style.SUCCESS(
+                    f"\nMake sure to add '\"unicorn\",' to your INSTALLED_APPS array in your settings file if necessary."
+                )
+            )
