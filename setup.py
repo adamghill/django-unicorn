@@ -4,29 +4,19 @@
 # This is a temporary solution for the fact that `pip install -e`
 # fails when there is not a `setup.py`.
 
-import re
+import json
+from configparser import ConfigParser
 from distutils.core import setup
-from pathlib import Path
 
 
-def get_version():
-    """
-    Grabs the version from pyproject.toml. Uses regex to avoid installing a dependency.
-    """
-
-    pyproject_path = Path("pyproject.toml")
-    version = "0.1.0"
-
-    if pyproject_path.exists():
-        with open(pyproject_path) as f:
-            pyproject_toml = f.read()
-            s = re.search(r"version\s*=\s*\"(.*?)\"", pyproject_toml)
-
-            if s.groups():
-                version = s.groups()[0]
-
-    return version
+def project_info():
+    config = ConfigParser()
+    config.read('pyproject.toml')
+    project = config['tool.poetry']
+    return {
+        'name': json.loads(project['name']),
+        'version': json.loads(project['version']),
+    }
 
 
-# TODO: read package name with regex
-setup(name="django-unicorn", version=get_version())
+setup(**project_info())
