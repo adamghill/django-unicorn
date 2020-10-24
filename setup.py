@@ -11,11 +11,11 @@ from distutils.core import setup
 
 def project_info():
     config = ConfigParser()
-    config.read('pyproject.toml')
-    project = config['tool.poetry']
+    config.read("pyproject.toml")
+    project = config["tool.poetry"]
     return {
-        'name': json.loads(project['name']),
-        'version': json.loads(project['version']),
+        "name": json.loads(project["name"]),
+        "version": json.loads(project["version"]),
     }
 
 
