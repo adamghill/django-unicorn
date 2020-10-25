@@ -1,8 +1,11 @@
+import orjson
 import pytest
 from django.http import JsonResponse
 
 from django_unicorn.components import ComponentLoadError
+from django_unicorn.utils import generate_checksum
 from django_unicorn.views import message
+from example.coffee.models import Flavor
 
 
 def assert_json_error(response, error):
@@ -71,3 +74,66 @@ def test_message_component_not_found(client):
         e.exconly()
         == "django_unicorn.components.ComponentLoadError: 'test' component could not be loaded."
     )
+
+
+def test_message_nested_sync_input(client):
+    data = {"dictionary": {"name": "test"}}
+    message = {
+        "actionQueue": [
+            {
+                "payload": {"name": "dictionary.name", "value": "test1"},
+                "type": "syncInput",
+            }
+        ],
+        "data": data,
+        "checksum": generate_checksum(orjson.dumps(data)),
+        "id": "FDHcbzGf",
+    }
+
+    response = post_json(
+        client, message, url="/message/tests.views.components.TestComponent"
+    )
+
+    body = orjson.loads(response.content)
+
+    assert body["id"] == "FDHcbzGf"
+    assert not body["errors"]
+    assert body["data"] == {"dictionary": {"name": "test1"}}
+
+
+@pytest.mark.django_db
+def test_message_db_input(client):
+    flavor = Flavor(id=1, name="Enzymatic-Flowery")
+    flavor.save()
+    data = {"flavors": [{"pk": flavor.pk, "title": flavor.name}]}
+
+    message = {
+        "actionQueue": [
+            {
+                "payload": {
+                    "model": "flavors",
+                    "db": {"pk": flavor.pk, "name": "flavor"},
+                    "fields": {"name": "Flowery-Floral"},
+                },
+                "type": "dbInput",
+            },
+            {"type": "callMethod", "payload": {"name": "refresh", "params": []}},
+        ],
+        "data": data,
+        "checksum": generate_checksum(orjson.dumps(data)),
+        "id": "FDHcbzGf",
+    }
+
+    response = post_json(
+        client, message, url="/message/tests.views.components.TestModelComponent"
+    )
+
+    flavor = Flavor.objects.get(id=1)
+    assert flavor.name == "Flowery-Floral"
+
+    body = orjson.loads(response.content)
+
+    assert not body["errors"]
+    assert body["data"] == {
+        "flavors": [{"pk": 1, "name": "Flowery-Floral", "label": "", "parent": None}]
+    }
