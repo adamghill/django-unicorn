@@ -92,7 +92,7 @@ def test_message_nested_sync_input(client):
     }
 
     response = post_json(
-        client, message, url="/message/tests.views.components.TestComponent"
+        client, message, url="/message/tests.views.fake_components.TestComponent"
     )
 
     body = orjson.loads(response.content)
@@ -100,6 +100,28 @@ def test_message_nested_sync_input(client):
     assert body["id"] == "FDHcbzGf"
     assert not body["errors"]
     assert body["data"] == {"dictionary": {"name": "test1"}}
+
+
+def test_message_call_method(client):
+    data = {}
+    message = {
+        "actionQueue": [
+            {"payload": {"name": "refresh", "params": []}, "type": "callMethod",}
+        ],
+        "data": data,
+        "checksum": generate_checksum(orjson.dumps(data)),
+        "id": "FDHcbzGf",
+    }
+
+    response = post_json(
+        client, message, url="/message/tests.views.fake_components.TestComponent"
+    )
+
+    body = orjson.loads(response.content)
+
+    assert body["id"] == "FDHcbzGf"
+    assert not body["errors"]
+    assert body["data"] == {"dictionary": {"name": "test"}}
 
 
 @pytest.mark.django_db
@@ -126,7 +148,7 @@ def test_message_db_input(client):
     }
 
     response = post_json(
-        client, message, url="/message/tests.views.components.TestModelComponent"
+        client, message, url="/message/tests.views.fake_components.TestModelComponent"
     )
 
     flavor = Flavor.objects.get(id=1)
