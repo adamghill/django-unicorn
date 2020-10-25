@@ -1,19 +1,17 @@
-import hmac
 import logging
 from functools import wraps
 from typing import Any, Dict, List, Union
 
 import orjson
-import shortuuid
-from django.conf import settings
 from django.db.models import Model
 from django.http import HttpRequest, JsonResponse
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_POST
 
+from .call_method_parser import parse_args, parse_call_method_name
 from .components import UnicornField, UnicornView
 from .errors import UnicornViewError
-from .call_method_parser import parse_args, parse_call_method_name
+from .utils import generate_checksum
 
 
 logger = logging.getLogger(__name__)
@@ -183,12 +181,7 @@ class ComponentRequest:
         checksum = self.body.get("checksum")
         assert checksum, "Missing checksum"
 
-        generated_checksum = hmac.new(
-            str.encode(settings.SECRET_KEY),
-            orjson.dumps(self.data),
-            digestmod="sha256",
-        ).hexdigest()
-        generated_checksum = shortuuid.uuid(generated_checksum)[:8]
+        generated_checksum = generate_checksum(orjson.dumps(self.data))
         assert checksum == generated_checksum, "Checksum does not match"
 
 

@@ -1,8 +1,7 @@
-import hmac
-import pickle
 import importlib
 import inspect
 import logging
+import pickle
 from typing import Any, Callable, Dict, List, Optional, Type, Union
 
 import orjson
@@ -10,7 +9,6 @@ import shortuuid
 from bs4 import BeautifulSoup
 from bs4.element import Tag
 from bs4.formatter import HTMLFormatter
-from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models import Model
 from django.template.response import TemplateResponse
@@ -18,6 +16,7 @@ from django.utils.safestring import mark_safe
 from django.views.generic.base import TemplateView
 
 from . import serializer
+from .utils import generate_checksum
 
 
 logger = logging.getLogger(__name__)
@@ -102,12 +101,7 @@ class UnicornTemplateResponse(TemplateResponse):
 
         content = response.content.decode("utf-8")
 
-        checksum = hmac.new(
-            str.encode(settings.SECRET_KEY),
-            str.encode(str(self.frontend_context_variables)),
-            digestmod="sha256",
-        ).hexdigest()
-        checksum = shortuuid.uuid(checksum)[:8]
+        checksum = generate_checksum(str.encode(str(self.frontend_context_variables)))
 
         soup = BeautifulSoup(content, features="html.parser")
         root_element = UnicornTemplateResponse._get_root_element(soup)
