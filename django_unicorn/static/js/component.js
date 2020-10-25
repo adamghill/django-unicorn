@@ -130,7 +130,7 @@ export class Component {
   callMethod(methodName, errCallback) {
     const action = {
       type: "callMethod",
-      payload: { name: methodName, params: [] },
+      payload: { name: methodName },
     };
     this.actionQueue.push(action);
 
