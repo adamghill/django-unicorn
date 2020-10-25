@@ -37,12 +37,15 @@ jobs:
           poetry config virtualenvs.in-project false
           poetry config virtualenvs.path ~/.virtualenvs${{ matrix.python-version }}
 
-      - name: Install Dependencies
+      - name: Install dependencies
         run: poetry install
         if: steps.cache.outputs.cache-hit != 'true'
 
-      - name: Code Quality
+      - name: black check
         run: poetry run black . --check --exclude migrations
+      
+      - name: isort check
+        run: poetry run isort --settings pyproject.toml --check .
 
       - name: Test with pytest
         run: poetry run pytest
