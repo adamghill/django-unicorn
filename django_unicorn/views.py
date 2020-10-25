@@ -245,10 +245,11 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
                 if hasattr(model_class, "model"):
                     DbModel = model_class.model
 
-                    for m in component.Meta.db_models:
-                        if m.model_class == model_class.model:
-                            db_defaults = m.defaults
-                            break
+                    if hasattr(component, "Meta"):
+                        for m in component.Meta.db_models:
+                            if m.model_class == model_class.model:
+                                db_defaults = m.defaults
+                                break
 
             if not DbModel and db_model_name:
                 assert hasattr(component, "Meta") and hasattr(
