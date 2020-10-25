@@ -19,4 +19,5 @@ def pytest_configure():
         ROOT_URLCONF="django_unicorn.urls",
         DATABASES=databases,
         INSTALLED_APPS=installed_apps,
+        UNIT_TEST=True,
     )
