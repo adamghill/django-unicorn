@@ -1,6 +1,7 @@
-import pytest
 from django.db.models import SET_NULL, ForeignKey, Model
 from django.db.models.fields import CharField
+
+import pytest
 
 from django_unicorn import serializer
 from example.coffee.models import Flavor

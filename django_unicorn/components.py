@@ -4,16 +4,17 @@ import logging
 import pickle
 from typing import Any, Callable, Dict, List, Optional, Type, Union
 
-import orjson
-import shortuuid
-from bs4 import BeautifulSoup
-from bs4.element import Tag
-from bs4.formatter import HTMLFormatter
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models import Model
 from django.template.response import TemplateResponse
 from django.utils.safestring import mark_safe
 from django.views.generic.base import TemplateView
+
+import orjson
+import shortuuid
+from bs4 import BeautifulSoup
+from bs4.element import Tag
+from bs4.formatter import HTMLFormatter
 
 from . import serializer
 from .utils import generate_checksum

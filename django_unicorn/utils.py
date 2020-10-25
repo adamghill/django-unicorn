@@ -1,7 +1,8 @@
 import hmac
 
-import shortuuid
 from django.conf import settings
+
+import shortuuid
 
 
 def generate_checksum(data_bytes):

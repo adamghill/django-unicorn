@@ -1,7 +1,7 @@
-from django_unicorn.db import DbModel
-from django_unicorn.components import UnicornView
-
 from coffee.models import Flavor
+
+from django_unicorn.components import UnicornView
+from django_unicorn.db import DbModel
 
 
 class ModelsView(UnicornView):

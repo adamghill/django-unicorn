@@ -1,8 +1,9 @@
 from typing import Any
 
-import orjson
 from django.core.serializers import serialize
 from django.db.models import Model, QuerySet
+
+import orjson
 
 
 def _get_model_dict(obj: Any) -> dict:

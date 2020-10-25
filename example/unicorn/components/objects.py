@@ -1,10 +1,10 @@
 from datetime import datetime
 
-from django_unicorn.components import UnicornView, UnicornField
+from django.utils.timezone import now
 
 from books.models import Book
 
-from django.utils.timezone import now
+from django_unicorn.components import UnicornField, UnicornView
 
 
 class PublishDateField(UnicornField):

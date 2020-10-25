@@ -1,6 +1,7 @@
+from django.http import JsonResponse
+
 import orjson
 import pytest
-from django.http import JsonResponse
 
 from django_unicorn.components import ComponentLoadError
 from django_unicorn.utils import generate_checksum

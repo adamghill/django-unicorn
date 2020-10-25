@@ -2,11 +2,12 @@ import logging
 from functools import wraps
 from typing import Any, Dict, List, Union
 
-import orjson
 from django.db.models import Model
 from django.http import HttpRequest, JsonResponse
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_POST
+
+import orjson
 
 from .call_method_parser import parse_args, parse_call_method_name
 from .components import UnicornField, UnicornView

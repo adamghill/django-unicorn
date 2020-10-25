@@ -1,6 +1,6 @@
-from django_unicorn.components import UnicornView
-
 from django.utils.timezone import now
+
+from django_unicorn.components import UnicornView
 
 
 class PollingView(UnicornView):

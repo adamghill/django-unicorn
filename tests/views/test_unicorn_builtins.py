@@ -1,10 +1,7 @@
 from datetime import datetime
 
 from django_unicorn.components import UnicornField, UnicornView
-from django_unicorn.views import (
-    _set_property_from_data,
-    _set_property_from_payload,
-)
+from django_unicorn.views import _set_property_from_data, _set_property_from_payload
 
 
 class NestedPropertyView(UnicornView):

@@ -1,5 +1,6 @@
-from django_unicorn.components import UnicornView
 from django import forms
+
+from django_unicorn.components import UnicornView
 
 
 class TodoForm(forms.Form):

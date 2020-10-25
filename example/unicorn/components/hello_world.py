@@ -1,4 +1,4 @@
-from django_unicorn.components import UnicornView, UnicornField
+from django_unicorn.components import UnicornField, UnicornView
 
 
 class HelloWorldView(UnicornView):

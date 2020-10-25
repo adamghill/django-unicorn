@@ -1,5 +1,6 @@
-from django_unicorn.components import UnicornView
 from datetime import datetime
+
+from django_unicorn.components import UnicornView
 
 from ..forms import ValidationForm
 

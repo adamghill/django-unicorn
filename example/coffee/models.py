@@ -1,4 +1,4 @@
-from django.db.models import Model, ForeignKey, SET_NULL
+from django.db.models import SET_NULL, ForeignKey, Model
 from django.db.models.fields import CharField
 
 
