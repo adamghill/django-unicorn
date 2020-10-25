@@ -29,7 +29,7 @@ def test_message_db_input_update(client):
     }
 
     response = client.post(
-        "/message/tests.views.fake_components.TestModelComponent",
+        "/message/tests.views.fake_components.FakeModelComponent",
         message,
         content_type="application/json",
     )
@@ -69,7 +69,7 @@ def test_message_db_input_create(client):
     assert Flavor.objects.all().count() == 0
 
     response = client.post(
-        "/message/tests.views.fake_components.TestModelComponent",
+        "/message/tests.views.fake_components.FakeModelComponent",
         message,
         content_type="application/json",
     )

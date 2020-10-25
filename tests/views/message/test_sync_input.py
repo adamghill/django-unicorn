@@ -18,7 +18,7 @@ def test_message_nested_sync_input(client):
     }
 
     response = client.post(
-        "/message/tests.views.fake_components.TestComponent",
+        "/message/tests.views.fake_components.FakeComponent",
         message,
         content_type="application/json",
     )
