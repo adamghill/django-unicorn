@@ -1,4 +1,10 @@
-import { generateDbKey, isEmpty, toKebabCase, walk } from "./utils.js";
+import {
+  generateDbKey,
+  hasValue,
+  isEmpty,
+  toKebabCase,
+  walk,
+} from "./utils.js";
 import { Element } from "./element.js";
 
 /**
@@ -30,7 +36,7 @@ export function addActionEventListener(component, eventType) {
             );
 
             modelElsInTargetScope.forEach((modelElement) => {
-              if (!isEmpty(modelElement.model) && modelElement.model.isLazy) {
+              if (hasValue(modelElement.model) && modelElement.model.isLazy) {
                 const actionForQueue = {
                   type: "syncInput",
                   payload: {
@@ -47,7 +53,7 @@ export function addActionEventListener(component, eventType) {
             );
 
             dbElsInTargetScope.forEach((dbElement) => {
-              if (!isEmpty(dbElement.model) && dbElement.model.isLazy) {
+              if (hasValue(dbElement.model) && dbElement.model.isLazy) {
                 const actionForQueue = {
                   type: "dbInput",
                   payload: {
