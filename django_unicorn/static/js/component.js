@@ -218,22 +218,33 @@ export class Component {
       return;
     }
 
-    const modelNamePieces = element.model.name.split(".");
-    // Get local version of data in case have to traverse into a nested property
-    let _data = this.data;
+    this.setNestedValue(element, element.model.name, this.data);
+  }
 
-    for (let i = 0; i < modelNamePieces.length; i++) {
-      const modelNamePiece = modelNamePieces[i];
+  /**
+   * Sets an element value dealing with potential nested values
+   * @param {Element} element Element to set values on
+   * @param {String} name Name of the property
+   * @param {Object} data Data to get values from
+   */
+  // eslint-disable-next-line class-methods-use-this
+  setNestedValue(element, name, data) {
+    const namePieces = name.split(".");
+    // Get local version of data in case have to traverse into a nested property
+    let _data = data;
+
+    for (let i = 0; i < namePieces.length; i++) {
+      const namePiece = namePieces[i];
 
       if (_data == null) {
         return;
       }
 
-      if (Object.prototype.hasOwnProperty.call(_data, modelNamePiece)) {
-        if (i === modelNamePieces.length - 1) {
-          element.setValue(_data[modelNamePiece]);
+      if (Object.prototype.hasOwnProperty.call(_data, namePiece)) {
+        if (i === namePieces.length - 1) {
+          element.setValue(_data[namePiece]);
         } else {
-          _data = _data[modelNamePiece];
+          _data = _data[namePiece];
         }
       }
     }
@@ -261,8 +272,10 @@ export class Component {
 
         datas.forEach((model) => {
           // Convert the model's pk to a string because it will always be a string on the element
-          if (model.pk.toString() === element.db.pk) {
-            element.setValue(model[element.field.name]);
+          if (hasValue(model.pk)) {
+            if (model.pk.toString() === element.db.pk) {
+              element.setValue(model[element.field.name]);
+            }
           }
         });
       }

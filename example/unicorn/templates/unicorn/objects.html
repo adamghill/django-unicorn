@@ -1,6 +1,6 @@
-<div>    
+<div>
     <div>
-        <label>Dictionaries</label>
+        <label>Dictionaries (original)</label>
         <input unicorn:model="dictionary.name" type="text" id="dictionary">
         <input unicorn:model="dictionary.nested.name" type="text" id="nestedDictionary">
 
@@ -11,11 +11,37 @@
         <button unicorn:click='dictionary.nested.name=2'>set dictionary(2)</button>
     </div>
 
+    <div unicorn:model="dictionary">
+        <label>Dictionaries (model parent)</label>
+        <input unicorn:field="name" type="text" id="dictionary2">
+        <input unicorn:field="nested.name" type="text" id="nestedDictionary2">
+
+        <br />
+        dictionary.name: {{ dictionary.name }}<br />
+        dictionary.nested.name: {{ dictionary.nested.name }}<br />
+        <button unicorn:click='set_dictionary({"name": 1, "nested": {"name": 2}})'>set dictionary(1)</button>
+        <button unicorn:click='dictionary.nested.name=2'>set dictionary(2)</button>
+    </div>
+    
     <div>
-        <label>Nested unicorn field property</label>
+        <label>Nested unicorn field property (original)</label>
         <input unicorn:model="unicorn_field.title" type="text" id="unicornField">
         <input unicorn:model="unicorn_field.publish_date_field.year" type="text" id="nestedUnicornField">
         <input unicorn:model="unicorn_field.publish_date" type="text" id="nestedDatetimeUnicornField">
+
+        <br />
+        unicorn_field.title: {{ unicorn_field.title }}<br />
+        unicorn_field.publish_date_field.year: {{ unicorn_field.publish_date_field.year }}<br />
+
+        <br />
+        <button unicorn:click="unicorn_field={'title': 'title1', 'publish_date': 'blob', 'publish_date_field': {'year': 1999}}">Set with dictionary</button>
+    </div>
+
+    <div unicorn:model="unicorn_field">
+        <label>Nested unicorn field property (model parent)</label>
+        <input unicorn:field="title" type="text" id="unicornField2">
+        <input unicorn:field="publish_date_field.year" type="text" id="nestedUnicornField2">
+        <input unicorn:field="publish_date" type="text" id="nestedDatetimeUnicornField2">
 
         <br />
         unicorn_field.title: {{ unicorn_field.title }}<br />

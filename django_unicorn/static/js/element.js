@@ -108,7 +108,7 @@ export class Element {
     }
 
     // Look in parent elements if the db.pk or db.name is missing
-    if (this.isUnicorn && !isEmpty(this.field)) {
+    if (this.isUnicorn && hasValue(this.field)) {
       const dbAttrs = ["pk", "name"];
       let elToCheck = this;
 
@@ -140,7 +140,14 @@ export class Element {
         }
 
         if (elToCheck.isUnicorn && hasValue(elToCheck.model.name)) {
-          this.model.name = elToCheck.model.name;
+          if (hasValue(this.field) && isEmpty(this.db)) {
+            // Handle a model + field that is not a db
+            this.model = this.field; // Make sure to keep all modifiers from the field for the model
+            this.model.name = `${elToCheck.model.name}.${this.field.name}`;
+            this.field = {};
+          } else {
+            this.model.name = elToCheck.model.name;
+          }
         }
 
         elToCheck = elToCheck.parent;
