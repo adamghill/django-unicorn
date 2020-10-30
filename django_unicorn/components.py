@@ -17,6 +17,7 @@ from bs4.element import Tag
 from bs4.formatter import HTMLFormatter
 
 from . import serializer
+from .settings import get_setting
 from .utils import generate_checksum
 
 
@@ -621,12 +622,20 @@ class UnicornView(TemplateView):
             # Use conventions to find the component class
             class_name = convert_to_camel_case(component_name)
             class_name = f"{class_name}View"
-
             module_name = convert_to_snake_case(component_name)
-            module_name = f"unicorn.components.{module_name}"
-            locations.append((class_name, module_name))
 
-        # TODO: django.conf setting that has locations for where to look for components
+            unicorn_apps = get_setting("APPS", ["unicorn"])
+
+            assert (
+                isinstance(unicorn_apps, list)
+                or isinstance(unicorn_apps, tuple)
+                or isinstance(unicorn_apps, set)
+            ), "APPS is expected to be a list, tuple or set"
+
+            for app in unicorn_apps:
+                app_module_name = f"{app}.components.{module_name}"
+                locations.append((class_name, app_module_name))
+
         # TODO: django.conf setting bool that defines whether to look in all installed apps for components
 
         # Store the last exception that got raised while looking for a component in case it is useful context
