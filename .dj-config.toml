@@ -1,0 +1,24 @@
+[[commands]]
+name = "md"
+help = "Does the migration dance"
+execute = "poetry run ./manage.py makemigrations && poetry run ./manage.py migrate"
+
+[[commands]]
+name = "up"
+help = "Up all the things"
+execute = "poetry install && poetry run example/manage.py migrate && poetry run example/manage.py runserver 0:8080"
+long_running = true
+
+[[commands]]
+name = "r"
+execute = "poetry run example/manage.py runserver 0:8080"
+long_running = true
+
+[[commands]]
+name = "t"
+execute = "poetry run pytest tests && npm run-script test"
+
+
+[[commands]]
+name = "is"
+execute = "poetry run isort --settings pyproject.toml ."
