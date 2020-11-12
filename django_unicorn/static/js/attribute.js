@@ -25,26 +25,26 @@ export class Attribute {
    * Init the attribute.
    */
   init() {
-    // TODO: Change the contains to startswith
-    if (contains(this.name, "unicorn:")) {
+    if (this.name.startsWith("unicorn:") || this.name.startsWith("u:")) {
       this.isUnicorn = true;
 
-      if (contains(this.name, "unicorn:model")) {
+      // Use `contains` when there could be modifiers
+      if (contains(this.name, ":model")) {
         this.isModel = true;
-      } else if (contains(this.name, "unicorn:field")) {
+      } else if (contains(this.name, ":field")) {
         this.isField = true;
-      } else if (contains(this.name, "unicorn:db")) {
+      } else if (contains(this.name, ":db")) {
         this.isDb = true;
-      } else if (contains(this.name, "unicorn:poll")) {
+      } else if (contains(this.name, ":poll")) {
         this.isPoll = true;
-      } else if (this.name === "unicorn:key") {
+      } else if (this.name === "unicorn:key" || this.name === "u:key") {
         this.isKey = true;
-      } else if (this.name === "unicorn:pk") {
+      } else if (this.name === "unicorn:pk" || this.name === "u:pk") {
         this.isPK = true;
-      } else if (contains(this.name, "unicorn:error:")) {
+      } else if (contains(this.name, ":error:")) {
         this.isError = true;
       } else {
-        const actionEventType = this.name.replace("unicorn:", "");
+        const actionEventType = this.name.replace("unicorn:", "").replace("u:", "");
 
         if (
           actionEventType !== "id" &&

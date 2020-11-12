@@ -5,7 +5,7 @@ export const MORPHDOM_OPTIONS = {
     // A node's unique identifier. Used to rearrange elements rather than
     // creating and destroying an element that already exists.
     if (node.attributes) {
-      const key = node.getAttribute("unicorn:key") || node.id;
+      const key = node.getAttribute("unicorn:key") || node.getAttribute("u:key") || node.id;
 
       if (key) {
         return key;
