@@ -1,6 +1,8 @@
+# https://pypi.org/project/dj-command/
+
 [[commands]]
 name = "md"
-help = "Does the migration dance"
+help = "Do the migration dance"
 execute = "poetry run ./manage.py makemigrations && poetry run ./manage.py migrate"
 
 [[commands]]
@@ -17,7 +19,6 @@ long_running = true
 [[commands]]
 name = "t"
 execute = "poetry run pytest tests && npm run-script test"
-
 
 [[commands]]
 name = "is"
