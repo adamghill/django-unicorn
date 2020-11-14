@@ -1,4 +1,6 @@
 import {
+  args,
+  contains,
   generateDbKey,
   hasValue,
   isEmpty,
@@ -30,7 +32,8 @@ export function addActionEventListener(component, eventType) {
         if (targetElement.isSame(element)) {
           // Add the value of any child element of the target that is a lazy model to the action queue
           // Handles situations similar to https://github.com/livewire/livewire/issues/528
-          walk(element.el, (childEl) => {
+
+          component.walker(element.el, (childEl) => {
             const modelElsInTargetScope = component.modelEls.filter((e) =>
               e.el.isSameNode(childEl)
             );
@@ -79,6 +82,48 @@ export function addActionEventListener(component, eventType) {
           if (action.isStop) {
             event.stopPropagation();
           }
+
+          // Handle special arguments (e.g. $event)
+          args(action.name).forEach((eventArg) => {
+            if (eventArg.startsWith("$event")) {
+              // Remove any extra whitespace, everything before and including "$event", and the ending paren
+              // let eventArg = action.name.trim();
+              eventArg = eventArg.trim().slice(eventArg.indexOf("$event") + 6).trim();
+  
+              const originalSpecialVariable = `$event${eventArg}`;
+              let data = event;
+              let invalidPiece = false;
+  
+              eventArg.split(".").forEach((piece) => {
+                piece = piece.trim();
+  
+                if (piece) {
+                  // TODO: Handle method calls with args
+                  if (piece.endsWith("()")) {
+                    // method call
+                    const methodName = piece.slice(0, piece.length - 2);
+                    data = data[methodName]();
+                  } else if (hasValue(data[piece])) {
+                    data = data[piece];
+                  } else {
+                    invalidPiece = true;
+                  }
+                }
+              });
+  
+              if (invalidPiece) {
+                console.error(`${originalSpecialVariable} could not be retrieved`)
+                action.name = action.name.replace(originalSpecialVariable, "");
+              } else if (data) {
+                if (typeof data === "string") {
+                  // Wrap strings in quotes
+                  data = `"${data}"`;
+                }
+  
+                action.name = action.name.replace(originalSpecialVariable, data);
+              }
+            }
+          });
 
           if (action.key) {
             if (action.key === toKebabCase(event.key)) {
