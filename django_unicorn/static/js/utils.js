@@ -112,3 +112,60 @@ export function walk(el, callback) {
     callback(walker.currentNode);
   }
 }
+
+
+export function args(func) {
+  func = func.trim()
+
+  if (!contains(func, "(") || !func.endsWith(")")) {
+    console.error(`Action method '${func}' could not be parsed`);
+    return [];
+  }
+
+  // Remove the method name and parenthesis
+  func = func.slice(func.indexOf("(") + 1, func.length - 1);
+
+  const functionArgs = [];
+  let currentArg = "";
+
+  let inSingleQuote = false;
+  let inDoubleQuote = false;
+  let parenthesisCount = 0;
+  let bracketCount = 0;
+
+  for (let idx = 0; idx < func.length; idx++) {
+    const c = func.charAt(idx);
+    currentArg += c;
+    
+    if (c === "[") {
+      bracketCount++;
+    } else if (c === "]") {
+      bracketCount--;
+    } else if (c === "(") {
+      parenthesisCount++;
+    } else if (c === ")") {
+      parenthesisCount--;
+    } else if (c === "'") {
+      inSingleQuote = !inSingleQuote;
+    } else if (c === "\"") {
+      inDoubleQuote = !inDoubleQuote;
+    } else if (c === ",") {
+      if (!inSingleQuote && !inDoubleQuote && bracketCount === 0 && parenthesisCount === 0) {
+        // Remove the trailing comma
+        currentArg = currentArg.slice(0, currentArg.length - 1);
+
+        functionArgs.push(currentArg);
+        currentArg = "";
+      }
+    }
+
+    if (idx === func.length - 1) {
+      if (!inSingleQuote && !inDoubleQuote && bracketCount === 0 && parenthesisCount === 0) {
+        functionArgs.push(currentArg.trim());
+        currentArg = "";
+      }
+    }
+  }
+
+  return functionArgs;
+}

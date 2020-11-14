@@ -1,5 +1,5 @@
 import test from "ava";
-import { getElement } from "../utils.js";
+import { getComponent, getElement } from "../utils.js";
 
 test("click", (t) => {
   const html = "<button unicorn:click='test()'></button>";
@@ -47,4 +47,76 @@ test("multiple actions", (t) => {
   t.true(element.actions.length === 2);
   t.true(element.actions[0].eventType === "keyup");
   t.true(element.actions[1].eventType === "keydown");
+});
+
+test("$event action variable invaid property", (t) => {
+  const html = `
+<div unicorn:id="5jypjiyb" unicorn:name="text-inputs" unicorn:checksum="GXzew3Km">
+  <input unicorn:model='name'></input>
+  <button unicorn:click='test($event.target.value)' value='1'></button>
+</div>`;
+  const component = getComponent(html)
+
+  t.is(component.attachedEventTypes.length, 1);
+  t.is(component.actionEvents.click.length, 1);
+
+  component.actionEvents.click[0].element.el.click()
+
+  t.is(component.actionQueue.length, 1)
+  const action = component.actionQueue[0];
+  t.is(action.payload.name, "test(\"1\")")
+});
+
+test("$event action variable", (t) => {
+  const html = `
+<div unicorn:id="5jypjiyb" unicorn:name="text-inputs" unicorn:checksum="GXzew3Km">
+  <input unicorn:model='name'></input>
+  <button unicorn:click='test($event.target.value.blob)' value='2'></button>
+</div>`;
+  const component = getComponent(html)
+
+  t.is(component.attachedEventTypes.length, 1);
+  t.is(component.actionEvents.click.length, 1);
+
+  component.actionEvents.click[0].element.el.click()
+
+  t.is(component.actionQueue.length, 1)
+  const action = component.actionQueue[0];
+  t.is(action.payload.name, "test()")
+});
+
+test("$event action variable with method", (t) => {
+  const html = `
+<div unicorn:id="5jypjiyb" unicorn:name="text-inputs" unicorn:checksum="GXzew3Km">
+  <input unicorn:model='name'></input>
+  <button unicorn:click='test($event.target.value.trim())' value=' 3 '></button>
+</div>`;
+  const component = getComponent(html)
+
+  t.is(component.attachedEventTypes.length, 1);
+  t.is(component.actionEvents.click.length, 1);
+
+  component.actionEvents.click[0].element.el.click()
+
+  t.is(component.actionQueue.length, 1)
+  const action = component.actionQueue[0];
+  t.is(action.payload.name, "test(\"3\")")
+});
+
+test("$event action variable in middle of args", (t) => {
+  const html = `
+<div unicorn:id="5jypjiyb" unicorn:name="text-inputs" unicorn:checksum="GXzew3Km">
+  <input unicorn:model='name'></input>
+  <button unicorn:click='test($event.target.value.trim(), 1)' value=' 4 '></button>
+</div>`;
+  const component = getComponent(html)
+
+  t.is(component.attachedEventTypes.length, 1);
+  t.is(component.actionEvents.click.length, 1);
+
+  component.actionEvents.click[0].element.el.click()
+
+  t.is(component.actionQueue.length, 1)
+  const action = component.actionQueue[0];
+  t.is(action.payload.name, "test(\"4\", 1)")
 });
