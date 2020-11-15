@@ -118,7 +118,6 @@ export function args(func) {
   func = func.trim()
 
   if (!contains(func, "(") || !func.endsWith(")")) {
-    console.error(`Action method '${func}' could not be parsed`);
     return [];
   }
 
