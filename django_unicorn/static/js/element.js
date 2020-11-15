@@ -26,6 +26,7 @@ export class Element {
 
     this.model = {};
     this.poll = {};
+    this.loading = {};
     this.actions = [];
     this.db = {};
     this.field = {};
@@ -73,6 +74,14 @@ export class Element {
 
         if (pollArgs.length > 0) {
           this.poll.timing = parseInt(pollArgs[0], 10) || 2000;
+        }
+      } else if (attribute.isLoading) {
+        if (attribute.modifiers.attr) {
+          this.loading.attr = attribute.value;
+        } else if (attribute.modifiers.class && attribute.modifiers.remove) {
+          this.loading.removeClass = attribute.value;
+        } else if (attribute.modifiers.class) {
+          this.loading.class = attribute.value;
         }
       } else if (attribute.eventType) {
         const action = {};

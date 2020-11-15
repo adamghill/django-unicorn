@@ -123,6 +123,20 @@ export function addActionEventListener(component, eventType) {
             }
           });
 
+          if (targetElement.loading) {
+            if (targetElement.loading.attr) {
+              targetElement.el[targetElement.loading.attr] = targetElement.loading.attr;
+            }
+
+            if (targetElement.loading.class) {
+              targetElement.el.classList.add(targetElement.loading.class);
+            }
+
+            if (targetElement.loading.removeClass) {
+              targetElement.el.classList.remove(targetElement.loading.removeClass);
+            }
+          }
+
           if (action.key) {
             if (action.key === toKebabCase(event.key)) {
               component.callMethod(action.name);

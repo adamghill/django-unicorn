@@ -12,6 +12,7 @@ export class Attribute {
     this.isModel = false;
     this.isField = false;
     this.isPoll = false;
+    this.isLoading = false;
     this.isKey = false;
     this.isPK = false;
     this.isError = false;
@@ -37,6 +38,8 @@ export class Attribute {
         this.isDb = true;
       } else if (contains(this.name, ":poll")) {
         this.isPoll = true;
+      } else if (contains(this.name, ":loading")) {
+        this.isLoading = true;
       } else if (this.name === "unicorn:key" || this.name === "u:key") {
         this.isKey = true;
       } else if (this.name === "unicorn:pk" || this.name === "u:pk") {
