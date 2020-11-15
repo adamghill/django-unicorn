@@ -24,6 +24,14 @@ test("two args with array", (t) => {
   t.is(functionArgs[1], "[1, 2]");
 });
 
+test("two args with object", (t) => {
+  const functionArgs = args("test($event.target.value, {\"1\": 2})");
+
+  t.is(functionArgs.length, 2);
+  t.is(functionArgs[0], "$event.target.value");
+  t.is(functionArgs[1], "{\"1\": 2}");
+});
+
 test("two args with comma in double quotes", (t) => {
   const functionArgs = args("test($event.target.value, \"1,2\")");
 

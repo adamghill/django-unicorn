@@ -132,6 +132,7 @@ export function args(func) {
   let inDoubleQuote = false;
   let parenthesisCount = 0;
   let bracketCount = 0;
+  let curlyCount = 0;
 
   for (let idx = 0; idx < func.length; idx++) {
     const c = func.charAt(idx);
@@ -145,6 +146,10 @@ export function args(func) {
       parenthesisCount++;
     } else if (c === ")") {
       parenthesisCount--;
+    } else if (c === "{") {
+      curlyCount++;
+    } else if (c === "}") {
+      curlyCount--;
     } else if (c === "'") {
       inSingleQuote = !inSingleQuote;
     } else if (c === "\"") {
