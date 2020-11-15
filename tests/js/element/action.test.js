@@ -120,3 +120,56 @@ test("$event action variable in middle of args", (t) => {
   const action = component.actionQueue[0];
   t.is(action.payload.name, "test(\"4\", 1)")
 });
+
+test("$event action loading attr", (t) => {
+  const html = `
+<div unicorn:id="5jypjiyb" unicorn:name="text-inputs" unicorn:checksum="GXzew3Km">
+  <button unicorn:click='test()' u:loading.attr="disabled"></button>
+</div>`;
+  const component = getComponent(html)
+
+  t.is(component.attachedEventTypes.length, 1);
+  t.is(component.actionEvents.click.length, 1);
+
+  const {el} = component.actionEvents.click[0].element;
+  t.true(typeof el.attributes.disabled === "undefined");
+
+  el.click()
+  t.false(typeof el.attributes.disabled === "undefined");
+});
+
+test("$event action loading class", (t) => {
+  const html = `
+<div unicorn:id="5jypjiyb" unicorn:name="text-inputs" unicorn:checksum="GXzew3Km">
+  <button unicorn:click='test()' u:loading.class="loading"></button>
+</div>`;
+  const component = getComponent(html)
+
+  t.is(component.attachedEventTypes.length, 1);
+  t.is(component.actionEvents.click.length, 1);
+
+  const {el} = component.actionEvents.click[0].element;
+  t.is(el.classList.length, 0);
+
+  el.click()
+  t.is(el.classList.length, 1);
+  t.is(el.classList[0], "loading");
+});
+
+test("$event action loading remove class", (t) => {
+  const html = `
+<div unicorn:id="5jypjiyb" unicorn:name="text-inputs" unicorn:checksum="GXzew3Km">
+  <button unicorn:click='test()' u:loading.class.remove="unloading" class="unloading"></button>
+</div>`;
+  const component = getComponent(html)
+
+  t.is(component.attachedEventTypes.length, 1);
+  t.is(component.actionEvents.click.length, 1);
+
+  const {el} = component.actionEvents.click[0].element;
+  t.is(el.classList.length, 1);
+  t.is(el.classList[0], "unloading");
+
+  el.click()
+  t.is(el.classList.length, 0);
+});
