@@ -1,4 +1,5 @@
 import {
+  $,
   args,
   generateDbKey,
   hasValue,
@@ -86,15 +87,18 @@ export function addActionEventListener(component, eventType) {
             if (eventArg.startsWith("$event")) {
               // Remove any extra whitespace, everything before and including "$event", and the ending paren
               // let eventArg = action.name.trim();
-              eventArg = eventArg.trim().slice(eventArg.indexOf("$event") + 6).trim();
-  
+              eventArg = eventArg
+                .trim()
+                .slice(eventArg.indexOf("$event") + 6)
+                .trim();
+
               const originalSpecialVariable = `$event${eventArg}`;
               let data = event;
               let invalidPiece = false;
-  
+
               eventArg.split(".").forEach((piece) => {
                 piece = piece.trim();
-  
+
                 if (piece) {
                   // TODO: Handle method calls with args
                   if (piece.endsWith("()")) {
@@ -108,34 +112,67 @@ export function addActionEventListener(component, eventType) {
                   }
                 }
               });
-  
+
               if (invalidPiece) {
-                console.error(`${originalSpecialVariable} could not be retrieved`)
+                console.error(
+                  `'${originalSpecialVariable}' could not be retrieved`
+                );
                 action.name = action.name.replace(originalSpecialVariable, "");
               } else if (data) {
                 if (typeof data === "string") {
                   // Wrap strings in quotes
                   data = `"${data}"`;
                 }
-  
-                action.name = action.name.replace(originalSpecialVariable, data);
+
+                action.name = action.name.replace(
+                  originalSpecialVariable,
+                  data
+                );
               }
             }
           });
 
           if (targetElement.loading) {
             if (targetElement.loading.attr) {
-              targetElement.el[targetElement.loading.attr] = targetElement.loading.attr;
-            }
-
-            if (targetElement.loading.class) {
+              targetElement.el[targetElement.loading.attr] =
+                targetElement.loading.attr;
+            } else if (targetElement.loading.class) {
               targetElement.el.classList.add(targetElement.loading.class);
-            }
-
-            if (targetElement.loading.removeClass) {
-              targetElement.el.classList.remove(targetElement.loading.removeClass);
+            } else if (targetElement.loading.removeClass) {
+              targetElement.el.classList.remove(
+                targetElement.loading.removeClass
+              );
             }
           }
+
+          // Look at all elements with a loading attribute
+          component.loadingEls.forEach((loadingElement) => {
+            if (loadingElement.target) {
+              let targetedEl = $(`#${loadingElement.target}`, component.root);
+
+              if (!targetedEl) {
+                component.keyEls.forEach((keyElement) => {
+                  if (!targetedEl && keyElement.key === loadingElement.target) {
+                    targetedEl = keyElement.el;
+                  }
+                });
+              }
+
+              if (targetedEl) {
+                if (targetElement.el.isSameNode(targetedEl)) {
+                  if (loadingElement.loading.hide) {
+                    loadingElement.hide();
+                  } else if (loadingElement.loading.show) {
+                    loadingElement.show();
+                  }
+                }
+              }
+            } else if (loadingElement.loading.hide) {
+              loadingElement.hide();
+            } else if (loadingElement.loading.show) {
+              loadingElement.show();
+            }
+          });
 
           if (action.key) {
             if (action.key === toKebabCase(event.key)) {

@@ -32,6 +32,8 @@ export class Component {
     this.root = undefined;
     this.modelEls = [];
     this.dbEls = [];
+    this.loadingEls = [];
+    this.keyEls = [];
     this.errors = {};
     this.poll = {};
 
@@ -104,6 +106,17 @@ export class Component {
           if (!this.modelEls.some((e) => e.isSame(element))) {
             this.modelEls.push(element);
           }
+        } else if (hasValue(element.loading)) {
+          this.loadingEls.push(element);
+
+          // Hide loading elements that are shown when an action happens
+          if (element.loading.show) {
+            element.hide();
+          }
+        }
+
+        if (hasValue(element.key)) {
+          this.keyEls.push(element);
         }
 
         element.actions.forEach((action) => {

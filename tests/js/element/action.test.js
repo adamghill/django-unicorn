@@ -41,7 +41,8 @@ test("click.stop", (t) => {
 });
 
 test("multiple actions", (t) => {
-  const html = "<input unicorn:keyup.enter='add' unicorn:keydown.escape='clear'></input>";
+  const html =
+    "<input unicorn:keyup.enter='add' unicorn:keydown.escape='clear'></input>";
   const element = getElement(html);
 
   t.true(element.actions.length === 2);
@@ -55,16 +56,16 @@ test("$event action variable invaid property", (t) => {
   <input unicorn:model='name'></input>
   <button unicorn:click='test($event.target.value)' value='1'></button>
 </div>`;
-  const component = getComponent(html)
+  const component = getComponent(html);
 
   t.is(component.attachedEventTypes.length, 1);
   t.is(component.actionEvents.click.length, 1);
 
-  component.actionEvents.click[0].element.el.click()
+  component.actionEvents.click[0].element.el.click();
 
-  t.is(component.actionQueue.length, 1)
+  t.is(component.actionQueue.length, 1);
   const action = component.actionQueue[0];
-  t.is(action.payload.name, "test(\"1\")")
+  t.is(action.payload.name, 'test("1")');
 });
 
 test("$event action variable", (t) => {
@@ -73,16 +74,16 @@ test("$event action variable", (t) => {
   <input unicorn:model='name'></input>
   <button unicorn:click='test($event.target.value.blob)' value='2'></button>
 </div>`;
-  const component = getComponent(html)
+  const component = getComponent(html);
 
   t.is(component.attachedEventTypes.length, 1);
   t.is(component.actionEvents.click.length, 1);
 
-  component.actionEvents.click[0].element.el.click()
+  component.actionEvents.click[0].element.el.click();
 
-  t.is(component.actionQueue.length, 1)
+  t.is(component.actionQueue.length, 1);
   const action = component.actionQueue[0];
-  t.is(action.payload.name, "test()")
+  t.is(action.payload.name, "test()");
 });
 
 test("$event action variable with method", (t) => {
@@ -91,16 +92,16 @@ test("$event action variable with method", (t) => {
   <input unicorn:model='name'></input>
   <button unicorn:click='test($event.target.value.trim())' value=' 3 '></button>
 </div>`;
-  const component = getComponent(html)
+  const component = getComponent(html);
 
   t.is(component.attachedEventTypes.length, 1);
   t.is(component.actionEvents.click.length, 1);
 
-  component.actionEvents.click[0].element.el.click()
+  component.actionEvents.click[0].element.el.click();
 
-  t.is(component.actionQueue.length, 1)
+  t.is(component.actionQueue.length, 1);
   const action = component.actionQueue[0];
-  t.is(action.payload.name, "test(\"3\")")
+  t.is(action.payload.name, 'test("3")');
 });
 
 test("$event action variable in middle of args", (t) => {
@@ -109,16 +110,16 @@ test("$event action variable in middle of args", (t) => {
   <input unicorn:model='name'></input>
   <button unicorn:click='test($event.target.value.trim(), 1)' value=' 4 '></button>
 </div>`;
-  const component = getComponent(html)
+  const component = getComponent(html);
 
   t.is(component.attachedEventTypes.length, 1);
   t.is(component.actionEvents.click.length, 1);
 
-  component.actionEvents.click[0].element.el.click()
+  component.actionEvents.click[0].element.el.click();
 
-  t.is(component.actionQueue.length, 1)
+  t.is(component.actionQueue.length, 1);
   const action = component.actionQueue[0];
-  t.is(action.payload.name, "test(\"4\", 1)")
+  t.is(action.payload.name, 'test("4", 1)');
 });
 
 test("$event action loading attr", (t) => {
@@ -126,15 +127,15 @@ test("$event action loading attr", (t) => {
 <div unicorn:id="5jypjiyb" unicorn:name="text-inputs" unicorn:checksum="GXzew3Km">
   <button unicorn:click='test()' u:loading.attr="disabled"></button>
 </div>`;
-  const component = getComponent(html)
+  const component = getComponent(html);
 
   t.is(component.attachedEventTypes.length, 1);
   t.is(component.actionEvents.click.length, 1);
 
-  const {el} = component.actionEvents.click[0].element;
+  const { el } = component.actionEvents.click[0].element;
   t.true(typeof el.attributes.disabled === "undefined");
 
-  el.click()
+  el.click();
   t.false(typeof el.attributes.disabled === "undefined");
 });
 
@@ -143,15 +144,15 @@ test("$event action loading class", (t) => {
 <div unicorn:id="5jypjiyb" unicorn:name="text-inputs" unicorn:checksum="GXzew3Km">
   <button unicorn:click='test()' u:loading.class="loading"></button>
 </div>`;
-  const component = getComponent(html)
+  const component = getComponent(html);
 
   t.is(component.attachedEventTypes.length, 1);
   t.is(component.actionEvents.click.length, 1);
 
-  const {el} = component.actionEvents.click[0].element;
+  const { el } = component.actionEvents.click[0].element;
   t.is(el.classList.length, 0);
 
-  el.click()
+  el.click();
   t.is(el.classList.length, 1);
   t.is(el.classList[0], "loading");
 });
@@ -161,15 +162,103 @@ test("$event action loading remove class", (t) => {
 <div unicorn:id="5jypjiyb" unicorn:name="text-inputs" unicorn:checksum="GXzew3Km">
   <button unicorn:click='test()' u:loading.class.remove="unloading" class="unloading"></button>
 </div>`;
-  const component = getComponent(html)
+  const component = getComponent(html);
 
   t.is(component.attachedEventTypes.length, 1);
   t.is(component.actionEvents.click.length, 1);
 
-  const {el} = component.actionEvents.click[0].element;
+  const { el } = component.actionEvents.click[0].element;
   t.is(el.classList.length, 1);
   t.is(el.classList[0], "unloading");
 
-  el.click()
+  el.click();
   t.is(el.classList.length, 0);
+});
+
+test("$event action loading show", (t) => {
+  const html = `
+<div unicorn:id="5jypjiyb" unicorn:name="text-inputs" unicorn:checksum="GXzew3Km">
+  <button unicorn:click='test()' id='testId' u:key='testKey'></button>
+  <div u:loading>
+  Loading
+  </div>
+</div>`;
+  const component = getComponent(html);
+
+  t.is(component.attachedEventTypes.length, 1);
+  t.is(component.actionEvents.click.length, 1);
+  t.is(component.loadingEls.length, 1);
+
+  const { el } = component.actionEvents.click[0].element;
+  const loadingEl = component.loadingEls[0];
+  t.true(loadingEl.el.hidden);
+
+  el.click();
+  t.false(loadingEl.el.hidden);
+});
+
+test("$event action loading hide", (t) => {
+  const html = `
+<div unicorn:id="5jypjiyb" unicorn:name="text-inputs" unicorn:checksum="GXzew3Km">
+  <button unicorn:click='test()' id='testId' u:key='testKey'></button>
+  <div u:loading.remove>
+  Loading
+  </div>
+</div>`;
+  const component = getComponent(html);
+
+  t.is(component.attachedEventTypes.length, 1);
+  t.is(component.actionEvents.click.length, 1);
+  t.is(component.loadingEls.length, 1);
+
+  const { el } = component.actionEvents.click[0].element;
+  const loadingEl = component.loadingEls[0];
+  t.false(loadingEl.el.hidden);
+
+  el.click();
+  t.true(loadingEl.el.hidden);
+});
+
+test("$event action loading by id", (t) => {
+  const html = `
+<div unicorn:id="5jypjiyb" unicorn:name="text-inputs" unicorn:checksum="GXzew3Km">
+  <button unicorn:click='test()' id='testId' u:key='testKey'></button>
+  <div u:loading u:target='testId'>
+  Loading
+  </div>
+</div>`;
+  const component = getComponent(html);
+
+  t.is(component.attachedEventTypes.length, 1);
+  t.is(component.actionEvents.click.length, 1);
+  t.is(component.loadingEls.length, 1);
+
+  const { el } = component.actionEvents.click[0].element;
+  const loadingEl = component.loadingEls[0];
+  t.true(loadingEl.el.hidden);
+
+  el.click();
+  t.false(loadingEl.el.hidden);
+});
+
+test("$event action loading by key", (t) => {
+  const html = `
+<div unicorn:id="5jypjiyb" unicorn:name="text-inputs" unicorn:checksum="GXzew3Km">
+  <button unicorn:click='test()' id='testId' u:key='testKey'></button>
+  <div u:loading u:target='testKey'>
+  Loading
+  </div>
+</div>`;
+  const component = getComponent(html);
+
+  t.is(component.attachedEventTypes.length, 1);
+  t.is(component.actionEvents.click.length, 1);
+  t.is(component.loadingEls.length, 1);
+
+  const { el } = component.actionEvents.click[0].element;
+  const loadingEl = component.loadingEls[0];
+  t.true(loadingEl.el.hidden);
+
+  el.click();
+  t.false(loadingEl.el.hidden);
 });

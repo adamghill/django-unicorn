@@ -30,7 +30,7 @@ export class Element {
     this.actions = [];
     this.db = {};
     this.field = {};
-
+    this.target = null;
     this.key = null;
     this.errors = [];
 
@@ -82,7 +82,13 @@ export class Element {
           this.loading.removeClass = attribute.value;
         } else if (attribute.modifiers.class) {
           this.loading.class = attribute.value;
+        } else if (attribute.modifiers.remove) {
+          this.loading.hide = true;
+        } else {
+          this.loading.show = true;
         }
+      } else if (attribute.isTarget) {
+        this.target = attribute.value;
       } else if (attribute.eventType) {
         const action = {};
         action.name = attribute.value;
@@ -169,6 +175,20 @@ export class Element {
    */
   focus() {
     this.el.focus();
+  }
+
+  /**
+   * Hide the element.
+   */
+  hide() {
+    this.el.hidden = "hidden";
+  }
+
+  /**
+   * Show the element.
+   */
+  show() {
+    this.el.hidden = null;
   }
 
   /**

@@ -113,9 +113,8 @@ export function walk(el, callback) {
   }
 }
 
-
 export function args(func) {
-  func = func.trim()
+  func = func.trim();
 
   if (!contains(func, "(") || !func.endsWith(")")) {
     return [];
@@ -136,7 +135,7 @@ export function args(func) {
   for (let idx = 0; idx < func.length; idx++) {
     const c = func.charAt(idx);
     currentArg += c;
-    
+
     if (c === "[") {
       bracketCount++;
     } else if (c === "]") {
@@ -151,10 +150,15 @@ export function args(func) {
       curlyCount--;
     } else if (c === "'") {
       inSingleQuote = !inSingleQuote;
-    } else if (c === "\"") {
+    } else if (c === '"') {
       inDoubleQuote = !inDoubleQuote;
     } else if (c === ",") {
-      if (!inSingleQuote && !inDoubleQuote && bracketCount === 0 && parenthesisCount === 0) {
+      if (
+        !inSingleQuote &&
+        !inDoubleQuote &&
+        bracketCount === 0 &&
+        parenthesisCount === 0
+      ) {
         // Remove the trailing comma
         currentArg = currentArg.slice(0, currentArg.length - 1);
 
@@ -164,7 +168,12 @@ export function args(func) {
     }
 
     if (idx === func.length - 1) {
-      if (!inSingleQuote && !inDoubleQuote && bracketCount === 0 && parenthesisCount === 0) {
+      if (
+        !inSingleQuote &&
+        !inDoubleQuote &&
+        bracketCount === 0 &&
+        parenthesisCount === 0
+      ) {
         functionArgs.push(currentArg.trim());
         currentArg = "";
       }

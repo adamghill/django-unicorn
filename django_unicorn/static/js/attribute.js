@@ -13,6 +13,7 @@ export class Attribute {
     this.isField = false;
     this.isPoll = false;
     this.isLoading = false;
+    this.isTarget = false;
     this.isKey = false;
     this.isPK = false;
     this.isError = false;
@@ -40,6 +41,8 @@ export class Attribute {
         this.isPoll = true;
       } else if (contains(this.name, ":loading")) {
         this.isLoading = true;
+      } else if (contains(this.name, ":target")) {
+        this.isTarget = true;
       } else if (this.name === "unicorn:key" || this.name === "u:key") {
         this.isKey = true;
       } else if (this.name === "unicorn:pk" || this.name === "u:pk") {
@@ -47,7 +50,9 @@ export class Attribute {
       } else if (contains(this.name, ":error:")) {
         this.isError = true;
       } else {
-        const actionEventType = this.name.replace("unicorn:", "").replace("u:", "");
+        const actionEventType = this.name
+          .replace("unicorn:", "")
+          .replace("u:", "");
 
         if (
           actionEventType !== "id" &&
