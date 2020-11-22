@@ -1,7 +1,10 @@
 {
-    "dependencies": {},
+    "dependencies": {
+        "esbuild": "^0.8.0"
+    },
     "scripts": {
         "build": "npx rollup -c",
+        "build-esbuild": "./node_modules/.bin/esbuild django_unicorn/static/js/unicorn.js --bundle --format=iife --global-name=Unicorn --minify --outfile=django_unicorn/static/js/unicorn2.min.js",
         "test": "npx ava",
         "watch:test": "npx ava --watch",
         "test-chrome": "web-test-runner \"test/**/*.test.js\" --node-resolve",
