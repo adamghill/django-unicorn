@@ -330,19 +330,7 @@ export class Component {
     }
 
     this.modelEls.forEach((element) => {
-      let shouldSetValue = false;
-
-      triggeringElements.forEach((triggeringElement) => {
-        if (!element.isSame(triggeringElement)) {
-          shouldSetValue = true;
-        }
-      });
-
-      // Set the value if there are no triggering elements (happens on initial page load)
-      // or when the model element doesn't match one of the triggering elements
-      if (shouldSetValue || triggeringElements.length === 0) {
-        this.setValue(element);
-      }
+      this.setValue(element);
     });
   }
 
