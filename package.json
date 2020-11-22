@@ -2,7 +2,7 @@
     "dependencies": {},
     "scripts": {
         "build": "npx rollup -c",
-        "test": "npx ava",
+        "test": "npx ava --serial",
         "watch:test": "npx ava --watch",
         "test-chrome": "web-test-runner \"test/**/*.test.js\" --node-resolve",
         "test-browsers": "web-test-runner \"test/**/*.test.js\" --node-resolve --playwright --browsers chromium firefox webkit"
