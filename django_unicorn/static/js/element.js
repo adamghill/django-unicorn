@@ -199,6 +199,26 @@ export class Element {
   }
 
   /**
+   * Get the element's next parent that is a unicorn element.
+   *
+   * Returns `null` if no unicorn element can be found before the root.
+   */
+  getUnicornParent() {
+    // const parentEl = this.el.parentElement;
+    let parentElement = this.parent;
+
+    while (!parentElement.isUnicorn) {
+      if (parentElement.el.getAttribute("unicorn:checksum")) {
+        return null;
+      }
+
+      parentElement = parentElement.parent;
+    }
+
+    return parentElement;
+  }
+
+  /**
    * Check if another `Element` is the same as this `Element`.
    * @param {Element} other
    */

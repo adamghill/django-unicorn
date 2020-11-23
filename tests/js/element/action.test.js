@@ -50,7 +50,23 @@ test("multiple actions", (t) => {
   t.true(element.actions[1].eventType === "keydown");
 });
 
-test("$event action variable invaid property", (t) => {
+test("click on internal element", (t) => {
+  const html = `
+<div unicorn:id="5jypjiyb" unicorn:name="text-inputs" unicorn:checksum="GXzew3Km">
+  <input unicorn:model='name'></input>
+  <button unicorn:click='test()'><span id="clicker">Click</span></button>
+</div>`;
+  const component = getComponent(html);
+
+  t.is(component.attachedEventTypes.length, 1);
+  t.is(component.actionEvents.click.length, 1);
+
+  component.actionEvents.click[0].element.el.children[0].click();
+
+  t.is(component.actionQueue.length, 1);
+});
+
+test("$event action variable invalid property", (t) => {
   const html = `
 <div unicorn:id="5jypjiyb" unicorn:name="text-inputs" unicorn:checksum="GXzew3Km">
   <input unicorn:model='name'></input>

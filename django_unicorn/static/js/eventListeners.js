@@ -17,7 +17,12 @@ import { Element } from "./element.js";
  */
 export function addActionEventListener(component, eventType) {
   component.document.addEventListener(eventType, (event) => {
-    const targetElement = new Element(event.target);
+    let targetElement = new Element(event.target);
+
+    // Make sure that the target element is a unicorn element.
+    if (targetElement && !targetElement.isUnicorn) {
+      targetElement = targetElement.getUnicornParent();
+    }
 
     if (
       targetElement &&
