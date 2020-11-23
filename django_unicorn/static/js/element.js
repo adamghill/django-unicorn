@@ -204,10 +204,9 @@ export class Element {
    * Returns `null` if no unicorn element can be found before the root.
    */
   getUnicornParent() {
-    // const parentEl = this.el.parentElement;
     let parentElement = this.parent;
 
-    while (!parentElement.isUnicorn) {
+    while (parentElement && !parentElement.isUnicorn) {
       if (parentElement.el.getAttribute("unicorn:checksum")) {
         return null;
       }
