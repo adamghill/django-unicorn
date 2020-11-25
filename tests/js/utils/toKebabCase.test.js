@@ -16,3 +16,7 @@ test("Null to empty string", (t) => {
 test("Empty string to empty string", (t) => {
   t.is(toKebabCase(""), "");
 });
+
+test("One space string to empty string", (t) => {
+  t.is(toKebabCase(" "), " ");
+});
