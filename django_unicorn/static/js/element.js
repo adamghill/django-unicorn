@@ -218,6 +218,21 @@ export class Element {
   }
 
   /**
+   * Handle loading for the element.
+   */
+  handleLoading() {
+    if (this.loading) {
+      if (this.loading.attr) {
+        this.el[this.loading.attr] = this.loading.attr;
+      } else if (this.loading.class) {
+        this.el.classList.add(this.loading.class);
+      } else if (this.loading.removeClass) {
+        this.el.classList.remove(this.loading.removeClass);
+      }
+    }
+  }
+
+  /**
    * Check if another `Element` is the same as this `Element`.
    * @param {Element} other
    */

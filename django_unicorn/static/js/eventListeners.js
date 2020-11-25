@@ -9,6 +9,44 @@ import {
 import { Element } from "./element.js";
 
 /**
+ * Handles loading elements in the component.
+ * @param {Component} component Component.
+ * @param {Element} targetElement Targetted element.
+ */
+function handleLoading(component, targetElement) {
+  targetElement.handleLoading();
+
+  // Look at all elements with a loading attribute
+  component.loadingEls.forEach((loadingElement) => {
+    if (loadingElement.target) {
+      let targetedEl = $(`#${loadingElement.target}`, component.root);
+
+      if (!targetedEl) {
+        component.keyEls.forEach((keyElement) => {
+          if (!targetedEl && keyElement.key === loadingElement.target) {
+            targetedEl = keyElement.el;
+          }
+        });
+      }
+
+      if (targetedEl) {
+        if (targetElement.el.isSameNode(targetedEl)) {
+          if (loadingElement.loading.hide) {
+            loadingElement.hide();
+          } else if (loadingElement.loading.show) {
+            loadingElement.show();
+          }
+        }
+      }
+    } else if (loadingElement.loading.hide) {
+      loadingElement.hide();
+    } else if (loadingElement.loading.show) {
+      loadingElement.show();
+    }
+  });
+}
+
+/**
  * Adds an action event listener to the document for each type of event (e.g. click, keyup, etc).
  * Added at the document level because validation errors would sometimes remove the
  * events when attached directly to the element.
@@ -137,53 +175,13 @@ export function addActionEventListener(component, eventType) {
             }
           });
 
-          if (targetElement.loading) {
-            if (targetElement.loading.attr) {
-              targetElement.el[targetElement.loading.attr] =
-                targetElement.loading.attr;
-            } else if (targetElement.loading.class) {
-              targetElement.el.classList.add(targetElement.loading.class);
-            } else if (targetElement.loading.removeClass) {
-              targetElement.el.classList.remove(
-                targetElement.loading.removeClass
-              );
-            }
-          }
-
-          // Look at all elements with a loading attribute
-          component.loadingEls.forEach((loadingElement) => {
-            if (loadingElement.target) {
-              let targetedEl = $(`#${loadingElement.target}`, component.root);
-
-              if (!targetedEl) {
-                component.keyEls.forEach((keyElement) => {
-                  if (!targetedEl && keyElement.key === loadingElement.target) {
-                    targetedEl = keyElement.el;
-                  }
-                });
-              }
-
-              if (targetedEl) {
-                if (targetElement.el.isSameNode(targetedEl)) {
-                  if (loadingElement.loading.hide) {
-                    loadingElement.hide();
-                  } else if (loadingElement.loading.show) {
-                    loadingElement.show();
-                  }
-                }
-              }
-            } else if (loadingElement.loading.hide) {
-              loadingElement.hide();
-            } else if (loadingElement.loading.show) {
-              loadingElement.show();
-            }
-          });
-
           if (action.key) {
             if (action.key === toKebabCase(event.key)) {
+              handleLoading(component, targetElement);
               component.callMethod(action.name);
             }
           } else {
+            handleLoading(component, targetElement);
             component.callMethod(action.name);
           }
         }
