@@ -310,7 +310,15 @@ class UnicornView(TemplateView):
                     if key in form.cleaned_data:
                         cleaned_value = form.cleaned_data[key]
                         value = field.widget.format_value(cleaned_value)
-                        frontend_context_variables[key] = value
+
+                        # Don't update the frontend variable if the only change is
+                        # stripping off the whitespace from the field value
+                        # https://docs.djangoproject.com/en/stable/ref/forms/fields/#django.forms.CharField.strip
+                        if (
+                            not hasattr(frontend_context_variables[key], "strip")
+                            or frontend_context_variables[key].strip() != value
+                        ):
+                            frontend_context_variables[key] = value
 
         encoded_frontend_context_variables = serializer.dumps(
             frontend_context_variables
@@ -423,7 +431,12 @@ class UnicornView(TemplateView):
         form = self._get_form(data)
 
         if form and name in form.fields and name in form.cleaned_data:
-            value = form.cleaned_data[name]
+            # The Django form CharField validator will remove whitespace
+            # from the field value. Ignore that update if it's the
+            # only thing different from the validator
+            # https://docs.djangoproject.com/en/stable/ref/forms/fields/#django.forms.CharField.strip
+            if not hasattr(value, "strip") or form.cleaned_data[name] != value.strip():
+                value = form.cleaned_data[name]
 
         updating_function_name = f"updating_{name}"
         if hasattr(self, updating_function_name):
