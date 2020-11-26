@@ -1,3 +1,5 @@
+{% load static %}
+
 <div>
     <div>{{ unicorn.errors.task.0.message }}</div>
 
@@ -8,8 +10,14 @@
             </form>
         </p>
         <p class="control">
+            <span>
             <button unicorn:click="add" class="button is-info">Add</button>&nbsp;&nbsp;
             <button unicorn:click="reset" class="button is-danger" {% if not tasks %}disabled{% endif %} style="border-radius: 4px;">Clear all tasks</button>
+        </span>
+
+            <span u:loading style="position: relative; left: 6px;">
+                <img src="{% static 'svg/oval.svg' %}" style="vertical-align: middle;"></img>
+            </span>
         </p>
     </div>
 
