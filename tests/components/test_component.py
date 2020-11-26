@@ -15,14 +15,14 @@ class ExampleComponent(UnicornView):
 
 @pytest.fixture(scope="module")
 def component():
-    return ExampleComponent(component_name="example")
+    return ExampleComponent(component_id="asdf1234", component_name="example")
 
 
 def test_init_with_template_name():
     class TestComponent(UnicornView):
         template_name = "unicorn/test.html"
 
-    component = TestComponent(component_name="hello-world")
+    component = TestComponent(component_id="asdf1234", component_name="hello-world")
     assert component.template_name == "unicorn/test.html"
 
 
@@ -31,7 +31,7 @@ def test_init_with_get_template_names():
         def get_template_names(self):
             return []
 
-    component = TestComponent(component_name="hello-world")
+    component = TestComponent(component_id="asdf1234", component_name="hello-world")
     assert component.template_name is None
 
 
@@ -59,7 +59,7 @@ def test_init_properties():
         def name(self):
             return "World"
 
-    component = TestComponent(component_name="hello-world")
+    component = TestComponent(component_id="asdf1234", component_name="hello-world")
     attributes = component._attributes()
     assert len(attributes) == 1
     assert attributes["name"] == "World"

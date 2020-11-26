@@ -81,3 +81,23 @@ USE_TZ = True
 
 STATIC_URL = "/static/"
 STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)
+
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {"class": "logging.StreamHandler",},
+        "null": {"class": "logging.NullHandler",},
+    },
+    "root": {"handlers": ["console"], "level": "WARNING",},
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": os.getenv("DJANGO_LOG_LEVEL", "INFO"),
+            "propagate": False,
+        },
+        "django.server": {"handlers": ["null"], "level": "INFO", "propagate": False,},
+        "profile": {"handlers": ["console"], "level": "DEBUG", "propagate": False,},
+    },
+}
