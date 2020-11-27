@@ -1,5 +1,6 @@
+from django.template.base import Token, TokenType
+
 from django_unicorn.templatetags.unicorn import unicorn
-from django.template.base import DebugLexer, Token, TokenType
 
 
 def test_unicorn():
@@ -7,20 +8,19 @@ def test_unicorn():
     unicorn_node = unicorn(None, token)
 
     assert unicorn_node.component_name == "todo"
+    assert len(unicorn_node.kwargs) == 0
 
 
-def test_unicorn_args():
-    token = Token(TokenType.TEXT, "unicorn 'todo' 'blob'")
+def test_unicorn_kwargs():
+    token = Token(TokenType.TEXT, "unicorn 'todo' blob='blob'")
     unicorn_node = unicorn(None, token)
 
-    assert unicorn_node.args == [
-        "'blob'",
-    ]
+    assert unicorn_node.kwargs == {"blob": "blob"}
 
 
-# def test_unicorn_render():
-#     token = Token(TokenType.TEXT, "unicorn 'todo' 'blob'")
-#     unicorn_node = unicorn(None, token)
-#     context = {}
+def test_unicorn_args_and_kwargs():
+    # args after the component name get ignored
+    token = Token(TokenType.TEXT, "unicorn 'todo' '1' 2 hello='world' test=3 '4'")
+    unicorn_node = unicorn(None, token)
 
-#     assert unicorn_node.render(context) == ""
+    assert unicorn_node.kwargs == {"hello": "world", "test": 3}

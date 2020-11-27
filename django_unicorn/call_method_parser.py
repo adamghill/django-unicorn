@@ -1,6 +1,6 @@
 import logging
 from ast import literal_eval
-from typing import Any, List, Tuple
+from typing import Any, Dict, List, Tuple
 from uuid import UUID
 
 from django.utils.dateparse import parse_datetime
@@ -15,9 +15,63 @@ CASTERS = [
 ]
 
 
+class InvalidKwarg(Exception):
+    pass
+
+
+def parse_kwarg(kwarg: str, raise_if_unparseable=False) -> Dict[str, Any]:
+    """
+    Parses a potential kwarg as a string into a dictionary.
+
+    For example: `parse_kwarg("test='1'")` == `{"test": "1"}`
+
+
+    """
+
+    parsed_kwarg = {}
+    kwarg = kwarg.strip()
+
+    if "=" not in kwarg:
+        raise InvalidKwarg(f"{kwarg} is invalid")
+    if kwarg.startswith("'") or kwarg.startswith('"'):
+        raise InvalidKwarg(
+            f"{kwarg} key cannot start with single quote or double quote"
+        )
+
+    has_equal_sign = False
+    key = ""
+    val = ""
+
+    for c in kwarg:
+        if c == "=":
+            has_equal_sign = True
+        elif has_equal_sign:
+            val += c
+        else:
+            key += c
+
+        if not has_equal_sign and (c == "'" or c == '"'):
+            raise InvalidKwarg(
+                f"{kwarg} key cannot contain a single quote or double quote"
+            )
+
+    # Attempt to parse the value into a primitive, but return it un-parsed if not possible
+    # because the value can be a template variable that will get set from the context when
+    # the templatetag is rendered
+    try:
+        val = parse_args(val)[0]
+    except ValueError:
+        if raise_if_unparseable:
+            raise
+
+    parsed_kwarg[key] = val
+
+    return parsed_kwarg
+
+
 def parse_args(args: str) -> List[Any]:
     """
-    Parses a arguments as a string into Python objects.
+    Parses arguments as a string into Python objects.
 
     For example: "'1'" would result in a "1". Or "[1, 2]" would result in [1, 2].
 
