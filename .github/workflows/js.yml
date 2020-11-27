@@ -1,9 +1,7 @@
-name: JavaScript CI
-
+name: JavaScript
 on: [push]
 
 jobs:
-
   test:
     runs-on: ubuntu-latest
 
@@ -17,6 +15,6 @@ jobs:
 
       - name: Install node packages
         run: npm install
-        
+
       - name: Test with ava
         run: npm run-script test

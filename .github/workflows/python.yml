@@ -1,9 +1,7 @@
-name: Python tests
-
+name: Python
 on: [push]
 
 jobs:
-
   test:
     runs-on: ubuntu-latest
     strategy:
@@ -22,7 +20,7 @@ jobs:
 
       - name: Install Poetry
         uses: abatilo/actions-poetry@v2.1.0
-      
+
       - name: Cache Poetry virtualenv
         uses: actions/cache@v2.1.3
         id: cache
@@ -43,7 +41,7 @@ jobs:
 
       - name: black check
         run: poetry run black . --check --exclude migrations
-      
+
       - name: isort check
         run: poetry run isort --settings pyproject.toml --check .
 
