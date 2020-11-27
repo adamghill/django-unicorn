@@ -3,6 +3,8 @@ from django.conf import settings
 
 import shortuuid
 
+from django_unicorn.call_method_parser import InvalidKwarg, parse_kwarg
+
 from ..components import UnicornView
 from ..settings import get_setting
 
@@ -38,33 +40,40 @@ def unicorn(parser, token):
             "%r tag's argument should be in quotes" % tag_name
         )
 
-    args = contents[2:]
+    kwargs = {}
 
-    return UnicornNode(component_name[1:-1], args)
+    for arg in contents[2:]:
+        try:
+            kwarg = parse_kwarg(arg)
+            kwargs.update(kwarg)
+        except InvalidKwarg:
+            pass
+
+    return UnicornNode(component_name[1:-1], kwargs)
 
 
 class UnicornNode(template.Node):
-    def __init__(self, component_name, args):
+    def __init__(self, component_name, kwargs):
         self.component_name = component_name
-        self.args = args
+        self.kwargs = kwargs
 
     def render(self, context):
-        formatted_args = []
-
-        for arg in self.args:
-            try:
-                formatted_args.append(template.Variable(arg).resolve(context))
-            except TypeError:
-                formatted_args.append(arg)
-            except template.VariableDoesNotExist:
-                formatted_args.append(arg)
-
         component_id = shortuuid.uuid()[:8]
+
+        resolved_kwargs = {}
+
+        for key, val in self.kwargs.items():
+            try:
+                resolved_kwargs.update({key: template.Variable(val).resolve(context)})
+            except TypeError:
+                resolved_kwargs.update({key: val})
+            except template.VariableDoesNotExist:
+                resolved_kwargs.update({key: val})
 
         view = UnicornView.create(
             component_id=component_id,
             component_name=self.component_name,
-            args=formatted_args,
+            kwargs=resolved_kwargs,
         )
         rendered_component = view.render(init_js=True)
 

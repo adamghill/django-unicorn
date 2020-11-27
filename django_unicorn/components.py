@@ -576,7 +576,10 @@ class UnicornView(TemplateView):
     @staticmethod
     @timed
     def create(
-        component_id: str, component_name: str, use_cache=True, args: List = [],
+        component_id: str,
+        component_name: str,
+        use_cache=True,
+        kwargs: Dict[str, Any] = {},
     ) -> "UnicornView":
         """
         Find and instantiate a component class based on `component_name`.
@@ -586,7 +589,7 @@ class UnicornView(TemplateView):
             param component_name: Name of the component. Used to locate the correct `UnicornView`
                 component class and template if necessary. Required.
             param use_cache: Get component from cache or force construction of component. Defaults to `True`.
-            param args: Arguments for the component passed in from the template. Defaults to `[]`.
+            param kwargs: Keyword arguments for the component passed in from the template. Defaults to `{}`.
         
         Returns:
             Instantiated `UnicornView` component.
@@ -652,7 +655,7 @@ class UnicornView(TemplateView):
             try:
                 component_class = _get_component_class(module_name, class_name)
                 component = component_class(
-                    *args, component_name=component_name, id=component_id,
+                    component_id=component_id, component_name=component_name, **kwargs,
                 )
                 component.mount()
                 component.hydrate()
