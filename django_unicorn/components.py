@@ -605,7 +605,7 @@ class UnicornView(TemplateView):
 
             if cache_key in constructed_views_cache:
                 component = constructed_views_cache[cache_key]
-                # component.request = request
+                component.setup(request)
                 component._validate_called = False
                 logger.debug(f"Retrieve {cache_key} from constructed views cache")
                 return component
