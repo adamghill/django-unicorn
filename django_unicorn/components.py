@@ -6,6 +6,7 @@ from typing import Any, Callable, Dict, List, Optional, Type, Union
 
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models import Model
+from django.http import HttpRequest
 from django.template.response import TemplateResponse
 from django.utils.safestring import mark_safe
 from django.views.generic.base import TemplateView
@@ -579,6 +580,7 @@ class UnicornView(TemplateView):
         component_id: str,
         component_name: str,
         use_cache=True,
+        request: HttpRequest = None,
         kwargs: Dict[str, Any] = {},
     ) -> "UnicornView":
         """
@@ -603,6 +605,7 @@ class UnicornView(TemplateView):
 
             if cache_key in constructed_views_cache:
                 component = constructed_views_cache[cache_key]
+                # component.request = request
                 component._validate_called = False
                 logger.debug(f"Retrieve {cache_key} from constructed views cache")
                 return component
@@ -655,7 +658,10 @@ class UnicornView(TemplateView):
             try:
                 component_class = _get_component_class(module_name, class_name)
                 component = component_class(
-                    component_id=component_id, component_name=component_name, **kwargs,
+                    component_id=component_id,
+                    component_name=component_name,
+                    request=request,
+                    **kwargs,
                 )
                 component.mount()
                 component.hydrate()

@@ -58,6 +58,11 @@ class UnicornNode(template.Node):
         self.kwargs = kwargs
 
     def render(self, context):
+        request = None
+
+        if hasattr(context, "request"):
+            request = context.request
+
         component_id = shortuuid.uuid()[:8]
 
         resolved_kwargs = {}
@@ -74,6 +79,7 @@ class UnicornNode(template.Node):
             component_id=component_id,
             component_name=self.component_name,
             kwargs=resolved_kwargs,
+            request=request,
         )
         rendered_component = view.render(init_js=True)
 
