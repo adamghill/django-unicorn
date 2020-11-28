@@ -211,7 +211,9 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
 
     component_request = ComponentRequest(request)
     component = UnicornView.create(
-        component_id=component_request.id, component_name=component_name
+        component_id=component_request.id,
+        component_name=component_name,
+        request=request,
     )
     validate_all_fields = False
 
@@ -292,6 +294,7 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
                     component_id=component_request.id,
                     component_name=component_name,
                     use_cache=False,
+                    request=request,
                 )
 
                 #  Explicitly remove all errors and prevent validation from firing before render()
@@ -303,6 +306,7 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
                     component_id=component_request.id,
                     component_name=component_name,
                     use_cache=True,
+                    request=request,
                 )
             elif call_method_name == "validate" or call_method_name == "validate()":
                 # Handle the validate special action
