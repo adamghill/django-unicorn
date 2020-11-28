@@ -1,6 +1,10 @@
 from django import template
 from django.conf import settings
 
+import shortuuid
+
+from django_unicorn.call_method_parser import InvalidKwarg, parse_kwarg
+
 from ..components import UnicornView
 from ..settings import get_setting
 
@@ -19,12 +23,15 @@ def unicorn_errors(context):
 
 
 def unicorn(parser, token):
-    try:
-        (tag_name, component_name) = token.split_contents()
-    except ValueError:
+    contents = token.split_contents()
+
+    if len(contents) < 2:
         raise template.TemplateSyntaxError(
-            "%r tag requires a single argument" % token.contents.split()[0]
+            "%r tag requires at least a single argument" % token.contents.split()[0]
         )
+
+    tag_name = contents[0]
+    component_name = contents[1]
 
     if not (
         component_name[0] == component_name[-1] and component_name[0] in ('"', "'")
@@ -33,15 +40,41 @@ def unicorn(parser, token):
             "%r tag's argument should be in quotes" % tag_name
         )
 
-    return UnicornNode(component_name[1:-1])
+    kwargs = {}
+
+    for arg in contents[2:]:
+        try:
+            kwarg = parse_kwarg(arg)
+            kwargs.update(kwarg)
+        except InvalidKwarg:
+            pass
+
+    return UnicornNode(component_name[1:-1], kwargs)
 
 
 class UnicornNode(template.Node):
-    def __init__(self, component_name):
+    def __init__(self, component_name, kwargs):
         self.component_name = component_name
+        self.kwargs = kwargs
 
     def render(self, context):
-        view = UnicornView.create(component_name=self.component_name)
+        component_id = shortuuid.uuid()[:8]
+
+        resolved_kwargs = {}
+
+        for key, val in self.kwargs.items():
+            try:
+                resolved_kwargs.update({key: template.Variable(val).resolve(context)})
+            except TypeError:
+                resolved_kwargs.update({key: val})
+            except template.VariableDoesNotExist:
+                resolved_kwargs.update({key: val})
+
+        view = UnicornView.create(
+            component_id=component_id,
+            component_name=self.component_name,
+            kwargs=resolved_kwargs,
+        )
         rendered_component = view.render(init_js=True)
 
         return rendered_component

@@ -1,22 +1,20 @@
-name: JavaScript CI
-
+name: JavaScript
 on: [push]
 
 jobs:
-
   test:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2.3.4
         with:
           fetch-depth: 1
 
       - name: Set up node
-        uses: actions/setup-node@v1.4.3
+        uses: actions/setup-node@v2.1.2
 
       - name: Install node packages
         run: npm install
-        
+
       - name: Test with ava
         run: npm run-script test

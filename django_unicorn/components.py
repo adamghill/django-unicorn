@@ -11,12 +11,12 @@ from django.utils.safestring import mark_safe
 from django.views.generic.base import TemplateView
 
 import orjson
-import shortuuid
 from bs4 import BeautifulSoup
 from bs4.element import Tag
 from bs4.formatter import HTMLFormatter
 
 from . import serializer
+from .decorators import timed
 from .settings import get_setting
 from .utils import generate_checksum
 
@@ -25,7 +25,6 @@ logger = logging.getLogger(__name__)
 
 
 # Module cache to reduce initialization costs
-views_cache = {}
 constructed_views_cache = {}
 
 
@@ -169,8 +168,12 @@ class UnicornView(TemplateView):
 
         assert self.component_name, "Component name is required"
 
-        if "component_id" not in kwargs or not kwargs["component_id"]:
-            self.component_id = shortuuid.uuid()[:8]
+        if "id" in kwargs and kwargs["id"]:
+            # Sometimes the component_id is initially in kwargs["id"]
+            self.component_id = kwargs["id"]
+
+        assert hasattr(self, "component_id"), "Component id is required"
+        assert self.component_id, "Component id is required"
 
         if "request" in kwargs:
             self.setup(kwargs["request"])
@@ -571,50 +574,42 @@ class UnicornView(TemplateView):
         )
 
     @staticmethod
+    @timed
     def create(
-        component_name: str, component_id: str = None, use_cache=True
+        component_id: str,
+        component_name: str,
+        use_cache=True,
+        kwargs: Dict[str, Any] = {},
     ) -> "UnicornView":
         """
         Find and instantiate a component class based on `component_name`.
 
         Args:
+            param component_id: Id of the component. Required.
             param component_name: Name of the component. Used to locate the correct `UnicornView`
-                component class and template if necessary.
-            param component_id: Id of the component. Will be created if not passed in.
+                component class and template if necessary. Required.
             param use_cache: Get component from cache or force construction of component. Defaults to `True`.
+            param kwargs: Keyword arguments for the component passed in from the template. Defaults to `{}`.
         
         Returns:
             Instantiated `UnicornView` component.
             Raises `ComponentLoadError` if the component could not be loaded.
         """
-        if component_id and use_cache:
-            key = f"{component_name}-{component_id}"
+        assert component_id, "Component id is required"
+        assert component_name, "Component name is required"
 
-            if key in constructed_views_cache:
-                component = constructed_views_cache[key]
+        if use_cache:
+            cache_key = f"{component_name}-{component_id}"
+
+            if cache_key in constructed_views_cache:
+                component = constructed_views_cache[cache_key]
                 component._validate_called = False
+                logger.debug(f"Retrieve {cache_key} from constructed views cache")
                 return component
-
-        if component_name in views_cache:
-            component = views_cache[component_name](
-                component_name=component_name, component_id=component_id
-            )
-
-            #  Re-initializes classes so that `reset` magic method will "clear" them as expected
-            component.reset()
-
-            component.hydrate()
-
-            if component_id:
-                key = f"{component_name}-{component_id}"
-                constructed_views_cache[key] = component
-
-            component._validate_called = False
-
-            return component
 
         locations = []
 
+        @timed
         def _get_component_class(
             module_name: str, class_name: str
         ) -> Type[UnicornView]:
@@ -660,12 +655,15 @@ class UnicornView(TemplateView):
             try:
                 component_class = _get_component_class(module_name, class_name)
                 component = component_class(
-                    component_name=component_name, id=component_id
+                    component_id=component_id, component_name=component_name, **kwargs,
                 )
                 component.mount()
                 component.hydrate()
+                component._validate_called = False
 
-                views_cache[component_name] = component_class
+                # Put the component in a "cache" to skip looking for the component on the next request
+                cache_key = f"{component_name}-{component_id}"
+                constructed_views_cache[cache_key] = component
 
                 return component
             except ModuleNotFoundError as e:

@@ -15,6 +15,7 @@ django = ">=3.0.0"
 beautifulsoup4 = "^4.9.1"
 orjson = "^3.2.1"
 shortuuid = "^1.0.1"
+wrapt = "^1.12.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.4.3"

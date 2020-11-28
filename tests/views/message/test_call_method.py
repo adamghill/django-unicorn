@@ -65,6 +65,28 @@ def test_message_call_method_params(client):
     assert body["data"].get("method_count") == 3
 
 
+def test_message_call_method_no_validation(client):
+    data = {}
+    message = {
+        "actionQueue": [
+            {"payload": {"name": "set_text_no_validation"}, "type": "callMethod",}
+        ],
+        "data": data,
+        "checksum": generate_checksum(orjson.dumps(data)),
+        "id": "FDHcbzGf",
+    }
+
+    response = client.post(
+        "/message/tests.views.fake_components.FakeValidationComponent",
+        message,
+        content_type="application/json",
+    )
+
+    body = orjson.loads(response.content)
+
+    assert not body["errors"]
+
+
 def test_message_call_method_validation(client):
     data = {}
     message = {
@@ -88,25 +110,3 @@ def test_message_call_method_validation(client):
     assert body["errors"]["number"]
     assert body["errors"]["number"][0]["code"] == "required"
     assert body["errors"]["number"][0]["message"] == "This field is required."
-
-
-def test_message_call_method_no_validation(client):
-    data = {}
-    message = {
-        "actionQueue": [
-            {"payload": {"name": "set_text_no_validation"}, "type": "callMethod",}
-        ],
-        "data": data,
-        "checksum": generate_checksum(orjson.dumps(data)),
-        "id": "FDHcbzGf",
-    }
-
-    response = client.post(
-        "/message/tests.views.fake_components.FakeValidationComponent",
-        message,
-        content_type="application/json",
-    )
-
-    body = orjson.loads(response.content)
-
-    assert not body["errors"]
