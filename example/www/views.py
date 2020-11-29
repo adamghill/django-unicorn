@@ -9,6 +9,6 @@ def index(request):
 
 def template(request, name):
     try:
-        return render(request, f"www/{name}.html")
+        return render(request, f"www/{name}.html", context={"example": "test"})
     except TemplateDoesNotExist:
         raise Http404
