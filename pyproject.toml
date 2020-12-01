@@ -12,7 +12,7 @@ keywords = ["django", "python", "javascript", "fullstack"]
 [tool.poetry.dependencies]
 python = "^3.6"
 django = ">=3.0.0"
-beautifulsoup4 = "^4.9.1"
+beautifulsoup4 = ">=4.8.0"
 orjson = "^3.2.1"
 shortuuid = "^1.0.1"
 wrapt = "^1.12.1"
