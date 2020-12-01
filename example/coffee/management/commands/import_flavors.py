@@ -7,7 +7,7 @@ from ...models import Flavor
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        with open("example/coffee/management/commands/coffee-flavors.csv", "r") as f:
+        with open("example/coffee/management/commands/flavors.csv", "r") as f:
             csv_reader = csv.reader(f)
 
             for row in csv_reader:
