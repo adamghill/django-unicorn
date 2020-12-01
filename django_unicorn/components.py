@@ -15,6 +15,7 @@ import orjson
 from bs4 import BeautifulSoup
 from bs4.element import Tag
 from bs4.formatter import HTMLFormatter
+from cachetools.lru import LRUCache
 
 from . import serializer
 from .decorators import timed
@@ -26,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 
 # Module cache to reduce initialization costs
-constructed_views_cache = {}
+constructed_views_cache = LRUCache(maxsize=100)
 
 
 class UnicornField:
