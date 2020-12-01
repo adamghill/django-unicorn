@@ -340,7 +340,7 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
             model_names_to_validate = []
 
             for key, value in original_data.items():
-                if value != component_request.data[key]:
+                if value != component_request.data.get(key):
                     model_names_to_validate.append(key)
 
             component.validate(model_names=model_names_to_validate)
