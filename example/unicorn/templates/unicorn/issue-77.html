@@ -1,27 +1,17 @@
 <div>
     <select name="left">
     {% for x in obja.objcs.all %}
-        <option value="{{ x.id }}" unicorn:click="set_left({{ x.id }})">{{ x }}</option>
+        <option value="{{ x.id }}" unicorn:click="set_left({{ x.id }})">{{ x.relB.name }}</option>
     {% endfor %}
     </select>
     
     <select name="right">
-    {% for x in objb.objcs.all %}
-        <option value="{{ x.id }}" unicorn:click="set_right({{ x.id }})">{{ x }}</option>
+    {% for x in obja.objcs.all %}
+        <option value="{{ x.id }}" unicorn:click="set_right({{ x.id }})">{{ x.relB.name }}</option>
     {% endfor %}
     </select>
 
     <hr />
-
-    <select name="left" unicorn:model="objc_left">
-    {% for x in obja.objcs.all %}
-        <option value="{{ x.id }}">{{ x }}</option>
-    {% endfor %}
-    </select>
-    
-    <select name="right" unicorn:model="objc_right">
-    {% for x in objb.objcs.all %}
-        <option value="{{ x.id }}">{{ x }}</option>
-    {% endfor %}
-    </select>
+    <p>LEFT : {{ objc_left.relB.name }}</p>
+    <p>RIGHT : {{ objc_right.relB.name }}</p>
 </div>

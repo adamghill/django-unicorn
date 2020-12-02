@@ -14,7 +14,13 @@ class Issue77View(UnicornView):
         self.obja = ObjA.objects.get(pk=kwargs["pk"])
 
     def set_left(self, pk):
+        print("OBJ L")
+        print(pk)
         self.objc_left = ObjC.objects.get(pk=pk)
+        print(self.objc_left)
 
     def set_right(self, pk):
+        print("OBJ R")
+        print(pk)
         self.objc_right = ObjC.objects.get(pk=pk)
+        print(self.objc_right)
