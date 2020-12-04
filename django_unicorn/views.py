@@ -43,9 +43,12 @@ def _set_property_from_data(
 
         # UnicornField and Models are always a dictionary (can be nested)
         if isinstance(field, UnicornField) or isinstance(field, Model):
-            for key in value.keys():
-                key_value = value[key]
-                _set_property_from_data(field, key, key_value)
+            if isinstance(value, dict):
+                for key in value.keys():
+                    key_value = value[key]
+                    _set_property_from_data(field, key, key_value)
+            else:
+                _set_property_from_data(field, field.name, value)
         else:
             if hasattr(component_or_field, "_set_property"):
                 # Can assume that `component_or_field` is a component
