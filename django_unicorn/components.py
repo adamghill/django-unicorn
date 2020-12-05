@@ -104,7 +104,8 @@ class UnicornTemplateResponse(TemplateResponse):
 
         content = response.content.decode("utf-8")
 
-        checksum = generate_checksum(str.encode(str(self.frontend_context_variables)))
+        frontend_context_variables_dict = orjson.loads(self.frontend_context_variables)
+        checksum = generate_checksum(orjson.dumps(frontend_context_variables_dict))
 
         soup = BeautifulSoup(content, features="html.parser")
         root_element = UnicornTemplateResponse._get_root_element(soup)

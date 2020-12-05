@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Dict, List
 
 from django.core.serializers import serialize
 from django.db.models import Model, QuerySet
@@ -48,6 +48,40 @@ def _json_serializer(obj):
     raise TypeError
 
 
+def _fix_floats(current: Dict, data: Dict = None, paths: List = []) -> None:
+    """
+    Recursively change any Python floats to string so that JavaScript
+    won't change float to integers.
+
+    Params:
+        current: Dictionary in which to check for and fix floats.
+    """
+
+    if data is None:
+        data = current
+
+    if isinstance(current, dict):
+        for key, val in current.items():
+            paths.append(key)
+            _fix_floats(val, data, paths=paths)
+            paths.pop()
+    elif isinstance(current, list):
+        for (idx, item) in enumerate(current):
+            paths.append(idx)
+            _fix_floats(item, data, paths=paths)
+            paths.pop()
+    elif isinstance(current, float):
+        _piece = data
+
+        for (idx, path) in enumerate(paths):
+            if idx == len(paths) - 1:
+                # `path` can be a dictionary key or list index,
+                # but either way it is retrieved the same way
+                _piece[path] = str(current)
+            else:
+                _piece = _piece[path]
+
+
 def dumps(data: dict) -> str:
     """
     Converts the passed-in dictionary to a string representation.
@@ -55,6 +89,10 @@ def dumps(data: dict) -> str:
     Handles the following objects: dataclass, datetime, enum, float, int, numpy, str, uuid,
     Django Model, Django QuerySet, any object with `to_json` method.
     """
-    dumped_data = orjson.dumps(data, default=_json_serializer).decode("utf-8")
+    serialized_data = orjson.dumps(data, default=_json_serializer)
+    dict_data = orjson.loads(serialized_data)
+    _fix_floats(dict_data)
+
+    dumped_data = orjson.dumps(dict_data).decode("utf-8")
 
     return dumped_data
