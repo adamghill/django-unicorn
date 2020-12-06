@@ -291,30 +291,7 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
             call_method_name = payload.get("name", "")
             assert call_method_name, "Missing 'name' key for callMethod"
 
-            if call_method_name == "reset" or call_method_name == "reset()":
-                # Handle the reset special action
-                component = UnicornView.create(
-                    component_id=component_request.id,
-                    component_name=component_name,
-                    use_cache=False,
-                    request=request,
-                )
-
-                #  Explicitly remove all errors and prevent validation from firing before render()
-                component.errors = {}
-                is_reset_called = True
-            elif call_method_name == "refresh" or call_method_name == "refresh()":
-                # Handle the refresh special action
-                component = UnicornView.create(
-                    component_id=component_request.id,
-                    component_name=component_name,
-                    use_cache=True,
-                    request=request,
-                )
-            elif call_method_name == "validate" or call_method_name == "validate()":
-                # Handle the validate special action
-                validate_all_fields = True
-            elif "=" in call_method_name:
+            if "=" in call_method_name:
                 # TODO: Parse this in a sane way so that an equal sign
                 # in the middle of a string doesn't trigger the set shortcut
                 equal_sign_idx = call_method_name.index("=")
@@ -330,7 +307,27 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
             else:
                 (method_name, params) = parse_call_method_name(call_method_name)
 
-                if method_name == "toggle":
+                if method_name == "refresh":
+                    # Handle the refresh special action
+                    component = UnicornView.create(
+                        component_id=component_request.id,
+                        component_name=component_name,
+                        use_cache=True,
+                        request=request,
+                    )
+                elif method_name == "reset":
+                    # Handle the reset special action
+                    component = UnicornView.create(
+                        component_id=component_request.id,
+                        component_name=component_name,
+                        use_cache=False,
+                        request=request,
+                    )
+
+                    #  Explicitly remove all errors and prevent validation from firing before render()
+                    component.errors = {}
+                    is_reset_called = True
+                elif method_name == "toggle":
                     for property_name in params:
                         if hasattr(component, property_name):
                             property_value = getattr(component, property_name)
@@ -338,6 +335,9 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
                             if isinstance(property_value, bool):
                                 property_value = not property_value
                                 setattr(component, property_name, property_value)
+                elif method_name == "validate":
+                    # Handle the validate special action
+                    validate_all_fields = True
                 else:
                     component.calling(method_name, params)
                     _call_method_name(component, method_name, params)
