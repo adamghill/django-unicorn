@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from django_unicorn.components import UnicornView
-from django_unicorn.views import _set_property_from_data, _set_property_from_payload
+from django_unicorn.views import _set_property_from_data, _set_property_value
 
 
 class NestedPropertyView(UnicornView):
@@ -19,12 +19,16 @@ def test_set_property_from_data_str():
     assert "property_view_updated" == component.string
 
 
-def test_set_property_from_payload_str():
+def test_set_property_value_str():
     component = NestedPropertyView(component_name="test", component_id="12345678")
     assert "property_view" == component.string
 
-    payload = {"name": "string", "value": "property_view_updated"}
-    _set_property_from_payload(component, payload, {"string": "property_view_updated"})
+    _set_property_value(
+        component,
+        "string",
+        "property_view_updated",
+        {"string": "property_view_updated"},
+    )
 
     assert "property_view_updated" == component.string
 
@@ -38,12 +42,11 @@ def test_set_property_from_data_int():
     assert 100 == component.integer
 
 
-def test_set_property_from_payload_int():
+def test_set_property_value_int():
     component = NestedPropertyView(component_name="test", component_id="12345678")
     assert 99 == component.integer
 
-    payload = {"name": "integer", "value": 100}
-    _set_property_from_payload(component, payload, {"integer": 100})
+    _set_property_value(component, "integer", 100, {"integer": 100})
 
     assert 100 == component.integer
 
@@ -57,11 +60,12 @@ def test_set_property_from_data_datetime():
     assert datetime(2020, 1, 2) == component.datetime
 
 
-def test_set_property_from_payload_datetime():
+def test_set_property_value_datetime():
     component = NestedPropertyView(component_name="test", component_id="12345678")
     assert datetime(2020, 1, 1) == component.datetime
 
-    payload = {"name": "datetime", "value": datetime(2020, 1, 2)}
-    _set_property_from_payload(component, payload, {"datetime": datetime(2020, 1, 2)})
+    _set_property_value(
+        component, "datetime", datetime(2020, 1, 2), {"datetime": datetime(2020, 1, 2)}
+    )
 
     assert datetime(2020, 1, 2) == component.datetime

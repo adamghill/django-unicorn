@@ -62,23 +62,22 @@ def _set_property_from_data(
                 setattr(component_or_field, name, value)
 
 
-def _set_property_from_payload(
-    component: UnicornView, payload: Dict, data: Dict = {}
+def _set_property_value(
+    component: UnicornView, property_name: str, property_value: Any, data: Dict = {}
 ) -> None:
     """
-    Sets properties on the component based on the payload.
+    Sets properties on the component.
     Also updates the data dictionary which gets set back as part of the payload.
 
     Args:
         param component: Component to set attributes on.
-        param payload: Dictionary that comes with request.
+        param property_name: Name of the property.
+        param property_value: Value to set on the property.
         param data: Dictionary that gets sent back with the response. Defaults to {}.
     """
 
-    property_name = payload.get("name")
-    assert property_name is not None, "Payload name is required"
-    property_value = payload.get("value")
-    assert property_value is not None, "Payload value is required"
+    assert property_name is not None, "Property name is required"
+    assert property_value is not None, "Property value is required"
 
     component.updating(property_name, property_value)
 
@@ -258,8 +257,8 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
     original_data = component_request.data.copy()
 
     # Set component properties based on request data
-    for (name, value) in component_request.data.items():
-        _set_property_from_data(component, name, value)
+    for (property_name, property_value) in component_request.data.items():
+        _set_property_from_data(component, property_name, property_value)
     component.hydrate()
 
     is_reset_called = False
@@ -269,7 +268,11 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
         payload = action.get("payload", {})
 
         if action_type == "syncInput":
-            _set_property_from_payload(component, payload, component_request.data)
+            property_name = payload.get("name")
+            property_value = payload.get("value")
+            _set_property_value(
+                component, property_name, property_value, component_request.data
+            )
         elif action_type == "dbInput":
             model = payload.get("model")
             db = payload.get("db", {})
@@ -337,12 +340,10 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
                     pass
 
             if setter_method:
-                # Create a fake "payload" so that nested properties will get set as expected
                 property_name = list(setter_method.keys())[0]
                 property_value = setter_method[property_name]
-                payload = {"name": property_name, "value": property_value}
 
-                _set_property_from_payload(component, payload)
+                _set_property_value(component, property_name, property_value)
             else:
                 (method_name, params) = parse_call_method_name(call_method_name)
 
@@ -368,12 +369,10 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
                     is_reset_called = True
                 elif method_name == "toggle":
                     for property_name in params:
-                        # Create a fake "payload" so that nested properties will get set as expected
                         property_value = _get_property_value(component, property_name)
                         property_value = not property_value
-                        payload = {"name": property_name, "value": property_value}
 
-                        _set_property_from_payload(component, payload)
+                        _set_property_value(component, property_name, property_value)
                 elif method_name == "validate":
                     # Handle the validate special action
                     validate_all_fields = True
