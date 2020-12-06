@@ -9,7 +9,12 @@ from django.views.decorators.http import require_POST
 
 import orjson
 
-from .call_method_parser import parse_args, parse_call_method_name
+from .call_method_parser import (
+    InvalidKwarg,
+    parse_args,
+    parse_call_method_name,
+    parse_kwarg,
+)
 from .components import UnicornField, UnicornView
 from .errors import UnicornViewError
 from .utils import generate_checksum
@@ -58,7 +63,7 @@ def _set_property_from_data(
 
 
 def _set_property_from_payload(
-    component: UnicornView, payload: Dict, data: Dict
+    component: UnicornView, payload: Dict, data: Dict = {}
 ) -> None:
     """
     Sets properties on the component based on the payload.
@@ -67,66 +72,95 @@ def _set_property_from_payload(
     Args:
         param component: Component to set attributes on.
         param payload: Dictionary that comes with request.
-        param data: Dictionary that gets sent back with the response.
+        param data: Dictionary that gets sent back with the response. Defaults to {}.
     """
 
     property_name = payload.get("name")
+    assert property_name is not None, "Payload name is required"
     property_value = payload.get("value")
+    assert property_value is not None, "Payload value is required"
+
     component.updating(property_name, property_value)
 
-    if property_name is not None and property_value is not None:
-        """
-        Handles nested properties. For example, for the following component:
+    """
+    Handles nested properties. For example, for the following component:
 
-        class Author(UnicornField):
-            name = "Neil"
+    class Author(UnicornField):
+        name = "Neil"
 
-        class TestView(UnicornView):
-            author = Author()
-        
-        `payload` would be `{'name': 'author.name', 'value': 'Neil Gaiman'}`
+    class TestView(UnicornView):
+        author = Author()
+    
+    `payload` would be `{'name': 'author.name', 'value': 'Neil Gaiman'}`
 
-        The following code updates UnicornView.author.name based the payload's `author.name`.
-        """
-        property_name_parts = property_name.split(".")
-        component_or_field = component
-        data_or_dict = data  # Could be an internal portion of data that gets set
+    The following code updates UnicornView.author.name based the payload's `author.name`.
+    """
+    property_name_parts = property_name.split(".")
+    component_or_field = component
+    data_or_dict = data  # Could be an internal portion of data that gets set
 
-        for (idx, property_name_part) in enumerate(property_name_parts):
-            if hasattr(component_or_field, property_name_part):
-                if idx == len(property_name_parts) - 1:
-                    if hasattr(component_or_field, "_set_property"):
-                        # Can assume that `component_or_field` is a component
-                        component_or_field._set_property(
-                            property_name_part, property_value
-                        )
-                    else:
-                        # Handle calling the updating/updated method for nested properties
-                        property_name_snake_case = property_name.replace(".", "_")
-                        updating_function_name = f"updating_{property_name_snake_case}"
-                        updated_function_name = f"updated_{property_name_snake_case}"
-
-                        if hasattr(component, updating_function_name):
-                            getattr(component, updating_function_name)(property_value)
-
-                        setattr(component_or_field, property_name_part, property_value)
-
-                        if hasattr(component, updated_function_name):
-                            getattr(component, updated_function_name)(property_value)
-
-                    data_or_dict[property_name_part] = property_value
+    for (idx, property_name_part) in enumerate(property_name_parts):
+        if hasattr(component_or_field, property_name_part):
+            if idx == len(property_name_parts) - 1:
+                if hasattr(component_or_field, "_set_property"):
+                    # Can assume that `component_or_field` is a component
+                    component_or_field._set_property(property_name_part, property_value)
                 else:
-                    component_or_field = getattr(component_or_field, property_name_part)
-                    data_or_dict = data_or_dict.get(property_name_part, {})
-            elif isinstance(component_or_field, dict):
-                if idx == len(property_name_parts) - 1:
-                    component_or_field[property_name_part] = property_value
-                    data_or_dict[property_name_part] = property_value
-                else:
-                    component_or_field = component_or_field[property_name_part]
-                    data_or_dict = data_or_dict.get(property_name_part, {})
+                    # Handle calling the updating/updated method for nested properties
+                    property_name_snake_case = property_name.replace(".", "_")
+                    updating_function_name = f"updating_{property_name_snake_case}"
+                    updated_function_name = f"updated_{property_name_snake_case}"
+
+                    if hasattr(component, updating_function_name):
+                        getattr(component, updating_function_name)(property_value)
+
+                    setattr(component_or_field, property_name_part, property_value)
+
+                    if hasattr(component, updated_function_name):
+                        getattr(component, updated_function_name)(property_value)
+
+                data_or_dict[property_name_part] = property_value
+            else:
+                component_or_field = getattr(component_or_field, property_name_part)
+                data_or_dict = data_or_dict.get(property_name_part, {})
+        elif isinstance(component_or_field, dict):
+            if idx == len(property_name_parts) - 1:
+                component_or_field[property_name_part] = property_value
+                data_or_dict[property_name_part] = property_value
+            else:
+                component_or_field = component_or_field[property_name_part]
+                data_or_dict = data_or_dict.get(property_name_part, {})
 
     component.updated(property_name, property_value)
+
+
+def _get_property_value(component: UnicornView, property_name: str) -> Any:
+    """
+    Gets property value from the component based on the property name.
+    Handles nested property names.
+
+    Args:
+        param component: Component to get property values from.
+        param property_name: Property name. Can be "dot-notation" to get nested properties.
+    """
+
+    assert property_name is not None, "property_name name is required"
+
+    # Handles nested properties
+    property_name_parts = property_name.split(".")
+    component_or_field = component
+
+    for (idx, property_name_part) in enumerate(property_name_parts):
+        if hasattr(component_or_field, property_name_part):
+            if idx == len(property_name_parts) - 1:
+                return getattr(component_or_field, property_name_part)
+            else:
+                component_or_field = getattr(component_or_field, property_name_part)
+        elif isinstance(component_or_field, dict):
+            if idx == len(property_name_parts) - 1:
+                return component_or_field[property_name_part]
+            else:
+                component_or_field = component_or_field[property_name_part]
 
 
 def _call_method_name(
@@ -291,19 +325,24 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
             call_method_name = payload.get("name", "")
             assert call_method_name, "Missing 'name' key for callMethod"
 
-            if "=" in call_method_name:
-                # TODO: Parse this in a sane way so that an equal sign
-                # in the middle of a string doesn't trigger the set shortcut
-                equal_sign_idx = call_method_name.index("=")
-                property_name = call_method_name[:equal_sign_idx]
-                parsed_args = parse_args(call_method_name[equal_sign_idx + 1 :])
-                property_value = parsed_args[0] if parsed_args else None
+            (method_name, params) = parse_call_method_name(call_method_name)
+            setter_method = {}
 
-                if hasattr(component, property_name) and property_value is not None:
-                    component.calling(f"set_{property_name}", property_value)
-                    setattr(component, property_name, property_value)
-                    component.called(f"set_{property_name}", property_value)
-                    component_request.data[property_name] = property_value
+            if "=" in call_method_name:
+                try:
+                    setter_method = parse_kwarg(
+                        call_method_name, raise_if_unparseable=True
+                    )
+                except InvalidKwarg:
+                    pass
+
+            if setter_method:
+                # Create a fake "payload" so that nested properties will get set as expected
+                property_name = list(setter_method.keys())[0]
+                property_value = setter_method[property_name]
+                payload = {"name": property_name, "value": property_value}
+
+                _set_property_from_payload(component, payload)
             else:
                 (method_name, params) = parse_call_method_name(call_method_name)
 
@@ -329,12 +368,12 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
                     is_reset_called = True
                 elif method_name == "toggle":
                     for property_name in params:
-                        if hasattr(component, property_name):
-                            property_value = getattr(component, property_name)
+                        # Create a fake "payload" so that nested properties will get set as expected
+                        property_value = _get_property_value(component, property_name)
+                        property_value = not property_value
+                        payload = {"name": property_name, "value": property_value}
 
-                            if isinstance(property_value, bool):
-                                property_value = not property_value
-                                setattr(component, property_name, property_value)
+                        _set_property_from_payload(component, payload)
                 elif method_name == "validate":
                     # Handle the validate special action
                     validate_all_fields = True

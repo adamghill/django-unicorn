@@ -55,9 +55,9 @@ def parse_kwarg(kwarg: str, raise_if_unparseable=False) -> Dict[str, Any]:
                 f"{kwarg} key cannot contain a single quote or double quote"
             )
 
-    # Attempt to parse the value into a primitive, but return it un-parsed if not possible
-    # because the value can be a template variable that will get set from the context when
-    # the templatetag is rendered
+    # Attempt to parse the value into a primitive, but allow it to be returned if not possible
+    # (the value can be a template variable that will get set from the context when
+    # the templatetag is rendered in which case it can't be parsed in this manner)
     try:
         val = parse_args(val)[0]
     except ValueError:
