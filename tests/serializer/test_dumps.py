@@ -96,3 +96,51 @@ def test_get_model_dict():
     expected = {"pk": None, "name": "name1", "label": "label1", "parent": None}
 
     assert expected == actual
+
+
+def test_float():
+    expected = '{"name":"0.0"}'
+    actual = serializer.dumps({"name": 0.0})
+
+    assert expected == actual
+
+
+def test_dict_float():
+    expected = '{"name":{"another":"0.0"}}'
+    actual = serializer.dumps({"name": {"another": 0.0}})
+
+    assert expected == actual
+
+
+def test_list_float():
+    expected = '{"name":[1,2,"0.0"]}'
+    actual = serializer.dumps({"name": [1, 2, 0.0]})
+
+    assert expected == actual
+
+
+def test_nested_list_float():
+    expected = '{"name":{"blob":[1,2,"0.0"]}}'
+    actual = serializer.dumps({"name": {"blob": [1, 2, 0.0]}})
+
+    assert expected == actual
+
+
+def test_nested_list_float_complicated():
+    expected = '{"name":{"blob":[1,2,"0.0"]},"more":["1.9",2,5],"another":[{"great":"1.0","ok":["1.6","0.0",4]}]}'
+    actual = serializer.dumps(
+        {
+            "name": {"blob": [1, 2, 0.0]},
+            "more": [1.9, 2, 5],
+            "another": [{"great": 1.0, "ok": [1.6, 0.0, 4]}],
+        }
+    )
+
+    assert expected == actual
+
+
+def test_nested_list_float_less_complicated():
+    expected = '{"another":[{"great":"1.0","ok":["1.6","0.0",4]}]}'
+    actual = serializer.dumps({"another": [{"great": 1.0, "ok": [1.6, 0.0, 4]}],})
+
+    assert expected == actual
