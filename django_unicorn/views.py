@@ -347,7 +347,7 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
             else:
                 (method_name, params) = parse_call_method_name(call_method_name)
 
-                if method_name == "refresh":
+                if method_name == "$refresh":
                     # Handle the refresh special action
                     component = UnicornView.create(
                         component_id=component_request.id,
@@ -355,7 +355,7 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
                         use_cache=True,
                         request=request,
                     )
-                elif method_name == "reset":
+                elif method_name == "$reset":
                     # Handle the reset special action
                     component = UnicornView.create(
                         component_id=component_request.id,
@@ -367,13 +367,13 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
                     #  Explicitly remove all errors and prevent validation from firing before render()
                     component.errors = {}
                     is_reset_called = True
-                elif method_name == "toggle":
+                elif method_name == "$toggle":
                     for property_name in params:
                         property_value = _get_property_value(component, property_name)
                         property_value = not property_value
 
                         _set_property_value(component, property_name, property_value)
-                elif method_name == "validate":
+                elif method_name == "$validate":
                     # Handle the validate special action
                     validate_all_fields = True
                 else:

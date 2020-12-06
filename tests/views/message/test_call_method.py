@@ -69,7 +69,7 @@ def test_message_call_method_toggle(client):
     data = {}
     message = {
         "actionQueue": [
-            {"payload": {"name": "toggle('check')"}, "type": "callMethod",}
+            {"payload": {"name": "$toggle('check')"}, "type": "callMethod",}
         ],
         "data": data,
         "checksum": generate_checksum(orjson.dumps(data)),
@@ -91,7 +91,7 @@ def test_message_call_method_nested_toggle(client):
     data = {}
     message = {
         "actionQueue": [
-            {"payload": {"name": "toggle('nested.check')"}, "type": "callMethod",}
+            {"payload": {"name": "$toggle('nested.check')"}, "type": "callMethod",}
         ],
         "data": data,
         "checksum": generate_checksum(orjson.dumps(data)),
