@@ -6,6 +6,12 @@
     </div>
 
     <div>
+        <h2>Boolean Toggles</h2>
+        {% if another_check %}YAYAYA{% else %}Noooooooo{% endif %}<br />
+        <button unicorn:click="toggle('is_checked', 'another_check')" id="toggle-check">Toggle booleans</button>
+    </div>
+
+    <div>
         <h2>Select</h2>
         <select unicorn:model="thing" id="select">
             <option>🐶</option>

@@ -43,6 +43,28 @@ def test_message_call_method_setter(client):
     assert body["data"].get("method_count") == 2
 
 
+def test_message_call_method_toggle(client):
+    data = {}
+    message = {
+        "actionQueue": [
+            {"payload": {"name": "toggle('check')"}, "type": "callMethod",}
+        ],
+        "data": data,
+        "checksum": generate_checksum(orjson.dumps(data)),
+        "id": "FDHcbzGf",
+    }
+
+    response = client.post(
+        "/message/tests.views.fake_components.FakeComponent",
+        message,
+        content_type="application/json",
+    )
+
+    body = orjson.loads(response.content)
+
+    assert body["data"].get("check") == False
+
+
 def test_message_call_method_params(client):
     data = {}
     message = {

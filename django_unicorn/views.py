@@ -315,6 +315,8 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
                 # Handle the validate special action
                 validate_all_fields = True
             elif "=" in call_method_name:
+                # TODO: Parse this in a sane way so that an equal sign
+                # in the middle of a string doesn't trigger the set shortcut
                 equal_sign_idx = call_method_name.index("=")
                 property_name = call_method_name[:equal_sign_idx]
                 parsed_args = parse_args(call_method_name[equal_sign_idx + 1 :])
@@ -327,9 +329,19 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
                     component_request.data[property_name] = property_value
             else:
                 (method_name, params) = parse_call_method_name(call_method_name)
-                component.calling(method_name, params)
-                _call_method_name(component, method_name, params)
-                component.called(method_name, params)
+
+                if method_name == "toggle":
+                    for property_name in params:
+                        if hasattr(component, property_name):
+                            property_value = getattr(component, property_name)
+
+                            if isinstance(property_value, bool):
+                                property_value = not property_value
+                                setattr(component, property_name, property_value)
+                else:
+                    component.calling(method_name, params)
+                    _call_method_name(component, method_name, params)
+                    component.called(method_name, params)
         else:
             raise UnicornViewError(f"Unknown action_type '{action_type}'")
 

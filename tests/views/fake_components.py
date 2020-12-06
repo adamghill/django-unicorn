@@ -10,6 +10,7 @@ class FakeComponent(UnicornView):
     template_name = "templates/test_component.html"
     dictionary = {"name": "test"}
     method_count = 0
+    check = True
 
     def test_method(self):
         self.method_count += 1

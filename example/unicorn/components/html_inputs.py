@@ -3,6 +3,7 @@ from django_unicorn.components import UnicornView
 
 class HtmlInputsView(UnicornView):
     is_checked = False
+    another_check = True
     thing = "🐙"
     things = [
         "alien",
