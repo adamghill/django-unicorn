@@ -74,15 +74,28 @@
                 <strong>Label</strong> {{ flavor.label }}
             </div>
 
-            {% comment %}
+            <div>
+                <label>Float value</label>
+                <input type="text" unicorn:field.defer="float_value"></input>
+                
+                <strong>Float value</strong> {{ flavor.float_value }}
+            </div>
+
+            <div>
+                <label>Decimal value</label>
+                <input type="text" unicorn:field.defer="decimal_value"></input>
+                
+                <strong>Decimal value</strong> {{ flavor.decimal_value }}
+            </div>
+
+            <!-- todo: get updating parent working correctly -->
             <label>Parent</label>
             <select>
                 <option value="" selected>None</option>
                 {% for available_flavor in available_flavors %}
-                <option value="{{ available_flavor.pk }}" {% if instance_flavor.parent.pk == available_flavor.pk %}selected{% endif %}>{{ available_flavor.name }}</option>
+                <option value="{{ available_flavor.pk }}" {% if flavor.parent.pk == available_flavor.pk %}selected{% endif %}>{{ available_flavor.name }}</option>
                 {% endfor %}
             </select>
-            {% endcomment %}
         </div>
         {% endfor %}
     </div>

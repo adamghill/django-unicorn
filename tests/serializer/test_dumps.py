@@ -83,7 +83,7 @@ def test_dumps_queryset(db):
 
     flavors = Flavor.objects.all()
 
-    expected = '{"flavors":[{"name":"name1","label":"label1","parent":null,"pk":1},{"name":"name2","label":"label2","parent":1,"pk":2}]}'
+    expected = '{"flavors":[{"name":"name1","label":"label1","parent":null,"float_value":null,"decimal_value":null,"pk":1},{"name":"name2","label":"label2","parent":1,"float_value":null,"decimal_value":null,"pk":2}]}'
     actual = serializer.dumps({"flavors": flavors})
 
     assert expected == actual
@@ -93,7 +93,14 @@ def test_get_model_dict():
     flavor_one = Flavor(name="name1", label="label1")
     actual = serializer._get_model_dict(flavor_one)
 
-    expected = {"pk": None, "name": "name1", "label": "label1", "parent": None}
+    expected = {
+        "pk": None,
+        "name": "name1",
+        "label": "label1",
+        "parent": None,
+        "decimal_value": None,
+        "float_value": None,
+    }
 
     assert expected == actual
 

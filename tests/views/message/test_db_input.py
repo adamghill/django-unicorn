@@ -41,7 +41,16 @@ def test_message_db_input_update(client):
 
     assert not body["errors"]
     assert body["data"] == {
-        "flavors": [{"pk": 1, "name": "Flowery-Floral", "label": "", "parent": None}]
+        "flavors": [
+            {
+                "pk": 1,
+                "name": "Flowery-Floral",
+                "decimal_value": None,
+                "float_value": None,
+                "label": "",
+                "parent": None,
+            }
+        ]
     }
 
 
@@ -82,6 +91,13 @@ def test_message_db_input_create(client):
     assert not body["errors"]
     assert body["data"] == {
         "flavors": [
-            {"pk": 1, "name": "Sugar Browning-Nutty", "label": "", "parent": None}
+            {
+                "pk": 1,
+                "name": "Sugar Browning-Nutty",
+                "decimal_value": None,
+                "float_value": None,
+                "label": "",
+                "parent": None,
+            }
         ]
     }

@@ -1,3 +1,5 @@
+from django.utils.functional import cached_property
+
 from coffee.models import Flavor
 
 from django_unicorn.components import UnicornView
@@ -32,6 +34,7 @@ class ModelsView(UnicornView):
         self.class_flavor.save()
         self.reset()
 
+    @cached_property
     def available_flavors(self):
         flavors = Flavor.objects.all()
 
