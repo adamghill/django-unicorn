@@ -4,6 +4,7 @@ from coffee.models import Flavor
 
 from django_unicorn.components import UnicornView
 from django_unicorn.db import DbModel
+from django_unicorn.decorators import db_model
 
 
 class ModelsView(UnicornView):
@@ -33,6 +34,10 @@ class ModelsView(UnicornView):
     def add_class_flavor(self):
         self.class_flavor.save()
         self.reset()
+
+    @db_model
+    def delete(self, model):
+        model.delete()
 
     @cached_property
     def available_flavors(self):

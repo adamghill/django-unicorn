@@ -129,7 +129,6 @@ export function addActionEventListener(component, eventType) {
           args(action.name).forEach((eventArg) => {
             if (eventArg.startsWith("$event")) {
               // Remove any extra whitespace, everything before and including "$event", and the ending paren
-              // let eventArg = action.name.trim();
               eventArg = eventArg
                 .trim()
                 .slice(eventArg.indexOf("$event") + 6)
@@ -170,6 +169,35 @@ export function addActionEventListener(component, eventType) {
                 action.name = action.name.replace(
                   originalSpecialVariable,
                   data
+                );
+              }
+            } else if (eventArg === "$model") {
+              const db = {};
+              let elToCheck = targetElement;
+
+              while (elToCheck.parent && (isEmpty(db.name) || isEmpty(db.pk))) {
+                if (elToCheck.el.getAttribute("unicorn:checksum")) {
+                  break;
+                }
+
+                if (elToCheck.db.name) {
+                  db.name = elToCheck.db.name;
+                }
+
+                if (elToCheck.db.pk) {
+                  db.pk = elToCheck.db.pk;
+                }
+
+                elToCheck = elToCheck.parent;
+              }
+
+              if (db.name && db.pk) {
+                action.name = action.name.replace(
+                  "$model",
+                  JSON.stringify({
+                    pk: db.pk,
+                    name: db.name,
+                  })
                 );
               }
             }

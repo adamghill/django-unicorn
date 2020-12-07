@@ -88,6 +88,9 @@
                 <strong>Decimal value</strong> {{ flavor.decimal_value }}
             </div>
 
+            <button unicorn:click="delete($model)">delete($model)</button>
+            <br/>
+
             <!-- todo: get updating parent working correctly -->
             <label>Parent</label>
             <select>

@@ -6,6 +6,42 @@ from django.conf import settings
 import wrapt
 
 
+@wrapt.decorator()
+def db_model(wrapped, instance, args, kwargs):
+    """
+    Converts a JSON representation of a Django model into an actual model.
+
+    For example:
+        @db_model
+        def delete(self, model):
+            ...
+    
+    Will get converted to:
+        `component.delete({ 'name': 'modelName', pk: 1})` -> `component.delete(modelInstance)`
+    """
+
+    if hasattr(instance, "Meta") and hasattr(instance.Meta, "db_models"):
+        db_model_name = args[0].get("name")
+        db_model_pk = args[0].get("pk")
+        db_model_found = False
+
+        for db_model in instance.Meta.db_models:
+            if db_model.name == db_model_name:
+                model = db_model.model_class.objects.get(pk=db_model_pk)
+                args = (model,) + args[1:]
+                db_model_found = True
+                break
+
+        if not db_model_found:
+            raise Exception(f"No db_model found that matches '{db_model_name}'")
+    else:
+        raise Exception("No db_models defined")
+
+    result = wrapped(*args, **kwargs)
+
+    return result
+
+
 def _timed_enabled():
     return settings.DEBUG
 
