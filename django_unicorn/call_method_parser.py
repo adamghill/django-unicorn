@@ -81,9 +81,13 @@ def parse_args(args: str) -> List[Any]:
     """
     found_args = []
     arg = ""
+
     curly_bracket_count = 0
     square_bracket_count = 0
     parenthesis_count = 0
+
+    in_single_quote = False
+    in_double_quote = False
 
     def _eval_arg(_arg):
         try:
@@ -114,7 +118,7 @@ def parse_args(args: str) -> List[Any]:
         return _arg
 
     for c in args:
-        if not c.strip():
+        if not in_single_quote and not in_double_quote and not c.strip():
             continue
 
         if (
@@ -147,6 +151,10 @@ def parse_args(args: str) -> List[Any]:
         elif c == ")":
             parenthesis_count -= 1
             arg = _parse_arg(arg)
+        elif c == "'":
+            in_single_quote = not in_single_quote
+        elif c == '"':
+            in_double_quote = not in_double_quote
 
     if arg:
         arg = _eval_arg(arg)

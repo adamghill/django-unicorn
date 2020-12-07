@@ -20,6 +20,22 @@ def test_single_quote_str_arg():
     assert isinstance(actual[0], str)
 
 
+def test_str_with_space_arg():
+    expected = ["django unicorn"]
+    actual = parse_args("'django unicorn'")
+
+    assert actual == expected
+    assert isinstance(actual[0], str)
+
+
+def test_complicated_str_with_space_arg():
+    expected = ["django's \"  '  unicorn"]
+    actual = parse_args("django's \"  '  unicorn")
+
+    assert actual == expected
+    assert isinstance(actual[0], str)
+
+
 def test_double_quote_str_arg():
     expected = ["1"]
     actual = parse_args('"1"')
