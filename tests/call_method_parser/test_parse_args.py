@@ -1,5 +1,7 @@
 from uuid import UUID
 
+import pytest
+
 from django_unicorn.call_method_parser import parse_args
 
 
@@ -28,17 +30,43 @@ def test_str_with_space_arg():
     assert isinstance(actual[0], str)
 
 
-def test_complicated_str_with_space_arg():
-    expected = ["django's \"  '  unicorn"]
-    actual = parse_args("django's \"  '  unicorn")
+def test_str_with_extra_single_quote():
+    expected = ["django's unicorn"]
+    actual = parse_args("'django's unicorn'")
+
+    assert actual == expected
+    assert isinstance(actual[0], str)
+
+
+def test_str_with_extra_double_quote():
+    expected = ['django "unicorn"']
+    actual = parse_args("'django \"unicorn\"'")
+
+    assert actual == expected
+    assert isinstance(actual[0], str)
+
+
+@pytest.mark.skip("These are edge cases, but still are broken")
+def test_str_with_comma():
+    expected = ["a', b"]
+    actual = parse_args("'a', b'")
+
+    assert actual == expected
+    assert isinstance(actual[0], str)
+
+
+@pytest.mark.skip("These are edge cases, but still are broken")
+def test_str_with_stop_character():
+    expected = ["a'} b"]
+    actual = parse_args("'a'} b'")
 
     assert actual == expected
     assert isinstance(actual[0], str)
 
 
 def test_double_quote_str_arg():
-    expected = ["1"]
-    actual = parse_args('"1"')
+    expected = ["string"]
+    actual = parse_args('"string"')
 
     assert actual == expected
     assert isinstance(actual[0], str)
@@ -69,12 +97,11 @@ def test_args_with_nested_dict():
     assert isinstance(actual[1].get("2"), dict)
 
 
-def test_args_with_nested_list():
+def test_args_with_nested_list_3():
     expected = [[1, ["2", "3"], 4], 9]
     actual = parse_args("[1, ['2', '3'], 4], 9")
 
     assert actual == expected
-    assert isinstance(actual[0][1][1], str)
 
 
 def test_args_with_nested_tuple():
@@ -85,8 +112,8 @@ def test_args_with_nested_tuple():
 
 
 def test_args_with_nested_objects():
-    expected = [[0, 1], {"2": {"3": 4}}, (5, 6, [7, 8])]
-    actual = parse_args("[0,1], {'2': { '3': 4 }}, (5, 6, [7, 8])")
+    expected = [[0, 1], {"2 2": {"3": 4}}, (5, 6, [7, 8])]
+    actual = parse_args("[0,  1], {'2 2': { '3': 4 }}, (5, 6, [7, 8])")
 
     assert actual == expected
 

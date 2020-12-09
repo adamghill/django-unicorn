@@ -14,6 +14,9 @@ CASTERS = [
     lambda a: UUID(a),
 ]
 
+STOP_CHARACTERS = [":", ",", "]", "}", ")"]
+STRING_CHARACTERS = ["'", '"']
+
 
 class InvalidKwarg(Exception):
     pass
@@ -86,8 +89,7 @@ def parse_args(args: str) -> List[Any]:
     square_bracket_count = 0
     parenthesis_count = 0
 
-    in_single_quote = False
-    in_double_quote = False
+    inside_string = False
 
     def _eval_arg(_arg):
         try:
@@ -118,11 +120,19 @@ def parse_args(args: str) -> List[Any]:
         return _arg
 
     for c in args:
-        if not in_single_quote and not in_double_quote and not c.strip():
+        if len(arg) > 1:
+            if c in STOP_CHARACTERS:
+                previous_char = arg[-1:][0]
+
+                if previous_char == "'":
+                    inside_string = False
+
+        if not inside_string and not c.strip():
             continue
 
         if (
             c == ","
+            and not inside_string
             and curly_bracket_count == 0
             and square_bracket_count == 0
             and parenthesis_count == 0
@@ -151,12 +161,13 @@ def parse_args(args: str) -> List[Any]:
         elif c == ")":
             parenthesis_count -= 1
             arg = _parse_arg(arg)
-        elif c == "'":
-            in_single_quote = not in_single_quote
-        elif c == '"':
-            in_double_quote = not in_double_quote
+        elif c in STRING_CHARACTERS:
+            inside_string = True
 
     if arg:
+        if arg.startswith("'") and arg.endswith("'") and len(arg.split("'")) > 3:
+            arg = arg[1:-1]
+
         arg = _eval_arg(arg)
         found_args.append(arg)
 
