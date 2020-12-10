@@ -12,12 +12,17 @@ class FakeComponent(UnicornView):
     method_count = 0
     check = False
     nested = {"check": False}
+    method_param = ""
 
     def test_method(self):
         self.method_count += 1
 
     def test_method_params(self, count):
         self.method_count = count
+
+    def test_method_string_param(self, param):
+        self.method_count += 1
+        self.method_param = param
 
 
 class FakeModelComponent(UnicornView):
