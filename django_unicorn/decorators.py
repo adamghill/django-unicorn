@@ -22,7 +22,9 @@ def db_model(wrapped, instance, args, kwargs):
 
     if hasattr(instance, "Meta") and hasattr(instance.Meta, "db_models"):
         db_model_name = args[0].get("name")
+        assert db_model_name, "Missing db model name"
         db_model_pk = args[0].get("pk")
+        assert db_model_pk, "Missing db model pk"
         db_model_found = False
 
         for db_model in instance.Meta.db_models:
@@ -32,10 +34,9 @@ def db_model(wrapped, instance, args, kwargs):
                 db_model_found = True
                 break
 
-        if not db_model_found:
-            raise Exception(f"No db_model found that matches '{db_model_name}'")
+        assert db_model_found, f"No db_model found that matches '{db_model_name}'"
     else:
-        raise Exception("No db_models defined")
+        raise AssertionError("No db_models defined")
 
     result = wrapped(*args, **kwargs)
 
