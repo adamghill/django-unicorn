@@ -13,7 +13,7 @@ class {camel_case_component_name}View(UnicornView):
 """
 
 TEMPLATE_FILE = """<div>
-    <!-- put 🦄 component code here -->
+    <!-- put component code here -->
 </div>
 """
 
