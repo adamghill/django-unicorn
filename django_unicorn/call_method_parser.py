@@ -8,7 +8,7 @@ from django.utils.dateparse import parse_datetime
 
 logger = logging.getLogger(__name__)
 
-# Lambda that attempts to convert something that failed while being parsed by `literal_ast`.
+# Lambda that attempts to convert something that failed while being parsed by `ast.literal_eval`.
 CASTERS = [
     lambda a: parse_datetime(a),
     lambda a: UUID(a),
