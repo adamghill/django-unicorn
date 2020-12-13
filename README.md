@@ -32,8 +32,8 @@ https://www.django-unicorn.com
 
 1. `git clone git@github.com:adamghill/django-unicorn.git`
 1. `poetry install`
-1. `poetry run example/manage.py migrate`
-1. `poetry run example/manage.py runserver 0:8000`
+1. `poetry run python example/manage.py migrate`
+1. `poetry run python example/manage.py runserver localhost:8000`
 1. Go to `localhost:8000` in your browser
 1. To install in another project `pip install -e ../django-unicorn`
 
