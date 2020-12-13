@@ -5,7 +5,7 @@ import shortuuid
 
 from django_unicorn.call_method_parser import InvalidKwarg, parse_kwarg
 
-from ..components import UnicornView
+
 from ..settings import get_setting
 
 
@@ -75,6 +75,7 @@ class UnicornNode(template.Node):
             except template.VariableDoesNotExist:
                 resolved_kwargs.update({key: val})
 
+        from ..components import UnicornView
         view = UnicornView.create(
             component_id=component_id,
             component_name=self.component_name,
