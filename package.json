@@ -39,5 +39,6 @@
             "!tests/js/utils.js"
         ],
         "failFast": true
-    }
+    },
+    "name": "django-unicorn"
 }
