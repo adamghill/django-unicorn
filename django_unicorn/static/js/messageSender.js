@@ -57,6 +57,11 @@ export function send(component, callback) {
         throw Error(responseJson.error);
       }
 
+      // Redirect to the specified url if it is set
+      if (responseJson.redirect) {
+        window.location = responseJson.redirect.url;
+      }
+
       // Remove any unicorn validation messages before trying to merge with morphdom
       component.modelEls.forEach((element) => {
         // Re-initialize element to make sure it is up to date
@@ -67,6 +72,7 @@ export function send(component, callback) {
       // Get the data from the response
       component.data = responseJson.data || {};
       component.errors = responseJson.errors || {};
+      component.return = responseJson.return || {};
       const rerenderedComponent = responseJson.dom;
 
       morphdom(component.root, rerenderedComponent, MORPHDOM_OPTIONS);

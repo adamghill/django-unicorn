@@ -1,3 +1,4 @@
+from django.shortcuts import redirect
 from django.utils.functional import cached_property
 
 from coffee.models import Flavor
@@ -29,7 +30,8 @@ class ModelsView(UnicornView):
 
     def add_instance_flavor(self):
         self.instance_flavor.save()
-        self.reset()
+
+        return redirect(f"/models?createdId={self.instance_flavor.id}")
 
     def add_class_flavor(self):
         self.class_flavor.save()

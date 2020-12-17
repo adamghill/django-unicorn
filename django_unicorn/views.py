@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Union
 
 from django.db.models import Model
 from django.http import HttpRequest, JsonResponse
+from django.http.response import HttpResponseRedirect
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_POST
 
@@ -12,6 +13,7 @@ import orjson
 from .call_method_parser import InvalidKwarg, parse_call_method_name, parse_kwarg
 from .components import UnicornField, UnicornView
 from .errors import UnicornViewError
+from .serializer import dumps
 from .utils import generate_checksum
 
 
@@ -159,10 +161,9 @@ def _get_property_value(component: UnicornView, property_name: str) -> Any:
 
 def _call_method_name(
     component: UnicornView, method_name: str, params: List[Any]
-) -> None:
+) -> Any:
     """
     Calls the method name with parameters.
-    Also updates the data dictionary which gets set back as part of the payload.
 
     Args:
         param component: Component to call method on.
@@ -174,9 +175,9 @@ def _call_method_name(
         func = getattr(component, method_name)
 
         if params:
-            func(*params)
+            return func(*params)
         else:
-            func()
+            return func()
 
 
 class ComponentRequest:
@@ -257,6 +258,7 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
     component.hydrate()
 
     is_reset_called = False
+    return_value = None
 
     for action in component_request.action_queue:
         action_type = action.get("type")
@@ -373,13 +375,27 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
                     validate_all_fields = True
                 else:
                     component.calling(method_name, params)
-                    _call_method_name(component, method_name, params)
+                    return_value = _call_method_name(component, method_name, params)
                     component.called(method_name, params)
         else:
             raise UnicornViewError(f"Unknown action_type '{action_type}'")
 
     # Re-load frontend context variables to deal with non-serializable properties
     component_request.data = orjson.loads(component.get_frontend_context_variables())
+
+    return_data = {}
+    redirect_data = {}
+
+    if return_value is not None:
+        if isinstance(return_value, HttpResponseRedirect):
+            redirect_data = {
+                "url": return_value.url,
+            }
+        else:
+            try:
+                return_data = orjson.loads(dumps(return_value))
+            except:
+                pass
 
     if not is_reset_called:
         if validate_all_fields:
@@ -400,6 +416,8 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
         "dom": rendered_component,
         "data": component_request.data,
         "errors": component.errors,
+        "redirect": redirect_data,
+        "return": return_data,
     }
 
     return JsonResponse(res)

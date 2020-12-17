@@ -35,6 +35,7 @@ export class Component {
     this.loadingEls = [];
     this.keyEls = [];
     this.errors = {};
+    this.return = {};
     this.poll = {};
 
     this.actionQueue = [];
