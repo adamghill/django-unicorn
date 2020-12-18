@@ -31,7 +31,7 @@ export function send(component, callback) {
     Accept: "application/json",
     "X-Requested-With": "XMLHttpRequest",
   };
-  headers[component.csrfTokenHeaderName] = getCsrfToken();
+  headers[component.csrfTokenHeaderName] = getCsrfToken(component);
 
   fetch(component.syncUrl, {
     method: "POST",
@@ -58,8 +58,13 @@ export function send(component, callback) {
       }
 
       // Redirect to the specified url if it is set
-      if (responseJson.redirect) {
-        window.location = responseJson.redirect.url;
+      // TODO: For turbolinks support look at https://github.com/livewire/livewire/blob/f2ba1977d73429911f81b3f6363ee8f8fea5abff/js/component/index.js#L330-L336
+      if (responseJson.redirect && responseJson.redirect.url) {
+        component.window.location.href = responseJson.redirect.url;
+
+        if (isFunction(callback)) {
+          callback([], null, null);
+        }
       }
 
       // Remove any unicorn validation messages before trying to merge with morphdom

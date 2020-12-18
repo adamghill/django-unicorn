@@ -23,6 +23,50 @@ def test_message_call_method(client):
     assert body["data"].get("method_count") == 1
 
 
+def test_message_call_method_redirect(client):
+    data = {}
+    message = {
+        "actionQueue": [{"payload": {"name": "test_redirect"}, "type": "callMethod",}],
+        "data": data,
+        "checksum": generate_checksum(orjson.dumps(data)),
+        "id": "FDHcbzGf",
+    }
+
+    response = client.post(
+        "/message/tests.views.fake_components.FakeComponent",
+        message,
+        content_type="application/json",
+    )
+
+    body = orjson.loads(response.content)
+
+    assert "redirect" in body
+    assert body["redirect"].get("url") == "/something-here"
+
+
+def test_message_call_method_return_value(client):
+    data = {}
+    message = {
+        "actionQueue": [
+            {"payload": {"name": "test_return_value"}, "type": "callMethod",}
+        ],
+        "data": data,
+        "checksum": generate_checksum(orjson.dumps(data)),
+        "id": "FDHcbzGf",
+    }
+
+    response = client.post(
+        "/message/tests.views.fake_components.FakeComponent",
+        message,
+        content_type="application/json",
+    )
+
+    body = orjson.loads(response.content)
+
+    assert "return" in body
+    assert body["return"] == "booya"
+
+
 def test_message_call_method_setter(client):
     data = {}
     message = {

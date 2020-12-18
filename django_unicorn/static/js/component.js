@@ -28,6 +28,7 @@ export class Component {
 
     this.document = args.document || document;
     this.walker = args.walker || walk;
+    this.window = args.window || window;
 
     this.root = undefined;
     this.modelEls = [];

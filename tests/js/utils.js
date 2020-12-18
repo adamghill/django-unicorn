@@ -52,7 +52,7 @@ export function walkDOM(el, callback) {
       walkDOM(el.firstChild, callback);
     }
     // eslint-disable-next-line no-cond-assign
-  } while (el = el.nextSibling);
+  } while ((el = el.nextSibling));
 }
 
 /**
@@ -87,7 +87,9 @@ export function getComponent(html, id, name, data) {
     name,
     data,
     document,
+    messageUrl: "test",
     walker: walkDOM,
+    window: { location: { href: "" } },
   });
 
   return component;

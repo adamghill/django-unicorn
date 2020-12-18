@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from django import forms
+from django.shortcuts import redirect
 
 from django_unicorn.components import UnicornView
 from example.coffee.models import Flavor
@@ -23,6 +24,12 @@ class FakeComponent(UnicornView):
     def test_method_string_param(self, param):
         self.method_count += 1
         self.method_param = param
+
+    def test_redirect(self):
+        return redirect("/something-here")
+
+    def test_return_value(self):
+        return "booya"
 
 
 class FakeModelComponent(UnicornView):

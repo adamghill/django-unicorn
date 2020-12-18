@@ -60,10 +60,10 @@ export function $(selector, scope) {
 /**
  * Get the CSRF token used by Django.
  */
-export function getCsrfToken() {
+export function getCsrfToken(component) {
   // Default to looking for the CSRF in the cookie
   const cookieKey = "csrftoken=";
-  const csrfTokenCookie = document.cookie
+  const csrfTokenCookie = component.document.cookie
     .split(";")
     .filter((item) => item.trim().startsWith(cookieKey));
 
@@ -72,7 +72,9 @@ export function getCsrfToken() {
   }
 
   // Fall back to check for the CSRF hidden input
-  const csrfElements = document.getElementsByName("csrfmiddlewaretoken");
+  const csrfElements = component.document.getElementsByName(
+    "csrfmiddlewaretoken"
+  );
 
   if (csrfElements && csrfElements.length > 0) {
     return csrfElements[0].getAttribute("value");
