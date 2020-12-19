@@ -5,11 +5,12 @@ import { send } from "../../../django_unicorn/static/js/messageSender.js";
 
 test.cb("click on internal element", (t) => {
   const html = `
-  <input type="hidden" name="csrfmiddlewaretoken" value="vte8BO6vgh1t7zUMDm8fdhpDNV62Hfc1fibo0a5doKc7DE0LybjTw5UNS6YMaYDa">
-  <div unicorn:id="5jypjiyb" unicorn:name="text-inputs" unicorn:checksum="GXzew3Km">
+<input type="hidden" name="csrfmiddlewaretoken" value="asdf">
+<div unicorn:id="5jypjiyb" unicorn:name="text-inputs" unicorn:checksum="GXzew3Km">
     <input unicorn:model='name'></input>
     <button unicorn:click='test()'><span id="clicker">Click</span></button>
-  </div>`;
+</div>
+  `;
 
   const component = getComponent(html);
 

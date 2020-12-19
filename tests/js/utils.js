@@ -1,4 +1,5 @@
 import { JSDOM } from "jsdom";
+import fetchMock from "fetch-mock";
 import { Element } from "../../django_unicorn/static/js/element.js";
 import { Component } from "../../django_unicorn/static/js/component.js";
 
@@ -65,8 +66,13 @@ export function getComponent(html, id, name, data) {
 <div unicorn:id="5jypjiyb" unicorn:name="text-inputs" unicorn:checksum="GXzew3Km">
   <input unicorn:model='name'></input>
   <button unicorn:click='name="world"'></button>
-</div>`;
+</div>
+    `;
   }
+
+  html = `
+<input type="hidden" name="csrfmiddlewaretoken" value="asdf">${html}
+  `;
 
   if (typeof id === "undefined") {
     id = "5jypjiyb";
@@ -91,6 +97,16 @@ export function getComponent(html, id, name, data) {
     walker: walkDOM,
     window: { location: { href: "" } },
   });
+
+  const res = {
+    id: "",
+    dom: "",
+    data: {},
+    errors: {},
+    redirect: {},
+    return: {},
+  };
+  global.fetch = fetchMock.sandbox().mock().post("/test/text-inputs", res);
 
   return component;
 }
