@@ -59,11 +59,16 @@ export function send(component, callback) {
 
       // Redirect to the specified url if it is set
       // TODO: For turbolinks support look at https://github.com/livewire/livewire/blob/f2ba1977d73429911f81b3f6363ee8f8fea5abff/js/component/index.js#L330-L336
-      if (responseJson.redirect && responseJson.redirect.url) {
-        component.window.location.href = responseJson.redirect.url;
+      if (responseJson.redirect) {
+        if (responseJson.redirect.url) {
+          // TODO: Use config to potentially use `component.window.history.pushState()`
+          component.window.location.href = responseJson.redirect.url;
 
-        if (isFunction(callback)) {
-          callback([], null, null);
+          if (isFunction(callback)) {
+            callback([], null, null);
+          }
+        } else if (responseJson.redirect.hash) {
+          component.window.location.hash = responseJson.redirect.hash;
         }
       }
 

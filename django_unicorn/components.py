@@ -32,12 +32,16 @@ constructed_views_cache = LRUCache(maxsize=100)
 
 class UnicornField:
     """
-    Can be used to provide a way to serialize a class quickly.
-    Probably not a good idea in lots of cases.
+    Base class to provide a way to serialize a component field quickly.
     """
 
     def to_json(self):
         return self.__dict__
+
+
+class HashUpdate:
+    def __init__(self, hash):
+        self.hash = hash
 
 
 class ComponentLoadError(Exception):

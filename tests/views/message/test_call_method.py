@@ -44,6 +44,29 @@ def test_message_call_method_redirect(client):
     assert body["redirect"].get("url") == "/something-here"
 
 
+def test_message_call_method_hash_update(client):
+    data = {}
+    message = {
+        "actionQueue": [
+            {"payload": {"name": "test_hash_update"}, "type": "callMethod",}
+        ],
+        "data": data,
+        "checksum": generate_checksum(orjson.dumps(data)),
+        "id": "FDHcbzGf",
+    }
+
+    response = client.post(
+        "/message/tests.views.fake_components.FakeComponent",
+        message,
+        content_type="application/json",
+    )
+
+    body = orjson.loads(response.content)
+
+    assert "redirect" in body
+    assert body["redirect"].get("hash") == "#test=1"
+
+
 def test_message_call_method_return_value(client):
     data = {}
     message = {

@@ -11,7 +11,7 @@ from django.views.decorators.http import require_POST
 import orjson
 
 from .call_method_parser import InvalidKwarg, parse_call_method_name, parse_kwarg
-from .components import UnicornField, UnicornView
+from .components import HashUpdate, UnicornField, UnicornView
 from .errors import UnicornViewError
 from .serializer import dumps
 from .utils import generate_checksum
@@ -386,10 +386,17 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
     return_data = {}
     redirect_data = {}
 
+    # TODO: Support a tuple/list return_value which could contain a redirect and value(s).
+    # `return (redirect(...), 1)` -> { return: { 1 } }, redirect: { url: "..." } }
+    # easier for `HashUpdate`, would need to handle setting last return value after new component loaded
     if return_value is not None:
         if isinstance(return_value, HttpResponseRedirect):
             redirect_data = {
                 "url": return_value.url,
+            }
+        elif isinstance(return_value, HashUpdate):
+            redirect_data = {
+                "hash": return_value.hash,
             }
         else:
             try:
