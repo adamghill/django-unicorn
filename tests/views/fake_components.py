@@ -3,7 +3,7 @@ from datetime import datetime
 from django import forms
 from django.shortcuts import redirect
 
-from django_unicorn.components import HashUpdate, UnicornView
+from django_unicorn.components import HashUpdate, LocationUpdate, UnicornView
 from example.coffee.models import Flavor
 
 
@@ -27,6 +27,9 @@ class FakeComponent(UnicornView):
 
     def test_redirect(self):
         return redirect("/something-here")
+
+    def test_refresh_redirect(self):
+        return LocationUpdate(redirect("/something-here"), title="new title")
 
     def test_hash_update(self):
         return HashUpdate("#test=1")

@@ -11,7 +11,7 @@ from django.views.decorators.http import require_POST
 import orjson
 
 from .call_method_parser import InvalidKwarg, parse_call_method_name, parse_kwarg
-from .components import HashUpdate, UnicornField, UnicornView
+from .components import HashUpdate, LocationUpdate, UnicornField, UnicornView
 from .errors import UnicornViewError
 from .serializer import dumps
 from .utils import generate_checksum
@@ -397,6 +397,12 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
         elif isinstance(return_value, HashUpdate):
             redirect_data = {
                 "hash": return_value.hash,
+            }
+        elif isinstance(return_value, LocationUpdate):
+            redirect_data = {
+                "url": return_value.redirect.url,
+                "refresh": True,
+                "title": return_value.title,
             }
         else:
             try:

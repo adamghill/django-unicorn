@@ -61,11 +61,18 @@ export function send(component, callback) {
       // TODO: For turbolinks support look at https://github.com/livewire/livewire/blob/f2ba1977d73429911f81b3f6363ee8f8fea5abff/js/component/index.js#L330-L336
       if (responseJson.redirect) {
         if (responseJson.redirect.url) {
-          // TODO: Use config to potentially use `component.window.history.pushState()`
-          component.window.location.href = responseJson.redirect.url;
+          if (responseJson.redirect.refresh) {
+            if (responseJson.redirect.title) {
+              component.window.document.title = responseJson.redirect.title;
+            }
 
-          if (isFunction(callback)) {
-            callback([], null, null);
+            component.window.history.pushState(
+              {},
+              "",
+              responseJson.redirect.url
+            );
+          } else {
+            component.window.location.href = responseJson.redirect.url;
           }
         } else if (responseJson.redirect.hash) {
           component.window.location.hash = responseJson.redirect.hash;

@@ -44,6 +44,12 @@ class HashUpdate:
         self.hash = hash
 
 
+class LocationUpdate:
+    def __init__(self, redirect, title=None):
+        self.redirect = redirect
+        self.title = title
+
+
 class ComponentLoadError(Exception):
     pass
 

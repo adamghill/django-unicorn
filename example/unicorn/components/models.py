@@ -3,7 +3,7 @@ from django.utils.functional import cached_property
 
 from coffee.models import Flavor
 
-from django_unicorn.components import HashUpdate, UnicornView
+from django_unicorn.components import HashUpdate, LocationUpdate, UnicornView
 from django_unicorn.db import DbModel
 from django_unicorn.decorators import db_model
 
@@ -33,7 +33,8 @@ class ModelsView(UnicornView):
         id = self.instance_flavor.id
         self.reset()
 
-        return HashUpdate(f"#createdId={id}")
+        # return HashUpdate(f"#createdId={id}")
+        return LocationUpdate(redirect(f"/models?createdId={id}"), title="new title")
 
     def add_class_flavor(self):
         self.class_flavor.save()

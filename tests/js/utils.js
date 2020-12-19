@@ -88,6 +88,14 @@ export function getComponent(html, id, name, data) {
 
   const document = getDocument(html);
 
+  const mockHistory = { urls: [] };
+  mockHistory.pushState = (state, title, url) => {
+    mockHistory.urls.push(url);
+  };
+  mockHistory.get = () => {
+    return mockHistory.urls[0];
+  };
+
   const component = new Component({
     id,
     name,
@@ -95,7 +103,11 @@ export function getComponent(html, id, name, data) {
     document,
     messageUrl: "test",
     walker: walkDOM,
-    window: { location: { href: "" } },
+    window: {
+      document: { title: "" },
+      history: mockHistory,
+      location: { href: "" },
+    },
   });
 
   const res = {
