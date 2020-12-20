@@ -1,3 +1,5 @@
+from typing import Dict
+
 from django import template
 from django.conf import settings
 
@@ -52,9 +54,13 @@ def unicorn(parser, token):
 
 
 class UnicornNode(template.Node):
-    def __init__(self, component_name, kwargs):
+    def __init__(self, component_name: str, kwargs: Dict):
         self.component_name = component_name
         self.kwargs = kwargs
+        self.component_key = ""
+
+        if "key" in kwargs:
+            self.component_key = kwargs.pop("key")
 
     def render(self, context):
         request = None
@@ -79,6 +85,7 @@ class UnicornNode(template.Node):
         view = UnicornView.create(
             component_id=component_id,
             component_name=self.component_name,
+            component_key=self.component_key,
             kwargs=resolved_kwargs,
             request=request,
         )

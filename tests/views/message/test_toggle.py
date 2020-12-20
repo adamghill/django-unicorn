@@ -1,4 +1,5 @@
 import orjson
+import shortuuid
 
 from django_unicorn.utils import generate_checksum
 
@@ -22,7 +23,7 @@ def test_message_toggle(client):
         ],
         "data": data,
         "checksum": generate_checksum(orjson.dumps(data)),
-        "id": "FDHcbzGf",
+        "id": shortuuid.uuid()[:8],
     }
 
     body = _post_message_and_get_body(client, message)
@@ -39,7 +40,7 @@ def test_message_nested_toggle(client):
         ],
         "data": data,
         "checksum": generate_checksum(orjson.dumps(data)),
-        "id": "FDHcbzGf",
+        "id": shortuuid.uuid()[:8],
     }
 
     body = _post_message_and_get_body(client, message)

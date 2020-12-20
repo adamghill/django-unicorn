@@ -1,4 +1,5 @@
 import orjson
+import shortuuid
 
 from django_unicorn.utils import generate_checksum
 
@@ -14,7 +15,7 @@ def test_message_nested_sync_input(client):
         ],
         "data": data,
         "checksum": generate_checksum(orjson.dumps(data)),
-        "id": "FDHcbzGf",
+        "id": shortuuid.uuid()[:8],
     }
 
     response = client.post(

@@ -7,6 +7,8 @@
 
 <button onclick="Unicorn.call('hello_world', 'set_name');">Method call from outside of the component</button>
 
+<button onclick="alert(Unicorn.getReturnValue('hello_world'));">Last return value from component</button>
+
 {% unicorn 'unicorn.components.hello_world.HelloWorldView' %}
 
 {% endblock content %}

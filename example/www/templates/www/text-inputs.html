@@ -5,6 +5,10 @@
 
 <h2>Text inputs</h2>
 
-{% unicorn 'text-inputs' %}
+<button onclick="Unicorn.call('zxcv', 'set_name');">Method call from outside of the component</button>
+
+{% unicorn 'text-inputs' key="asdf" %}
+
+{% unicorn 'text-inputs' key="zxcv" %}
 
 {% endblock content %}

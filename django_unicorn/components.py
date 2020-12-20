@@ -87,6 +87,7 @@ class UnicornTemplateResponse(TemplateResponse):
         using=None,
         component_name=None,
         component_id=None,
+        component_key="",
         frontend_context_variables={},
         init_js=False,
         **kwargs,
@@ -103,6 +104,7 @@ class UnicornTemplateResponse(TemplateResponse):
 
         self.component_id = component_id
         self.component_name = component_name
+        self.component_key = component_key
         self.frontend_context_variables = frontend_context_variables
         self.init_js = init_js
 
@@ -121,6 +123,7 @@ class UnicornTemplateResponse(TemplateResponse):
         root_element = UnicornTemplateResponse._get_root_element(soup)
         root_element["unicorn:id"] = self.component_id
         root_element["unicorn:name"] = self.component_name
+        root_element["unicorn:key"] = self.component_key
         root_element["unicorn:checksum"] = checksum
 
         if self.init_js:
@@ -128,6 +131,7 @@ class UnicornTemplateResponse(TemplateResponse):
             init = {
                 "id": self.component_id,
                 "name": self.component_name,
+                "key": self.component_key,
                 "data": orjson.loads(self.frontend_context_variables),
             }
             init = orjson.dumps(init).decode("utf-8")
@@ -166,6 +170,7 @@ class UnicornTemplateResponse(TemplateResponse):
 class UnicornView(TemplateView):
     response_class = UnicornTemplateResponse
     component_name: str = ""
+    component_key: str = ""
     request = None
 
     # Caches to reduce the amount of time introspecting the class
@@ -292,6 +297,7 @@ class UnicornView(TemplateView):
             context=self.get_context_data(),
             component_name=self.component_name,
             component_id=self.component_id,
+            component_key=self.component_key,
             frontend_context_variables=frontend_context_variables,
             init_js=init_js,
         )
@@ -561,6 +567,7 @@ class UnicornView(TemplateView):
             # Component methods
             "component_id",
             "component_name",
+            "component_key",
             "reset",
             "mount",
             "hydrate",
@@ -591,6 +598,7 @@ class UnicornView(TemplateView):
     def create(
         component_id: str,
         component_name: str,
+        component_key: str = "",
         use_cache=True,
         request: HttpRequest = None,
         kwargs: Dict[str, Any] = {},
@@ -602,6 +610,8 @@ class UnicornView(TemplateView):
             param component_id: Id of the component. Required.
             param component_name: Name of the component. Used to locate the correct `UnicornView`
                 component class and template if necessary. Required.
+            param component_key: Key of the component to allow multiple components of the same name
+                to be differentiated. Optional.
             param use_cache: Get component from cache or force construction of component. Defaults to `True`.
             param kwargs: Keyword arguments for the component passed in from the template. Defaults to `{}`.
         
@@ -613,13 +623,11 @@ class UnicornView(TemplateView):
         assert component_name, "Component name is required"
 
         if use_cache:
-            cache_key = f"{component_name}-{component_id}"
-
-            if cache_key in constructed_views_cache:
-                component = constructed_views_cache[cache_key]
+            if component_id in constructed_views_cache:
+                component = constructed_views_cache[component_id]
                 component.setup(request)
                 component._validate_called = False
-                logger.debug(f"Retrieve {cache_key} from constructed views cache")
+                logger.debug(f"Retrieve {component_id} from constructed views cache")
                 return component
 
         locations = []
@@ -672,6 +680,7 @@ class UnicornView(TemplateView):
                 component = component_class(
                     component_id=component_id,
                     component_name=component_name,
+                    component_key=component_key,
                     request=request,
                     **kwargs,
                 )
@@ -680,8 +689,7 @@ class UnicornView(TemplateView):
                 component._validate_called = False
 
                 # Put the component in a "cache" to skip looking for the component on the next request
-                cache_key = f"{component_name}-{component_id}"
-                constructed_views_cache[cache_key] = component
+                constructed_views_cache[component_id] = component
 
                 return component
             except ModuleNotFoundError as e:

@@ -1,4 +1,5 @@
 import orjson
+import shortuuid
 
 from django_unicorn.utils import generate_checksum
 
@@ -9,7 +10,7 @@ def test_message_call_method(client):
         "actionQueue": [{"payload": {"name": "test_method"}, "type": "callMethod",}],
         "data": data,
         "checksum": generate_checksum(orjson.dumps(data)),
-        "id": "FDHcbzGf",
+        "id": shortuuid.uuid()[:8],
     }
 
     response = client.post(
@@ -29,7 +30,7 @@ def test_message_call_method_redirect(client):
         "actionQueue": [{"payload": {"name": "test_redirect"}, "type": "callMethod",}],
         "data": data,
         "checksum": generate_checksum(orjson.dumps(data)),
-        "id": "FDHcbzGf",
+        "id": shortuuid.uuid()[:8],
     }
 
     response = client.post(
@@ -54,7 +55,7 @@ def test_message_call_method_refresh_redirect(client):
         ],
         "data": data,
         "checksum": generate_checksum(orjson.dumps(data)),
-        "id": "FDHcbzGf",
+        "id": shortuuid.uuid()[:8],
     }
 
     response = client.post(
@@ -80,7 +81,7 @@ def test_message_call_method_hash_update(client):
         ],
         "data": data,
         "checksum": generate_checksum(orjson.dumps(data)),
-        "id": "FDHcbzGf",
+        "id": shortuuid.uuid()[:8],
     }
 
     response = client.post(
@@ -103,7 +104,7 @@ def test_message_call_method_return_value(client):
         ],
         "data": data,
         "checksum": generate_checksum(orjson.dumps(data)),
-        "id": "FDHcbzGf",
+        "id": shortuuid.uuid()[:8],
     }
 
     response = client.post(
@@ -115,7 +116,10 @@ def test_message_call_method_return_value(client):
     body = orjson.loads(response.content)
 
     assert "return" in body
-    assert body["return"] == "booya"
+    return_data = body["return"]
+    assert return_data.get("method") == "test_return_value"
+    assert return_data.get("params") == []
+    assert return_data.get("value") == "booya"
 
 
 def test_message_call_method_setter(client):
@@ -124,7 +128,7 @@ def test_message_call_method_setter(client):
         "actionQueue": [{"payload": {"name": "method_count=2"}, "type": "callMethod",}],
         "data": data,
         "checksum": generate_checksum(orjson.dumps(data)),
-        "id": "FDHcbzGf",
+        "id": shortuuid.uuid()[:8],
     }
 
     response = client.post(
@@ -146,7 +150,7 @@ def test_message_call_method_nested_setter(client):
         ],
         "data": data,
         "checksum": generate_checksum(orjson.dumps(data)),
-        "id": "FDHcbzGf",
+        "id": shortuuid.uuid()[:8],
     }
 
     response = client.post(
@@ -168,7 +172,7 @@ def test_message_call_method_toggle(client):
         ],
         "data": data,
         "checksum": generate_checksum(orjson.dumps(data)),
-        "id": "FDHcbzGf",
+        "id": shortuuid.uuid()[:8],
     }
 
     response = client.post(
@@ -190,7 +194,7 @@ def test_message_call_method_nested_toggle(client):
         ],
         "data": data,
         "checksum": generate_checksum(orjson.dumps(data)),
-        "id": "FDHcbzGf",
+        "id": shortuuid.uuid()[:8],
     }
 
     response = client.post(
@@ -212,7 +216,7 @@ def test_message_call_method_params(client):
         ],
         "data": data,
         "checksum": generate_checksum(orjson.dumps(data)),
-        "id": "FDHcbzGf",
+        "id": shortuuid.uuid()[:8],
     }
 
     response = client.post(
@@ -234,7 +238,7 @@ def test_message_call_method_no_validation(client):
         ],
         "data": data,
         "checksum": generate_checksum(orjson.dumps(data)),
-        "id": "FDHcbzGf",
+        "id": shortuuid.uuid()[:8],
     }
 
     response = client.post(
@@ -256,7 +260,7 @@ def test_message_call_method_validation(client):
         ],
         "data": data,
         "checksum": generate_checksum(orjson.dumps(data)),
-        "id": "FDHcbzGf",
+        "id": shortuuid.uuid()[:8],
     }
 
     response = client.post(

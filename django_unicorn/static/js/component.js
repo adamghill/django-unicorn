@@ -15,6 +15,7 @@ export class Component {
   constructor(args) {
     this.id = args.id;
     this.name = args.name;
+    this.key = args.key;
     this.messageUrl = args.messageUrl;
     this.csrfTokenHeaderName = args.csrfTokenHeaderName;
 

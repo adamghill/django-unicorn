@@ -1,5 +1,6 @@
 import orjson
 import pytest
+import shortuuid
 
 from django_unicorn.utils import generate_checksum
 from example.coffee.models import Flavor
@@ -25,7 +26,7 @@ def test_message_db_input_update(client):
         ],
         "data": data,
         "checksum": generate_checksum(orjson.dumps(data)),
-        "id": "FDHcbzGf",
+        "id": shortuuid.uuid()[:8],
     }
 
     response = client.post(
@@ -72,7 +73,7 @@ def test_message_db_input_create(client):
         ],
         "data": data,
         "checksum": generate_checksum(orjson.dumps(data)),
-        "id": "FDHcbzGf",
+        "id": shortuuid.uuid()[:8],
     }
 
     assert Flavor.objects.all().count() == 0

@@ -1,4 +1,5 @@
 import orjson
+import shortuuid
 
 from django_unicorn.utils import generate_checksum
 
@@ -20,7 +21,7 @@ def test_setter(client):
         "actionQueue": [{"type": "callMethod", "payload": {"name": "check=True"}},],
         "data": data,
         "checksum": generate_checksum(orjson.dumps(data)),
-        "id": "FDHcbzGf",
+        "id": shortuuid.uuid()[:8],
     }
 
     body = _post_message_and_get_body(client, message)
@@ -37,7 +38,7 @@ def test_nested_setter(client):
         ],
         "data": data,
         "checksum": generate_checksum(orjson.dumps(data)),
-        "id": "FDHcbzGf",
+        "id": shortuuid.uuid()[:8],
     }
 
     body = _post_message_and_get_body(client, message)
@@ -57,7 +58,7 @@ def test_equal_sign(client):
         ],
         "data": data,
         "checksum": generate_checksum(orjson.dumps(data)),
-        "id": "FDHcbzGf",
+        "id": shortuuid.uuid()[:8],
     }
 
     body = _post_message_and_get_body(client, message)
