@@ -4,17 +4,15 @@ from typing import Any, Dict, List, Union
 
 from django.db.models import Model
 from django.http import HttpRequest, JsonResponse
-from django.http.response import HttpResponseRedirect
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_POST
 
 import orjson
 
 from .call_method_parser import InvalidKwarg, parse_call_method_name, parse_kwarg
-from .components import HashUpdate, LocationUpdate, UnicornField, UnicornView
+from .components import UnicornField, UnicornView
 from .errors import UnicornViewError
-from .serializer import dumps
-from .utils import generate_checksum
+from .message import ComponentRequest, Return
 
 
 logger = logging.getLogger(__name__)
@@ -180,44 +178,6 @@ def _call_method_name(
             return func()
 
 
-class ComponentRequest:
-    """
-    Parses, validates, and stores all of the data from the message request.
-    """
-
-    def __init__(self, request):
-        self.body = {}
-
-        try:
-            self.body = orjson.loads(request.body)
-            assert self.body, "Invalid JSON body"
-        except orjson.JSONDecodeError as e:
-            raise UnicornViewError("Body could not be parsed") from e
-
-        self.data = self.body.get("data")
-        assert self.data is not None, "Missing data"  # data could theoretically be {}
-
-        self.id = self.body.get("id")
-        assert self.id, "Missing component id"
-
-        self.validate_checksum()
-
-        self.action_queue = self.body.get("actionQueue", [])
-
-    def validate_checksum(self):
-        """
-        Validates that the checksum in the request matches the data.
-
-        Returns:
-            Raises `AssertionError` if the checksums don't match.
-        """
-        checksum = self.body.get("checksum")
-        assert checksum, "Missing checksum"
-
-        generated_checksum = generate_checksum(orjson.dumps(self.data))
-        assert checksum == generated_checksum, "Checksum does not match"
-
-
 @handle_error
 @csrf_protect
 @require_POST
@@ -258,7 +218,7 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
     component.hydrate()
 
     is_reset_called = False
-    return_value = None
+    return_data = None
 
     for action in component_request.action_queue:
         action_type = action.get("type")
@@ -326,6 +286,7 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
             assert call_method_name, "Missing 'name' key for callMethod"
 
             (method_name, params) = parse_call_method_name(call_method_name)
+            return_data = Return(method_name, params)
             setter_method = {}
 
             if "=" in call_method_name:
@@ -341,9 +302,8 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
                 property_value = setter_method[property_name]
 
                 _set_property_value(component, property_name, property_value)
+                return_data = Return(property_name, [property_value])
             else:
-                (method_name, params) = parse_call_method_name(call_method_name)
-
                 if method_name == "$refresh":
                     # Handle the refresh special action
                     component = UnicornView.create(
@@ -375,40 +335,15 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
                     validate_all_fields = True
                 else:
                     component.calling(method_name, params)
-                    return_value = _call_method_name(component, method_name, params)
+                    return_data.value = _call_method_name(
+                        component, method_name, params
+                    )
                     component.called(method_name, params)
         else:
             raise UnicornViewError(f"Unknown action_type '{action_type}'")
 
     # Re-load frontend context variables to deal with non-serializable properties
     component_request.data = orjson.loads(component.get_frontend_context_variables())
-
-    return_data = {}
-    redirect_data = {}
-
-    # TODO: Support a tuple/list return_value which could contain a redirect and value(s).
-    # `return (redirect(...), 1)` -> { return: { 1 } }, redirect: { url: "..." } }
-    # easier for `HashUpdate`, would need to handle setting last return value after new component loaded
-    if return_value is not None:
-        if isinstance(return_value, HttpResponseRedirect):
-            redirect_data = {
-                "url": return_value.url,
-            }
-        elif isinstance(return_value, HashUpdate):
-            redirect_data = {
-                "hash": return_value.hash,
-            }
-        elif isinstance(return_value, LocationUpdate):
-            redirect_data = {
-                "url": return_value.redirect.url,
-                "refresh": True,
-                "title": return_value.title,
-            }
-        else:
-            try:
-                return_data = orjson.loads(dumps(return_value))
-            except:
-                pass
 
     if not is_reset_called:
         if validate_all_fields:
@@ -429,8 +364,11 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
         "dom": rendered_component,
         "data": component_request.data,
         "errors": component.errors,
-        "redirect": redirect_data,
-        "return": return_data,
     }
+
+    if return_data:
+        res.update(
+            {"redirect": return_data.redirect, "return": return_data.get_data(),}
+        )
 
     return JsonResponse(res)
