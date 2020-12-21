@@ -1,3 +1,5 @@
+from django.utils.timezone import now
+
 from django_unicorn.components import UnicornView
 
 
@@ -9,3 +11,5 @@ class TextInputsView(UnicornView):
             self.name = name
         else:
             self.name = "Universe"
+
+        return f"{self.name} - {now().second}"

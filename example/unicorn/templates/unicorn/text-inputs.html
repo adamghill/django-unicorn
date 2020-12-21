@@ -34,15 +34,16 @@
     <input unicorn:model="name" type="text" unicorn:keyup.enter="name='enter'" unicorn:keydown.escape="name=''"></input>
 
     <br />
+    Hello {{ name|title }} 👋
+
+    <br />
     <button unicorn:click="set_name">set_name</button>
     <button unicorn:click="set_name()">set_name()</button>
     <button unicorn:click="set_name('')">set_name('')</button>
     <button unicorn:click="set_name('blob 2')">set_name('blob 2')</button>
     <button unicorn:click="name='human'">name='human'</button>
 
-    <br />
-    Hello {{ name|title }} 👋
-
-    <br />
+    <br /><br />
     <button unicorn:click='set_name($event.target.value.trim())' value=' button value '>set_name($event.target.value.trim())</button>
+    <button unicorn:click="set_name($returnValue.trim())">set_name($returnValue)</button>
 </div>

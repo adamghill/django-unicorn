@@ -66,6 +66,82 @@ test("click on internal element", (t) => {
   t.is(component.actionQueue.length, 1);
 });
 
+test("$returnValue", (t) => {
+  const html = `
+<div unicorn:id="5jypjiyb" unicorn:name="text-inputs" unicorn:checksum="GXzew3Km">
+  <input unicorn:model='name'></input>
+  <button unicorn:click='test($returnValue)'></button>
+</div>`;
+  const component = getComponent(html);
+  component.return = { value: "123" };
+
+  t.is(component.attachedEventTypes.length, 1);
+  t.is(component.actionEvents.click.length, 1);
+
+  component.actionEvents.click[0].element.el.click();
+
+  t.is(component.actionQueue.length, 1);
+  const action = component.actionQueue[0];
+  t.is(action.payload.name, 'test("123")');
+});
+
+test("$returnValue invalid property", (t) => {
+  const html = `
+<div unicorn:id="5jypjiyb" unicorn:name="text-inputs" unicorn:checksum="GXzew3Km">
+  <input unicorn:model='name'></input>
+  <button unicorn:click='test($returnValue.blob)'></button>
+</div>`;
+  const component = getComponent(html);
+  component.return = { value: "123" };
+
+  t.is(component.attachedEventTypes.length, 1);
+  t.is(component.actionEvents.click.length, 1);
+
+  component.actionEvents.click[0].element.el.click();
+
+  t.is(component.actionQueue.length, 1);
+  const action = component.actionQueue[0];
+  t.is(action.payload.name, "test()");
+});
+
+test("$returnValue nested property", (t) => {
+  const html = `
+<div unicorn:id="5jypjiyb" unicorn:name="text-inputs" unicorn:checksum="GXzew3Km">
+  <input unicorn:model='name'></input>
+  <button unicorn:click='test($returnValue.hello)'></button>
+</div>`;
+  const component = getComponent(html);
+  component.return = { value: { hello: "world" } };
+
+  t.is(component.attachedEventTypes.length, 1);
+  t.is(component.actionEvents.click.length, 1);
+
+  component.actionEvents.click[0].element.el.click();
+
+  t.is(component.actionQueue.length, 1);
+  const action = component.actionQueue[0];
+  t.is(action.payload.name, 'test("world")');
+});
+
+test("$returnValue with method", (t) => {
+  const html = `
+<div unicorn:id="5jypjiyb" unicorn:name="text-inputs" unicorn:checksum="GXzew3Km">
+  <input unicorn:model='name'></input>
+  <button unicorn:click='test($returnValue.trim())'></button>
+</div>`;
+  const component = getComponent(html);
+  component.return = { value: " world " };
+
+  t.is(component.attachedEventTypes.length, 1);
+  t.is(component.actionEvents.click.length, 1);
+
+  component.actionEvents.click[0].element.el.click();
+
+  t.is(component.actionQueue.length, 1);
+  const action = component.actionQueue[0];
+  t.is(action.payload.name, 'test("world")');
+});
+
 test("$event action variable invalid property", (t) => {
   const html = `
 <div unicorn:id="5jypjiyb" unicorn:name="text-inputs" unicorn:checksum="GXzew3Km">
@@ -84,7 +160,7 @@ test("$event action variable invalid property", (t) => {
   t.is(action.payload.name, 'test("1")');
 });
 
-test("$event action variable", (t) => {
+test("$event invalid variable", (t) => {
   const html = `
 <div unicorn:id="5jypjiyb" unicorn:name="text-inputs" unicorn:checksum="GXzew3Km">
   <input unicorn:model='name'></input>

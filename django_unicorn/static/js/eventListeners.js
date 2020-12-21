@@ -47,6 +47,50 @@ function handleLoading(component, targetElement) {
 }
 
 /**
+ * Parse arguments and deal with nested data.
+ *
+ * // <button u:click="test($returnValue.hello.trim())">Test</button>
+ * let data = {hello: " world "};
+ * let output = parseEventArg(data, "$returnValue.hello.trim()");
+ * // output is 'world'
+ *
+ * @param {Object} data The data that should be parsed.
+ * @param {String} arg The argument to the function.
+ * @param {String} specialArgName The special argument (starts with a $).
+ */
+function parseEventArg(data, arg, specialArgName) {
+  // Remove any extra whitespace, everything before and including "$event", and the ending paren
+  arg = arg
+    .trim()
+    .slice(arg.indexOf(specialArgName) + specialArgName.length)
+    .trim();
+
+  arg.split(".").forEach((piece) => {
+    piece = piece.trim();
+
+    if (piece) {
+      // TODO: Handle method calls with args
+      if (piece.endsWith("()")) {
+        // method call
+        const methodName = piece.slice(0, piece.length - 2);
+        data = data[methodName]();
+      } else if (hasValue(data[piece])) {
+        data = data[piece];
+      } else {
+        throw Error(`'${piece}' could not be retrieved`);
+      }
+    }
+  });
+
+  if (typeof data === "string") {
+    // Wrap strings in quotes
+    data = `"${data}"`;
+  }
+
+  return data;
+}
+
+/**
  * Adds an action event listener to the document for each type of event (e.g. click, keyup, etc).
  * Added at the document level because validation errors would sometimes remove the
  * events when attached directly to the element.
@@ -128,48 +172,31 @@ export function addActionEventListener(component, eventType) {
           // Handle special arguments (e.g. $event)
           args(action.name).forEach((eventArg) => {
             if (eventArg.startsWith("$event")) {
-              // Remove any extra whitespace, everything before and including "$event", and the ending paren
-              eventArg = eventArg
-                .trim()
-                .slice(eventArg.indexOf("$event") + 6)
-                .trim();
-
-              const originalSpecialVariable = `$event${eventArg}`;
-              let data = event;
-              let invalidPiece = false;
-
-              eventArg.split(".").forEach((piece) => {
-                piece = piece.trim();
-
-                if (piece) {
-                  // TODO: Handle method calls with args
-                  if (piece.endsWith("()")) {
-                    // method call
-                    const methodName = piece.slice(0, piece.length - 2);
-                    data = data[methodName]();
-                  } else if (hasValue(data[piece])) {
-                    data = data[piece];
-                  } else {
-                    invalidPiece = true;
-                  }
+              try {
+                const data = parseEventArg(event, eventArg, "$event");
+                action.name = action.name.replace(eventArg, data);
+              } catch (err) {
+                // console.error(err);
+                action.name = action.name.replace(eventArg, "");
+              }
+            } else if (eventArg.startsWith("$returnValue")) {
+              if (
+                hasValue(component.return) &&
+                hasValue(component.return.value)
+              ) {
+                try {
+                  const data = parseEventArg(
+                    component.return.value,
+                    eventArg,
+                    "$returnValue"
+                  );
+                  action.name = action.name.replace(eventArg, data);
+                } catch (err) {
+                  // console.error(err);
+                  action.name = action.name.replace(eventArg, "");
                 }
-              });
-
-              if (invalidPiece) {
-                console.error(
-                  `'${originalSpecialVariable}' could not be retrieved`
-                );
-                action.name = action.name.replace(originalSpecialVariable, "");
-              } else if (data) {
-                if (typeof data === "string") {
-                  // Wrap strings in quotes
-                  data = `"${data}"`;
-                }
-
-                action.name = action.name.replace(
-                  originalSpecialVariable,
-                  data
-                );
+              } else {
+                action.name = action.name.replace(eventArg, "");
               }
             } else if (eventArg === "$model") {
               const db = {};
