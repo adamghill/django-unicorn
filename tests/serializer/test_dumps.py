@@ -151,3 +151,16 @@ def test_nested_list_float_less_complicated():
     actual = serializer.dumps({"another": [{"great": 1.0, "ok": [1.6, 0.0, 4]}],})
 
     assert expected == actual
+
+
+def test_pydantic():
+    from pydantic import BaseModel
+
+    class Book(BaseModel):
+        title = "The Grapes of Wrath"
+        author = "John Steinbeck"
+
+    expected = '{"title":"The Grapes of Wrath","author":"John Steinbeck"}'
+    actual = serializer.dumps(Book())
+
+    assert expected == actual
