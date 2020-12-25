@@ -22,6 +22,16 @@
         <button u:click='set_dictionary({"name": 1, "nested": {"name": 2}})'>set dictionary(1)</button>
         <button u:click='dictionary.nested.name=2'>set dictionary(2)</button>
     </div>
+
+    <div>
+        <label>Pydantic field</label>
+        <input u:model="pydantic_field.title" type="text" id="pydanticField">
+        <input u:model="pydantic_field.publish_date" type="text" id="datetimePydanticField">
+
+        <br />
+        pydantic_field.title: {{ pydantic_field.title }}<br />
+        pydantic_field.publish_date: {{ pydantic_field.publish_date }}<br />
+    </div>
     
     <div>
         <label>Nested unicorn field property (original)</label>

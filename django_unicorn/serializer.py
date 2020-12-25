@@ -4,6 +4,12 @@ from typing import Any, Dict, List
 from django.core.serializers import serialize
 from django.db.models import Model, QuerySet
 
+
+try:
+    from pydantic import BaseModel as PydanticBaseModel
+except ImportError:
+    PydanticBaseModel = None
+
 import orjson
 
 
@@ -43,6 +49,8 @@ def _json_serializer(obj):
             queryset_json.append(model_json)
 
         return queryset_json
+    elif PydanticBaseModel and isinstance(obj, PydanticBaseModel):
+        return obj.dict()
     elif hasattr(obj, "to_json"):
         return obj.to_json()
 

@@ -28,6 +28,7 @@ django-stubs = "^1.5.0"
 pytest-django = "^3.9.0"
 bpython = "^0.19"
 django-mock-queries = "^2.1.5"
+pydantic = "^1.7.3"
 
 [build-system]
 requires = ["poetry>=0.12"]
