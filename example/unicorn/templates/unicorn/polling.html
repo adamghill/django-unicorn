@@ -1,4 +1,8 @@
-<div unicorn:poll-1000="get_date">
+<div unicorn:poll-1000="get_date" unicorn:poll.disable="polling_disabled">
     <input unicorn:model="date_example" type="text" id="dateExampleId">
     date_example: {{ date_example }} | {{ date_example|date:"s" }}<br />
+
+    <button u:click="polling_disabled=False">Enable Polling</button>
+    <button u:click="polling_disabled=True">Disable Polling</button>
+    <button u:click="$toggle('polling_disabled')">Toggle Polling</button>
 </div>

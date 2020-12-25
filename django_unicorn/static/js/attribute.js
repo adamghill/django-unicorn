@@ -37,6 +37,8 @@ export class Attribute {
         this.isField = true;
       } else if (contains(this.name, ":db")) {
         this.isDb = true;
+      } else if (contains(this.name, ":poll.disable")) {
+        this.isPollDisable = true;
       } else if (contains(this.name, ":poll")) {
         this.isPoll = true;
       } else if (contains(this.name, ":loading")) {

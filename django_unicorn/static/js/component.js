@@ -209,12 +209,13 @@ export class Component {
     // Call the method once before the timer starts
     this.callMethod(this.poll.method, handleError);
 
-    this.poll.timer = setInterval(
-      this.callMethod.bind(this),
-      this.poll.timing,
-      this.poll.method,
-      handleError
-    );
+    this.poll.timer = setInterval(() => {
+      if (this.poll.disable) {
+        if (this.data[this.poll.disable] === false) {
+          this.callMethod(this.poll.method, handleError);
+        }
+      }
+    }, this.poll.timing);
   }
 
   /**

@@ -15,3 +15,12 @@ test("poll-1000", (t) => {
 
   t.is(element.poll.timing, 1000);
 });
+
+test("poll.disable", (t) => {
+  const html =
+    "<div unicorn:poll='test()' unicorn:poll.disable='disabled_poll'></div>";
+  const element = getElement(html);
+
+  t.is(element.poll.timing, 2000);
+  t.is(element.poll.disable, "disabled_poll");
+});

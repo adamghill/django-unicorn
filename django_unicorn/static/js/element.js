@@ -75,6 +75,8 @@ export class Element {
         if (pollArgs.length > 0) {
           this.poll.timing = parseInt(pollArgs[0], 10) || 2000;
         }
+      } else if (attribute.isPollDisable) {
+        this.poll.disable = attribute.value;
       } else if (attribute.isLoading) {
         if (attribute.modifiers.attr) {
           this.loading.attr = attribute.value;
