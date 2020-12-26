@@ -1,4 +1,7 @@
 <div unicorn:poll-1000="get_date" unicorn:poll.disable="polling_disabled">
+    current_time: {{ current_time|date:"s" }}
+
+    <br /><br />
     <input unicorn:model="date_example" type="text" id="dateExampleId">
     date_example: {{ date_example }} | {{ date_example|date:"s" }}<br />
 

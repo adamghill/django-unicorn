@@ -210,10 +210,8 @@ export class Component {
     this.callMethod(this.poll.method, handleError);
 
     this.poll.timer = setInterval(() => {
-      if (this.poll.disable) {
-        if (this.data[this.poll.disable] === false) {
-          this.callMethod(this.poll.method, handleError);
-        }
+      if (!hasValue(this.poll.disable) || !this.data[this.poll.disable]) {
+        this.callMethod(this.poll.method, handleError);
       }
     }, this.poll.timing);
   }
