@@ -163,6 +163,19 @@ export class Component {
   }
 
   /**
+   * Handles poll errors.
+   * @param {Error} err Error.
+   */
+  handlePollError(err) {
+    if (err) {
+      console.error(err);
+    }
+    if (this.poll.timer) {
+      clearInterval(this.poll.timer);
+    }
+  }
+
+  /**
    * Sets up polling if it is defined on the component's root.
    */
   initPolling() {
@@ -186,6 +199,8 @@ export class Component {
         false
       );
 
+      // Call the method once before the timer starts
+      this.callMethod(this.poll.method, this.handlePollError);
       this.startPolling();
     }
   }
@@ -194,24 +209,14 @@ export class Component {
    * Starts polling and handles stopping the polling if there is an error.
    */
   startPolling() {
-    this.poll.timer = null;
-    const { timer } = this.poll;
-
-    function handleError(err) {
-      if (err) {
-        console.error(err);
-      }
-      if (timer) {
-        clearInterval(timer);
-      }
-    }
-
-    // Call the method once before the timer starts
-    this.callMethod(this.poll.method, handleError);
-
     this.poll.timer = setInterval(() => {
-      if (!hasValue(this.poll.disable) || !this.data[this.poll.disable]) {
-        this.callMethod(this.poll.method, handleError);
+      if (!this.poll.disable) {
+        if (
+          !hasValue(this.poll.disableData) ||
+          !this.data[this.poll.disableData]
+        ) {
+          this.callMethod(this.poll.method, this.handlePollError);
+        }
       }
     }, this.poll.timing);
   }

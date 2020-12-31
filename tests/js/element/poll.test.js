@@ -22,5 +22,5 @@ test("poll.disable", (t) => {
   const element = getElement(html);
 
   t.is(element.poll.timing, 2000);
-  t.is(element.poll.disable, "disabled_poll");
+  t.is(element.poll.disableData, "disabled_poll");
 });

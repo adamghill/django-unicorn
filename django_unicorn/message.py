@@ -4,7 +4,7 @@ from django.http.response import HttpResponseRedirect
 
 import orjson
 
-from .components import HashUpdate, LocationUpdate
+from .components import HashUpdate, LocationUpdate, PollUpdate
 from .errors import UnicornViewError
 from .serializer import dumps
 from .utils import generate_checksum
@@ -59,6 +59,7 @@ class Return:
         self.params = params
         self._value = {}
         self.redirect = {}
+        self.poll = {}
 
     @property
     def value(self):
@@ -67,7 +68,7 @@ class Return:
     @value.setter
     def value(self, value):
         self._value = value
-        # TODO: Support a tuple/list return_value which could contain a redirect and value(s)
+        # TODO: Support a tuple/list return_value which could contain multiple values
 
         if value is not None:
             if isinstance(value, HttpResponseRedirect):
@@ -84,6 +85,8 @@ class Return:
                     "refresh": True,
                     "title": value.title,
                 }
+            elif isinstance(value, PollUpdate):
+                self.poll = value.to_json()
 
             if self.redirect:
                 self._value = self.redirect

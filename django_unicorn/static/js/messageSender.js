@@ -1,4 +1,4 @@
-import { getCsrfToken, isFunction } from "./utils.js";
+import { getCsrfToken, hasValue, isFunction } from "./utils.js";
 import morphdom from "./morphdom/2.6.1/morphdom.js";
 import { MORPHDOM_OPTIONS } from "./morphdom/2.6.1/options.js";
 
@@ -91,6 +91,25 @@ export function send(component, callback) {
       component.errors = responseJson.errors || {};
       component.return = responseJson.return || {};
       const rerenderedComponent = responseJson.dom;
+
+      // Handle poll
+      const poll = responseJson.poll || {};
+
+      if (hasValue(poll)) {
+        if (component.poll.timer) {
+          clearInterval(component.poll.timer);
+        }
+
+        if (poll.timing) {
+          component.poll.timing = poll.timing;
+        }
+        if (poll.method) {
+          component.poll.method = poll.method;
+        }
+
+        component.poll.disable = poll.disable || false;
+        component.startPolling();
+      }
 
       morphdom(component.root, rerenderedComponent, MORPHDOM_OPTIONS);
 

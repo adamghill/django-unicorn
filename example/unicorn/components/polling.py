@@ -1,6 +1,6 @@
 from django.utils.timezone import now
 
-from django_unicorn.components import UnicornView
+from django_unicorn.components import PollUpdate, UnicornView
 
 
 class PollingView(UnicornView):
@@ -8,8 +8,14 @@ class PollingView(UnicornView):
     date_example = now()
     current_time = now()
 
-    def refresh(self):
-        self.current_time = now()
-
     def get_date(self):
+        self.current_time = now()
         self.date_example = now()
+
+        return PollUpdate(timing=2000, disable=False, method="get_date_2")
+
+    def get_date_2(self):
+        self.current_time = now()
+        self.date_example = now()
+
+        return PollUpdate(timing=1000, disable=False, method="get_date")

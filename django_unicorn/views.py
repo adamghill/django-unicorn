@@ -368,7 +368,17 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
 
     if return_data:
         res.update(
-            {"redirect": return_data.redirect, "return": return_data.get_data(),}
+            {"return": return_data.get_data(),}
         )
+
+        if return_data.redirect:
+            res.update(
+                {"redirect": return_data.redirect,}
+            )
+
+        if return_data.poll:
+            res.update(
+                {"poll": return_data.poll,}
+            )
 
     return JsonResponse(res)

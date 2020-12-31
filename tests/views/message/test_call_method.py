@@ -122,6 +122,32 @@ def test_message_call_method_return_value(client):
     assert return_data.get("value") == "booya"
 
 
+def test_message_call_method_poll_update(client):
+    data = {}
+    message = {
+        "actionQueue": [
+            {"payload": {"name": "test_poll_update"}, "type": "callMethod",}
+        ],
+        "data": data,
+        "checksum": generate_checksum(orjson.dumps(data)),
+        "id": shortuuid.uuid()[:8],
+    }
+
+    response = client.post(
+        "/message/tests.views.fake_components.FakeComponent",
+        message,
+        content_type="application/json",
+    )
+
+    body = orjson.loads(response.content)
+
+    assert "poll" in body
+    poll = body["poll"]
+    assert poll.get("timing") == 1000
+    assert poll.get("disable") == True
+    assert poll.get("method") == "new_method"
+
+
 def test_message_call_method_setter(client):
     data = {}
     message = {

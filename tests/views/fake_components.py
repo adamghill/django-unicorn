@@ -3,7 +3,12 @@ from datetime import datetime
 from django import forms
 from django.shortcuts import redirect
 
-from django_unicorn.components import HashUpdate, LocationUpdate, UnicornView
+from django_unicorn.components import (
+    HashUpdate,
+    LocationUpdate,
+    PollUpdate,
+    UnicornView,
+)
 from example.coffee.models import Flavor
 
 
@@ -36,6 +41,9 @@ class FakeComponent(UnicornView):
 
     def test_return_value(self):
         return "booya"
+
+    def test_poll_update(self):
+        return PollUpdate(timing=1000, disable=True, method="new_method")
 
 
 class FakeModelComponent(UnicornView):

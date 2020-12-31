@@ -7,6 +7,7 @@ from typing import Any, Callable, Dict, List, Optional, Type, Union
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models import Model
 from django.http import HttpRequest
+from django.http.response import HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.utils.safestring import mark_safe
 from django.views.generic.base import TemplateView
@@ -39,15 +40,60 @@ class UnicornField:
         return self.__dict__
 
 
-class HashUpdate:
-    def __init__(self, hash):
+class Update:
+    """
+    Base class for updaters.
+    """
+
+    def to_json(self):
+        return self.__dict__
+
+
+class HashUpdate(Update):
+    """
+    Updates the current URL hash from an action method.
+    """
+
+    def __init__(self, hash: str):
+        """
+        Args:
+            param hash: The hash to change. Example: `#model-123`.
+        """
         self.hash = hash
 
 
-class LocationUpdate:
-    def __init__(self, redirect, title=None):
+class LocationUpdate(Update):
+    """
+    Updates the current URL from an action method.
+    """
+
+    def __init__(self, redirect: HttpResponseRedirect, title: str = None):
+        """
+        Args:
+            param redirect: The redirect that contains the URL to redirect to.
+            param title: The new title of the page. Optional.
+        """
         self.redirect = redirect
         self.title = title
+
+
+class PollUpdate(Update):
+    """
+    Updates the current poll from an action method.
+    """
+
+    def __init__(self, timing: int = None, method: str = None, disable: bool = False):
+        """
+        Args:
+            param timing: The timing that should be used for the poll. Optional. Defaults to `None`
+                which keeps the existing timing.
+            param method: The method that should be used for the poll. Optional. Defaults to `None`
+                which keeps the existing method.
+            param disable: Whether to disable the poll or not not. Optional. Defaults to `False`.
+        """
+        self.timing = timing
+        self.method = method
+        self.disable = disable
 
 
 class ComponentLoadError(Exception):

@@ -69,6 +69,7 @@ export class Element {
       } else if (attribute.isPoll) {
         this.poll.method = attribute.value ? attribute.value : "refresh";
         this.poll.timing = 2000;
+        this.poll.disable = false;
 
         const pollArgs = attribute.name.split("-").slice(1);
 
@@ -76,7 +77,7 @@ export class Element {
           this.poll.timing = parseInt(pollArgs[0], 10) || 2000;
         }
       } else if (attribute.isPollDisable) {
-        this.poll.disable = attribute.value;
+        this.poll.disableData = attribute.value;
       } else if (attribute.isLoading) {
         if (attribute.modifiers.attr) {
           this.loading.attr = attribute.value;
