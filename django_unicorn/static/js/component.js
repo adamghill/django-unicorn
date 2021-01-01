@@ -211,10 +211,20 @@ export class Component {
   startPolling() {
     this.poll.timer = setInterval(() => {
       if (!this.poll.disable) {
-        if (
-          !hasValue(this.poll.disableData) ||
-          !this.data[this.poll.disableData]
-        ) {
+        if (hasValue(this.poll.disableData)) {
+          if (this.poll.disableData.startsWith("!")) {
+            // Manually negate this and re-negate it after the check
+            this.poll.disableData = this.poll.disableData.slice(1);
+
+            if (this.data[this.poll.disableData]) {
+              this.callMethod(this.poll.method, this.handlePollError);
+            }
+
+            this.poll.disableData = `!${this.poll.disableData}`;
+          } else if (!this.data[this.poll.disableData]) {
+            this.callMethod(this.poll.method, this.handlePollError);
+          }
+        } else {
           this.callMethod(this.poll.method, this.handlePollError);
         }
       }
