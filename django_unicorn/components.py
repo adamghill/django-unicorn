@@ -262,7 +262,9 @@ class UnicornView(TemplateView):
             pass
 
         if not self.template_name and not get_template_names_is_valid:
-            self.template_name = f"unicorn/{self.component_name}.html"
+            # Convert component name with a dot to a folder structure
+            template_name = self.component_name.replace(".", "/")
+            self.template_name = f"unicorn/{template_name}.html"
 
     def _set_caches(self) -> None:
         """
@@ -690,14 +692,22 @@ class UnicornView(TemplateView):
 
             return component_class
 
-        if "." in component_name:
+        if "." in component_name and component_name.endswith("View"):
             # Handle fully-qualified component names (e.g. `project.unicorn.HelloWorldView`)
             class_name = component_name.split(".")[-1:][0]
             module_name = component_name.replace("." + class_name, "")
             locations.append((class_name, module_name))
         else:
+            # Handle component names that specify a folder structure
+            component_name = component_name.replace("/", ".")
+
             # Use conventions to find the component class
             class_name = convert_to_camel_case(component_name)
+
+            if "." in class_name:
+                if class_name.split(".")[-1:]:
+                    class_name = class_name.split(".")[-1:][0]
+
             class_name = f"{class_name}View"
             module_name = convert_to_snake_case(component_name)
 
