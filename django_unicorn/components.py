@@ -692,36 +692,36 @@ class UnicornView(TemplateView):
 
             return component_class
 
-        if "." in component_name and component_name.endswith("View"):
+        if "." in component_name:
             # Handle fully-qualified component names (e.g. `project.unicorn.HelloWorldView`)
             class_name = component_name.split(".")[-1:][0]
             module_name = component_name.replace("." + class_name, "")
             locations.append((class_name, module_name))
-        else:
-            # Handle component names that specify a folder structure
-            component_name = component_name.replace("/", ".")
 
-            # Use conventions to find the component class
-            class_name = convert_to_camel_case(component_name)
+        # Handle component names that specify a folder structure
+        component_name = component_name.replace("/", ".")
 
-            if "." in class_name:
-                if class_name.split(".")[-1:]:
-                    class_name = class_name.split(".")[-1:][0]
+        # Use conventions to find the component class
+        class_name = convert_to_camel_case(component_name)
 
-            class_name = f"{class_name}View"
-            module_name = convert_to_snake_case(component_name)
+        if "." in class_name:
+            if class_name.split(".")[-1:]:
+                class_name = class_name.split(".")[-1:][0]
 
-            unicorn_apps = get_setting("APPS", ["unicorn"])
+        class_name = f"{class_name}View"
+        module_name = convert_to_snake_case(component_name)
 
-            assert (
-                isinstance(unicorn_apps, list)
-                or isinstance(unicorn_apps, tuple)
-                or isinstance(unicorn_apps, set)
-            ), "APPS is expected to be a list, tuple or set"
+        unicorn_apps = get_setting("APPS", ["unicorn"])
 
-            for app in unicorn_apps:
-                app_module_name = f"{app}.components.{module_name}"
-                locations.append((class_name, app_module_name))
+        assert (
+            isinstance(unicorn_apps, list)
+            or isinstance(unicorn_apps, tuple)
+            or isinstance(unicorn_apps, set)
+        ), "APPS is expected to be a list, tuple or set"
+
+        for app in unicorn_apps:
+            app_module_name = f"{app}.components.{module_name}"
+            locations.append((class_name, app_module_name))
 
         # TODO: django.conf setting bool that defines whether to look in all installed apps for components
 
