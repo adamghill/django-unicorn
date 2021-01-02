@@ -1,0 +1,14 @@
+{% load unicorn %}
+
+<div>
+    it's a table!
+    {% unicorn 'nested/filter' %}
+
+    <table>
+        <thead>
+        </thead>
+        {% for row in rows %}
+            {% unicorn 'row' row=row %}
+        {% endfor %}
+    </table>
+</div>
