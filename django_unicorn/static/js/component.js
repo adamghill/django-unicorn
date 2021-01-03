@@ -19,6 +19,11 @@ export class Component {
     this.key = args.key;
     this.messageUrl = args.messageUrl;
     this.csrfTokenHeaderName = args.csrfTokenHeaderName;
+    this.attachEvents = true;
+
+    if (hasValue(args.attachEvents)) {
+      this.attachEvents = args.attachEvents;
+    }
 
     if (contains(this.name, ".")) {
       const names = this.name.split(".");
@@ -32,6 +37,7 @@ export class Component {
     this.walker = args.walker || walk;
     this.window = args.window || window;
     this.morphdom = args.morphdom || morphdom;
+    this.parentComponent = null;
 
     this.root = undefined;
     this.modelEls = [];
@@ -52,8 +58,11 @@ export class Component {
     this.attachedDbEvents = [];
 
     this.init();
-    this.refreshEventListeners();
-    this.initPolling();
+
+    if (this.attachEvents) {
+      this.refreshEventListeners();
+      this.initPolling();
+    }
   }
 
   /**
@@ -67,6 +76,28 @@ export class Component {
     }
 
     this.refreshChecksum();
+
+    // Set parentComponent
+    let currentEl = this.root;
+
+    while (!this.parentComponent && currentEl.parentElement !== null) {
+      currentEl = currentEl.parentElement;
+
+      const componentId = currentEl.getAttribute("unicorn:id");
+
+      if (componentId) {
+        const componentName = currentEl.getAttribute("unicorn:name");
+        const componentKey = currentEl.getAttribute("unicorn:key");
+
+        this.parentComponent = new Component({
+          id: componentId,
+          key: componentKey,
+          name: componentName,
+          messageUrl: this.messageUrl,
+          attachEvents: false,
+        });
+      }
+    }
   }
 
   /**
@@ -77,69 +108,77 @@ export class Component {
     this.modelEls = [];
     this.dbEls = [];
 
-    this.walker(this.root, (el) => {
-      if (el.isSameNode(this.root)) {
-        // Skip the component root element
-        return;
-      }
-
-      const element = new Element(el);
-
-      if (element.isUnicorn) {
-        if (
-          hasValue(element.field) &&
-          (hasValue(element.db) || hasValue(element.model))
-        ) {
-          if (!this.attachedDbEvents.some((e) => e.isSame(element))) {
-            this.attachedDbEvents.push(element);
-            addDbEventListener(this, element.el, element.field.eventType);
-          }
-
-          if (!this.dbEls.some((e) => e.isSame(element))) {
-            this.dbEls.push(element);
-          }
-        } else if (
-          hasValue(element.model) &&
-          isEmpty(element.db) &&
-          isEmpty(element.field)
-        ) {
-          if (!this.attachedModelEvents.some((e) => e.isSame(element))) {
-            this.attachedModelEvents.push(element);
-            addModelEventListener(this, element.el, element.model.eventType);
-          }
-
-          if (!this.modelEls.some((e) => e.isSame(element))) {
-            this.modelEls.push(element);
-          }
-        } else if (hasValue(element.loading)) {
-          this.loadingEls.push(element);
-
-          // Hide loading elements that are shown when an action happens
-          if (element.loading.show) {
-            element.hide();
-          }
+    try {
+      this.walker(this.root, (el) => {
+        if (el.isSameNode(this.root)) {
+          // Skip the component root element
+          return;
+        }
+        if (el.getAttribute("unicorn:checksum")) {
+          // Skip nested components
+          throw Error();
         }
 
-        if (hasValue(element.key)) {
-          this.keyEls.push(element);
-        }
+        const element = new Element(el);
 
-        element.actions.forEach((action) => {
-          if (this.actionEvents[action.eventType]) {
-            this.actionEvents[action.eventType].push({ action, element });
-          } else {
-            this.actionEvents[action.eventType] = [{ action, element }];
+        if (element.isUnicorn) {
+          if (
+            hasValue(element.field) &&
+            (hasValue(element.db) || hasValue(element.model))
+          ) {
+            if (!this.attachedDbEvents.some((e) => e.isSame(element))) {
+              this.attachedDbEvents.push(element);
+              addDbEventListener(this, element.el, element.field.eventType);
+            }
 
-            if (
-              !this.attachedEventTypes.some((et) => et === action.eventType)
-            ) {
-              this.attachedEventTypes.push(action.eventType);
-              addActionEventListener(this, action.eventType);
+            if (!this.dbEls.some((e) => e.isSame(element))) {
+              this.dbEls.push(element);
+            }
+          } else if (
+            hasValue(element.model) &&
+            isEmpty(element.db) &&
+            isEmpty(element.field)
+          ) {
+            if (!this.attachedModelEvents.some((e) => e.isSame(element))) {
+              this.attachedModelEvents.push(element);
+              addModelEventListener(this, element.el, element.model.eventType);
+            }
+
+            if (!this.modelEls.some((e) => e.isSame(element))) {
+              this.modelEls.push(element);
+            }
+          } else if (hasValue(element.loading)) {
+            this.loadingEls.push(element);
+
+            // Hide loading elements that are shown when an action happens
+            if (element.loading.show) {
+              element.hide();
             }
           }
-        });
-      }
-    });
+
+          if (hasValue(element.key)) {
+            this.keyEls.push(element);
+          }
+
+          element.actions.forEach((action) => {
+            if (this.actionEvents[action.eventType]) {
+              this.actionEvents[action.eventType].push({ action, element });
+            } else {
+              this.actionEvents[action.eventType] = [{ action, element }];
+
+              if (
+                !this.attachedEventTypes.some((et) => et === action.eventType)
+              ) {
+                this.attachedEventTypes.push(action.eventType);
+                addActionEventListener(this, action.eventType);
+              }
+            }
+          });
+        }
+      });
+    } catch (err) {
+      // nothing
+    }
   }
 
   /**

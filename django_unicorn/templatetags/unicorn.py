@@ -54,13 +54,11 @@ def unicorn(parser, token):
 
 
 class UnicornNode(template.Node):
-    def __init__(self, component_name: str, kwargs: Dict):
+    def __init__(self, component_name: str, kwargs: Dict = {}):
         self.component_name = component_name
         self.kwargs = kwargs
         self.component_key = ""
-
-        if "key" in kwargs:
-            self.component_key = kwargs.pop("key")
+        self.parent = None
 
     def render(self, context):
         request = None
@@ -80,12 +78,19 @@ class UnicornNode(template.Node):
             except template.VariableDoesNotExist:
                 resolved_kwargs.update({key: val})
 
+        if "key" in resolved_kwargs:
+            self.component_key = resolved_kwargs.pop("key")
+
+        if "parent" in resolved_kwargs:
+            self.parent = resolved_kwargs.pop("parent")
+
         from ..components import UnicornView
 
         view = UnicornView.create(
             component_id=component_id,
             component_name=self.component_name,
             component_key=self.component_key,
+            parent=self.parent,
             kwargs=resolved_kwargs,
             request=request,
         )

@@ -209,6 +209,12 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
     )
     validate_all_fields = False
 
+    if component.parent:
+        logger.debug("component.parent", component.parent)
+
+    if component.children:
+        logger.debug("component.children length", len(component.children))
+
     # Get a copy of the data passed in to determine what fields are updated later
     original_data = component_request.data.copy()
 
@@ -365,6 +371,16 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
         "data": component_request.data,
         "errors": component.errors,
     }
+
+    if component.parent:
+        res.update(
+            {
+                "parent": {
+                    "id": component.parent.component_id,
+                    "dom": component.parent.render(),
+                }
+            }
+        )
 
     if return_data:
         res.update(

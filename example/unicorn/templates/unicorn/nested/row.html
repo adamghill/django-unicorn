@@ -1,3 +1,25 @@
 <div>
-    row!
+    <tr>
+        <td>
+            {% if is_editing %}
+            <input type="text" unicorn:model="model.name" />
+            {% else %}
+            {{ model.name }}
+            {% endif %}
+        </td>
+        <td>
+            {% if is_editing %}
+            <input type="text" unicorn:model="model.label" />
+            {% else %}
+            {{ model.label }}
+            {% endif %}
+        </td>
+        <td>
+            {% if is_editing %}
+            <button unicorn:click="save">Save</button>
+            {% else %}
+            <button unicorn:click="edit">Edit</button>
+            {% endif %}
+        </td>
+    </tr>
 </div>
