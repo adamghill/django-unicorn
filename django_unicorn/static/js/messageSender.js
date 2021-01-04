@@ -97,7 +97,6 @@ export function send(component, callback) {
       component.return = responseJson.return || {};
 
       const parent = responseJson.parent || {};
-      const componentId = responseJson.id;
       const rerenderedComponent = responseJson.dom;
 
       // Handle poll
@@ -119,26 +118,23 @@ export function send(component, callback) {
         component.startPolling();
       }
 
-      // morph the parent component if there is one
-      // this is magic
-      let parentComponent = null;
-
+      // Refresh the parent component if there is one
       if (hasValue(parent) && hasValue(parent.id) && hasValue(parent.dom)) {
-        parentComponent = component.parentComponent;
+        let parentComponent = component.getParentComponent();
 
-        while (
-          parentComponent.parentComponent &&
-          parentComponent.id !== parent.id
-        ) {
-          parentComponent = parentComponent.parentComponent;
+        while (parentComponent && parentComponent.id !== parent.id) {
+          parentComponent = parentComponent.getParentComponent();
         }
 
         if (parentComponent && parentComponent.id === parent.id) {
+          parentComponent.data = parent.data || {};
+          parentComponent.errors = parent.errors || {};
           component.morphdom(
             parentComponent.root,
             parent.dom,
             MORPHDOM_OPTIONS
           );
+          parentComponent.refreshChecksum();
         }
       }
 

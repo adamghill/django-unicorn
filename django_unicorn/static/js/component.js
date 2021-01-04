@@ -1,13 +1,14 @@
-import { $, contains, hasValue, isEmpty, isFunction, walk } from "./utils.js";
 import { debounce } from "./delayers.js";
 import { Element } from "./element.js";
-import { send } from "./messageSender.js";
 import {
   addActionEventListener,
   addDbEventListener,
   addModelEventListener,
 } from "./eventListeners.js";
+import { components } from "./factory.js";
+import { send } from "./messageSender.js";
 import morphdom from "./morphdom/2.6.1/morphdom.js";
+import { $, contains, hasValue, isEmpty, isFunction, walk } from "./utils.js";
 
 /**
  * Encapsulate component.
@@ -37,7 +38,6 @@ export class Component {
     this.walker = args.walker || walk;
     this.window = args.window || window;
     this.morphdom = args.morphdom || morphdom;
-    this.parentComponent = null;
 
     this.root = undefined;
     this.modelEls = [];
@@ -76,28 +76,23 @@ export class Component {
     }
 
     this.refreshChecksum();
+  }
 
-    // Set parentComponent
+  getParentComponent() {
+    // Get parentComponent
     let currentEl = this.root;
+    let parentComponent = null;
 
-    while (!this.parentComponent && currentEl.parentElement !== null) {
+    while (!parentComponent && currentEl.parentElement !== null) {
       currentEl = currentEl.parentElement;
-
       const componentId = currentEl.getAttribute("unicorn:id");
 
       if (componentId) {
-        const componentName = currentEl.getAttribute("unicorn:name");
-        const componentKey = currentEl.getAttribute("unicorn:key");
-
-        this.parentComponent = new Component({
-          id: componentId,
-          key: componentKey,
-          name: componentName,
-          messageUrl: this.messageUrl,
-          attachEvents: false,
-        });
+        parentComponent = components[componentId] || null;
       }
     }
+
+    return parentComponent;
   }
 
   /**
