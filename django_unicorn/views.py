@@ -13,6 +13,7 @@ from .call_method_parser import InvalidKwarg, parse_call_method_name, parse_kwar
 from .components import UnicornField, UnicornView
 from .errors import UnicornViewError
 from .message import ComponentRequest, Return
+from .serializer import loads
 
 
 logger = logging.getLogger(__name__)
@@ -209,12 +210,6 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
     )
     validate_all_fields = False
 
-    if component.parent:
-        logger.debug("component.parent", component.parent)
-
-    if component.children:
-        logger.debug("component.children length", len(component.children))
-
     # Get a copy of the data passed in to determine what fields are updated later
     original_data = component_request.data.copy()
 
@@ -372,16 +367,6 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
         "errors": component.errors,
     }
 
-    if component.parent:
-        res.update(
-            {
-                "parent": {
-                    "id": component.parent.component_id,
-                    "dom": component.parent.render(),
-                }
-            }
-        )
-
     if return_data:
         res.update(
             {"return": return_data.get_data(),}
@@ -396,5 +381,18 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
             res.update(
                 {"poll": return_data.poll,}
             )
+
+    parent_component = component.parent
+    if parent_component:
+        res.update(
+            {
+                "parent": {
+                    "id": parent_component.component_id,
+                    "dom": parent_component.render(),
+                    "data": loads(parent_component.get_frontend_context_variables()),
+                    "errors": parent_component.errors,
+                }
+            }
+        )
 
     return JsonResponse(res)

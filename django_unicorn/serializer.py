@@ -119,3 +119,11 @@ def dumps(data: dict) -> str:
     serialized_data = orjson.dumps(data, default=_json_serializer)
 
     return _dumps(serialized_data)
+
+
+def loads(obj: str) -> dict:
+    """
+    Converts a string representation to dictionary.
+    """
+
+    return orjson.loads(obj)
