@@ -16,6 +16,12 @@ export function send(component, callback) {
     return;
   }
 
+  // Since methods can change the data "behind the scenes", any queue with a callMethod
+  // action forces model elements to always be updated
+  const forceModelUpdate = component.actionQueue.some(
+    (a) => a.type === "callMethod"
+  );
+
   // Set the current action queue and clear the action queue in case another event happens
   component.currentActionQueue = component.actionQueue;
   component.actionQueue = [];
@@ -136,7 +142,7 @@ export function send(component, callback) {
       component.currentActionQueue = null;
 
       if (isFunction(callback)) {
-        callback(triggeringElements, null);
+        callback(triggeringElements, forceModelUpdate, null);
       }
     })
     .catch((err) => {

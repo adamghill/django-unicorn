@@ -290,11 +290,19 @@ export function addModelEventListener(component, el, eventType) {
 
     component.queueMessage(
       element.model.debounceTime,
-      (triggeringElements, err) => {
+      (triggeringElements, forceModelUpdate, err) => {
         if (err) {
           console.error(err);
         } else {
-          component.setModelValues(triggeringElements);
+          triggeringElements = triggeringElements || [];
+
+          // Make sure that the current element is included in the triggeringElements
+          // if for some reason it is missing
+          if (!triggeringElements.some((e) => e.isSame(element))) {
+            triggeringElements.push(element);
+          }
+
+          component.setModelValues(triggeringElements, forceModelUpdate);
           component.setDbModelValues();
         }
       }
@@ -355,7 +363,7 @@ export function addDbEventListener(component, el, eventType) {
 
     component.actionQueue.push(action);
 
-    component.queueMessage(element.model.debounceTime, (_, err) => {
+    component.queueMessage(element.model.debounceTime, (_, __, err) => {
       if (err) {
         console.error(err);
       } else {

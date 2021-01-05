@@ -150,13 +150,15 @@ export class Component {
     };
     this.actionQueue.push(action);
 
-    this.queueMessage(-1, (triggeringElements, err) => {
+    this.queueMessage(-1, (triggeringElements, _, err) => {
       if (err && isFunction(errCallback)) {
         errCallback(err);
       } else if (err) {
         console.error(err);
       } else {
-        this.setModelValues(triggeringElements);
+        // Can hard-code `forceModelUpdate` to `true` since it is always required for
+        // `callMethod` actions
+        this.setModelValues(triggeringElements, true);
         this.setDbModelValues();
       }
     });
@@ -316,14 +318,17 @@ export class Component {
    * Sets all model values.
    * @param {[Element]} triggeringElements The elements that triggered the event.
    */
-  setModelValues(triggeringElements) {
+  setModelValues(triggeringElements, forceModelUpdates) {
     triggeringElements = triggeringElements || [];
+    forceModelUpdates = forceModelUpdates || false;
 
-    // Focus on the last element on what triggered the update.
+    let lastTriggeringElement = null;
+
+    // Focus on the last element which triggered the update.
     // Prevents validation errors from stealing focus.
     if (triggeringElements.length > 0) {
       let elementFocused = false;
-      const lastTriggeringElement = triggeringElements.slice(-1)[0];
+      lastTriggeringElement = triggeringElements.slice(-1)[0];
 
       if (
         hasValue(lastTriggeringElement) &&
@@ -347,7 +352,13 @@ export class Component {
     }
 
     this.modelEls.forEach((element) => {
-      this.setValue(element);
+      if (
+        !lastTriggeringElement ||
+        !lastTriggeringElement.isSame(element) ||
+        forceModelUpdates
+      ) {
+        this.setValue(element);
+      }
     });
   }
 
