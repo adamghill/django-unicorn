@@ -5,12 +5,12 @@
         <title>django-unicorn examples</title>
         <link rel="stylesheet" href="{% static 'css/marx.min.css' %}">
         <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+        {% unicorn_scripts %}
     </head>
 
     <body>
         <main>
             {% csrf_token %}
-            {% unicorn_scripts %}
 
             <h1>django-unicorn</h1>
 
