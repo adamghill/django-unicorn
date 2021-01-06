@@ -56,6 +56,10 @@ export function walkDOM(el, callback) {
   } while ((el = el.nextSibling));
 }
 
+function morphdom(initial, merge, options) {
+  return initial;
+}
+
 /**
  * Gets a constructed `Component` based on the passed-in HTML fragement.
  * @param {String} html THe HTML fragment for the component.
@@ -103,6 +107,7 @@ export function getComponent(html, id, name, data) {
     document,
     messageUrl: "test",
     walker: walkDOM,
+    morphdom,
     window: {
       document: { title: "" },
       history: mockHistory,

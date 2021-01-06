@@ -1,5 +1,4 @@
 import { getCsrfToken, hasValue, isFunction } from "./utils.js";
-import morphdom from "./morphdom/2.6.1/morphdom.js";
 import { MORPHDOM_OPTIONS } from "./morphdom/2.6.1/options.js";
 
 /**
@@ -117,7 +116,7 @@ export function send(component, callback) {
         component.startPolling();
       }
 
-      morphdom(component.root, rerenderedComponent, MORPHDOM_OPTIONS);
+      component.morphdom(component.root, rerenderedComponent, MORPHDOM_OPTIONS);
 
       // Refresh the checksum based on the new data
       component.refreshChecksum();

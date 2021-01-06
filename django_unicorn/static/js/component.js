@@ -7,6 +7,7 @@ import {
   addDbEventListener,
   addModelEventListener,
 } from "./eventListeners.js";
+import morphdom from "./morphdom/2.6.1/morphdom.js";
 
 /**
  * Encapsulate component.
@@ -30,6 +31,7 @@ export class Component {
     this.document = args.document || document;
     this.walker = args.walker || walk;
     this.window = args.window || window;
+    this.morphdom = args.morphdom || morphdom;
 
     this.root = undefined;
     this.modelEls = [];
@@ -353,9 +355,9 @@ export class Component {
 
     this.modelEls.forEach((element) => {
       if (
+        forceModelUpdates ||
         !lastTriggeringElement ||
-        !lastTriggeringElement.isSame(element) ||
-        forceModelUpdates
+        !lastTriggeringElement.isSame(element)
       ) {
         this.setValue(element);
       }

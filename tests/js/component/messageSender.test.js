@@ -126,3 +126,42 @@ test.cb("call_method hash", (t) => {
     t.end();
   });
 });
+
+test.cb("call_method forceModelUpdate is true", (t) => {
+  const html = `
+<input type="hidden" name="csrfmiddlewaretoken" value="asdf">
+<div unicorn:id="5jypjiyb" unicorn:name="text-inputs" unicorn:checksum="GXzew3Km">
+    <input unicorn:model='name'></input>
+    <button unicorn:click='test()'><span id="clicker">Click</span></button>
+</div>
+  `;
+
+  const component = getComponent(html);
+
+  t.is(component.attachedEventTypes.length, 1);
+  t.is(component.actionEvents.click.length, 1);
+
+  component.actionEvents.click[0].element.el.click();
+
+  t.is(component.actionQueue.length, 1);
+
+  // mock the fetch
+  const res = {
+    id: "aQzrrRoG",
+    dom: "blob",
+    data: {
+      name: "World",
+    },
+    errors: {},
+    redirect: {},
+    return: {},
+  };
+  global.fetch = fetchMock.sandbox().mock().post("/test/text-inputs", res);
+
+  send(component, (a, forceModelUpdates, err) => {
+    t.not(err);
+    t.true(forceModelUpdates);
+    fetchMock.reset();
+    t.end();
+  });
+});
