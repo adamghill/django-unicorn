@@ -5,7 +5,7 @@ import {
   addDbEventListener,
   addModelEventListener,
 } from "./eventListeners.js";
-import { components } from "./factory.js";
+import { components } from "./store.js";
 import { send } from "./messageSender.js";
 import morphdom from "./morphdom/2.6.1/morphdom.js";
 import { $, contains, hasValue, isEmpty, isFunction, walk } from "./utils.js";

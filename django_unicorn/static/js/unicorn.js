@@ -1,6 +1,6 @@
 import { Component } from "./component.js";
 import { isEmpty } from "./utils.js";
-import { components } from "./factory.js";
+import { components } from "./store.js";
 
 let messageUrl = "";
 const csrfTokenHeaderName = "X-CSRFToken";
