@@ -27,8 +27,9 @@
             </tr>
         </thead>
         {% for flavor in flavors %}
-            {% unicorn 'nested.row' parent=view model=flavor %}
+            {% unicorn 'nested.row' parent=view key=flavor.id model=flavor %}
         {% endfor %}
     </table>
+    
 
 </div>

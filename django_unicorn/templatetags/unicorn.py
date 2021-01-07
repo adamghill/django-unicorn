@@ -6,6 +6,7 @@ from django.conf import settings
 import shortuuid
 
 from django_unicorn.call_method_parser import InvalidKwarg, parse_kwarg
+from django_unicorn.errors import UnicornViewError
 
 from ..settings import get_setting
 
@@ -66,8 +67,6 @@ class UnicornNode(template.Node):
         if hasattr(context, "request"):
             request = context.request
 
-        component_id = shortuuid.uuid()[:8]
-
         resolved_kwargs = {}
 
         for key, val in self.kwargs.items():
@@ -83,6 +82,33 @@ class UnicornNode(template.Node):
 
         if "parent" in resolved_kwargs:
             self.parent = resolved_kwargs.pop("parent")
+
+        component_id = None
+
+        if self.parent:
+            if self.component_key:
+                # Recursively look in the current component's parent's children for the `self.component_key`.
+                # If found, use the found component's `component_id`.
+                def _check_for_key(_component):
+                    for _child in _component.children:
+                        if (
+                            _child.component_name == self.component_name
+                            and _child.component_key == self.component_key
+                            and _child.component_id
+                        ):
+                            return _child.component_id
+
+                        return _check_for_key(_child)
+
+                found_component_id = _check_for_key(self.parent)
+
+                if found_component_id:
+                    component_id = found_component_id
+            else:
+                component_id = self.parent.component_id + ":" + self.component_name
+
+        if not component_id:
+            component_id = shortuuid.uuid()[:8]
 
         from ..components import UnicornView
 
