@@ -98,6 +98,7 @@ class UnicornNode(template.Node):
                         ):
                             return _child.component_id
 
+                    for _child in _component.children:
                         return _check_for_key(_child)
 
                 found_component_id = _check_for_key(self.parent)
