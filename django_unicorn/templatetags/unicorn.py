@@ -101,6 +101,19 @@ class UnicornNode(template.Node):
 
             if self.component_key:
                 component_id = f"{component_id}:{self.component_key}"
+            elif "id" in resolved_kwargs:
+                kwarg_id = resolved_kwargs["id"]
+                component_id = f"{component_id}:{kwarg_id}"
+            elif "pk" in resolved_kwargs:
+                kwarg_pk = resolved_kwargs["pk"]
+                component_id = f"{component_id}:{kwarg_pk}"
+            elif "model" in resolved_kwargs:
+                model = resolved_kwargs["model"]
+
+                if hasattr(model, "pk"):
+                    component_id = f"{component_id}:{model.pk}"
+                elif hasattr(model, "id"):
+                    component_id = f"{component_id}:{model.id}"
 
         if component_id:
             if not settings.DEBUG:
