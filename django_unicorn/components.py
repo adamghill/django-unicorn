@@ -202,7 +202,7 @@ class UnicornTemplateResponse(TemplateResponse):
             Raises an Exception if a div cannot be found.
         """
         for element in soup.contents:
-            if element.name and element.name == "div":
+            if element.name:
                 return element
 
         raise Exception("No root element found")
