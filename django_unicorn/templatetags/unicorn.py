@@ -96,29 +96,16 @@ class UnicornNode(template.Node):
         component_id = None
 
         if self.parent:
+            # Child components use the parent for part of the `component_id`
+            component_id = f"{self.parent.component_id}:{self.component_name}"
+
             if self.component_key:
-                # Recursively look in the current component's parent's children for the `self.component_key`.
-                # If found, use the found component's `component_id`.
-                def _check_for_key(_component):
-                    for _child in _component.children:
-                        if (
-                            _child.component_name == self.component_name
-                            and _child.component_key == self.component_key
-                            and _child.component_id
-                        ):
-                            return _child.component_id
+                component_id = f"{component_id}:{self.component_key}"
 
-                    for _child in _component.children:
-                        return _check_for_key(_child)
-
-                found_component_id = _check_for_key(self.parent)
-
-                if found_component_id:
-                    component_id = found_component_id
-            else:
-                component_id = self.parent.component_id + ":" + self.component_name
-
-        if not component_id:
+        if component_id:
+            if not settings.DEBUG:
+                component_id = shortuuid.uuid(name=component_id)[:8]
+        else:
             component_id = shortuuid.uuid()[:8]
 
         from ..components import UnicornView
