@@ -5,14 +5,14 @@
         <button unicorn:click="$refresh">$refresh</button>
 
         {% if is_editing %}
-        <input type="text" unicorn:model="name" /> <button unicorn:click="save">Save</button>
+        <input type="text" unicorn:model.defer="name" />
+        <button unicorn:click="save">Save</button>
+        <button unicorn:click="cancel">Cancel</button>
         {% else %}
         <h3>{{ name }}</h3>
         <a href="#" unicorn:click.prevent="edit">Edit</a>
         {% endif %}
     </div>
-
-    <input type="text" unicorn:model="name" />
 
     <button unicorn:click="load_table">Load table</button>
 

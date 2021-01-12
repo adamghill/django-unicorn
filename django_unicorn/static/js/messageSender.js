@@ -120,28 +120,29 @@ export function send(component, callback) {
 
       // Refresh the parent component if there is one
       if (hasValue(parent) && hasValue(parent.id) && hasValue(parent.dom)) {
-        let parentComponent = component.getParentComponent();
-
-        while (parentComponent && parentComponent.id !== parent.id) {
-          parentComponent = parentComponent.getParentComponent();
-        }
+        const parentComponent = component.getParentComponent(parent.id);
 
         if (parentComponent && parentComponent.id === parent.id) {
+          // TODO: Handle errors?
           parentComponent.data = parent.data || {};
-          parentComponent.errors = parent.errors || {};
+
           component.morphdom(
             parentComponent.root,
             parent.dom,
             MORPHDOM_OPTIONS
           );
           parentComponent.refreshChecksum();
+
+          // parentComponent.getChildrenComponents().forEach((child) => {
+          //   child.refreshEventListeners();
+          // });
         }
       }
 
       component.morphdom(component.root, rerenderedComponent, MORPHDOM_OPTIONS);
 
-      // Refresh the checksum based on the new data
-      component.refreshChecksum();
+      // Re-init to refresh the root and checksum based on the new data
+      component.init();
 
       // Reset all event listeners
       component.refreshEventListeners();

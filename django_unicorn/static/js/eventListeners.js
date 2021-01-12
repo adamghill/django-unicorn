@@ -115,13 +115,14 @@ export function addActionEventListener(component, eventType) {
         const { action } = actionEvent;
         const { element } = actionEvent;
 
-        if (targetElement.isSame(element)) {
+        // TOD: Check why the targetElement needs to check isSameNode OR has the same
+        // key/id since `isSameNode` won't always work
+        if (targetElement.isSame(element) || targetElement.isSameId(element)) {
           // Add the value of any child element of the target that is a lazy model to the action queue
           // Handles situations similar to https://github.com/livewire/livewire/issues/528
-
           component.walker(element.el, (childEl) => {
             const modelElsInTargetScope = component.modelEls.filter((e) =>
-              e.el.isSameNode(childEl)
+              e.isSameEl(childEl)
             );
 
             modelElsInTargetScope.forEach((modelElement) => {
@@ -192,7 +193,6 @@ export function addActionEventListener(component, eventType) {
                   );
                   action.name = action.name.replace(eventArg, data);
                 } catch (err) {
-                  // console.error(err);
                   action.name = action.name.replace(eventArg, "");
                 }
               } else {

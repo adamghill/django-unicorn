@@ -236,12 +236,32 @@ export class Element {
   }
 
   /**
-   * Check if another `Element` is the same as this `Element`.
+   * Check if another `Element` is the same as this `Element`. Uses `isSameNode` behind the scenes.
    * @param {Element} other
    */
   isSame(other) {
     // Use isSameNode (not isEqualNode) because we want to check the nodes reference the same object
-    return this.el.isSameNode(other.el);
+    return this.isSameEl(other.el);
+  }
+
+  /**
+   * Check if a DOM element is the same as this `Element`. Uses `isSameNode` behind the scenes.
+   * @param {El} DOM el
+   */
+  isSameEl(el) {
+    // Use isSameNode (not isEqualNode) because we want to check the nodes reference the same object
+    return this.el.isSameNode(el);
+  }
+
+  /**
+   * Check if another `Element` is the same as this `Element` by checking the key and id.
+   * @param {Element} other
+   */
+  isSameId(other) {
+    return (
+      (this.key && other.key && this.key === other.key) ||
+      (this.id && other.id && this.id === other.id)
+    );
   }
 
   /**

@@ -78,8 +78,40 @@ export class Component {
     this.refreshChecksum();
   }
 
-  getParentComponent() {
-    // Get parentComponent
+  /**
+   * Gets the children components of the current component.
+   */
+  getChildrenComponents() {
+    const elements = [];
+
+    this.walker(this.root, (el) => {
+      if (el.isSameNode(this.root)) {
+        // Skip the component root element
+        return;
+      }
+      const componentId = el.getAttribute("unicorn:id");
+
+      if (componentId) {
+        const childComponent = components[componentId] || null;
+
+        if (childComponent) {
+          elements.push(childComponent);
+        }
+      }
+    });
+
+    return elements;
+  }
+
+  /**
+   * Gets the parent component of the current component.
+   * @param {int} parentComponentId Parent component id.
+   */
+  getParentComponent(parentComponentId) {
+    if (typeof parentComponentId !== "undefined") {
+      return components[parentComponentId] || null;
+    }
+
     let currentEl = this.root;
     let parentComponent = null;
 
