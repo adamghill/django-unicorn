@@ -75,7 +75,17 @@ class UnicornNode(template.Node):
             except TypeError:
                 resolved_kwargs.update({key: val})
             except template.VariableDoesNotExist:
-                resolved_kwargs.update({key: val})
+                if val.endswith(".id"):
+                    pk_val = val.replace(".id", ".pk")
+
+                    try:
+                        resolved_kwargs.update(
+                            {key: template.Variable(pk_val).resolve(context)}
+                        )
+                    except TypeError:
+                        resolved_kwargs.update({key: val})
+                    except template.VariableDoesNotExist:
+                        resolved_kwargs.update({key: val})
 
         if "key" in resolved_kwargs:
             self.component_key = resolved_kwargs.pop("key")
