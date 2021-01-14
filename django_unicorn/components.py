@@ -247,6 +247,7 @@ class UnicornView(TemplateView):
         if "parent" in kwargs:
             self.parent = kwargs["parent"]
 
+        self._children_set = False
         self._validate_called = False
         self.errors = {}
         self._set_default_template_name()
