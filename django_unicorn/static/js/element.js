@@ -138,13 +138,12 @@ export class Element {
         elToCheck = this;
 
         while (isEmpty(this.db[attr])) {
-          if (elToCheck.el.getAttribute("unicorn:checksum")) {
-            // A litte hacky, but stop looking after you hit the beginning of the component
-            break;
-          }
-
           if (elToCheck.isUnicorn && hasValue(elToCheck.db[attr])) {
             this.db[attr] = elToCheck.db[attr];
+          }
+
+          if (elToCheck.isRoot()) {
+            break;
           }
 
           elToCheck = elToCheck.parent;
@@ -155,11 +154,6 @@ export class Element {
       elToCheck = this;
 
       while (isEmpty(this.model.name)) {
-        if (elToCheck.el.getAttribute("unicorn:checksum")) {
-          // A litte hacky, but stop looking after you hit the beginning of the component
-          break;
-        }
-
         if (elToCheck.isUnicorn && hasValue(elToCheck.model.name)) {
           if (hasValue(this.field) && isEmpty(this.db)) {
             // Handle a model + field that is not a db
@@ -169,6 +163,10 @@ export class Element {
           } else {
             this.model.name = elToCheck.model.name;
           }
+        }
+
+        if (elToCheck.isRoot()) {
+          break;
         }
 
         elToCheck = elToCheck.parent;
@@ -213,7 +211,7 @@ export class Element {
     let parentElement = this.parent;
 
     while (parentElement && !parentElement.isUnicorn) {
-      if (parentElement.el.getAttribute("unicorn:checksum")) {
+      if (parentElement.isRoot()) {
         return null;
       }
 
@@ -327,5 +325,13 @@ export class Element {
     });
 
     this.errors = [];
+  }
+
+  /**
+   * Whether the element is a root node or not.
+   */
+  isRoot() {
+    // A litte hacky, but assume that an element with `unicorn:checksum` is a component root
+    return hasValue(this.el.getAttribute("unicorn:checksum"));
   }
 }

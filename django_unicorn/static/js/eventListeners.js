@@ -208,16 +208,16 @@ export function addActionEventListener(component, eventType) {
               let elToCheck = targetElement;
 
               while (elToCheck.parent && (isEmpty(db.name) || isEmpty(db.pk))) {
-                if (elToCheck.el.getAttribute("unicorn:checksum")) {
-                  break;
-                }
-
                 if (elToCheck.db.name) {
                   db.name = elToCheck.db.name;
                 }
 
                 if (elToCheck.db.pk) {
                   db.pk = elToCheck.db.pk;
+                }
+
+                if (elToCheck.isRoot()) {
+                  break;
                 }
 
                 elToCheck = elToCheck.parent;
