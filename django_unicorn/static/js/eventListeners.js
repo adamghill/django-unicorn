@@ -170,6 +170,11 @@ export function addActionEventListener(component, eventType) {
             event.stopPropagation();
           }
 
+          if (action.isDiscard) {
+            // Remove all existing action events in the queue
+            component.actionQueue = [];
+          }
+
           // Handle special arguments (e.g. $event)
           args(action.name).forEach((eventArg) => {
             if (eventArg.startsWith("$event")) {

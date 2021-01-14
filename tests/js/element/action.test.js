@@ -40,6 +40,16 @@ test("click.stop", (t) => {
   t.is(action.key, undefined);
 });
 
+test("click.discard", (t) => {
+  const html = "<a href='#' unicorn:click.discard='test()'>Test()</a>";
+  const element = getElement(html);
+
+  const action = element.actions[0];
+  t.true(action.isDiscard);
+  t.is(action.eventType, "click");
+  t.is(action.key, undefined);
+});
+
 test("multiple actions", (t) => {
   const html =
     "<input unicorn:keyup.enter='add' unicorn:keydown.escape='clear'></input>";

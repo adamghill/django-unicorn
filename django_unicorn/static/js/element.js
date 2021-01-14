@@ -98,6 +98,7 @@ export class Element {
         action.eventType = attribute.eventType;
         action.isPrevent = false;
         action.isStop = false;
+        action.isDiscard = false;
 
         if (attribute.modifiers) {
           Object.keys(attribute.modifiers).forEach((modifier) => {
@@ -105,6 +106,8 @@ export class Element {
               action.isPrevent = true;
             } else if (modifier === "stop") {
               action.isStop = true;
+            } else if (modifier === "discard") {
+              action.isDiscard = true;
             } else {
               // Assume the modifier is a keycode
               action.key = modifier;
