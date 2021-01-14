@@ -15,10 +15,10 @@
     </td>
     <td>
         {% if is_editing %}
-        <button unicorn:click="save" id="save-{{ model.id }}">Save</button>
-        <button unicorn:click="cancel" unicorn:key="cancel-{{ model.id }}">Cancel</button>
+        <button unicorn:click="save">Save</button>
+        <button unicorn:click.discard="cancel">Cancel</button>
         {% else %}
-        <button unicorn:click="edit" unicorn:key="edit-{{ model.id }}">Edit</button>
+        <button unicorn:click="edit">Edit</button>
         {% endif %}
     </td>
 </tr>

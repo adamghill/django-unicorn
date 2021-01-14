@@ -27,4 +27,8 @@ class TableView(UnicornView):
         self.load_table()
 
     def load_table(self):
-        self.flavors = Flavor.objects.all()[:10]
+        self.flavors = Flavor.objects.all()[10:20]
+
+        for child in self.children:
+            if hasattr(child, "is_editing"):
+                child.is_editing = False
