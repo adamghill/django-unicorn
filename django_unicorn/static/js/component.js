@@ -20,11 +20,6 @@ export class Component {
     this.key = args.key;
     this.messageUrl = args.messageUrl;
     this.csrfTokenHeaderName = args.csrfTokenHeaderName;
-    this.attachEvents = true;
-
-    if (hasValue(args.attachEvents)) {
-      this.attachEvents = args.attachEvents;
-    }
 
     if (contains(this.name, ".")) {
       const names = this.name.split(".");
@@ -58,11 +53,8 @@ export class Component {
     this.attachedDbEvents = [];
 
     this.init();
-
-    if (this.attachEvents) {
-      this.refreshEventListeners();
-      this.initPolling();
-    }
+    this.refreshEventListeners();
+    this.initPolling();
   }
 
   /**

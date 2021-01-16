@@ -20,7 +20,6 @@ export function componentInit(args) {
   args.csrfTokenHeaderName = csrfTokenHeaderName;
 
   const component = new Component(args);
-  component.init();
   components[component.id] = component;
 
   component.setModelValues();
