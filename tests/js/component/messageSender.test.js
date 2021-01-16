@@ -35,7 +35,7 @@ test.cb("call_method redirect", (t) => {
   global.fetch = fetchMock.sandbox().mock().post("/test/text-inputs", res);
 
   send(component, (a, b, err) => {
-    t.not(err);
+    t.true(err === null);
     t.is(component.window.location.href, "http://www.google.com");
     fetchMock.reset();
     t.end();
@@ -78,7 +78,7 @@ test.cb("call_method refresh redirect", (t) => {
   global.fetch = fetchMock.sandbox().mock().post("/test/text-inputs", res);
 
   send(component, (a, b, err) => {
-    t.not(err);
+    t.true(err === null);
     t.is(component.window.history.get(), "/test/text-inputs?some=query");
     t.is(component.window.document.title, "new title");
     fetchMock.reset();
@@ -120,7 +120,7 @@ test.cb("call_method hash", (t) => {
   global.fetch = fetchMock.sandbox().mock().post("/test/text-inputs", res);
 
   send(component, (a, b, err) => {
-    t.not(err);
+    t.true(err === null);
     t.is(component.window.location.hash, "#somehash");
     fetchMock.reset();
     t.end();
@@ -159,7 +159,7 @@ test.cb("call_method forceModelUpdate is true", (t) => {
   global.fetch = fetchMock.sandbox().mock().post("/test/text-inputs", res);
 
   send(component, (a, forceModelUpdates, err) => {
-    t.not(err);
+    t.true(err === null);
     t.true(forceModelUpdates);
     fetchMock.reset();
     t.end();
