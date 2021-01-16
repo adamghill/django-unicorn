@@ -8,6 +8,7 @@ test("model", (t) => {
   t.is(element.model.name, "name");
   t.is(element.model.eventType, "input");
   t.false(element.model.isLazy);
+  t.false(element.model.isDefer);
 });
 
 test("model.defer", (t) => {
