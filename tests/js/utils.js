@@ -47,6 +47,10 @@ export function getElement(html, querySelector) {
  */
 export function walkDOM(el, callback) {
   do {
+    el.getAttribute = (attr) => {
+      return null;
+    };
+
     callback(el);
 
     if (el.hasChildNodes()) {
