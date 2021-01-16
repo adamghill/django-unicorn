@@ -131,10 +131,7 @@ class UnicornTemplateResponse(TemplateResponse):
         status=None,
         charset=None,
         using=None,
-        component_name=None,
-        component_id=None,
-        component_key="",
-        frontend_context_variables={},
+        component=None,
         init_js=False,
         **kwargs,
     ):
@@ -148,37 +145,39 @@ class UnicornTemplateResponse(TemplateResponse):
             using=using,
         )
 
-        self.component_id = component_id
-        self.component_name = component_name
-        self.component_key = component_key
-        self.frontend_context_variables = frontend_context_variables
+        self.component = component
         self.init_js = init_js
 
     def render(self):
         response = super().render()
 
-        if not self.component_id:
+        if not self.component or not self.component.component_id:
             return response
 
         content = response.content.decode("utf-8")
 
-        frontend_context_variables_dict = orjson.loads(self.frontend_context_variables)
+        frontend_context_variables = self.component.get_frontend_context_variables()
+
+        frontend_context_variables_dict = orjson.loads(frontend_context_variables)
         checksum = generate_checksum(orjson.dumps(frontend_context_variables_dict))
+
+        # Handle potential nested component name using dot-notation
+        nested_component_name = self.component.component_name.replace(".", "/")
 
         soup = BeautifulSoup(content, features="html.parser")
         root_element = UnicornTemplateResponse._get_root_element(soup)
-        root_element["unicorn:id"] = self.component_id
-        root_element["unicorn:name"] = self.component_name
-        root_element["unicorn:key"] = self.component_key
+        root_element["unicorn:id"] = self.component.component_id
+        root_element["unicorn:name"] = nested_component_name
+        root_element["unicorn:key"] = self.component.component_key
         root_element["unicorn:checksum"] = checksum
 
         if self.init_js:
             script_tag = soup.new_tag("script")
             init = {
-                "id": self.component_id,
-                "name": self.component_name,
-                "key": self.component_key,
-                "data": orjson.loads(self.frontend_context_variables),
+                "id": self.component.component_id,
+                "name": nested_component_name,
+                "key": self.component.component_key,
+                "data": orjson.loads(frontend_context_variables),
             }
             init = orjson.dumps(init).decode("utf-8")
             script_tag["type"] = "module"
@@ -189,6 +188,7 @@ class UnicornTemplateResponse(TemplateResponse):
         rendered_template = mark_safe(rendered_template)
 
         response.content = rendered_template
+
         return response
 
     @staticmethod
@@ -202,7 +202,7 @@ class UnicornTemplateResponse(TemplateResponse):
             Raises an Exception if a div cannot be found.
         """
         for element in soup.contents:
-            if element.name and element.name == "div":
+            if element.name:
                 return element
 
         raise Exception("No root element found")
@@ -218,6 +218,8 @@ class UnicornView(TemplateView):
     component_name: str = ""
     component_key: str = ""
     request = None
+    parent = None
+    children = []
 
     # Caches to reduce the amount of time introspecting the class
     _methods_cache: Dict[str, Callable] = {}
@@ -242,6 +244,10 @@ class UnicornView(TemplateView):
         if "request" in kwargs:
             self.setup(kwargs["request"])
 
+        if "parent" in kwargs:
+            self.parent = kwargs["parent"]
+
+        self._children_set = False
         self._validate_called = False
         self.errors = {}
         self._set_default_template_name()
@@ -262,7 +268,9 @@ class UnicornView(TemplateView):
             pass
 
         if not self.template_name and not get_template_names_is_valid:
-            self.template_name = f"unicorn/{self.component_name}.html"
+            # Convert component name with a dot to a folder structure
+            template_name = self.component_name.replace(".", "/")
+            self.template_name = f"unicorn/{template_name}.html"
 
     def _set_caches(self) -> None:
         """
@@ -337,15 +345,9 @@ class UnicornView(TemplateView):
         Args:
             param init_js: Whether or not to include the Javascript required to initialize the component.
         """
-        frontend_context_variables = self.get_frontend_context_variables()
 
         response = self.render_to_response(
-            context=self.get_context_data(),
-            component_name=self.component_name,
-            component_id=self.component_id,
-            component_key=self.component_key,
-            frontend_context_variables=frontend_context_variables,
-            init_js=init_js,
+            context=self.get_context_data(), component=self, init_js=init_js,
         )
 
         # render_to_response() could only return a HttpResponse, so check for render()
@@ -353,6 +355,17 @@ class UnicornView(TemplateView):
             response.render()
 
         rendered_component = response.content.decode("utf-8")
+
+        # Set the current component as a child of the parent if there is a parent
+        # If no parent, mark that the component has its children set.
+        # This works because the nested (internal) components get rendered first before the parent,
+        # so once we hit a component without a parent we know all of the children have been rendered correctly
+        # TODO: This might fall apart with a third layer of nesting components
+        if self.parent:
+            if not self.parent._children_set:
+                self.parent.children.append(self)
+        else:
+            self._children_set = True
 
         return rendered_component
 
@@ -626,6 +639,8 @@ class UnicornView(TemplateView):
             "get_frontend_context_variables",
             "errors",
             "updated",
+            "parent",
+            "children",
         )
         excludes = []
 
@@ -645,6 +660,7 @@ class UnicornView(TemplateView):
         component_id: str,
         component_name: str,
         component_key: str = "",
+        parent: "UnicornView" = None,
         use_cache=True,
         request: HttpRequest = None,
         kwargs: Dict[str, Any] = {},
@@ -658,6 +674,7 @@ class UnicornView(TemplateView):
                 component class and template if necessary. Required.
             param component_key: Key of the component to allow multiple components of the same name
                 to be differentiated. Optional.
+            param parent: The parent component of the current component.
             param use_cache: Get component from cache or force construction of component. Defaults to `True`.
             param kwargs: Keyword arguments for the component passed in from the template. Defaults to `{}`.
         
@@ -674,6 +691,7 @@ class UnicornView(TemplateView):
                 component.setup(request)
                 component._validate_called = False
                 logger.debug(f"Retrieve {component_id} from constructed views cache")
+
                 return component
 
         locations = []
@@ -695,23 +713,31 @@ class UnicornView(TemplateView):
             class_name = component_name.split(".")[-1:][0]
             module_name = component_name.replace("." + class_name, "")
             locations.append((class_name, module_name))
-        else:
-            # Use conventions to find the component class
-            class_name = convert_to_camel_case(component_name)
-            class_name = f"{class_name}View"
-            module_name = convert_to_snake_case(component_name)
 
-            unicorn_apps = get_setting("APPS", ["unicorn"])
+        # Handle component names that specify a folder structure
+        component_name = component_name.replace("/", ".")
 
-            assert (
-                isinstance(unicorn_apps, list)
-                or isinstance(unicorn_apps, tuple)
-                or isinstance(unicorn_apps, set)
-            ), "APPS is expected to be a list, tuple or set"
+        # Use conventions to find the component class
+        class_name = convert_to_camel_case(component_name)
 
-            for app in unicorn_apps:
-                app_module_name = f"{app}.components.{module_name}"
-                locations.append((class_name, app_module_name))
+        if "." in class_name:
+            if class_name.split(".")[-1:]:
+                class_name = class_name.split(".")[-1:][0]
+
+        class_name = f"{class_name}View"
+        module_name = convert_to_snake_case(component_name)
+
+        unicorn_apps = get_setting("APPS", ["unicorn"])
+
+        assert (
+            isinstance(unicorn_apps, list)
+            or isinstance(unicorn_apps, tuple)
+            or isinstance(unicorn_apps, set)
+        ), "APPS is expected to be a list, tuple or set"
+
+        for app in unicorn_apps:
+            app_module_name = f"{app}.components.{module_name}"
+            locations.append((class_name, app_module_name))
 
         # TODO: django.conf setting bool that defines whether to look in all installed apps for components
 
@@ -727,9 +753,14 @@ class UnicornView(TemplateView):
                     component_id=component_id,
                     component_name=component_name,
                     component_key=component_key,
+                    parent=parent,
                     request=request,
                     **kwargs,
                 )
+
+                component.children = []
+                component._children_set = False
+
                 component.mount()
                 component.hydrate()
                 component._validate_called = False

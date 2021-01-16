@@ -98,6 +98,7 @@ export class Element {
         action.eventType = attribute.eventType;
         action.isPrevent = false;
         action.isStop = false;
+        action.isDiscard = false;
 
         if (attribute.modifiers) {
           Object.keys(attribute.modifiers).forEach((modifier) => {
@@ -105,6 +106,8 @@ export class Element {
               action.isPrevent = true;
             } else if (modifier === "stop") {
               action.isStop = true;
+            } else if (modifier === "discard") {
+              action.isDiscard = true;
             } else {
               // Assume the modifier is a keycode
               action.key = modifier;
@@ -135,13 +138,12 @@ export class Element {
         elToCheck = this;
 
         while (isEmpty(this.db[attr])) {
-          if (elToCheck.el.getAttribute("unicorn:checksum")) {
-            // A litte hacky, but stop looking after you hit the beginning of the component
-            break;
-          }
-
           if (elToCheck.isUnicorn && hasValue(elToCheck.db[attr])) {
             this.db[attr] = elToCheck.db[attr];
+          }
+
+          if (elToCheck.isRoot()) {
+            break;
           }
 
           elToCheck = elToCheck.parent;
@@ -152,11 +154,6 @@ export class Element {
       elToCheck = this;
 
       while (isEmpty(this.model.name)) {
-        if (elToCheck.el.getAttribute("unicorn:checksum")) {
-          // A litte hacky, but stop looking after you hit the beginning of the component
-          break;
-        }
-
         if (elToCheck.isUnicorn && hasValue(elToCheck.model.name)) {
           if (hasValue(this.field) && isEmpty(this.db)) {
             // Handle a model + field that is not a db
@@ -166,6 +163,10 @@ export class Element {
           } else {
             this.model.name = elToCheck.model.name;
           }
+        }
+
+        if (elToCheck.isRoot()) {
+          break;
         }
 
         elToCheck = elToCheck.parent;
@@ -210,7 +211,7 @@ export class Element {
     let parentElement = this.parent;
 
     while (parentElement && !parentElement.isUnicorn) {
-      if (parentElement.el.getAttribute("unicorn:checksum")) {
+      if (parentElement.isRoot()) {
         return null;
       }
 
@@ -236,12 +237,32 @@ export class Element {
   }
 
   /**
-   * Check if another `Element` is the same as this `Element`.
+   * Check if another `Element` is the same as this `Element`. Uses `isSameNode` behind the scenes.
    * @param {Element} other
    */
   isSame(other) {
     // Use isSameNode (not isEqualNode) because we want to check the nodes reference the same object
-    return this.el.isSameNode(other.el);
+    return this.isSameEl(other.el);
+  }
+
+  /**
+   * Check if a DOM element is the same as this `Element`. Uses `isSameNode` behind the scenes.
+   * @param {El} DOM el
+   */
+  isSameEl(el) {
+    // Use isSameNode (not isEqualNode) because we want to check the nodes reference the same object
+    return this.el.isSameNode(el);
+  }
+
+  /**
+   * Check if another `Element` is the same as this `Element` by checking the key and id.
+   * @param {Element} other
+   */
+  isSameId(other) {
+    return (
+      (this.key && other.key && this.key === other.key) ||
+      (this.id && other.id && this.id === other.id)
+    );
   }
 
   /**
@@ -304,5 +325,13 @@ export class Element {
     });
 
     this.errors = [];
+  }
+
+  /**
+   * Whether the element is a root node or not.
+   */
+  isRoot() {
+    // A litte hacky, but assume that an element with `unicorn:checksum` is a component root
+    return hasValue(this.el.getAttribute("unicorn:checksum"));
   }
 }

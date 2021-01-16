@@ -39,7 +39,15 @@ def _json_serializer(obj):
     TODO: Investigate other ways to serialize objects automatically.
     e.g. Using DRF serializer: https://www.django-rest-framework.org/api-guide/serializers/#serializing-objects
     """
-    if isinstance(obj, Model):
+    from .components import UnicornView
+
+    if isinstance(obj, UnicornView):
+        return {
+            "name": obj.component_name,
+            "id": obj.component_id,
+            "key": obj.component_key,
+        }
+    elif isinstance(obj, Model):
         return _get_model_dict(obj)
     elif isinstance(obj, QuerySet):
         queryset_json = []
@@ -111,3 +119,11 @@ def dumps(data: dict) -> str:
     serialized_data = orjson.dumps(data, default=_json_serializer)
 
     return _dumps(serialized_data)
+
+
+def loads(obj: str) -> dict:
+    """
+    Converts a string representation to dictionary.
+    """
+
+    return orjson.loads(obj)

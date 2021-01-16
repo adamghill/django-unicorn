@@ -16,3 +16,7 @@ test("{} isEmpty", (t) => {
 test("object isEmpty", (t) => {
   t.false(isEmpty({ test: 123 }));
 });
+
+test("empty string isEmpty", (t) => {
+  t.true(isEmpty(""));
+});

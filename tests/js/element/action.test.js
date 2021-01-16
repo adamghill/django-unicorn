@@ -40,6 +40,48 @@ test("click.stop", (t) => {
   t.is(action.key, undefined);
 });
 
+test("click.discard", (t) => {
+  const html = "<a href='#' unicorn:click.discard='test()'>Test()</a>";
+  const element = getElement(html);
+
+  const action = element.actions[0];
+  t.true(action.isDiscard);
+  t.is(action.eventType, "click");
+  t.is(action.key, undefined);
+});
+
+test("click.discard model changes", (t) => {
+  const html = `
+<div unicorn:id="5jypjiyb" unicorn:name="text-inputs" unicorn:checksum="GXzew3Km">
+  <input unicorn:model='name'></input>
+  <button unicorn:click.discard='cancel'></button>
+</div>`;
+  const component = getComponent(html);
+  const modelEl = component.modelEls[0].el;
+
+  // create event and trigger it
+  const inputEvent = component.document.createEvent("HTMLEvents");
+  inputEvent.initEvent("input", true, true);
+  modelEl.dispatchEvent(inputEvent);
+
+  // check that the model change is in the actionQueue
+  t.is(component.actionQueue.length, 1);
+  t.is(component.actionQueue[0].type, "syncInput");
+  t.is(component.actionQueue[0].payload.name, "name");
+
+  // check that there are actions associated with click
+  t.is(component.attachedEventTypes.length, 1);
+  t.is(component.actionEvents.click.length, 1);
+
+  component.actionEvents.click[0].element.el.click();
+
+  // check that the model change got discarded, but the cancel action is in the actionQueue
+  t.is(component.actionQueue.length, 1);
+  const action = component.actionQueue[0];
+  t.is(action.type, "callMethod");
+  t.is(action.payload.name, "cancel");
+});
+
 test("multiple actions", (t) => {
   const html =
     "<input unicorn:keyup.enter='add' unicorn:keydown.escape='clear'></input>";
@@ -222,6 +264,23 @@ test("$model action variable", (t) => {
       <button unicorn:click='test($model)'></button>
     </div>
   </div>
+</div>`;
+  const component = getComponent(html);
+
+  t.is(component.attachedEventTypes.length, 1);
+  t.is(component.actionEvents.click.length, 1);
+
+  component.actionEvents.click[0].element.el.click();
+
+  t.is(component.actionQueue.length, 1);
+  const action = component.actionQueue[0];
+  t.is(action.payload.name, 'test({"pk":"1","name":"example"})');
+});
+
+test("$model action variable with db in root", (t) => {
+  const html = `
+<div unicorn:id="5jypjiyb" unicorn:name="text-inputs" unicorn:checksum="GXzew3Km" u:db="example" u:pk="1">
+  <button unicorn:click='test($model)'></button>
 </div>`;
   const component = getComponent(html);
 

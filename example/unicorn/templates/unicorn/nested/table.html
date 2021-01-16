@@ -1,0 +1,35 @@
+{% load unicorn %}
+<div>
+    <div>
+        <button unicorn:click="$reset">$reset</button>
+        <button unicorn:click="$refresh">$refresh</button>
+
+        {% if is_editing %}
+        <input type="text" unicorn:model.defer="name" />
+        <button unicorn:click="save">Save</button>
+        <button unicorn:click="cancel">Cancel</button>
+        {% else %}
+        <h3>{{ name }}</h3>
+        <a href="#" unicorn:click.prevent="edit">Edit</a>
+        {% endif %}
+    </div>
+
+    <button unicorn:click="load_table">Load table</button>
+
+    {% unicorn 'nested.filter' parent=view %}
+
+    <table>
+        <thead>
+            <tr>
+                <td>Name</td>
+                <td>Label</td>
+                <td>Action</td>
+            </tr>
+        </thead>
+        {% for flavor in flavors %}
+            {% unicorn 'nested.row' parent=view key=flavor.id model=flavor %}
+        {% endfor %}
+    </table>
+    
+
+</div>

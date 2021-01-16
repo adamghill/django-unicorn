@@ -1,9 +1,9 @@
 import { Component } from "./component.js";
-import { hasValue, isEmpty } from "./utils.js";
+import { isEmpty } from "./utils.js";
+import { components } from "./store.js";
 
 let messageUrl = "";
 const csrfTokenHeaderName = "X-CSRFToken";
-const components = {};
 
 /**
  * Initializes the Unicorn object.
@@ -20,7 +20,6 @@ export function componentInit(args) {
   args.csrfTokenHeaderName = csrfTokenHeaderName;
 
   const component = new Component(args);
-  component.init();
   components[component.id] = component;
 
   component.setModelValues();

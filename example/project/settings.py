@@ -98,6 +98,6 @@ LOGGING = {
             "propagate": False,
         },
         "django.server": {"handlers": ["null"], "level": "INFO", "propagate": False,},
-        "profile": {"handlers": ["console"], "level": "DEBUG", "propagate": False,},
+        "profile": {"handlers": ["console"], "level": "INFO", "propagate": False,},
     },
 }

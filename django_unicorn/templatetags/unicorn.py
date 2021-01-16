@@ -6,6 +6,7 @@ from django.conf import settings
 import shortuuid
 
 from django_unicorn.call_method_parser import InvalidKwarg, parse_kwarg
+from django_unicorn.errors import UnicornViewError
 
 from ..settings import get_setting
 
@@ -54,21 +55,17 @@ def unicorn(parser, token):
 
 
 class UnicornNode(template.Node):
-    def __init__(self, component_name: str, kwargs: Dict):
+    def __init__(self, component_name: str, kwargs: Dict = {}):
         self.component_name = component_name
         self.kwargs = kwargs
         self.component_key = ""
-
-        if "key" in kwargs:
-            self.component_key = kwargs.pop("key")
+        self.parent = None
 
     def render(self, context):
         request = None
 
         if hasattr(context, "request"):
             request = context.request
-
-        component_id = shortuuid.uuid()[:8]
 
         resolved_kwargs = {}
 
@@ -80,12 +77,59 @@ class UnicornNode(template.Node):
             except template.VariableDoesNotExist:
                 resolved_kwargs.update({key: val})
 
+                if val.endswith(".id"):
+                    pk_val = val.replace(".id", ".pk")
+
+                    try:
+                        resolved_kwargs.update(
+                            {key: template.Variable(pk_val).resolve(context)}
+                        )
+                    except TypeError:
+                        resolved_kwargs.update({key: val})
+                    except template.VariableDoesNotExist:
+                        resolved_kwargs.update({key: val})
+
+        if "key" in resolved_kwargs:
+            self.component_key = resolved_kwargs.pop("key")
+
+        if "parent" in resolved_kwargs:
+            self.parent = resolved_kwargs.pop("parent")
+
+        component_id = None
+
+        if self.parent:
+            # Child components use the parent for part of the `component_id`
+            component_id = f"{self.parent.component_id}:{self.component_name}"
+
+            if self.component_key:
+                component_id = f"{component_id}:{self.component_key}"
+            elif "id" in resolved_kwargs:
+                kwarg_id = resolved_kwargs["id"]
+                component_id = f"{component_id}:{kwarg_id}"
+            elif "pk" in resolved_kwargs:
+                kwarg_pk = resolved_kwargs["pk"]
+                component_id = f"{component_id}:{kwarg_pk}"
+            elif "model" in resolved_kwargs:
+                model = resolved_kwargs["model"]
+
+                if hasattr(model, "pk"):
+                    component_id = f"{component_id}:{model.pk}"
+                elif hasattr(model, "id"):
+                    component_id = f"{component_id}:{model.id}"
+
+        if component_id:
+            if not settings.DEBUG:
+                component_id = shortuuid.uuid(name=component_id)[:8]
+        else:
+            component_id = shortuuid.uuid()[:8]
+
         from ..components import UnicornView
 
         view = UnicornView.create(
             component_id=component_id,
             component_name=self.component_name,
             component_key=self.component_key,
+            parent=self.parent,
             kwargs=resolved_kwargs,
             request=request,
         )

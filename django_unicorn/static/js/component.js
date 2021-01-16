@@ -1,13 +1,14 @@
-import { $, contains, hasValue, isEmpty, isFunction, walk } from "./utils.js";
 import { debounce } from "./delayers.js";
 import { Element } from "./element.js";
-import { send } from "./messageSender.js";
 import {
   addActionEventListener,
   addDbEventListener,
   addModelEventListener,
 } from "./eventListeners.js";
+import { components } from "./store.js";
+import { send } from "./messageSender.js";
 import morphdom from "./morphdom/2.6.1/morphdom.js";
+import { $, contains, hasValue, isEmpty, isFunction, walk } from "./utils.js";
 
 /**
  * Encapsulate component.
@@ -70,6 +71,55 @@ export class Component {
   }
 
   /**
+   * Gets the children components of the current component.
+   */
+  getChildrenComponents() {
+    const elements = [];
+
+    this.walker(this.root, (el) => {
+      if (el.isSameNode(this.root)) {
+        // Skip the component root element
+        return;
+      }
+      const componentId = el.getAttribute("unicorn:id");
+
+      if (componentId) {
+        const childComponent = components[componentId] || null;
+
+        if (childComponent) {
+          elements.push(childComponent);
+        }
+      }
+    });
+
+    return elements;
+  }
+
+  /**
+   * Gets the parent component of the current component.
+   * @param {int} parentComponentId Parent component id.
+   */
+  getParentComponent(parentComponentId) {
+    if (typeof parentComponentId !== "undefined") {
+      return components[parentComponentId] || null;
+    }
+
+    let currentEl = this.root;
+    let parentComponent = null;
+
+    while (!parentComponent && currentEl.parentElement !== null) {
+      currentEl = currentEl.parentElement;
+      const componentId = currentEl.getAttribute("unicorn:id");
+
+      if (componentId) {
+        parentComponent = components[componentId] || null;
+      }
+    }
+
+    return parentComponent;
+  }
+
+  /**
    * Sets event listeners on unicorn elements.
    */
   refreshEventListeners() {
@@ -77,69 +127,77 @@ export class Component {
     this.modelEls = [];
     this.dbEls = [];
 
-    this.walker(this.root, (el) => {
-      if (el.isSameNode(this.root)) {
-        // Skip the component root element
-        return;
-      }
-
-      const element = new Element(el);
-
-      if (element.isUnicorn) {
-        if (
-          hasValue(element.field) &&
-          (hasValue(element.db) || hasValue(element.model))
-        ) {
-          if (!this.attachedDbEvents.some((e) => e.isSame(element))) {
-            this.attachedDbEvents.push(element);
-            addDbEventListener(this, element.el, element.field.eventType);
-          }
-
-          if (!this.dbEls.some((e) => e.isSame(element))) {
-            this.dbEls.push(element);
-          }
-        } else if (
-          hasValue(element.model) &&
-          isEmpty(element.db) &&
-          isEmpty(element.field)
-        ) {
-          if (!this.attachedModelEvents.some((e) => e.isSame(element))) {
-            this.attachedModelEvents.push(element);
-            addModelEventListener(this, element.el, element.model.eventType);
-          }
-
-          if (!this.modelEls.some((e) => e.isSame(element))) {
-            this.modelEls.push(element);
-          }
-        } else if (hasValue(element.loading)) {
-          this.loadingEls.push(element);
-
-          // Hide loading elements that are shown when an action happens
-          if (element.loading.show) {
-            element.hide();
-          }
+    try {
+      this.walker(this.root, (el) => {
+        if (el.isSameNode(this.root)) {
+          // Skip the component root element
+          return;
+        }
+        if (el.getAttribute("unicorn:checksum")) {
+          // Skip nested components
+          throw Error();
         }
 
-        if (hasValue(element.key)) {
-          this.keyEls.push(element);
-        }
+        const element = new Element(el);
 
-        element.actions.forEach((action) => {
-          if (this.actionEvents[action.eventType]) {
-            this.actionEvents[action.eventType].push({ action, element });
-          } else {
-            this.actionEvents[action.eventType] = [{ action, element }];
+        if (element.isUnicorn) {
+          if (
+            hasValue(element.field) &&
+            (hasValue(element.db) || hasValue(element.model))
+          ) {
+            if (!this.attachedDbEvents.some((e) => e.isSame(element))) {
+              this.attachedDbEvents.push(element);
+              addDbEventListener(this, element.el, element.field.eventType);
+            }
 
-            if (
-              !this.attachedEventTypes.some((et) => et === action.eventType)
-            ) {
-              this.attachedEventTypes.push(action.eventType);
-              addActionEventListener(this, action.eventType);
+            if (!this.dbEls.some((e) => e.isSame(element))) {
+              this.dbEls.push(element);
+            }
+          } else if (
+            hasValue(element.model) &&
+            isEmpty(element.db) &&
+            isEmpty(element.field)
+          ) {
+            if (!this.attachedModelEvents.some((e) => e.isSame(element))) {
+              this.attachedModelEvents.push(element);
+              addModelEventListener(this, element.el, element.model.eventType);
+            }
+
+            if (!this.modelEls.some((e) => e.isSame(element))) {
+              this.modelEls.push(element);
+            }
+          } else if (hasValue(element.loading)) {
+            this.loadingEls.push(element);
+
+            // Hide loading elements that are shown when an action happens
+            if (element.loading.show) {
+              element.hide();
             }
           }
-        });
-      }
-    });
+
+          if (hasValue(element.key)) {
+            this.keyEls.push(element);
+          }
+
+          element.actions.forEach((action) => {
+            if (this.actionEvents[action.eventType]) {
+              this.actionEvents[action.eventType].push({ action, element });
+            } else {
+              this.actionEvents[action.eventType] = [{ action, element }];
+
+              if (
+                !this.attachedEventTypes.some((et) => et === action.eventType)
+              ) {
+                this.attachedEventTypes.push(action.eventType);
+                addActionEventListener(this, action.eventType);
+              }
+            }
+          });
+        }
+      });
+    } catch (err) {
+      // nothing
+    }
   }
 
   /**

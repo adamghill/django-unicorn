@@ -47,6 +47,10 @@ export function getElement(html, querySelector) {
  */
 export function walkDOM(el, callback) {
   do {
+    el.getAttribute = (attr) => {
+      return null;
+    };
+
     callback(el);
 
     if (el.hasChildNodes()) {
@@ -90,8 +94,6 @@ export function getComponent(html, id, name, data) {
     data = { name: "World" };
   }
 
-  const document = getDocument(html);
-
   const mockHistory = { urls: [] };
   mockHistory.pushState = (state, title, url) => {
     mockHistory.urls.push(url);
@@ -104,7 +106,7 @@ export function getComponent(html, id, name, data) {
     id,
     name,
     data,
-    document,
+    document: getDocument(html),
     messageUrl: "test",
     walker: walkDOM,
     morphdom,
@@ -114,6 +116,9 @@ export function getComponent(html, id, name, data) {
       location: { href: "" },
     },
   });
+
+  // Set the document explicitly for unit test purposes
+  component.document = getDocument(html);
 
   const res = {
     id: "",

@@ -8,11 +8,13 @@ from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_POST
 
 import orjson
+from bs4 import BeautifulSoup
 
 from .call_method_parser import InvalidKwarg, parse_call_method_name, parse_kwarg
 from .components import UnicornField, UnicornView
 from .errors import UnicornViewError
 from .message import ComponentRequest, Return
+from .serializer import loads
 
 
 logger = logging.getLogger(__name__)
@@ -380,5 +382,37 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
             res.update(
                 {"poll": return_data.poll,}
             )
+
+    parent_component = component.parent
+
+    if parent_component:
+        parent_frontend_context_variables = (
+            parent_component.get_frontend_context_variables()
+        )
+
+        dom = parent_component.render()
+
+        soup = BeautifulSoup(dom, features="html.parser")
+        checksum = None
+
+        # TODO: This doesn't create the same checksum for some reason
+        # checksum = orjson.dumps(parent_frontend_context_variables)
+
+        for element in soup.find_all():
+            if "unicorn:checksum" in element.attrs:
+                checksum = element["unicorn:checksum"]
+                break
+
+        res.update(
+            {
+                "parent": {
+                    "id": parent_component.component_id,
+                    "dom": dom,
+                    "checksum": checksum,
+                    "data": loads(parent_frontend_context_variables),
+                    "errors": parent_component.errors,
+                }
+            }
+        )
 
     return JsonResponse(res)

@@ -5,7 +5,8 @@ export function isEmpty(obj) {
   return (
     typeof obj === "undefined" ||
     obj === null ||
-    (Object.keys(obj).length === 0 && obj.constructor === Object)
+    (Object.keys(obj).length === 0 && obj.constructor === Object) ||
+    obj === ""
   );
 }
 

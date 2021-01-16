@@ -1,0 +1,24 @@
+<tr>
+    <td>
+        {% if is_editing %}
+        <input type="text" unicorn:model.defer="model.name" />
+        {% else %}
+        {{ model.name }}
+        {% endif %}
+    </td>
+    <td>
+        {% if is_editing %}
+        <input type="text" unicorn:model.defer="model.label" />
+        {% else %}
+        {{ model.label }}
+        {% endif %}
+    </td>
+    <td>
+        {% if is_editing %}
+        <button unicorn:click="save">Save</button>
+        <button unicorn:click.discard="cancel">Cancel</button>
+        {% else %}
+        <button unicorn:click="edit">Edit</button>
+        {% endif %}
+    </td>
+</tr>
