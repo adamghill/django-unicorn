@@ -12,6 +12,7 @@ from bs4 import BeautifulSoup
 
 from .call_method_parser import InvalidKwarg, parse_call_method_name, parse_kwarg
 from .components import UnicornField, UnicornView
+from .decorators import timed
 from .errors import UnicornViewError
 from .message import ComponentRequest, Return
 from .serializer import loads
@@ -33,6 +34,7 @@ def handle_error(view_func):
     return wraps(view_func)(wrapped_view)
 
 
+@timed
 def _set_property_from_data(
     component_or_field: Union[UnicornView, UnicornField, Model], name: str, value,
 ) -> None:
@@ -59,6 +61,7 @@ def _set_property_from_data(
                 setattr(component_or_field, name, value)
 
 
+@timed
 def _set_property_value(
     component: UnicornView, property_name: str, property_value: Any, data: Dict = {}
 ) -> None:
@@ -130,6 +133,7 @@ def _set_property_value(
     component.updated(property_name, property_value)
 
 
+@timed
 def _get_property_value(component: UnicornView, property_name: str) -> Any:
     """
     Gets property value from the component based on the property name.
@@ -159,6 +163,7 @@ def _get_property_value(component: UnicornView, property_name: str) -> Any:
                 component_or_field = component_or_field[property_name_part]
 
 
+@timed
 def _call_method_name(
     component: UnicornView, method_name: str, params: List[Any]
 ) -> Any:
@@ -180,6 +185,7 @@ def _call_method_name(
             return func()
 
 
+@timed
 @handle_error
 @csrf_protect
 @require_POST

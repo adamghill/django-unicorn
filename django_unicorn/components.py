@@ -148,6 +148,7 @@ class UnicornTemplateResponse(TemplateResponse):
         self.component = component
         self.init_js = init_js
 
+    @timed
     def render(self):
         response = super().render()
 
@@ -157,7 +158,6 @@ class UnicornTemplateResponse(TemplateResponse):
         content = response.content.decode("utf-8")
 
         frontend_context_variables = self.component.get_frontend_context_variables()
-
         frontend_context_variables_dict = orjson.loads(frontend_context_variables)
         checksum = generate_checksum(orjson.dumps(frontend_context_variables_dict))
 
@@ -253,6 +253,7 @@ class UnicornView(TemplateView):
         self._set_default_template_name()
         self._set_caches()
 
+    @timed
     def _set_default_template_name(self) -> None:
         """
         Sets a default template name based on component's name if necessary.
@@ -272,6 +273,7 @@ class UnicornView(TemplateView):
             template_name = self.component_name.replace(".", "/")
             self.template_name = f"unicorn/{template_name}.html"
 
+    @timed
     def _set_caches(self) -> None:
         """
         Setup some initial "caches" to prevent Python from having to introspect
@@ -282,6 +284,7 @@ class UnicornView(TemplateView):
         self._methods_cache = self._methods()
         self._set_resettable_attributes_cache()
 
+    @timed
     def reset(self):
         for (
             attribute_name,
@@ -337,6 +340,7 @@ class UnicornView(TemplateView):
         """
         pass
 
+    @timed
     def render(self, init_js=False) -> str:
         """
         Renders a UnicornView component with the public properties available. Delegates to a
@@ -369,6 +373,7 @@ class UnicornView(TemplateView):
 
         return rendered_component
 
+    @timed
     def get_frontend_context_variables(self) -> str:
         """
         Get publicly available properties and output them in a string-encoded JSON object.
@@ -407,6 +412,7 @@ class UnicornView(TemplateView):
 
         return encoded_frontend_context_variables
 
+    @timed
     def _get_form(self, data):
         if hasattr(self, "form_class"):
             try:
@@ -417,6 +423,7 @@ class UnicornView(TemplateView):
             except Exception as e:
                 logger.exception(e)
 
+    @timed
     def get_context_data(self, **kwargs):
         """
         Overrides the standard `get_context_data` to add in publicly available
@@ -432,9 +439,11 @@ class UnicornView(TemplateView):
 
         return context
 
+    @timed
     def is_valid(self, model_names: List = None) -> bool:
         return len(self.validate(model_names).keys()) == 0
 
+    @timed
     def validate(self, model_names: List = None) -> Dict:
         """
         Validates the data using the `form_class` set on the component.
@@ -481,6 +490,7 @@ class UnicornView(TemplateView):
 
         return self.errors
 
+    @timed
     def _attribute_names(self) -> List[str]:
         """
         Gets publicly available attribute names. Cached in `_attribute_names_cache`.
@@ -492,6 +502,7 @@ class UnicornView(TemplateView):
 
         return attribute_names
 
+    @timed
     def _attributes(self) -> Dict[str, Any]:
         """
         Get publicly available attributes and their values from the component.
@@ -505,6 +516,7 @@ class UnicornView(TemplateView):
 
         return attributes
 
+    @timed
     def _set_property(self, name, value):
         # Get the correct value type by using the form if it is available
         data = self._attributes()
@@ -535,6 +547,7 @@ class UnicornView(TemplateView):
                 f"'{name}' attribute on '{self.component_name}' component could not be set. Is it a @property without a setter?"
             )
 
+    @timed
     def _methods(self) -> Dict[str, Callable]:
         """
         Get publicly available method names and their functions from the component.
@@ -553,6 +566,7 @@ class UnicornView(TemplateView):
 
         return methods
 
+    @timed
     def _set_hook_methods_cache(self) -> None:
         """
         Caches the updating/updated attribute function names defined on the component.
@@ -568,6 +582,7 @@ class UnicornView(TemplateView):
                 if hasattr(self, function_name):
                     self._hook_methods_cache.append(function_name)
 
+    @timed
     def _set_resettable_attributes_cache(self) -> None:
         """
         Caches the attributes that are "resettable" in `_resettable_attributes_cache`.
