@@ -72,3 +72,27 @@ def test_message_component_not_found(client):
         e.exconly()
         == "django_unicorn.components.ComponentLoadError: 'test' component could not be loaded."
     )
+
+
+def test_message_component_with_dash(client):
+    data = {"data": {}, "checksum": "FpZ5q8E2", "id": "asdf"}
+
+    with pytest.raises(ComponentLoadError) as e:
+        post_json(client, data, url="/message/test-a")
+
+    assert (
+        e.exconly()
+        == "django_unicorn.components.ComponentLoadError: 'test-a' component could not be loaded."
+    )
+
+
+def test_message_component_with_dot(client):
+    data = {"data": {}, "checksum": "FpZ5q8E2", "id": "asdf"}
+
+    with pytest.raises(ComponentLoadError) as e:
+        post_json(client, data, url="/message/test.a")
+
+    assert (
+        e.exconly()
+        == "django_unicorn.components.ComponentLoadError: 'test.a' component could not be loaded."
+    )
