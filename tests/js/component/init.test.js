@@ -19,3 +19,14 @@ test("unicorn:checksum", (t) => {
 
   t.is(component.checksum, "GXzew3Km");
 });
+
+test("component on non-div", (t) => {
+  const html = `
+  <span unicorn:id="5jypjiyb" unicorn:name="text-inputs" unicorn:checksum="GXzew3Km">
+  </span>`;
+  const component = getComponent(html);
+
+  t.is(component.root.attributes.length, 3);
+  t.is(component.id, "5jypjiyb");
+  t.is(component.checksum, "GXzew3Km");
+});
