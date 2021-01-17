@@ -1,4 +1,12 @@
 <div unicorn:poll-1000="get_date" unicorn:poll.disable="polling_disabled">
+    {% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
     current_time: {{ current_time|date:"s" }}
 
     <br /><br />
