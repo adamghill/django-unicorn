@@ -123,6 +123,9 @@ class UnicornNode(template.Node):
         else:
             component_id = shortuuid.uuid()[:8]
 
+        # Useful for unit test
+        self.component_id = component_id
+
         from ..components import UnicornView
 
         view = UnicornView.create(
