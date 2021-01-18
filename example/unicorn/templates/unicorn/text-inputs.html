@@ -1,37 +1,43 @@
 <div>
+    <style>
+        .dirty {
+            border: red solid 1px !important;
+        }
+    </style>
+
     <button unicorn:click="$reset">Reset the component</button>
     <br />
     <br />
 
     <label>unicorn:key</label>
-    <input unicorn:model="name" type="text" id="name" unicorn:key="key1">
+    <input unicorn:model="name" unicorn:dirty.class="dirty" type="text" id="name" unicorn:key="key1">
 
     <label>Duplicate id</label>
-    <input unicorn:model="name" type="text" id="name">
+    <input unicorn:model="name" unicorn:dirty.class="dirty" type="text" id="name">
 
     <label>Unique id</label>
-    <input unicorn:model="name" type="text" id="uniqueName">
+    <input unicorn:model="name" unicorn:dirty.class="dirty" type="text" id="uniqueName">
 
     <label>Keyup</label>
-    <input unicorn:model="name" unicorn:keyup="set_name('something new')" type="text" id="keyupName">
+    <input unicorn:model="name" unicorn:keyup="set_name('something new')" unicorn:dirty.class="dirty" type="text" id="keyupName">
 
     <label>Keydown for escape key</label>
-    <input unicorn:model="name" unicorn:keydown.escape="name='ESCAPE!'" type="text" id="keydownEscapeName">
+    <input unicorn:model="name" unicorn:keydown.escape="name='ESCAPE!'" unicorn:dirty.class="dirty" type="text" id="keydownEscapeName">
 
     <label>Defer</label>
-    <input unicorn:model.defer="name" type="text" id="deferName" unicorn:key="deferKey">
+    <input unicorn:model.defer="name" unicorn:dirty.class="dirty" type="text" id="deferName" unicorn:key="deferKey">
 
     <label>Lazy</label>
-    <input unicorn:model.lazy="name" type="text" id="lazyName" unicorn:key="key1">
+    <input unicorn:model.lazy="name" unicorn:dirty.class="dirty" type="text" id="lazyName" unicorn:key="key1">
     
     <label>Debounce-1000</label>
-    <input unicorn:model.debounce-1000="name" type="text" id="debounceName" unicorn:key="key1">
+    <input unicorn:model.debounce-1000="name" unicorn:dirty.class="dirty" type="text" id="debounceName" unicorn:key="key1">
 
     <label>Chained lazy and debounce-500</label>
-    <input unicorn:model.lazy.debounce-500="name" type="text" id="lazyDebounceName">
+    <input unicorn:model.lazy.debounce-500="name" unicorn:dirty.class="dirty" type="text" id="lazyDebounceName">
 
     <label>Multiple actions</label>
-    <input unicorn:model="name" type="text" unicorn:keyup.enter="name='enter'" unicorn:keydown.escape="name=''"></input>
+    <input unicorn:model="name" unicorn:dirty.class="dirty" unicorn:keyup.enter="name='enter'" unicorn:keydown.escape="name=''" type="text"></input>
 
     <br />
     Hello {{ name|title }} 👋

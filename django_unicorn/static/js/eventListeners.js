@@ -260,6 +260,12 @@ export function addModelEventListener(component, el, eventType) {
   el.addEventListener(eventType, (event) => {
     const element = new Element(event.target);
 
+    if (component.data[element.model.name] !== element.getValue()) {
+      element.handleDirty();
+    } else {
+      element.handleDirty(true);
+    }
+
     const action = {
       type: "syncInput",
       payload: {

@@ -95,6 +95,7 @@ export function send(component, callback) {
         // Re-initialize element to make sure it is up to date
         element.init();
         element.removeErrors();
+        element.handleDirty(true);
       });
 
       // Get the data from the response

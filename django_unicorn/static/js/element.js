@@ -27,6 +27,7 @@ export class Element {
     this.model = {};
     this.poll = {};
     this.loading = {};
+    this.dirty = {};
     this.actions = [];
     this.db = {};
     this.field = {};
@@ -89,6 +90,12 @@ export class Element {
           this.loading.hide = true;
         } else {
           this.loading.show = true;
+        }
+      } else if (attribute.isDirty) {
+        if (attribute.modifiers.class && attribute.modifiers.remove) {
+          this.dirty.removeClass = attribute.value;
+        } else if (attribute.modifiers.class) {
+          this.dirty.class = attribute.value;
         }
       } else if (attribute.isTarget) {
         this.target = attribute.value;
@@ -225,13 +232,37 @@ export class Element {
    * Handle loading for the element.
    */
   handleLoading() {
-    if (this.loading) {
+    if (hasValue(this.loading)) {
       if (this.loading.attr) {
         this.el[this.loading.attr] = this.loading.attr;
       } else if (this.loading.class) {
         this.el.classList.add(this.loading.class);
       } else if (this.loading.removeClass) {
         this.el.classList.remove(this.loading.removeClass);
+      }
+    }
+  }
+
+  /**
+   * Handle dirty for the element.
+   * @param {bool} revert Whether or not the revert the dirty class.
+   */
+  handleDirty(revert) {
+    revert = revert || false;
+
+    if (hasValue(this.dirty)) {
+      if (this.dirty.class) {
+        if (revert) {
+          this.el.classList.remove(this.dirty.class);
+        } else {
+          this.el.classList.add(this.dirty.class);
+        }
+      } else if (this.dirty.removeClass) {
+        if (revert) {
+          this.el.classList.add(this.dirty.removeClass);
+        } else {
+          this.el.classList.remove(this.dirty.removeClass);
+        }
       }
     }
   }
