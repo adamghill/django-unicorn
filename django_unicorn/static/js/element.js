@@ -48,20 +48,17 @@ export class Element {
         this.isUnicorn = true;
       }
 
-      if (attribute.isModel) {
-        this.model.name = attribute.value;
-        this.model.eventType = attribute.modifiers.lazy ? "blur" : "input";
-        this.model.isLazy = !!attribute.modifiers.lazy;
-        this.model.isDefer = !!attribute.modifiers.defer;
-        this.model.debounceTime = attribute.modifiers.debounce
-          ? parseInt(attribute.modifiers.debounce, 10) || -1
-          : -1;
-      } else if (attribute.isField) {
-        this.field.name = attribute.value;
-        this.field.eventType = attribute.modifiers.lazy ? "blur" : "input";
-        this.field.isLazy = !!attribute.modifiers.lazy;
-        this.field.isDefer = !!attribute.modifiers.defer;
-        this.field.debounceTime = attribute.modifiers.debounce
+      if (attribute.isModel || attribute.isField) {
+        let key = "model";
+        if (attribute.isField) {
+          key = "field";
+        }
+
+        this[key].name = attribute.value;
+        this[key].eventType = attribute.modifiers.lazy ? "blur" : "input";
+        this[key].isLazy = !!attribute.modifiers.lazy;
+        this[key].isDefer = !!attribute.modifiers.defer;
+        this[key].debounceTime = attribute.modifiers.debounce
           ? parseInt(attribute.modifiers.debounce, 10) || -1
           : -1;
       } else if (attribute.isDb) {
@@ -80,25 +77,23 @@ export class Element {
         }
       } else if (attribute.isPollDisable) {
         this.poll.disableData = attribute.value;
-      } else if (attribute.isLoading) {
-        if (attribute.modifiers.attr) {
-          this.loading.attr = attribute.value;
-        } else if (attribute.modifiers.class && attribute.modifiers.remove) {
-          this.loading.removeClasses = attribute.value.split(" ");
-        } else if (attribute.modifiers.class) {
-          this.loading.classes = attribute.value.split(" ");
-        } else if (attribute.modifiers.remove) {
-          this.loading.hide = true;
-        } else {
-          this.loading.show = true;
+      } else if (attribute.isLoading || attribute.isDirty) {
+        let key = "dirty";
+
+        if (attribute.isLoading) {
+          key = "loading";
         }
-      } else if (attribute.isDirty) {
+
         if (attribute.modifiers.attr) {
-          this.dirty.attr = attribute.value;
+          this[key].attr = attribute.value;
         } else if (attribute.modifiers.class && attribute.modifiers.remove) {
-          this.dirty.removeClasses = attribute.value.split(" ");
+          this[key].removeClasses = attribute.value.split(" ");
         } else if (attribute.modifiers.class) {
-          this.dirty.classes = attribute.value.split(" ");
+          this[key].classes = attribute.value.split(" ");
+        } else if (attribute.isLoading && attribute.modifiers.remove) {
+          this.loading.hide = true;
+        } else if (attribute.isLoading) {
+          this.loading.show = true;
         }
       } else if (attribute.isTarget) {
         this.target = attribute.value;
@@ -235,19 +230,7 @@ export class Element {
    * Handle loading for the element.
    */
   handleLoading() {
-    if (hasValue(this.loading)) {
-      if (this.loading.attr) {
-        this.el.setAttribute(this.loading.attr, this.loading.attr);
-      }
-
-      if (this.loading.classes) {
-        this.el.classList.add(...this.loading.classes);
-      }
-
-      if (this.loading.removeClasses) {
-        this.el.classList.remove(...this.loading.removeClasses);
-      }
-    }
+    this.handleInterfacer("loading");
   }
 
   /**
@@ -255,35 +238,47 @@ export class Element {
    * @param {bool} revert Whether or not the revert the dirty class.
    */
   handleDirty(revert) {
+    this.handleInterfacer("dirty", revert);
+  }
+
+  /**
+   * Handle interfacers for the element.
+   * @param {string} interfacerType The type of interfacer. Either "dirty" or "loading".
+   * @param {bool} revert Whether or not the revert the interfacer.
+   */
+  handleInterfacer(interfacerType, revert) {
     revert = revert || false;
 
-    if (hasValue(this.dirty)) {
-      if (this.dirty.attr) {
+    if (hasValue(this[interfacerType])) {
+      if (this[interfacerType].attr) {
         if (revert) {
-          this.el.removeAttribute(this.dirty.attr);
+          this.el.removeAttribute(this[interfacerType].attr);
         } else {
-          this.el.setAttribute(this.dirty.attr, this.dirty.attr);
+          this.el.setAttribute(
+            this[interfacerType].attr,
+            this[interfacerType].attr
+          );
         }
       }
 
-      if (this.dirty.classes) {
+      if (this[interfacerType].classes) {
         if (revert) {
-          this.el.classList.remove(...this.dirty.classes);
+          this.el.classList.remove(...this[interfacerType].classes);
 
           // Remove the class attribute if it's empty so that morphdom sees the node as equal
           if (this.el.classList.length === 0) {
             this.el.removeAttribute("class");
           }
         } else {
-          this.el.classList.add(...this.dirty.classes);
+          this.el.classList.add(...this[interfacerType].classes);
         }
       }
 
-      if (this.dirty.removeClasses) {
+      if (this[interfacerType].removeClasses) {
         if (revert) {
-          this.el.classList.add(...this.dirty.removeClasses);
+          this.el.classList.add(...this[interfacerType].removeClasses);
         } else {
-          this.el.classList.remove(...this.dirty.removeClasses);
+          this.el.classList.remove(...this[interfacerType].removeClasses);
         }
       }
     }
