@@ -147,7 +147,7 @@ export class Component {
           ) {
             if (!this.attachedDbEvents.some((e) => e.isSame(element))) {
               this.attachedDbEvents.push(element);
-              addDbEventListener(this, element.el, element.field.eventType);
+              addDbEventListener(this, element);
             }
 
             if (!this.dbEls.some((e) => e.isSame(element))) {
@@ -160,7 +160,13 @@ export class Component {
           ) {
             if (!this.attachedModelEvents.some((e) => e.isSame(element))) {
               this.attachedModelEvents.push(element);
-              addModelEventListener(this, element.el, element.model.eventType);
+              addModelEventListener(this, element);
+
+              // If an element is lazy, also add an event listener for input for dirty states
+              if (element.model.isLazy) {
+                // This input event for isLazy will be stopped after dirty is checked when the event fires
+                addModelEventListener(this, element, "input");
+              }
             }
 
             if (!this.modelEls.some((e) => e.isSame(element))) {
@@ -190,6 +196,7 @@ export class Component {
               ) {
                 this.attachedEventTypes.push(action.eventType);
                 addActionEventListener(this, action.eventType);
+                element.events.push(action.eventType);
               }
             }
           });

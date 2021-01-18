@@ -33,6 +33,7 @@ export class Element {
     this.field = {};
     this.target = null;
     this.key = null;
+    this.events = [];
     this.errors = [];
 
     if (!this.el.attributes) {

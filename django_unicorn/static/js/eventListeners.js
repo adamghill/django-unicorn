@@ -253,17 +253,26 @@ export function addActionEventListener(component, eventType) {
 /**
  * Adds a model event listener to the element.
  * @param {Component} component Component that contains the element.
- * @param {DOM Element} el DOM Element that will get the event attached.
- * @param {string} eventType Event type to listen for.
+ * @param {Element} Element that will get the event attached.
+ * @param {string} eventType Event type to listen for. Optional; will use `model.eventType` by default.
  */
-export function addModelEventListener(component, el, eventType) {
-  el.addEventListener(eventType, (event) => {
-    const element = new Element(event.target);
+export function addModelEventListener(component, element, eventType) {
+  eventType = eventType || element.model.eventType;
+  element.events.push(eventType);
 
+  const { el } = element;
+
+  el.addEventListener(eventType, (event) => {
     if (component.data[element.model.name] !== element.getValue()) {
       element.handleDirty();
     } else {
       element.handleDirty(true);
+    }
+
+    // Lazy models fire an input and blur so that the dirty check above works as expected.
+    // This will prevent the input event from doing anything.
+    if (element.model.isLazy && eventType === "input") {
+      return;
     }
 
     const action = {
@@ -324,13 +333,15 @@ export function addModelEventListener(component, el, eventType) {
 /**
  * Adds a db event listener to the element.
  * @param {Component} component Component that contains the element.
- * @param {DOM Element} el DOM `Element` that will get the event attached.
- * @param {string} eventType Event type to listen for.
+ * @param {Element} Element that will get the event attached.
+ * @param {string} eventType Event type to listen for. Optional; will use `field.eventType` by default.
  */
-export function addDbEventListener(component, el, eventType) {
-  el.addEventListener(eventType, (event) => {
-    const element = new Element(event.target);
+export function addDbEventListener(component, element, eventType) {
+  eventType = eventType || element.field.eventType;
+  element.events.push(eventType);
+  const { el } = element;
 
+  el.addEventListener(eventType, (event) => {
     if (
       (isEmpty(element.db.name) && isEmpty(element.model.name)) ||
       isEmpty(element.db.pk)
