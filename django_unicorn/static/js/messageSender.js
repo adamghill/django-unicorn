@@ -58,7 +58,13 @@ export function send(component, callback) {
       }
 
       if (responseJson.error) {
-        // TODO: Check for "Checksum does not match" error and try to fix it
+        if (responseJson.error === "Checksum does not match") {
+          // Reset the models if the checksum doesn't match
+          if (isFunction(callback)) {
+            callback([], true, null);
+          }
+        }
+
         throw Error(responseJson.error);
       }
 
