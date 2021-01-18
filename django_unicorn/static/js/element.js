@@ -92,7 +92,9 @@ export class Element {
           this.loading.show = true;
         }
       } else if (attribute.isDirty) {
-        if (attribute.modifiers.class && attribute.modifiers.remove) {
+        if (attribute.modifiers.attr) {
+          this.dirty.attr = attribute.value;
+        } else if (attribute.modifiers.class && attribute.modifiers.remove) {
           this.dirty.removeClasses = attribute.value.split(" ");
         } else if (attribute.modifiers.class) {
           this.dirty.classes = attribute.value.split(" ");
@@ -251,6 +253,14 @@ export class Element {
     revert = revert || false;
 
     if (hasValue(this.dirty)) {
+      if (this.dirty.attr) {
+        if (revert) {
+          this.el.removeAttribute(this.dirty.attr);
+        } else {
+          this.el.setAttribute(this.dirty.attr, this.dirty.attr);
+        }
+      }
+
       if (this.dirty.classes) {
         if (revert) {
           this.el.classList.remove(...this.dirty.classes);
@@ -263,6 +273,7 @@ export class Element {
           this.el.classList.add(...this.dirty.classes);
         }
       }
+
       if (this.dirty.removeClasses) {
         if (revert) {
           this.el.classList.add(...this.dirty.removeClasses);
