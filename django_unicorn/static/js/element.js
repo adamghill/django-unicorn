@@ -93,9 +93,9 @@ export class Element {
         }
       } else if (attribute.isDirty) {
         if (attribute.modifiers.class && attribute.modifiers.remove) {
-          this.dirty.removeClass = attribute.value;
+          this.dirty.removeClasses = attribute.value.split(" ");
         } else if (attribute.modifiers.class) {
-          this.dirty.class = attribute.value;
+          this.dirty.classes = attribute.value.split(" ");
         }
       } else if (attribute.isTarget) {
         this.target = attribute.value;
@@ -251,17 +251,23 @@ export class Element {
     revert = revert || false;
 
     if (hasValue(this.dirty)) {
-      if (this.dirty.class) {
+      if (this.dirty.classes) {
         if (revert) {
-          this.el.classList.remove(this.dirty.class);
+          this.el.classList.remove(...this.dirty.classes);
+
+          // Remove the class attribute if it's empty so that morphdom sees the node as equal
+          if (this.el.classList.length === 0) {
+            this.el.removeAttribute("class");
+          }
         } else {
-          this.el.classList.add(this.dirty.class);
+          this.el.classList.add(...this.dirty.classes);
         }
-      } else if (this.dirty.removeClass) {
+      }
+      if (this.dirty.removeClasses) {
         if (revert) {
-          this.el.classList.add(this.dirty.removeClass);
+          this.el.classList.add(...this.dirty.removeClasses);
         } else {
-          this.el.classList.remove(this.dirty.removeClass);
+          this.el.classList.remove(...this.dirty.removeClasses);
         }
       }
     }

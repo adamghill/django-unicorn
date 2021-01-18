@@ -3,6 +3,15 @@
         .dirty {
             border: red solid 1px !important;
         }
+        .dirtier {
+            color: red !important;
+        }
+        .ugly {
+            border: red solid 1px !important;
+        }
+        .clean {
+            border: green dashed 1px !important;
+        }
     </style>
 
     <button unicorn:click="$reset">Reset the component</button>
@@ -10,13 +19,13 @@
     <br />
 
     <label>unicorn:key</label>
-    <input unicorn:model="name" unicorn:dirty.class="dirty" type="text" id="name" unicorn:key="key1">
+    <input unicorn:model="name" class="clean" unicorn:dirty.class.remove="clean" type="text" id="name" unicorn:key="key1">
 
     <label>Duplicate id</label>
     <input unicorn:model="name" unicorn:dirty.class="dirty" type="text" id="name">
 
     <label>Unique id</label>
-    <input unicorn:model="name" unicorn:dirty.class="dirty" type="text" id="uniqueName">
+    <input unicorn:model="name" class="clean" unicorn:dirty.class="dirty dirtier" unicorn:dirty.class.remove="clean" type="text" id="uniqueName">
 
     <label>Keyup</label>
     <input unicorn:model="name" unicorn:keyup="set_name('something new')" unicorn:dirty.class="dirty" type="text" id="keyupName">

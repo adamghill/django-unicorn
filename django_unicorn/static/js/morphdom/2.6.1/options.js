@@ -23,12 +23,5 @@ export const MORPHDOM_OPTIONS = {
     if (fromEl.isEqualNode(toEl)) {
       return false;
     }
-
-    if (
-      fromEl.getAttribute("unicorn:dirty.class") ||
-      fromEl.getAttribute("unicorn:dirty.class.remove")
-    ) {
-      return false;
-    }
   },
 };
