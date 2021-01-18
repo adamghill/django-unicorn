@@ -84,9 +84,9 @@ export class Element {
         if (attribute.modifiers.attr) {
           this.loading.attr = attribute.value;
         } else if (attribute.modifiers.class && attribute.modifiers.remove) {
-          this.loading.removeClass = attribute.value;
+          this.loading.removeClasses = attribute.value.split(" ");
         } else if (attribute.modifiers.class) {
-          this.loading.class = attribute.value;
+          this.loading.classes = attribute.value.split(" ");
         } else if (attribute.modifiers.remove) {
           this.loading.hide = true;
         } else {
@@ -237,11 +237,15 @@ export class Element {
   handleLoading() {
     if (hasValue(this.loading)) {
       if (this.loading.attr) {
-        this.el[this.loading.attr] = this.loading.attr;
-      } else if (this.loading.class) {
-        this.el.classList.add(this.loading.class);
-      } else if (this.loading.removeClass) {
-        this.el.classList.remove(this.loading.removeClass);
+        this.el.setAttribute(this.loading.attr, this.loading.attr);
+      }
+
+      if (this.loading.classes) {
+        this.el.classList.add(...this.loading.classes);
+      }
+
+      if (this.loading.removeClasses) {
+        this.el.classList.remove(...this.loading.removeClasses);
       }
     }
   }
