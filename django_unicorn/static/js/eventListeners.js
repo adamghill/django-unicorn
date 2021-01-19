@@ -262,16 +262,26 @@ export function addModelEventListener(component, element, eventType) {
   const { el } = element;
 
   el.addEventListener(eventType, (event) => {
+    let isDirty = false;
+
     if (component.data[element.model.name] !== element.getValue()) {
+      isDirty = true;
       element.handleDirty();
     } else {
       element.handleDirty(true);
     }
 
-    // Lazy models fire an input and blur so that the dirty check above works as expected.
-    // This will prevent the input event from doing anything.
-    if (element.model.isLazy && eventType === "input") {
-      return;
+    if (element.model.isLazy) {
+      // Lazy models fire an input and blur so that the dirty check above works as expected.
+      // This will prevent the input event from doing anything.
+      if (eventType === "input") {
+        return;
+      }
+
+      // Lazy non-dirty elements can bail
+      if (!isDirty) {
+        return;
+      }
     }
 
     const action = {
@@ -287,19 +297,24 @@ export function addModelEventListener(component, element, eventType) {
     }
 
     if (element.model.isDefer) {
-      let foundAction = false;
+      let foundActionIdx = -1;
 
       // Update the existing action with the current value
-      component.actionQueue.forEach((a) => {
+      component.actionQueue.forEach((a, idx) => {
         if (a.payload.name === element.model.name) {
           a.payload.value = element.getValue();
-          foundAction = true;
+          foundActionIdx = idx;
         }
       });
 
       // Add a new action
-      if (!foundAction) {
+      if (isDirty && foundActionIdx === -1) {
         component.actionQueue.push(action);
+      }
+
+      // Remove the found action that isn't dirty
+      if (!isDirty && foundActionIdx > -1) {
+        component.actionQueue.splice(foundActionIdx);
       }
 
       return;
@@ -348,22 +363,31 @@ export function addDbEventListener(component, element, eventType) {
       return;
     }
 
+    let isDirty = false;
+
     for (let i = 0; i < component.data[element.model.name].length; i++) {
       const dbModel = component.data[element.model.name][i];
 
       if (dbModel.pk.toString() === element.db.pk) {
         if (dbModel[element.field.name] !== element.getValue()) {
           element.handleDirty();
+          isDirty = true;
         } else {
           element.handleDirty(true);
         }
       }
     }
 
-    // Lazy models fire an input and blur so that the dirty check above works as expected.
-    // This will prevent the input event from doing anything.
-    if (element.field.isLazy && eventType === "input") {
-      return;
+    if (element.field.isLazy) {
+      // Lazy models fire an input and blur so that the dirty check above works as expected.
+      // This will prevent the input event from doing anything.
+      if (eventType === "input") {
+        return;
+      }
+      // Lazy non-dirty elements can bail
+      if (!isDirty) {
+        return;
+      }
     }
 
     if (!component.lastTriggeringElements.some((e) => e.isSame(element))) {
@@ -382,19 +406,24 @@ export function addDbEventListener(component, element, eventType) {
     action.payload.fields[element.field.name] = element.getValue();
 
     if (element.field.isDefer) {
-      let foundAction = false;
+      let foundActionIdx = -1;
 
       // Update the existing action with the current value
-      component.actionQueue.forEach((a) => {
+      component.actionQueue.forEach((a, idx) => {
         if (generateDbKey(a.payload) === element.dbKey()) {
           a.payload.fields[element.field.name] = element.getValue();
-          foundAction = true;
+          foundActionIdx = idx;
         }
       });
 
       // Add a new action
-      if (!foundAction) {
+      if (isDirty && foundActionIdx === -1) {
         component.actionQueue.push(action);
+      }
+
+      // Remove the found action that isn't dirty
+      if (!isDirty && foundActionIdx > -1) {
+        component.actionQueue.splice(foundActionIdx);
       }
 
       return;
