@@ -360,6 +360,12 @@ export function addDbEventListener(component, element, eventType) {
       }
     }
 
+    // Lazy models fire an input and blur so that the dirty check above works as expected.
+    // This will prevent the input event from doing anything.
+    if (element.field.isLazy && eventType === "input") {
+      return;
+    }
+
     if (!component.lastTriggeringElements.some((e) => e.isSame(element))) {
       component.lastTriggeringElements.push(element);
     }
