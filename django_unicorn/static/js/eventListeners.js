@@ -259,7 +259,6 @@ export function addActionEventListener(component, eventType) {
 export function addModelEventListener(component, element, eventType) {
   eventType = eventType || element.model.eventType;
   element.events.push(eventType);
-
   const { el } = element;
 
   el.addEventListener(eventType, (event) => {
@@ -347,6 +346,18 @@ export function addDbEventListener(component, element, eventType) {
       isEmpty(element.db.pk)
     ) {
       return;
+    }
+
+    for (let i = 0; i < component.data[element.model.name].length; i++) {
+      const dbModel = component.data[element.model.name][i];
+
+      if (dbModel.pk.toString() === element.db.pk) {
+        if (dbModel[element.field.name] !== element.getValue()) {
+          element.handleDirty();
+        } else {
+          element.handleDirty(true);
+        }
+      }
     }
 
     if (!component.lastTriggeringElements.some((e) => e.isSame(element))) {

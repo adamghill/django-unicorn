@@ -1,4 +1,10 @@
 <div>
+    <style>
+        .dirty {
+            border: red 1px solid !important;
+        }
+    </style>
+    
     <div>
         <h3>New Flavor (instance variable)</h3>
 
@@ -62,14 +68,14 @@
             <h4>PK: {{ flavor.pk }}</h4>
             <div>
                 <label>Name</label>
-                <input type="text" unicorn:field.defer="name"></input>
+                <input type="text" unicorn:field.defer="name" u:dirty.class="dirty"></input>
                 
                 <strong>Name</strong> {{ flavor.name }}
             </div>
             
             <div>
                 <label>Label</label>
-                <input type="text" unicorn:field.defer="label"></input>
+                <input type="text" unicorn:field.defer="label" u:dirty.class="dirty"></input>
                 
                 <strong>Label</strong> {{ flavor.label }}
             </div>
