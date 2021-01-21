@@ -58,6 +58,10 @@ export function send(component, callback) {
         return;
       }
 
+      if (responseJson.queued && responseJson.queued === true) {
+        return;
+      }
+
       if (responseJson.error) {
         if (responseJson.error === "Checksum does not match") {
           // Reset the models if the checksum doesn't match

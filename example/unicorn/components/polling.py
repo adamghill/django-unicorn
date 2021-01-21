@@ -1,3 +1,5 @@
+import time
+
 from django.contrib import messages
 from django.utils.timezone import now
 
@@ -8,6 +10,11 @@ class PollingView(UnicornView):
     polling_disabled = False
     date_example = now()
     current_time = now()
+    counter = 0
+
+    def slow_update(self):
+        self.counter += 1
+        time.sleep(0.8)  # Simulate slow request
 
     def get_date(self):
         self.current_time = now()

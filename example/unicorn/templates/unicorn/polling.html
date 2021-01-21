@@ -13,6 +13,9 @@
 
     current_time: {{ current_time|date:"s" }}
 
+    <br /><br/>
+    <button u:click="slow_update()">Increase counter: {{counter}}</button>
+
     <br /><br />
     <input unicorn:model="date_example" type="text" id="dateExampleId">
     date_example: {{ date_example }} | {{ date_example|date:"s" }}<br />
