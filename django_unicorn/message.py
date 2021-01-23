@@ -32,10 +32,14 @@ class ComponentRequest:
         assert self.id, "Missing component id"
 
         self.key = self.body.get("key", "")
+        self.epoch = self.body.get("epoch", "")
 
         self.validate_checksum()
 
         self.action_queue = self.body.get("actionQueue", [])
+
+    def __repr__(self):
+        return f"ComponentRequest(id='{self.id}' key='{self.key}' epoch={self.epoch} data={self.data} action_queue={self.action_queue})"
 
     def validate_checksum(self):
         """

@@ -30,6 +30,7 @@ export function send(component, callback) {
     data: component.data,
     checksum: component.checksum,
     actionQueue: component.currentActionQueue,
+    epoch: Date.now(),
   };
 
   const headers = {
