@@ -16,6 +16,7 @@ from .decorators import timed
 from .errors import UnicornViewError
 from .message import ComponentRequest, Return
 from .serializer import loads
+from .utils import generate_checksum
 
 
 logger = logging.getLogger(__name__)
@@ -227,10 +228,12 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
 
     is_reset_called = False
     return_data = None
+    partials = []
 
     for action in component_request.action_queue:
         action_type = action.get("type")
         payload = action.get("payload", {})
+        partials.append(action.get("partial"))
 
         if action_type == "syncInput":
             property_name = payload.get("name")
@@ -290,6 +293,8 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
                     instance.save()
                     pk = instance.pk
         elif action_type == "callMethod":
+            print("payload", payload)
+
             call_method_name = payload.get("name", "")
             assert call_method_name, "Missing 'name' key for callMethod"
 
@@ -366,13 +371,60 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
             component.validate(model_names=model_names_to_validate)
 
     rendered_component = component.render()
+    partial_doms = []
+
+    if partials and all(partials):
+        soup = BeautifulSoup(rendered_component, features="html.parser")
+
+        for partial in partials:
+            partial_found = False
+            only_id = False
+            only_key = False
+
+            target = partial.get("target")
+
+            if not target:
+                target = partial.get("key")
+
+                if target:
+                    only_key = True
+
+            if not target:
+                target = partial.get("id")
+
+                if target:
+                    only_id = True
+
+            assert target, "Partial target is required"
+
+            if not only_id:
+                for element in soup.find_all():
+                    if (
+                        "unicorn:key" in element.attrs
+                        and element.attrs["unicorn:key"] == target
+                    ):
+                        partial_doms.append({"key": target, "dom": str(element)})
+                        partial_found = True
+                        break
+
+            if not partial_found and not only_key:
+                for element in soup.find_all():
+                    if "id" in element.attrs and element.attrs["id"] == target:
+                        partial_doms.append({"id": target, "dom": str(element)})
+                        partial_found = True
+                        break
 
     res = {
         "id": component_request.id,
-        "dom": rendered_component,
         "data": component_request.data,
         "errors": component.errors,
+        "checksum": generate_checksum(orjson.dumps(component_request.data)),
     }
+
+    if partial_doms:
+        res.update({"partials": partial_doms})
+    else:
+        res.update({"dom": rendered_component})
 
     if return_data:
         res.update(
@@ -396,9 +448,9 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
             parent_component.get_frontend_context_variables()
         )
 
-        dom = parent_component.render()
+        parent_dom = parent_component.render()
 
-        soup = BeautifulSoup(dom, features="html.parser")
+        soup = BeautifulSoup(parent_dom, features="html.parser")
         checksum = None
 
         # TODO: This doesn't create the same checksum for some reason
@@ -413,7 +465,7 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
             {
                 "parent": {
                     "id": parent_component.component_id,
-                    "dom": dom,
+                    "dom": parent_dom,
                     "checksum": checksum,
                     "data": loads(parent_frontend_context_variables),
                     "errors": parent_component.errors,

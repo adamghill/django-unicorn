@@ -70,7 +70,7 @@ export function getComponent(componentNameOrKey) {
 export function call(componentNameOrKey, methodName) {
   const component = getComponent(componentNameOrKey);
 
-  component.callMethod(methodName, (err) => {
+  component.callMethod(methodName, null, (err) => {
     console.error(err);
   });
 }

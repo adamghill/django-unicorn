@@ -216,10 +216,11 @@ export class Component {
   /**
    * Calls the method for a particular component.
    */
-  callMethod(methodName, errCallback) {
+  callMethod(methodName, partial, errCallback) {
     const action = {
       type: "callMethod",
       payload: { name: methodName },
+      partial,
     };
     this.actionQueue.push(action);
 
@@ -276,7 +277,7 @@ export class Component {
       );
 
       // Call the method once before the timer starts
-      this.callMethod(this.poll.method, this.handlePollError);
+      this.callMethod(this.poll.method, null, this.handlePollError);
       this.startPolling();
     }
   }
@@ -293,15 +294,15 @@ export class Component {
             this.poll.disableData = this.poll.disableData.slice(1);
 
             if (this.data[this.poll.disableData]) {
-              this.callMethod(this.poll.method, this.handlePollError);
+              this.callMethod(this.poll.method, null, this.handlePollError);
             }
 
             this.poll.disableData = `!${this.poll.disableData}`;
           } else if (!this.data[this.poll.disableData]) {
-            this.callMethod(this.poll.method, this.handlePollError);
+            this.callMethod(this.poll.method, null, this.handlePollError);
           }
         } else {
-          this.callMethod(this.poll.method, this.handlePollError);
+          this.callMethod(this.poll.method, null, this.handlePollError);
         }
       }
     }, this.poll.timing);

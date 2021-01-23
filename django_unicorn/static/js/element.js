@@ -32,6 +32,7 @@ export class Element {
     this.db = {};
     this.field = {};
     this.target = null;
+    this.partial = {};
     this.key = null;
     this.events = [];
     this.errors = [];
@@ -97,6 +98,14 @@ export class Element {
         }
       } else if (attribute.isTarget) {
         this.target = attribute.value;
+      } else if (attribute.isPartial) {
+        if (attribute.modifiers.id) {
+          this.partial.id = attribute.value;
+        } else if (attribute.modifiers.key) {
+          this.partial.key = attribute.value;
+        } else {
+          this.partial.target = attribute.value;
+        }
       } else if (attribute.eventType) {
         const action = {};
         action.name = attribute.value;

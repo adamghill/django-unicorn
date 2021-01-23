@@ -14,6 +14,7 @@ export class Attribute {
     this.isPoll = false;
     this.isLoading = false;
     this.isTarget = false;
+    this.isPartial = false;
     this.isDirty = false;
     this.isKey = false;
     this.isPK = false;
@@ -46,6 +47,8 @@ export class Attribute {
         this.isLoading = true;
       } else if (contains(this.name, ":target")) {
         this.isTarget = true;
+      } else if (contains(this.name, ":partial")) {
+        this.isPartial = true;
       } else if (contains(this.name, ":dirty")) {
         this.isDirty = true;
       } else if (this.name === "unicorn:key" || this.name === "u:key") {

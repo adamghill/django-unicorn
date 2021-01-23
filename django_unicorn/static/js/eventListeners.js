@@ -102,6 +102,8 @@ export function addActionEventListener(component, eventType) {
     let targetElement = new Element(event.target);
 
     // Make sure that the target element is a unicorn element.
+    // Handles events fired from an element inside a unicorn element
+    // e.g. <button u:click="click"><span>Click!</span></button>
     if (targetElement && !targetElement.isUnicorn) {
       targetElement = targetElement.getUnicornParent();
     }
@@ -138,6 +140,7 @@ export function addActionEventListener(component, eventType) {
               }
             });
 
+            // Add the value of any child element of the target that is a lazy db to the action queue
             const dbElsInTargetScope = component.dbEls.filter((e) =>
               e.el.isSameNode(childEl)
             );
@@ -238,11 +241,11 @@ export function addActionEventListener(component, eventType) {
           if (action.key) {
             if (action.key === toKebabCase(event.key)) {
               handleLoading(component, targetElement);
-              component.callMethod(action.name);
+              component.callMethod(action.name, targetElement.partial);
             }
           } else {
             handleLoading(component, targetElement);
-            component.callMethod(action.name);
+            component.callMethod(action.name, targetElement.partial);
           }
         }
       });

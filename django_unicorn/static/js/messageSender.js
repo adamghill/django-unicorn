@@ -1,4 +1,4 @@
-import { getCsrfToken, hasValue, isFunction } from "./utils.js";
+import { $, getCsrfToken, hasValue, isFunction } from "./utils.js";
 import { MORPHDOM_OPTIONS } from "./morphdom/2.6.1/options.js";
 
 /**
@@ -104,7 +104,9 @@ export function send(component, callback) {
       component.return = responseJson.return || {};
 
       const parent = responseJson.parent || {};
-      const rerenderedComponent = responseJson.dom;
+      const rerenderedComponent = responseJson.dom || {};
+      const partials = responseJson.partials || [];
+      const { checksum } = responseJson;
 
       // Handle poll
       const poll = responseJson.poll || {};
@@ -146,7 +148,33 @@ export function send(component, callback) {
         }
       }
 
-      component.morphdom(component.root, rerenderedComponent, MORPHDOM_OPTIONS);
+      if (partials.length > 0) {
+        for (let i = 0; i < partials.length; i++) {
+          const partial = partials[i];
+          let targetDom = null;
+
+          if (partial.key) {
+            targetDom = $(`[unicorn\\:key="${partial.key}"]`, component.root);
+          } else if (partial.id) {
+            targetDom = $(`#${partial.id}`, component.root);
+          }
+
+          if (targetDom) {
+            component.morphdom(targetDom, partial.dom, MORPHDOM_OPTIONS);
+          }
+        }
+
+        if (checksum) {
+          component.root.setAttribute("unicorn:checksum", checksum);
+          component.refreshChecksum();
+        }
+      } else {
+        component.morphdom(
+          component.root,
+          rerenderedComponent,
+          MORPHDOM_OPTIONS
+        );
+      }
 
       // Re-init to refresh the root and checksum based on the new data
       component.init();

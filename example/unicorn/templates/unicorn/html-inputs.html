@@ -1,14 +1,19 @@
 <div>
-    <div>
+    <div id="boolean-toggles-id">
         <h2>Checkbox</h2>
         <input type="checkbox" unicorn:model="is_checked" id="check">
         {% if is_checked %}Yes! 🦄{% else %}Nope 🙁{% endif %}
     </div>
 
-    <div>
+    <div unicorn:key="boolean-toggles-key">
         <h2>Boolean Toggles</h2>
-        {% if another_check %}YAYAYA{% else %}Noooooooo{% endif %}<br />
-        <button unicorn:click="$toggle('is_checked', 'another_check')" id="toggle-check">Toggle booleans</button>
+        {% if another_check %}Checked ✅{% else %}Not checked ❎{% endif %}
+        <br />
+        <button unicorn:click="$toggle('is_checked', 'another_check')">Toggle booleans (normal)</button><br />
+        <button unicorn:click="$toggle('is_checked', 'another_check')" u:partial.key="boolean-toggles-key">Toggle booleans (partial.key)</button>
+        <button unicorn:click="$toggle('is_checked', 'another_check')" u:partial.id="boolean-toggles-id">Toggle booleans (partial.id)</button><br />
+        <button unicorn:click="$toggle('is_checked', 'another_check')" u:partial="boolean-toggles-id">Toggle booleans (partial boolean-toggles-id)</button>
+        <button unicorn:click="$toggle('is_checked', 'another_check')" u:partial="boolean-toggles-key">Toggle booleans (partial boolean-toggles-key)</button>
     </div>
 
     <div>
