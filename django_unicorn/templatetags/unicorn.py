@@ -16,7 +16,15 @@ register = template.Library()
 
 @register.inclusion_tag("unicorn/scripts.html")
 def unicorn_scripts():
-    return {"MINIFIED": get_setting("MINIFIED", not settings.DEBUG)}
+    return {
+        "MINIFIED": get_setting("MINIFIED", not settings.DEBUG),
+        "IS_ASGI": hasattr(settings, "ASGI_APPLICATION")
+        and bool(settings.ASGI_APPLICATION)
+        and (
+            not hasattr(settings, "WSGI_APPLICATION")
+            or not bool(settings.WSGI_APPLICATION)
+        ),
+    }
 
 
 @register.inclusion_tag("unicorn/errors.html", takes_context=True)

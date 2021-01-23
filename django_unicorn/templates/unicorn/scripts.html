@@ -4,7 +4,11 @@
 <script src="{% static 'js/unicorn.min.js' %}"></script>
 
 <script>
+    {% if IS_ASGI %}
+    var url = "{% url 'django_unicorn:message_async' %}";
+    {% else %}
     var url = "{% url 'django_unicorn:message' %}";
+    {% endif %}
     Unicorn.init(url);
 </script>
 {% else %}
@@ -14,7 +18,11 @@
     // Set Unicorn to the global so it can be used by components
     window.Unicorn = Unicorn;
 
+    {% if IS_ASGI %}
+    var url = "{% url 'django_unicorn:message_async' %}";
+    {% else %}
     var url = "{% url 'django_unicorn:message' %}";
+    {% endif %}
     Unicorn.init(url);
 </script>
 {% endif %}
