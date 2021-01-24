@@ -49,6 +49,7 @@ https://www.django-unicorn.com
 
 ## Bump version
 
+1. `dj t`
 1. `npm run build`
 1. `poetry version major|minor|patch`
 1. Commit/tag/push version bump
