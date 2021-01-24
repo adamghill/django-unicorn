@@ -15,7 +15,7 @@ from .components import UnicornField, UnicornView
 from .decorators import timed
 from .errors import UnicornViewError
 from .message import ComponentRequest, Return
-from .serializer import loads
+from .serializer import dumps, loads
 from .utils import generate_checksum
 
 
@@ -442,33 +442,27 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
     parent_component = component.parent
 
     if parent_component:
-        parent_frontend_context_variables = (
+        parent_frontend_context_variables = loads(
             parent_component.get_frontend_context_variables()
         )
+        parent_checksum = generate_checksum(dumps(parent_frontend_context_variables))
 
-        parent_dom = parent_component.render()
+        parent = {
+            "id": parent_component.component_id,
+            "checksum": parent_checksum,
+        }
 
-        soup = BeautifulSoup(parent_dom, features="html.parser")
-        checksum = None
+        if not partial_doms:
+            parent_dom = parent_component.render()
 
-        # TODO: This doesn't create the same checksum for some reason
-        # checksum = orjson.dumps(parent_frontend_context_variables)
-
-        for element in soup.find_all():
-            if "unicorn:checksum" in element.attrs:
-                checksum = element["unicorn:checksum"]
-                break
-
-        res.update(
-            {
-                "parent": {
-                    "id": parent_component.component_id,
+            parent.update(
+                {
                     "dom": parent_dom,
-                    "checksum": checksum,
-                    "data": loads(parent_frontend_context_variables),
+                    "data": parent_frontend_context_variables,
                     "errors": parent_component.errors,
                 }
-            }
-        )
+            )
+
+        res.update({"parent": parent})
 
     return JsonResponse(res)

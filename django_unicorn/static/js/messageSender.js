@@ -128,19 +128,32 @@ export function send(component, callback) {
       }
 
       // Refresh the parent component if there is one
-      if (hasValue(parent) && hasValue(parent.id) && hasValue(parent.dom)) {
+      if (hasValue(parent) && hasValue(parent.id)) {
         const parentComponent = component.getParentComponent(parent.id);
 
         if (parentComponent && parentComponent.id === parent.id) {
-          // TODO: Handle errors?
-          parentComponent.data = parent.data || {};
+          // TODO: Handle parent errors?
 
-          component.morphdom(
-            parentComponent.root,
-            parent.dom,
-            MORPHDOM_OPTIONS
-          );
-          parentComponent.refreshChecksum();
+          if (hasValue(parent.data)) {
+            parentComponent.data = parent.data;
+          }
+
+          if (parent.dom) {
+            component.morphdom(
+              parentComponent.root,
+              parent.dom,
+              MORPHDOM_OPTIONS
+            );
+          }
+
+          if (parent.checksum) {
+            parentComponent.root.setAttribute(
+              "unicorn:checksum",
+              parent.checksum
+            );
+            parentComponent.refreshChecksum();
+          }
+
           parentComponent.refreshEventListeners();
 
           parentComponent.getChildrenComponents().forEach((child) => {
@@ -159,6 +172,14 @@ export function send(component, callback) {
             targetDom = $(`[unicorn\\:key="${partial.key}"]`, component.root);
           } else if (partial.id) {
             targetDom = $(`#${partial.id}`, component.root);
+          }
+
+          if (!targetDom && component.root.parentElement) {
+            // Go up one parent if the target can't be found
+            targetDom = $(
+              `[unicorn\\:key="${partial.key}"]`,
+              component.root.parentElement
+            );
           }
 
           if (targetDom) {

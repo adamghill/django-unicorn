@@ -122,6 +122,8 @@ def dumps(data: dict, fix_floats: bool = True) -> str:
     Args:
         param fix_floats: Whether any floats should be converted to strings. Defaults to `True`,
             but will be faster without it.
+    
+    Returns a string which deviates from `orjson.dumps`, but seems more useful.
     """
 
     serialized_data = orjson.dumps(data, default=_json_serializer)
@@ -129,7 +131,7 @@ def dumps(data: dict, fix_floats: bool = True) -> str:
     if fix_floats:
         return _dumps(serialized_data)
 
-    return serialized_data
+    return serialized_data.decode("utf-8")
 
 
 def loads(str: str) -> dict:
