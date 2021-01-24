@@ -2,11 +2,9 @@ import logging
 
 from django.http.response import HttpResponseRedirect
 
-import orjson
-
 from .components import HashUpdate, LocationUpdate, PollUpdate
 from .errors import UnicornViewError
-from .serializer import dumps
+from .serializer import JSONDecodeError, dumps, loads
 from .utils import generate_checksum
 
 
@@ -22,9 +20,9 @@ class ComponentRequest:
         self.body = {}
 
         try:
-            self.body = orjson.loads(request.body)
+            self.body = loads(request.body)
             assert self.body, "Invalid JSON body"
-        except orjson.JSONDecodeError as e:
+        except JSONDecodeError as e:
             raise UnicornViewError("Body could not be parsed") from e
 
         self.data = self.body.get("data")
@@ -49,7 +47,7 @@ class ComponentRequest:
         checksum = self.body.get("checksum")
         assert checksum, "Missing checksum"
 
-        generated_checksum = generate_checksum(orjson.dumps(self.data))
+        generated_checksum = generate_checksum(dumps(self.data, fix_floats=False))
         assert checksum == generated_checksum, "Checksum does not match"
 
 
@@ -93,8 +91,8 @@ class Return:
 
     def get_data(self):
         try:
-            serialized_value = orjson.loads(dumps(self.value))
-            serialized_params = orjson.loads(dumps(self.params))
+            serialized_value = loads(dumps(self.value))
+            serialized_params = loads(dumps(self.params))
 
             return {
                 "method": self.method_name,

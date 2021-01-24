@@ -13,6 +13,10 @@ except ImportError:
 import orjson
 
 
+class JSONDecodeError(Exception):
+    pass
+
+
 def _get_model_dict(obj: Any) -> dict:
     """
     Serializes Django models. Uses the built-in Django JSON serializer, but moves the data around to
@@ -108,22 +112,32 @@ def _dumps(serialized_data):
     return dumped_data
 
 
-def dumps(data: dict) -> str:
+def dumps(data: dict, fix_floats: bool = True) -> str:
     """
     Converts the passed-in dictionary to a string representation.
 
     Handles the following objects: dataclass, datetime, enum, float, int, numpy, str, uuid,
     Django Model, Django QuerySet, any object with `to_json` method.
+
+    Args:
+        param fix_floats: Whether any floats should be converted to strings. Defaults to `True`,
+            but will be faster without it.
     """
 
     serialized_data = orjson.dumps(data, default=_json_serializer)
 
-    return _dumps(serialized_data)
+    if fix_floats:
+        return _dumps(serialized_data)
+
+    return serialized_data
 
 
-def loads(obj: str) -> dict:
+def loads(str: str) -> dict:
     """
     Converts a string representation to dictionary.
     """
 
-    return orjson.loads(obj)
+    try:
+        return orjson.loads(str)
+    except orjson.JSONDecodeError as e:
+        raise JSONDecodeError from e
