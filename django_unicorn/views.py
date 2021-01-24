@@ -293,8 +293,6 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
                     instance.save()
                     pk = instance.pk
         elif action_type == "callMethod":
-            print("payload", payload)
-
             call_method_name = payload.get("name", "")
             assert call_method_name, "Missing 'name' key for callMethod"
 
