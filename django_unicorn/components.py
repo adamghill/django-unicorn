@@ -542,10 +542,8 @@ class UnicornView(TemplateView):
 
             if hasattr(self, updated_function_name):
                 getattr(self, updated_function_name)(value)
-        except AttributeError:
-            logger.error(
-                f"'{name}' attribute on '{self.component_name}' component could not be set. Is it a @property without a setter?"
-            )
+        except AttributeError as e:
+            raise
 
     @timed
     def _methods(self) -> Dict[str, Callable]:
