@@ -141,10 +141,12 @@ export function send(component, callback) {
             MORPHDOM_OPTIONS
           );
           parentComponent.refreshChecksum();
+          parentComponent.refreshEventListeners();
 
-          // parentComponent.getChildrenComponents().forEach((child) => {
-          //   child.refreshEventListeners();
-          // });
+          parentComponent.getChildrenComponents().forEach((child) => {
+            child.init();
+            child.refreshEventListeners();
+          });
         }
       }
 
