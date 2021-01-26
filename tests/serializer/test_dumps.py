@@ -23,6 +23,7 @@ class ComplicatedTestModel(Model):
     class Meta:
         app_label = "tests"
 
+
 def test_int():
     expected = '{"name":123}'
     actual = serializer.dumps({"name": 123})
@@ -39,7 +40,14 @@ def test_string():
 
 def test_list():
     expected = '{"name":["abc","def"]}'
-    actual = serializer.dumps({"name": ["abc", "def",]})
+    actual = serializer.dumps(
+        {
+            "name": [
+                "abc",
+                "def",
+            ]
+        }
+    )
 
     assert expected == actual
 
@@ -165,7 +173,11 @@ def test_nested_list_float_complicated():
 
 def test_nested_list_float_less_complicated():
     expected = '{"another":[{"great":"1.0","ok":["1.6","0.0",4]}]}'
-    actual = serializer.dumps({"another": [{"great": 1.0, "ok": [1.6, 0.0, 4]}],})
+    actual = serializer.dumps(
+        {
+            "another": [{"great": 1.0, "ok": [1.6, 0.0, 4]}],
+        }
+    )
 
     assert expected == actual
 
