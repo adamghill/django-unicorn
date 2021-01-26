@@ -291,6 +291,7 @@ export function addModelEventListener(component, element, eventType) {
         name: element.model.name,
         value: element.getValue(),
       },
+      partial: element.partial,
     };
 
     if (!component.lastTriggeringElements.some((e) => e.isSame(element))) {
@@ -402,6 +403,7 @@ export function addDbEventListener(component, element, eventType) {
         db: element.db,
         fields: {},
       },
+      partial: element.partial,
     };
 
     action.payload.fields[element.field.name] = element.getValue();

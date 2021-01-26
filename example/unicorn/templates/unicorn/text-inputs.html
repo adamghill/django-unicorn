@@ -19,13 +19,17 @@
     <br />
 
     <label>unicorn:key</label>
-    <input unicorn:model="name" class="clean" unicorn:dirty.class.remove="clean" type="text" id="name" unicorn:key="key1">
+    <input unicorn:model="name" u:partial.id="model-id" class="clean" unicorn:dirty.class.remove="clean" type="text" id="name" unicorn:key="key1">
+
+    <div>
+        <span unicorn:key="model-key">Targeted by key: {{name}}</span> | <span id="model-id">Targeted by id: {{name}}</span> | <span id="">Not targeted by id: {{name}}</span> | 
+    </div>
 
     <label>Duplicate id</label>
     <input unicorn:model="name" unicorn:dirty.class="dirty" type="text" id="name">
 
     <label>Unique id</label>
-    <input unicorn:model="name" class="clean" unicorn:dirty.class="dirty dirtier" unicorn:dirty.class.remove="clean" type="text" id="uniqueName">
+    <input unicorn:model="name" u:partial.key="model-key" class="clean" unicorn:dirty.class="dirty dirtier" unicorn:dirty.class.remove="clean" type="text" id="uniqueName">
 
     <label>Keyup</label>
     <input unicorn:model="name" unicorn:keyup="set_name('something new')" unicorn:dirty.class="dirty" type="text" id="keyupName">
