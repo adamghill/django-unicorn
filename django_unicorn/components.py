@@ -172,7 +172,6 @@ class UnicornTemplateResponse(TemplateResponse):
         root_element["unicorn:checksum"] = checksum
 
         if self.init_js:
-            script_tag = soup.new_tag("script")
             init = {
                 "id": self.component.component_id,
                 "name": nested_component_name,
@@ -180,9 +179,18 @@ class UnicornTemplateResponse(TemplateResponse):
                 "data": orjson.loads(frontend_context_variables),
             }
             init = orjson.dumps(init).decode("utf-8")
-            script_tag["type"] = "module"
-            script_tag.string = f"if (typeof Unicorn === 'undefined') {{ console.error('Unicorn is missing. Do you need {{% load unicorn %}} or {{% unicorn-scripts %}}?') }} else {{ Unicorn.componentInit({init}); }}"
-            root_element.insert_after(script_tag)
+            init_script = f"Unicorn.componentInit({init});"
+
+            if self.component.parent:
+                self.component._init_script = init_script
+            else:
+                for child in self.component.children:
+                    init_script = f"{init_script} {child._init_script}"
+
+                script_tag = soup.new_tag("script")
+                script_tag["type"] = "module"
+                script_tag.string = f"if (typeof Unicorn === 'undefined') {{ console.error('Unicorn is missing. Do you need {{% load unicorn %}} or {{% unicorn-scripts %}}?') }} else {{ {init_script} }}"
+                root_element.insert_after(script_tag)
 
         rendered_template = UnicornTemplateResponse._desoupify(soup)
         rendered_template = mark_safe(rendered_template)
@@ -247,6 +255,7 @@ class UnicornView(TemplateView):
         if "parent" in kwargs:
             self.parent = kwargs["parent"]
 
+        self._init_script: str = ""
         self._children_set = False
         self._validate_called = False
         self.errors = {}
