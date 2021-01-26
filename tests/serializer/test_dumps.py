@@ -48,7 +48,7 @@ def test_simple_model():
     simple_test_model = SimpleTestModel(id=1, name="abc")
     expected = '{"simple_test_model":{"name":"abc","pk":1}}'
 
-    actual = serializer.dumps({"simple_test_model": simple_test_model})
+    actual = serializer.dumps({"simple_test_model": simple_test_model}, fix_floats=True)
 
     assert expected == actual
 
@@ -63,7 +63,7 @@ def test_model_with_time(db):
     now = datetime.datetime.now()
     now_formate = now.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
 
-    expected = '{"test_models":[{"created":"'+now_formate+'","last_updated":"'+now_formate+'","name":"abc","pk":1}]}'
+    expected = f'{{"test_models":[{{"created":"{now_formate}","last_updated":"{now_formate}","name":"abc","pk":1}}]}}'
     actual = serializer.dumps({"test_models": test_models})
 
     assert expected == actual
