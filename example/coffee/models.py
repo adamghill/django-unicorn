@@ -1,5 +1,5 @@
 from django.db.models import SET_NULL, ForeignKey, Model
-from django.db.models.fields import CharField, DecimalField, FloatField
+from django.db.models.fields import CharField, DecimalField, FloatField, DateTimeField
 
 
 class Flavor(Model):
@@ -8,6 +8,15 @@ class Flavor(Model):
     parent = ForeignKey("self", blank=True, null=True, on_delete=SET_NULL)
     float_value = FloatField(null=True)
     decimal_value = DecimalField(null=True, max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return self.name
+
+
+class TestModelWithTime(Model):
+    created = DateTimeField(auto_now_add=True, editable=False)
+    last_updated = DateTimeField(auto_now=True, editable=False)
+    name = CharField(max_length=255, unique=True)
 
     def __str__(self):
         return self.name

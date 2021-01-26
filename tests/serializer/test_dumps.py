@@ -1,10 +1,12 @@
 from django.db.models import SET_NULL, ForeignKey, Model
-from django.db.models.fields import CharField
+from django.db.models.fields import CharField, DateTimeField
+
 
 import pytest
+import datetime
 
 from django_unicorn import serializer
-from example.coffee.models import Flavor
+from example.coffee.models import Flavor, TestModelWithTime
 
 
 class SimpleTestModel(Model):
@@ -20,7 +22,6 @@ class ComplicatedTestModel(Model):
 
     class Meta:
         app_label = "tests"
-
 
 def test_int():
     expected = '{"name":123}'
@@ -48,6 +49,22 @@ def test_simple_model():
     expected = '{"simple_test_model":{"name":"abc","pk":1}}'
 
     actual = serializer.dumps({"simple_test_model": simple_test_model})
+
+    assert expected == actual
+
+
+@pytest.mark.django_db
+def test_model_with_time(db):
+    test_model_with_time = TestModelWithTime(name="abc")
+    test_model_with_time.save()
+
+    test_models = TestModelWithTime.objects.all()
+
+    now = datetime.datetime.now()
+    now_formate = now.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
+
+    expected = '{"test_models":[{"created":"'+now_formate+'","last_updated":"'+now_formate+'","name":"abc","pk":1}]}'
+    actual = serializer.dumps({"test_models": test_models})
 
     assert expected == actual
 
