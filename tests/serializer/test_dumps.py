@@ -55,15 +55,15 @@ def test_simple_model():
 
 @pytest.mark.django_db
 def test_model_with_time(db):
+    # This test needs a real model because of the auto-time-stamping
     test_model_with_time = TestModelWithTime(name="abc")
     test_model_with_time.save()
 
     test_models = TestModelWithTime.objects.all()
+    # This test can sometimes fail if the time between the creation and calling the methode datetime is to long
+    now = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
 
-    now = datetime.datetime.now()
-    now_formate = now.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
-
-    expected = f'{{"test_models":[{{"created":"{now_formate}","last_updated":"{now_formate}","name":"abc","pk":1}}]}}'
+    expected = f'{{"test_models":[{{"created":"{now}","last_updated":"{now}","name":"abc","pk":1}}]}}'
     actual = serializer.dumps({"test_models": test_models})
 
     assert expected == actual
