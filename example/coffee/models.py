@@ -1,5 +1,5 @@
 from django.db.models import SET_NULL, ForeignKey, Model
-from django.db.models.fields import CharField, DecimalField, FloatField
+from django.db.models.fields import CharField, DateTimeField, DecimalField, FloatField
 
 
 class Flavor(Model):
@@ -11,3 +11,9 @@ class Flavor(Model):
 
     def __str__(self):
         return self.name
+
+
+class Bean(Model):
+    name = CharField(max_length=255, unique=True)
+    created = DateTimeField(auto_now_add=True, editable=False)
+    last_updated = DateTimeField(auto_now=True, editable=False)
