@@ -3,14 +3,22 @@ from ast import literal_eval
 from typing import Any, Dict, List, Tuple
 from uuid import UUID
 
-from django.utils.dateparse import parse_datetime
+from django.utils.dateparse import (
+    parse_date,
+    parse_datetime,
+    parse_duration,
+    parse_time,
+)
 
 
 logger = logging.getLogger(__name__)
 
-# Lambda that attempts to convert something that failed while being parsed by `ast.literal_eval`.
+# Lambdas that attempt to convert something that failed while being parsed by `ast.literal_eval`.
 CASTERS = [
     lambda a: parse_datetime(a),
+    lambda a: parse_time(a),
+    lambda a: parse_date(a),
+    lambda a: parse_duration(a),
     lambda a: UUID(a),
 ]
 
