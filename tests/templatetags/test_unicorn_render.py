@@ -1,3 +1,5 @@
+import re
+
 from django.template.base import Token, TokenType
 
 from django_unicorn.components import UnicornView
@@ -175,3 +177,45 @@ def test_unicorn_render_id_use_pk():
     actual = unicorn_node.render(context)
 
     assert "==123==" in actual
+
+
+def test_unicorn_render_component_one_script_tag(settings):
+    settings.DEBUG = True
+    token = Token(
+        TokenType.TEXT,
+        "unicorn 'tests.templatetags.test_unicorn_render.FakeComponentKwargs'",
+    )
+    unicorn_node = unicorn(None, token)
+    context = {}
+    html = unicorn_node.render(context)
+
+    assert "<script" in html
+    assert len(re.findall("<script", html)) == 1
+
+
+def test_unicorn_render_child_component_no_script_tag(settings):
+    settings.DEBUG = True
+    token = Token(
+        TokenType.TEXT,
+        "unicorn 'tests.templatetags.test_unicorn_render.FakeComponentKwargs' parent=view",
+    )
+    unicorn_node = unicorn(None, token)
+    view = FakeComponentParent(component_name="test", component_id="asdf")
+    context = {"view": view}
+    html = unicorn_node.render(context)
+
+    assert "<script" not in html
+
+
+def test_unicorn_render_parent_component_one_script_tag(settings):
+    settings.DEBUG = True
+    token = Token(
+        TokenType.TEXT,
+        "unicorn 'tests.templatetags.test_unicorn_render.FakeComponentParent'",
+    )
+    unicorn_node = unicorn(None, token)
+    context = {}
+    html = unicorn_node.render(context)
+
+    assert "<script" in html
+    assert len(re.findall("<script", html)) == 1
