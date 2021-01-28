@@ -116,4 +116,3 @@ def test_message_db_input_create(client):
 
     assert not body["errors"]
     assert dicts_equal(expected, body["data"])
-
