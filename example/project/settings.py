@@ -52,6 +52,9 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "project.wsgi.application"
+ASGI_APPLICATION = (
+    "project.asgi.application"  # need to comment out WSGI_APPLICATION to enable ASGI
+)
 
 
 DATABASES = {

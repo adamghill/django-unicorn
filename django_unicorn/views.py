@@ -466,3 +466,9 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
         res.update({"parent": parent})
 
     return JsonResponse(res)
+
+
+async def message_async(
+    request: HttpRequest, component_name: str = None
+) -> JsonResponse:
+    return message(request, component_name)
