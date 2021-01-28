@@ -1,12 +1,23 @@
-from datetime import datetime
+import json
 
-from django.db.models import SET_NULL, CharField, DateTimeField, ForeignKey, Model
+from django.db.models import (
+    SET_NULL,
+    CharField,
+    DateField,
+    DateTimeField,
+    DurationField,
+    ForeignKey,
+    Model,
+    TimeField,
+)
 from django.db.models.fields import CharField
+from django.utils.timezone import now
 
 import pytest
 
 from django_unicorn import serializer
-from example.coffee.models import Bean, Flavor
+from django_unicorn.utils import dicts_equal
+from example.coffee.models import Flavor
 
 
 class SimpleTestModel(Model):
@@ -54,21 +65,100 @@ def test_simple_model():
     assert expected == actual
 
 
-@pytest.mark.django_db
 def test_model_with_datetime(db):
-    bean = Bean(name="abc")
-    bean.save()
+    datetime = now()
+    flavor = Flavor(name="name1", datetime=datetime)
 
-    beans = Bean.objects.all()
+    expected = {
+        "flavor": {
+            "name": "name1",
+            "label": "",
+            "parent": None,
+            "float_value": None,
+            "decimal_value": None,
+            "uuid": str(flavor.uuid),
+            "date": None,
+            "datetime": datetime.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3],
+            "time": None,
+            "duration": None,
+            "pk": None,
+        }
+    }
 
-    created = bean.created.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
-    last_updated = bean.last_updated.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
-    pk = bean.pk
-    expected = f'{{"beans":[{{"name":"abc","created":"{created}","last_updated":"{last_updated}","pk":{pk}}}]}}'
+    actual = serializer.dumps({"flavor": flavor})
+    assert dicts_equal(expected, json.loads(actual))
 
-    actual = serializer.dumps({"beans": beans})
 
-    assert expected == actual
+def test_model_with_datetime_as_string(db):
+    datetime = now().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
+    flavor = Flavor(name="name1", datetime=datetime)
+
+    expected = {
+        "flavor": {
+            "name": "name1",
+            "label": "",
+            "parent": None,
+            "float_value": None,
+            "decimal_value": None,
+            "uuid": str(flavor.uuid),
+            "date": None,
+            "datetime": datetime,
+            "time": None,
+            "duration": None,
+            "pk": None,
+        }
+    }
+
+    actual = serializer.dumps({"flavor": flavor})
+    assert dicts_equal(expected, json.loads(actual))
+
+
+def test_model_with_time_as_string(db):
+    time = now().strftime("%H:%M:%S.%f")[:-3]
+    flavor = Flavor(name="name1", time=time)
+
+    expected = {
+        "flavor": {
+            "name": "name1",
+            "label": "",
+            "parent": None,
+            "float_value": None,
+            "decimal_value": None,
+            "uuid": str(flavor.uuid),
+            "date": None,
+            "datetime": None,
+            "time": time,
+            "duration": None,
+            "pk": None,
+        }
+    }
+
+    actual = serializer.dumps({"flavor": flavor})
+    assert dicts_equal(expected, json.loads(actual))
+
+
+def test_model_with_duration_as_string(db):
+    duration = "-1 day, 19:00:00"
+    flavor = Flavor(name="name1", duration=duration)
+
+    expected = {
+        "flavor": {
+            "name": "name1",
+            "label": "",
+            "parent": None,
+            "float_value": None,
+            "decimal_value": None,
+            "uuid": str(flavor.uuid),
+            "date": None,
+            "datetime": None,
+            "time": None,
+            "duration": "-1 19:00:00",
+            "pk": None,
+        }
+    }
+
+    actual = serializer.dumps({"flavor": flavor})
+    assert dicts_equal(expected, json.loads(actual))
 
 
 def test_model_foreign_key():
@@ -102,10 +192,39 @@ def test_dumps_queryset(db):
 
     flavors = Flavor.objects.all()
 
-    expected = '{"flavors":[{"name":"name1","label":"label1","parent":null,"float_value":null,"decimal_value":null,"pk":1},{"name":"name2","label":"label2","parent":1,"float_value":null,"decimal_value":null,"pk":2}]}'
-    actual = serializer.dumps({"flavors": flavors})
+    expected_data = {
+        "flavors": [
+            {
+                "name": "name1",
+                "label": "label1",
+                "parent": None,
+                "float_value": None,
+                "decimal_value": None,
+                "uuid": str(flavor_one.uuid),
+                "date": None,
+                "datetime": None,
+                "time": None,
+                "duration": None,
+                "pk": 1,
+            },
+            {
+                "name": "name2",
+                "label": "label2",
+                "parent": 1,
+                "float_value": None,
+                "decimal_value": None,
+                "uuid": str(flavor_two.uuid),
+                "date": None,
+                "datetime": None,
+                "time": None,
+                "duration": None,
+                "pk": 2,
+            },
+        ]
+    }
 
-    assert expected == actual
+    actual = serializer.dumps({"flavors": flavors})
+    assert expected_data == json.loads(actual)
 
 
 def test_get_model_dict():
@@ -119,6 +238,11 @@ def test_get_model_dict():
         "parent": None,
         "decimal_value": None,
         "float_value": None,
+        "uuid": str(flavor_one.uuid),
+        "date": None,
+        "datetime": None,
+        "time": None,
+        "duration": None,
     }
 
     assert expected == actual

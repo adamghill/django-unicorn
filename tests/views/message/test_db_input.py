@@ -2,7 +2,7 @@ import orjson
 import pytest
 import shortuuid
 
-from django_unicorn.utils import generate_checksum
+from django_unicorn.utils import dicts_equal, generate_checksum
 from example.coffee.models import Flavor
 
 
@@ -41,7 +41,7 @@ def test_message_db_input_update(client):
     body = orjson.loads(response.content)
 
     assert not body["errors"]
-    assert body["data"] == {
+    expected = {
         "flavors": [
             {
                 "pk": 1,
@@ -50,9 +50,16 @@ def test_message_db_input_update(client):
                 "float_value": None,
                 "label": "",
                 "parent": None,
+                "uuid": str(flavor.uuid),
+                "datetime": None,
+                "date": None,
+                "time": None,
+                "duration": None,
             }
         ]
     }
+
+    assert dicts_equal(expected, body["data"])
 
 
 @pytest.mark.django_db
@@ -89,16 +96,24 @@ def test_message_db_input_create(client):
 
     body = orjson.loads(response.content)
 
-    assert not body["errors"]
-    assert body["data"] == {
+    expected = {
         "flavors": [
             {
-                "pk": 1,
                 "name": "Sugar Browning-Nutty",
-                "decimal_value": None,
-                "float_value": None,
                 "label": "",
                 "parent": None,
+                "float_value": None,
+                "decimal_value": None,
+                "uuid": str(flavor.uuid),
+                "datetime": None,
+                "date": None,
+                "time": None,
+                "duration": None,
+                "pk": 1,
             }
         ]
     }
+
+    assert not body["errors"]
+    assert dicts_equal(expected, body["data"])
+

@@ -15,6 +15,15 @@
     </td>
     <td>
         {% if is_editing %}
+        <input type="text" unicorn:model.defer="model.datetime" />
+        {% elif model.datetime %}
+        {{ model.datetime }}
+        {% else %}
+        n/a
+        {% endif %}
+    </td>
+    <td>
+        {% if is_editing %}
         <button unicorn:click="save">Save</button>
         <button unicorn:click.discard="cancel" unicorn:partial.key="{{ model.pk }}">Cancel</button>
         {% else %}
