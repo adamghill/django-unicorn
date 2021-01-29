@@ -19,7 +19,7 @@ wrapt = "^1.12.1"
 cachetools = "^4.1.1"
 
 [tool.poetry.dev-dependencies]
-pytest = "^5.4.3"
+pytest = "^6.2"
 black = "^19.10b0"
 flake8 = "^3.8.3"
 isort = "^5.0.9"
@@ -44,3 +44,12 @@ multi_line_output = 3
 include_trailing_comma = true
 skip_glob = "*/migrations/*.py"
 profile = "black"
+
+[tool.pytest.ini_options]
+addopts = "--quiet --failed-first --reuse-db --nomigrations -p no:warnings"
+testpaths = [
+    "tests"
+]
+markers = [
+    "slow: marks tests as slow",
+]
