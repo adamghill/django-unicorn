@@ -16,7 +16,7 @@ class FakeTargetComponent(UnicornView):
 
 
 def test_message_generated_checksum_matches_dom_checksum(client):
-    data = {}
+    data = {"clicked": False}
     message = {
         "actionQueue": [
             {"payload": {"name": "test_method"}, "type": "callMethod", "target": None,}
@@ -48,7 +48,7 @@ def test_message_generated_checksum_matches_dom_checksum(client):
 
 
 def test_message_target_invalid(client):
-    data = {}
+    data = {"clicked": False}
     message = {
         "actionQueue": [
             {
@@ -76,7 +76,7 @@ def test_message_target_invalid(client):
 
 
 def test_message_target_id(client):
-    data = {}
+    data = {"clicked": False}
     message = {
         "actionQueue": [
             {
@@ -106,7 +106,7 @@ def test_message_target_id(client):
 
 
 def test_message_target_only_id(client):
-    data = {}
+    data = {"clicked": False}
     message = {
         "actionQueue": [
             {
@@ -136,7 +136,7 @@ def test_message_target_only_id(client):
 
 
 def test_message_target_only_key(client):
-    data = {}
+    data = {"clicked": False}
     message = {
         "actionQueue": [
             {
@@ -166,7 +166,7 @@ def test_message_target_only_key(client):
 
 
 def test_message_target_key(client):
-    data = {}
+    data = {"clicked": False}
     message = {
         "actionQueue": [
             {

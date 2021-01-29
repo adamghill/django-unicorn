@@ -5,7 +5,7 @@ from django_unicorn.utils import generate_checksum
 
 
 def test_message_call_method(client):
-    data = {}
+    data = {"method_count": 0}
     message = {
         "actionQueue": [{"payload": {"name": "test_method"}, "type": "callMethod",}],
         "data": data,
@@ -149,7 +149,7 @@ def test_message_call_method_poll_update(client):
 
 
 def test_message_call_method_setter(client):
-    data = {}
+    data = {"method_count": 0}
     message = {
         "actionQueue": [{"payload": {"name": "method_count=2"}, "type": "callMethod",}],
         "data": data,
@@ -169,7 +169,7 @@ def test_message_call_method_setter(client):
 
 
 def test_message_call_method_nested_setter(client):
-    data = {}
+    data = {"nested": {"check": True}}
     message = {
         "actionQueue": [
             {"payload": {"name": "nested.check=False"}, "type": "callMethod",}
@@ -191,7 +191,7 @@ def test_message_call_method_nested_setter(client):
 
 
 def test_message_call_method_toggle(client):
-    data = {}
+    data = {"check": False}
     message = {
         "actionQueue": [
             {"payload": {"name": "$toggle('check')"}, "type": "callMethod",}
@@ -213,7 +213,7 @@ def test_message_call_method_toggle(client):
 
 
 def test_message_call_method_nested_toggle(client):
-    data = {}
+    data = {"nested": {"check": False}}
     message = {
         "actionQueue": [
             {"payload": {"name": "$toggle('nested.check')"}, "type": "callMethod",}
@@ -235,7 +235,7 @@ def test_message_call_method_nested_toggle(client):
 
 
 def test_message_call_method_params(client):
-    data = {}
+    data = {"method_count": 0}
     message = {
         "actionQueue": [
             {"payload": {"name": "test_method_params(3)"}, "type": "callMethod",}
@@ -301,3 +301,52 @@ def test_message_call_method_validation(client):
     assert body["errors"]["number"]
     assert body["errors"]["number"][0]["code"] == "required"
     assert body["errors"]["number"][0]["message"] == "This field is required."
+
+
+def test_message_call_method_reset(client):
+    data = {"method_count": 1}
+    message = {
+        "actionQueue": [
+            {"payload": {"name": "method_count=2"}, "type": "callMethod"},
+            {"payload": {"name": "$reset"}, "type": "callMethod",},
+        ],
+        "data": data,
+        "checksum": generate_checksum(orjson.dumps(data)),
+        "id": shortuuid.uuid()[:8],
+    }
+
+    response = client.post(
+        "/message/tests.views.fake_components.FakeComponent",
+        message,
+        content_type="application/json",
+    )
+
+    body = orjson.loads(response.content)
+
+    assert body["data"]["method_count"] == 0
+    # `data` should contain all data (not just the diffs) for resets
+    assert body["data"].get("check") is not None
+    assert body["data"].get("dictionary") is not None
+
+
+def test_message_call_method_refresh(client):
+    data = {"method_count": 1}
+    message = {
+        "actionQueue": [{"payload": {"name": "$refresh"}, "type": "callMethod",},],
+        "data": data,
+        "checksum": generate_checksum(orjson.dumps(data)),
+        "id": shortuuid.uuid()[:8],
+    }
+
+    response = client.post(
+        "/message/tests.views.fake_components.FakeComponent",
+        message,
+        content_type="application/json",
+    )
+
+    body = orjson.loads(response.content)
+
+    assert body["data"]["method_count"] == 1
+    # `data` should contain all data (not just the diffs) for resets
+    assert body["data"].get("check") is not None
+    assert body["data"].get("dictionary") is not None

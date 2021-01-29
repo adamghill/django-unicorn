@@ -16,7 +16,7 @@ def _post_message_and_get_body(client, message):
 
 
 def test_setter(client):
-    data = {"nested": {"check": False}}
+    data = {"nested": {"check": False}, "check": False}
     message = {
         "actionQueue": [{"type": "callMethod", "payload": {"name": "check=True"}},],
         "data": data,
@@ -48,7 +48,7 @@ def test_nested_setter(client):
 
 
 def test_equal_sign(client):
-    data = {"nested": {"check": False}}
+    data = {"nested": {"check": False}, "method_param": ""}
     message = {
         "actionQueue": [
             {
