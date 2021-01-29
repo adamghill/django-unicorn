@@ -1,3 +1,4 @@
+import copy
 import logging
 from functools import wraps
 from typing import Any, Dict, List, Union
@@ -218,8 +219,8 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
     )
     validate_all_fields = False
 
-    # Get a copy of the data passed in to determine what fields are updated later
-    original_data = component_request.data.copy()
+    # Get a deepcopy of the data passed in to determine what fields are updated later
+    original_data = copy.deepcopy(component_request.data)
 
     # Set component properties based on request data
     for (property_name, property_value) in component_request.data.items():
@@ -227,6 +228,7 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
     component.hydrate()
 
     is_reset_called = False
+    is_refresh_called = False
     return_data = None
     partials = []
 
@@ -323,6 +325,8 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
                         use_cache=True,
                         request=request,
                     )
+
+                    is_refresh_called = True
                 elif method_name == "$reset":
                     # Handle the reset special action
                     component = UnicornView.create(
@@ -356,16 +360,20 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
     # Re-load frontend context variables to deal with non-serializable properties
     component_request.data = orjson.loads(component.get_frontend_context_variables())
 
-    updated_data = {}
+    # Send back all available data for reset or refresh actions
+    updated_data = component_request.data
 
     if not is_reset_called:
-        if validate_all_fields:
-            component.validate()
-        else:
+        if not is_refresh_called:
+            updated_data = {}
+
             for key, value in original_data.items():
                 if value != component_request.data.get(key):
                     updated_data[key] = component_request.data.get(key)
 
+        if validate_all_fields:
+            component.validate()
+        else:
             component.validate(model_names=list(updated_data.keys()))
 
     rendered_component = component.render()
