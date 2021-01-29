@@ -356,17 +356,17 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
     # Re-load frontend context variables to deal with non-serializable properties
     component_request.data = orjson.loads(component.get_frontend_context_variables())
 
+    updated_data = {}
+
     if not is_reset_called:
         if validate_all_fields:
             component.validate()
         else:
-            model_names_to_validate = []
-
             for key, value in original_data.items():
                 if value != component_request.data.get(key):
-                    model_names_to_validate.append(key)
+                    updated_data[key] = component_request.data.get(key)
 
-            component.validate(model_names=model_names_to_validate)
+            component.validate(model_names=list(updated_data.keys()))
 
     rendered_component = component.render()
     partial_doms = []
@@ -414,7 +414,7 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
 
     res = {
         "id": component_request.id,
-        "data": component_request.data,
+        "data": updated_data,
         "errors": component.errors,
         "checksum": generate_checksum(orjson.dumps(component_request.data)),
     }
