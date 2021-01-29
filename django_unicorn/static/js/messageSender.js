@@ -98,8 +98,11 @@ export function send(component, callback) {
         element.handleDirty(true);
       });
 
-      // Get the data from the response
-      component.data = responseJson.data || {};
+      // Merge the data from the response into the component's data
+      Object.keys(responseJson.data || {}).forEach((key) => {
+        component.data[key] = responseJson.data[key];
+      });
+
       component.errors = responseJson.errors || {};
       component.return = responseJson.return || {};
 
