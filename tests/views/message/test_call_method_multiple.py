@@ -23,26 +23,16 @@ class FakeSlowComponent(UnicornView):
         return self.counter
 
 
-@pytest.mark.slow
-def test_message_call_method_single(client):
-    data = {"counter": 0}
-    component_id = shortuuid.uuid()[:8]
-    message = {
-        "actionQueue": [{"payload": {"name": "slow_action"}, "type": "callMethod",}],
-        "data": data,
-        "checksum": generate_checksum(orjson.dumps(data)),
-        "id": component_id,
-        "epoch": time.time(),  # assert there is an epoch (or set it in Python?)
-    }
-
-    response = client.post(
-        "/message/tests.views.message.test_call_method_multiple.FakeSlowComponent",
-        message,
-        content_type="application/json",
-    )
-
-    body = orjson.loads(response.content)
-    assert body["data"].get("counter") == 1
+def _set_serial(
+    settings,
+    enabled,
+    timeout,
+    cache_backend="django.core.cache.backends.locmem.LocMemCache",
+):
+    settings.UNICORN["SERIAL"]["ENABLED"] = enabled
+    settings.UNICORN["SERIAL"]["TIMEOUT"] = timeout
+    settings.UNICORN["CACHE_ALIAS"] = "default"
+    settings.CACHES["default"]["BACKEND"] = cache_backend
 
 
 def _message_runner(args):
@@ -63,7 +53,33 @@ def _message_runner(args):
 
 
 @pytest.mark.slow
-def test_message_call_method_two(client):
+def test_message_single(client, settings):
+    _set_serial(settings, True, 5)
+
+    data = {"counter": 0}
+    component_id = shortuuid.uuid()[:8]
+    message = {
+        "actionQueue": [{"payload": {"name": "slow_action"}, "type": "callMethod",}],
+        "data": data,
+        "checksum": generate_checksum(orjson.dumps(data)),
+        "id": component_id,
+        "epoch": time.time(),  # assert there is an epoch (or set it in Python?)
+    }
+
+    response = client.post(
+        "/message/tests.views.message.test_call_method_multiple.FakeSlowComponent",
+        message,
+        content_type="application/json",
+    )
+
+    body = orjson.loads(response.content)
+    assert body["data"].get("counter") == 1
+
+
+@pytest.mark.slow
+def test_message_two(client, settings):
+    _set_serial(settings, True, 5)
+
     data = {"counter": 0}
     component_id = shortuuid.uuid()[:8]
     message = {
@@ -80,7 +96,6 @@ def test_message_call_method_two(client):
 
         first_result = results[0]
         first_body = orjson.loads(first_result.content)
-        # print("first_body", first_body)
         assert first_body["data"].get("counter") == 2
 
         second_result = results[1]
@@ -89,7 +104,9 @@ def test_message_call_method_two(client):
 
 
 @pytest.mark.slow
-def test_message_call_method_multiple(client):
+def test_message_multiple(client, settings):
+    _set_serial(settings, True, 5)
+
     data = {"counter": 0}
     component_id = shortuuid.uuid()[:8]
     message = {
@@ -115,9 +132,6 @@ def test_message_call_method_multiple(client):
 
 
 @pytest.mark.slow
-<<<<<<< HEAD
-def test_message_call_method_multiple_with_updated_data(client):
-=======
 def test_message_multiple_return_is_correct(client, settings):
     _set_serial(settings, True, 5)
 
@@ -153,6 +167,8 @@ def test_message_multiple_with_updated_data(client, settings):
     it gets disregarded because no sane way to merge it together. Not ideal, but not sure how to
     handle it.
     """
+    _set_serial(settings, True, 5)
+
     data = {"counter": 0}
     component_id = shortuuid.uuid()[:8]
     message = {

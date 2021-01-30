@@ -3,7 +3,7 @@ import logging
 from functools import wraps
 from typing import Any, Dict, List, Union
 
-from django.core.cache import cache
+from django.core.cache import caches
 from django.db.models import Model
 from django.http import HttpRequest, JsonResponse
 from django.views.decorators.csrf import csrf_protect
@@ -18,14 +18,12 @@ from .decorators import timed
 from .errors import UnicornViewError
 from .message import ComponentRequest, Return
 from .serializer import dumps, loads
+from .settings import get_cache_alias, get_serial_enabled, get_serial_timeout
 from .utils import generate_checksum
 
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
-
-
-UNICORN_REQUEST_TIMEOUT = 60 * 1
 
 
 def handle_error(view_func):
@@ -335,13 +333,23 @@ def _process_component_request(
                         request=request,
                     )
 
+                    # Set component properties based on request data
+                    for (
+                        property_name,
+                        property_value,
+                    ) in component_request.data.items():
+                        _set_property_from_data(
+                            component, property_name, property_value
+                        )
+                    component.hydrate()
+
                     is_refresh_called = True
                 elif method_name == "$reset":
                     # Handle the reset special action
                     component = UnicornView.create(
                         component_id=component_request.id,
                         component_name=component_name,
-                        use_cache=False,
+                        use_cache=False,  # TODO: this probably doesn't matter for this now
                         request=request,
                     )
 
@@ -510,12 +518,20 @@ def _handle_component_request(
             "parent": {},  // optional representation of the parent component
         }
     """
+    if not get_serial_enabled():
+        return _process_component_request(request, component_name, component_request)
+
+    cache = caches[get_cache_alias()]
+
     # Add the current request `ComponentRequest` to the cache
     # TODO: Add component name to `ComponentRequest` (grab it off of the request path?)
     component_cache_key = f"{component_name}:{component_request.id}"
     component_requests = cache.get(component_cache_key) or []
     component_requests.append(component_request)
-    cache.set(component_cache_key, component_requests, timeout=UNICORN_REQUEST_TIMEOUT)
+
+    cache.set(
+        component_cache_key, component_requests, timeout=get_serial_timeout(),
+    )
 
     if len(component_requests) > 1:
         original_epoch = component_requests[0].epoch
@@ -554,8 +570,14 @@ def _handle_component_requests(
             "parent": {},  // optional representation of the parent component
         }
     """
+    cache = caches[get_cache_alias()]
+
     # Handle current request and any others in the cache by first sorting all of the current requests by ascending order
     component_requests = cache.get(component_cache_key)
+
+    if not component_requests or not isinstance(component_requests, list):
+        raise UnicornViewError(f"No request found for {component_cache_key}")
+
     component_requests = sorted(component_requests, key=lambda r: r.epoch)
     first_component_request = component_requests[0]
 
@@ -566,18 +588,21 @@ def _handle_component_requests(
         request, component_name, first_component_request
     )
 
+    # Re-check for requests after the first request is processed
     component_requests = cache.get(component_cache_key)
-    component_requests.pop(0)
-    cache.set(component_cache_key, component_requests, timeout=UNICORN_REQUEST_TIMEOUT)
 
-    component_requests = cache.get(component_cache_key)
+    # Check that the request is in the cache before popping it off
+    if component_requests:
+        component_requests.pop(0)
+        cache.set(
+            component_cache_key, component_requests, timeout=get_serial_timeout(),
+        )
 
     if component_requests:
         # Create one new `component_request` from all of the queued requests that can be processed
         merged_component_request = None
 
         for additional_component_request in copy.deepcopy(component_requests):
-            print(additional_component_request.epoch, additional_component_request.data)
             if merged_component_request:
                 # Add new component request action queue to the merged component request
                 merged_component_request.action_queue.extend(
@@ -598,9 +623,7 @@ def _handle_component_requests(
 
             component_requests.pop(0)
             cache.set(
-                component_cache_key,
-                component_requests,
-                timeout=UNICORN_REQUEST_TIMEOUT,
+                component_cache_key, component_requests, timeout=get_serial_timeout(),
             )
 
         merged_json_result = _handle_component_request(

@@ -27,8 +27,8 @@ from .utils import generate_checksum
 logger = logging.getLogger(__name__)
 
 
-# Module cache to reduce initialization costs
-constructed_views_cache = LRUCache(maxsize=100)
+# Module cache to store the found component classes
+views_cache = LRUCache(maxsize=100)
 
 
 class UnicornField:
@@ -707,17 +707,6 @@ class UnicornView(TemplateView):
         assert component_id, "Component id is required"
         assert component_name, "Component name is required"
 
-        if use_cache:
-            if component_id in constructed_views_cache:
-                component = constructed_views_cache[component_id]
-                component.setup(request)
-                component._validate_called = False
-                logger.debug(f"Retrieve {component_id} from constructed views cache")
-
-                return component
-
-        locations = []
-
         @timed
         def _get_component_class(
             module_name: str, class_name: str
@@ -729,6 +718,55 @@ class UnicornView(TemplateView):
             component_class = getattr(module, class_name)
 
             return component_class
+
+        @timed
+        def _construct_component(
+            component_class,
+            component_id,
+            component_name,
+            component_key,
+            parent,
+            request,
+            **kwargs,
+        ):
+            """
+            Constructs a class instance.
+            """
+            component = component_class(
+                component_id=component_id,
+                component_name=component_name,
+                component_key=component_key,
+                parent=parent,
+                request=request,
+                **kwargs,
+            )
+
+            component.children = []
+            component._children_set = False
+
+            component.mount()
+            component.hydrate()
+            component._validate_called = False
+
+            return component
+
+        if use_cache:
+            if component_id in views_cache:
+                component_class = views_cache[component_id]
+                component = _construct_component(
+                    component_class=component_class,
+                    component_id=component_id,
+                    component_name=component_name,
+                    component_key=component_key,
+                    parent=parent,
+                    request=request,
+                    **kwargs,
+                )
+                logger.debug(f"Retrieve {component_id} from views cache")
+
+                return component
+
+        locations = []
 
         if "." in component_name:
             # Handle fully-qualified component names (e.g. `project.unicorn.HelloWorldView`)
@@ -771,7 +809,8 @@ class UnicornView(TemplateView):
         for (class_name, module_name) in locations:
             try:
                 component_class = _get_component_class(module_name, class_name)
-                component = component_class(
+                component = _construct_component(
+                    component_class=component_class,
                     component_id=component_id,
                     component_name=component_name,
                     component_key=component_key,
@@ -779,16 +818,8 @@ class UnicornView(TemplateView):
                     request=request,
                     **kwargs,
                 )
-
-                component.children = []
-                component._children_set = False
-
-                component.mount()
-                component.hydrate()
-                component._validate_called = False
-
-                # Put the component in a "cache" to skip looking for the component on the next request
-                constructed_views_cache[component_id] = component
+                # Put the component's class in a "cache" to skip looking for the component on the next request
+                views_cache[component_id] = component_class
 
                 return component
             except ModuleNotFoundError as e:

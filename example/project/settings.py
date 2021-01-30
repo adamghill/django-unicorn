@@ -53,6 +53,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "project.wsgi.application"
 
+
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
@@ -88,6 +89,9 @@ USE_TZ = True
 
 STATIC_URL = "/static/"
 STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)
+
+
+UNICORN = {"SERIAL": {"ENABLED": True, "TIMEOUT": 5,}, "CACHE_ALIAS": "default"}
 
 
 LOGGING = {
