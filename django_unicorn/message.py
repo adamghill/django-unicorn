@@ -16,7 +16,7 @@ class ComponentRequest:
     Parses, validates, and stores all of the data from the message request.
     """
 
-    def __init__(self, request):
+    def __init__(self, request, component_name):
         self.body = {}
 
         try:
@@ -24,6 +24,9 @@ class ComponentRequest:
             assert self.body, "Invalid JSON body"
         except JSONDecodeError as e:
             raise UnicornViewError("Body could not be parsed") from e
+
+        self.name = component_name
+        assert self.name, "Missing component name"
 
         self.data = self.body.get("data")
         assert self.data is not None, "Missing data"  # data could theoretically be {}
@@ -39,7 +42,7 @@ class ComponentRequest:
         self.action_queue = self.body.get("actionQueue", [])
 
     def __repr__(self):
-        return f"ComponentRequest(id='{self.id}' key='{self.key}' epoch={self.epoch} data={self.data} action_queue={self.action_queue})"
+        return f"ComponentRequest(name='{self.name}' id='{self.id}' key='{self.key}' epoch={self.epoch} data={self.data} action_queue={self.action_queue})"
 
     def validate_checksum(self):
         """

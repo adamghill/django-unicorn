@@ -190,7 +190,7 @@ def _call_method_name(
 
 
 def _process_component_request(
-    request: HttpRequest, component_name: str, component_request: ComponentRequest
+    request: HttpRequest, component_request: ComponentRequest
 ) -> Dict:
     """
     Process a `ComponentRequest` by:
@@ -205,7 +205,6 @@ def _process_component_request(
     
     Args:
         param request: HttpRequest for the function-based view.
-        param: component_name: Name of the component, e.g. "hello-world".
         param: component_request: Component request to process.
     
     Returns:
@@ -221,7 +220,7 @@ def _process_component_request(
     """
     component = UnicornView.create(
         component_id=component_request.id,
-        component_name=component_name,
+        component_name=component_request.name,
         request=request,
     )
     validate_all_fields = False
@@ -328,7 +327,7 @@ def _process_component_request(
                     # Handle the refresh special action
                     component = UnicornView.create(
                         component_id=component_request.id,
-                        component_name=component_name,
+                        component_name=component_request.name,
                         use_cache=True,
                         request=request,
                     )
@@ -348,7 +347,7 @@ def _process_component_request(
                     # Handle the reset special action
                     component = UnicornView.create(
                         component_id=component_request.id,
-                        component_name=component_name,
+                        component_name=component_request.name,
                         use_cache=False,  # TODO: this probably doesn't matter for this now
                         request=request,
                     )
@@ -494,7 +493,7 @@ def _process_component_request(
 
 
 def _handle_component_request(
-    request: HttpRequest, component_name: str, component_request: ComponentRequest
+    request: HttpRequest, component_request: ComponentRequest
 ) -> Dict:
     """
     Process a `ComponentRequest` by adding it to the cache and then either:
@@ -504,7 +503,6 @@ def _handle_component_request(
     
     Args:
         param request: HttpRequest for the function-based view.
-        param: component_name: Name of the component, e.g. "hello-world".
         param: component_request: Component request to process.
     
     Returns:
@@ -518,14 +516,15 @@ def _handle_component_request(
             "parent": {},  // optional representation of the parent component
         }
     """
+    # If serial isn't enabled or the wrong cache, just process the request like normal
     if not get_serial_enabled():
-        return _process_component_request(request, component_name, component_request)
+        return _process_component_request(request, component_request)
 
     cache = caches[get_cache_alias()]
 
     # Add the current request `ComponentRequest` to the cache
     # TODO: Add component name to `ComponentRequest` (grab it off of the request path?)
-    component_cache_key = f"{component_name}:{component_request.id}"
+    component_cache_key = f"{component_request.name}:{component_request.id}"
     component_requests = cache.get(component_cache_key) or []
     component_requests.append(component_request)
 
@@ -541,10 +540,12 @@ def _handle_component_request(
             "original_epoch": original_epoch,
         }
 
-    return _handle_component_requests(request, component_name, component_cache_key)
+    return _handle_queued_component_requests(
+        request, component_request.name, component_cache_key
+    )
 
 
-def _handle_component_requests(
+def _handle_queued_component_requests(
     request: HttpRequest, component_name: str, component_cache_key
 ) -> Dict:
     """
@@ -584,9 +585,7 @@ def _handle_component_requests(
     # Can't store request on a `ComponentRequest` and cache it because `HttpRequest`
     # isn't pickleable. Does it matter that a different request gets passed in then
     # the original request that generated the `ComponentRequest`?
-    first_json_result = _process_component_request(
-        request, component_name, first_component_request
-    )
+    first_json_result = _process_component_request(request, first_component_request)
 
     # Re-check for requests after the first request is processed
     component_requests = cache.get(component_cache_key)
@@ -627,7 +626,7 @@ def _handle_component_requests(
             )
 
         merged_json_result = _handle_component_request(
-            request, component_name, merged_component_request
+            request, merged_component_request
         )
 
         return merged_json_result
@@ -662,7 +661,7 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
 
     assert component_name, "Missing component name in url"
 
-    component_request = ComponentRequest(request)
-    json_result = _handle_component_request(request, component_name, component_request)
+    component_request = ComponentRequest(request, component_name)
+    json_result = _handle_component_request(request, component_request)
 
     return JsonResponse(json_result)
