@@ -115,10 +115,55 @@ def convert_to_snake_case(s: str) -> str:
     return s.replace("-", "_")
 
 
-def convert_to_camel_case(s: str) -> str:
-    # TODO: Better handling of dash/snake->camel-case
+def convert_to_pascal_case(s: str) -> str:
+    # TODO: Better handling of dash/snake->pascal-case
     s = convert_to_snake_case(s)
     return "".join(word.title() for word in s.split("_"))
+
+
+def get_locations(component_name):
+    # TODO: django.conf setting bool that defines whether to look in all installed apps for components
+    locations = []
+
+    if "." in component_name:
+        # Handle component names that specify a folder structure
+        component_name = component_name.replace("/", ".")
+
+        # Handle fully-qualified component names (e.g. `project.unicorn.HelloWorldView`)
+        class_name = component_name.split(".")[-1:][0]
+        module_name = component_name.replace("." + class_name, "")
+        locations.append((class_name, module_name))
+
+        # Assume if it ends with "View", then we don't need to add other
+        if component_name.endswith("View") or component_name.endswith("Component"):
+            return locations
+
+    # Handle component names that specify a folder structure
+    component_name = component_name.replace("/", ".")
+
+    # Use conventions to find the component class
+    class_name = convert_to_pascal_case(component_name)
+
+    if "." in class_name:
+        if class_name.split(".")[-1:]:
+            class_name = class_name.split(".")[-1:][0]
+
+    class_name = f"{class_name}View"
+    module_name = convert_to_snake_case(component_name)
+
+    unicorn_apps = get_setting("APPS", ["unicorn"])
+
+    assert (
+        isinstance(unicorn_apps, list)
+        or isinstance(unicorn_apps, tuple)
+        or isinstance(unicorn_apps, set)
+    ), "APPS is expected to be a list, tuple or set"
+
+    for app in unicorn_apps:
+        app_module_name = f"{app}.components.{module_name}"
+        locations.append((class_name, app_module_name))
+
+    return locations
 
 
 class UnicornTemplateResponse(TemplateResponse):
@@ -763,40 +808,7 @@ class UnicornView(TemplateView):
 
             return component
 
-        locations = []
-
-        if "." in component_name:
-            # Handle fully-qualified component names (e.g. `project.unicorn.HelloWorldView`)
-            class_name = component_name.split(".")[-1:][0]
-            module_name = component_name.replace("." + class_name, "")
-            locations.append((class_name, module_name))
-
-        # Handle component names that specify a folder structure
-        component_name = component_name.replace("/", ".")
-
-        # Use conventions to find the component class
-        class_name = convert_to_camel_case(component_name)
-
-        if "." in class_name:
-            if class_name.split(".")[-1:]:
-                class_name = class_name.split(".")[-1:][0]
-
-        class_name = f"{class_name}View"
-        module_name = convert_to_snake_case(component_name)
-
-        unicorn_apps = get_setting("APPS", ["unicorn"])
-
-        assert (
-            isinstance(unicorn_apps, list)
-            or isinstance(unicorn_apps, tuple)
-            or isinstance(unicorn_apps, set)
-        ), "APPS is expected to be a list, tuple or set"
-
-        for app in unicorn_apps:
-            app_module_name = f"{app}.components.{module_name}"
-            locations.append((class_name, app_module_name))
-
-        # TODO: django.conf setting bool that defines whether to look in all installed apps for components
+        locations = get_locations(component_name)
 
         # Store the last exception that got raised while looking for a component in case it is useful context
         last_exception: Union[

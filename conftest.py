@@ -19,6 +19,7 @@ def pytest_configure():
     unicorn_settings = {
         "SERIAL": {"ENABLED": True, "TIMEOUT": 5},
         "CACHE_ALIAS": "default",
+        "APPS": ("unicorn",),
     }
 
     caches = {
@@ -40,7 +41,7 @@ def pytest_configure():
 
 
 @pytest.fixture(autouse=True)
-def reset_unicorn_settings(settings):
+def reset_settings(settings):
     """
     This takes the original `UNICORN` settings before the test is run, runs the test, and then resets them afterwards.
     This is required because mutating nested dictionaries does not reset them as expected by `pytest-django`.
