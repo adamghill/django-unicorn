@@ -46,7 +46,7 @@ skip_glob = "*/migrations/*.py"
 profile = "black"
 
 [tool.pytest.ini_options]
-addopts = "--quiet --failed-first --reuse-db --nomigrations -p no:warnings"
+addopts = "--quiet --failed-first --reuse-db --nomigrations -p no:warnings -m 'not slow'"
 testpaths = [
     "tests"
 ]
