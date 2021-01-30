@@ -521,7 +521,6 @@ def _handle_component_request(
     cache = caches[get_cache_alias()]
 
     # Add the current request `ComponentRequest` to the cache
-    # TODO: Add component name to `ComponentRequest` (grab it off of the request path?)
     component_cache_key = f"{component_request.name}:{component_request.id}"
     component_requests = cache.get(component_cache_key) or []
     component_requests.append(component_request)

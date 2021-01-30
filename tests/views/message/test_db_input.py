@@ -1,3 +1,5 @@
+import time
+
 import orjson
 import pytest
 import shortuuid
@@ -27,6 +29,7 @@ def test_message_db_input_update(client):
         "data": data,
         "checksum": generate_checksum(orjson.dumps(data)),
         "id": shortuuid.uuid()[:8],
+        "epoch": time.time(),
     }
 
     response = client.post(
@@ -81,6 +84,7 @@ def test_message_db_input_create(client):
         "data": data,
         "checksum": generate_checksum(orjson.dumps(data)),
         "id": shortuuid.uuid()[:8],
+        "epoch": time.time(),
     }
 
     assert Flavor.objects.all().count() == 0

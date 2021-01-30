@@ -1,3 +1,5 @@
+import time
+
 import orjson
 import shortuuid
 
@@ -24,6 +26,7 @@ def test_message_toggle(client):
         "data": data,
         "checksum": generate_checksum(orjson.dumps(data)),
         "id": shortuuid.uuid()[:8],
+        "epoch": time.time(),
     }
 
     body = _post_message_and_get_body(client, message)
@@ -41,6 +44,7 @@ def test_message_nested_toggle(client):
         "data": data,
         "checksum": generate_checksum(orjson.dumps(data)),
         "id": shortuuid.uuid()[:8],
+        "epoch": time.time(),
     }
 
     body = _post_message_and_get_body(client, message)

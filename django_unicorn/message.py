@@ -34,8 +34,10 @@ class ComponentRequest:
         self.id = self.body.get("id")
         assert self.id, "Missing component id"
 
-        self.key = self.body.get("key", "")
         self.epoch = self.body.get("epoch", "")
+        assert self.epoch, "Missing epoch"
+
+        self.key = self.body.get("key", "")
 
         self.validate_checksum()
 

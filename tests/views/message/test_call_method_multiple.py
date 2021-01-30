@@ -40,8 +40,6 @@ def _message_runner(args):
     sleep_time = args[1]
     message = args[2]
     time.sleep(sleep_time)
-
-    # TODO: assert there is an epoch (or set it in Python?) in component request init
     message["epoch"] = time.time()
 
     response = client.post(
@@ -63,7 +61,7 @@ def test_message_single(client, settings):
         "data": data,
         "checksum": generate_checksum(orjson.dumps(data)),
         "id": component_id,
-        "epoch": time.time(),  # assert there is an epoch (or set it in Python?)
+        "epoch": time.time(),
     }
 
     response = client.post(
