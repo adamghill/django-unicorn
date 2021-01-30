@@ -683,7 +683,6 @@ class UnicornView(TemplateView):
         component_name: str,
         component_key: str = "",
         parent: "UnicornView" = None,
-        use_cache=True,
         request: HttpRequest = None,
         kwargs: Dict[str, Any] = {},
     ) -> "UnicornView":
@@ -697,7 +696,6 @@ class UnicornView(TemplateView):
             param component_key: Key of the component to allow multiple components of the same name
                 to be differentiated. Optional.
             param parent: The parent component of the current component.
-            param use_cache: Get component from cache or force construction of component. Defaults to `True`.
             param kwargs: Keyword arguments for the component passed in from the template. Defaults to `{}`.
         
         Returns:
@@ -750,21 +748,20 @@ class UnicornView(TemplateView):
 
             return component
 
-        if use_cache:
-            if component_id in views_cache:
-                component_class = views_cache[component_id]
-                component = _construct_component(
-                    component_class=component_class,
-                    component_id=component_id,
-                    component_name=component_name,
-                    component_key=component_key,
-                    parent=parent,
-                    request=request,
-                    **kwargs,
-                )
-                logger.debug(f"Retrieve {component_id} from views cache")
+        if component_id in views_cache:
+            component_class = views_cache[component_id]
+            component = _construct_component(
+                component_class=component_class,
+                component_id=component_id,
+                component_name=component_name,
+                component_key=component_key,
+                parent=parent,
+                request=request,
+                **kwargs,
+            )
+            logger.debug(f"Retrieve {component_id} from views cache")
 
-                return component
+            return component
 
         locations = []
 

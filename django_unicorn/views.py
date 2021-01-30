@@ -328,7 +328,6 @@ def _process_component_request(
                     component = UnicornView.create(
                         component_id=component_request.id,
                         component_name=component_request.name,
-                        use_cache=True,
                         request=request,
                     )
 
@@ -348,7 +347,6 @@ def _process_component_request(
                     component = UnicornView.create(
                         component_id=component_request.id,
                         component_name=component_request.name,
-                        use_cache=False,  # TODO: this probably doesn't matter for this now
                         request=request,
                     )
 
