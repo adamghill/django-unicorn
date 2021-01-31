@@ -3,6 +3,15 @@
 
 {% block content %}
 
+<style>
+tr:nth-child(even) {
+    background-color: #F3F4F6;
+}
+tr:nth-child(odd) {
+    background-color: #aeb2bb;
+} 
+</style>
+
 <h2>Nested components (table)</h2>
 
 {% unicorn 'nested.table' %}
