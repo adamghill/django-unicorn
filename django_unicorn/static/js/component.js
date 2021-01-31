@@ -20,12 +20,6 @@ export class Component {
     this.key = args.key;
     this.messageUrl = args.messageUrl;
     this.csrfTokenHeaderName = args.csrfTokenHeaderName;
-
-    if (contains(this.name, ".")) {
-      const names = this.name.split(".");
-      this.name = names[names.length - 2];
-    }
-
     this.data = args.data;
     this.syncUrl = `${this.messageUrl}/${this.name}`;
 

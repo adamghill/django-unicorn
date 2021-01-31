@@ -206,20 +206,17 @@ class UnicornTemplateResponse(TemplateResponse):
         frontend_context_variables_dict = orjson.loads(frontend_context_variables)
         checksum = generate_checksum(orjson.dumps(frontend_context_variables_dict))
 
-        # Handle potential nested component name using dot-notation
-        nested_component_name = self.component.component_name.replace(".", "/")
-
         soup = BeautifulSoup(content, features="html.parser")
         root_element = UnicornTemplateResponse._get_root_element(soup)
         root_element["unicorn:id"] = self.component.component_id
-        root_element["unicorn:name"] = nested_component_name
+        root_element["unicorn:name"] = self.component.component_name
         root_element["unicorn:key"] = self.component.component_key
         root_element["unicorn:checksum"] = checksum
 
         if self.init_js:
             init = {
                 "id": self.component.component_id,
-                "name": nested_component_name,
+                "name": self.component.component_name,
                 "key": self.component.component_key,
                 "data": orjson.loads(frontend_context_variables),
             }
