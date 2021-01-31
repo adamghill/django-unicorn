@@ -1,8 +1,10 @@
+from coffee.models import Flavor
+
 from django_unicorn.components import UnicornView
 
 
 class RowView(UnicornView):
-    model = None
+    model: Flavor = None
     is_editing = False
 
     def edit(self):
