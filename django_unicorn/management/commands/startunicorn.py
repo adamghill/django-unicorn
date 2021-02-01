@@ -2,13 +2,13 @@ from pathlib import Path
 
 from django.core.management.base import BaseCommand, CommandError
 
-from ...components import convert_to_camel_case, convert_to_snake_case
+from ...components import convert_to_pascal_case, convert_to_snake_case
 
 
 COMPONENT_FILE = """from django_unicorn.components import UnicornView
 
 
-class {camel_case_component_name}View(UnicornView):
+class {pascal_case_component_name}View(UnicornView):
     pass
 """
 
@@ -34,7 +34,7 @@ class Command(BaseCommand):
 
         for component_name in options["component_names"]:
             snake_case_component_name = convert_to_snake_case(component_name)
-            camel_case_component_name = convert_to_camel_case(component_name)
+            pascal_case_component_name = convert_to_pascal_case(component_name)
 
             # Create component
             if not Path("unicorn/components").exists():
@@ -43,7 +43,7 @@ class Command(BaseCommand):
             component_path = Path(f"unicorn/components/{snake_case_component_name}.py")
             component_path.write_text(
                 COMPONENT_FILE.format(
-                    **{"camel_case_component_name": camel_case_component_name}
+                    **{"pascal_case_component_name": pascal_case_component_name}
                 )
             )
             self.stdout.write(self.style.SUCCESS(f"Created {component_path}."))
