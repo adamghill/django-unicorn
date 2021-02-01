@@ -405,6 +405,7 @@ def _process_component_request(
                         component_id=component_request.id,
                         component_name=component_request.name,
                         request=request,
+                        use_cache=False,
                     )
 
                     #  Explicitly remove all errors and prevent validation from firing before render()

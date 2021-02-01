@@ -27,8 +27,13 @@ from .utils import generate_checksum
 logger = logging.getLogger(__name__)
 
 
+# TODO: Make maxsize configurable
 # Module cache to store the found component classes
 views_cache = LRUCache(maxsize=100)
+
+# Module cache for constructed component classes
+# This can create a subtle race condition so a more long-term solution needs to be found
+constructed_views_cache = LRUCache(maxsize=100)
 
 
 class UnicornField:
@@ -164,6 +169,38 @@ def get_locations(component_name):
         locations.append((class_name, app_module_name))
 
     return locations
+
+
+@timed
+def construct_component(
+    component_class,
+    component_id,
+    component_name,
+    component_key,
+    parent,
+    request,
+    **kwargs,
+):
+    """
+    Constructs a class instance.
+    """
+    component = component_class(
+        component_id=component_id,
+        component_name=component_name,
+        component_key=component_key,
+        parent=parent,
+        request=request,
+        **kwargs,
+    )
+
+    component.children = []
+    component._children_set = False
+
+    component.mount()
+    component.hydrate()
+    component._validate_called = False
+
+    return component
 
 
 class UnicornTemplateResponse(TemplateResponse):
@@ -726,6 +763,7 @@ class UnicornView(TemplateView):
         component_key: str = "",
         parent: "UnicornView" = None,
         request: HttpRequest = None,
+        use_cache=True,
         kwargs: Dict[str, Any] = {},
     ) -> "UnicornView":
         """
@@ -759,40 +797,18 @@ class UnicornView(TemplateView):
 
             return component_class
 
-        @timed
-        def _construct_component(
-            component_class,
-            component_id,
-            component_name,
-            component_key,
-            parent,
-            request,
-            **kwargs,
-        ):
-            """
-            Constructs a class instance.
-            """
-            component = component_class(
-                component_id=component_id,
-                component_name=component_name,
-                component_key=component_key,
-                parent=parent,
-                request=request,
-                **kwargs,
-            )
-
-            component.children = []
-            component._children_set = False
-
-            component.mount()
-            component.hydrate()
+        if use_cache and component_id in constructed_views_cache:
+            component = constructed_views_cache[component_id]
+            component.setup(request)
             component._validate_called = False
+            logger.debug(f"Retrieve {component_id} from constructed views cache")
 
             return component
 
         if component_id in views_cache:
-            component_class = views_cache[component_id]
-            component = _construct_component(
+            (component_class, parent, kwargs) = views_cache[component_id]
+
+            component = construct_component(
                 component_class=component_class,
                 component_id=component_id,
                 component_name=component_name,
@@ -815,7 +831,7 @@ class UnicornView(TemplateView):
         for (class_name, module_name) in locations:
             try:
                 component_class = _get_component_class(module_name, class_name)
-                component = _construct_component(
+                component = construct_component(
                     component_class=component_class,
                     component_id=component_id,
                     component_name=component_name,
@@ -824,8 +840,10 @@ class UnicornView(TemplateView):
                     request=request,
                     **kwargs,
                 )
+
                 # Put the component's class in a "cache" to skip looking for the component on the next request
-                views_cache[component_id] = component_class
+                views_cache[component_id] = (component_class, parent, kwargs)
+                constructed_views_cache[component_id] = component
 
                 return component
             except ModuleNotFoundError as e:

@@ -364,6 +364,6 @@ def test_message_call_method_refresh(client):
     body = orjson.loads(response.content)
 
     assert body["data"]["method_count"] == 1
-    # `data` should contain all data (not just the diffs) for resets
+    # `data` should contain all data (not just the diffs) for refreshes
     assert body["data"].get("check") is not None
     assert body["data"].get("dictionary") is not None

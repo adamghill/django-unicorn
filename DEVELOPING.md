@@ -27,6 +27,6 @@
 1. Make sure test package can be installed as expected (https://test.pypi.org/project/django-unicorn/)
 1. `poetry publish`
 1. Make sure live package can be installed as expected (https://pypi.org/project/django-unicorn/)
+1. [Create GitHub release](https://github.com/adamghill/django-unicorn/releases/new) and add changelog there
 1. Update django-unicorn.com's changelog.md
 1. Update django-unicorn.com's version of `django-unicorn`
-1. [Create GitHub release](https://github.com/adamghill/django-unicorn/releases/new) and add changelog there
