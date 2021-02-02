@@ -22,7 +22,7 @@
     <input unicorn:model="name" u:partial.id="model-id" class="clean" unicorn:dirty.class.remove="clean" type="text" id="name" unicorn:key="key1">
 
     <div>
-        <span unicorn:key="model-key">Targeted by key: {{name}}</span> | <span id="model-id">Targeted by id: {{name}}</span> | <span id="">Not targeted by id: {{name}}</span> | 
+        <span unicorn:key="model-key">Targeted by key: {{name}}</span> | <span id="model-id">Targeted by id: {{name}}</span> | <span id="">Not targeted by id: {{name}}</span> |
     </div>
 
     <label>Duplicate id</label>
@@ -42,7 +42,7 @@
 
     <label>Lazy</label>
     <input unicorn:model.lazy="name" unicorn:dirty.class="dirty" type="text" id="lazyName" unicorn:key="key1">
-    
+
     <label>Debounce-1000</label>
     <input unicorn:model.debounce-1000="name" unicorn:dirty.class="dirty" type="text" id="debounceName" unicorn:key="key1">
 
@@ -60,6 +60,7 @@
     <button unicorn:click="set_name()">set_name()</button>
     <button unicorn:click="set_name('')">set_name('')</button>
     <button unicorn:click="set_name('blob 2')">set_name('blob 2')</button>
+    <button unicorn:click="set_name('abc{}.def')">set_name('abc{}.def')</button>
     <button unicorn:click="name='human'">name='human'</button>
 
     <br /><br />
