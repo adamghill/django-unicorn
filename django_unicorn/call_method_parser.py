@@ -122,7 +122,7 @@ def parse_call_method_name(call_method_name: str) -> Tuple[str, List[Any]]:
         # Not returned, but might be usable
         kwargs = {kw.arg: eval_arg(kw.value) for kw in call.keywords}
 
-    # Insert "$" if spcial function
+    # Insert "$" if special function
     if dollar_func:
         method_name = "$" + method_name
 
