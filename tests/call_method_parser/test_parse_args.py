@@ -16,49 +16,47 @@ def test_args():
 
 
 def test_single_quote_str_arg():
-    expected = ("1")
+    expected = "1"
     actual = eval_arg("'1'")
 
     assert actual == expected
-    assert isinstance(actual[0], str)
+    assert isinstance(actual, str)
 
 
 def test_str_with_space_arg():
-    expected = ("django unicorn")
+    expected = "django unicorn"
     actual = eval_arg("'django unicorn'")
 
     assert actual == expected
-    assert isinstance(actual[0], str)
+    assert isinstance(actual, str)
 
 
 def test_str_with_extra_single_quote():
-    expected = ("django's unicorn")
+    expected = "django's unicorn"
     actual = eval_arg("'django\\'s unicorn'")
 
     assert actual == expected
-    assert isinstance(actual[0], str)
+    assert isinstance(actual, str)
 
 
 def test_str_with_extra_double_quote():
-    expected = ('django "unicorn"')
+    expected = 'django "unicorn"'
     actual = eval_arg("'django \"unicorn\"'")
 
     assert actual == expected
     assert isinstance(actual[0], str)
 
 
-@pytest.mark.skip("These are edge cases, but still are broken")
 def test_str_with_comma():
-    expected = ("a', b")
+    expected = "'a', b'"
     actual = eval_arg("'a', b'")
 
     assert actual == expected
     assert isinstance(actual[0], str)
 
 
-@pytest.mark.skip("These are edge cases, but still are broken")
 def test_str_with_stop_character():
-    expected = ("a'} b")
+    expected = "'a'} b'"
     actual = eval_arg("'a'} b'")
 
     assert actual == expected
@@ -66,11 +64,11 @@ def test_str_with_stop_character():
 
 
 def test_double_quote_str_arg():
-    expected = ("string")
+    expected = "string"
     actual = eval_arg('"string"')
 
     assert actual == expected
-    assert isinstance(actual[0], str)
+    assert isinstance(actual, str)
 
 
 def test_args_with_single_quote_dict():

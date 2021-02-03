@@ -113,13 +113,13 @@ def parse_call_method_name(call_method_name: str) -> Tuple[str, List[Any]]:
 
     tree = ast.parse(call_method_name, "eval")
     method_name = call_method_name
-    params: List[Any] = []
+    args: List[Any] = []
     kwargs: Dict[str, Any] = {}
 
     if tree.body and isinstance(tree.body[0].value, ast.Call):
         call = tree.body[0].value
         method_name = call.func.id
-        params = [eval_arg(arg) for arg in call.args]
+        args = [eval_arg(arg) for arg in call.args]
 
         # Not returned, but might be usable
         kwargs = {kw.arg: eval_arg(kw.value) for kw in call.keywords}
@@ -128,4 +128,4 @@ def parse_call_method_name(call_method_name: str) -> Tuple[str, List[Any]]:
     if dollar_func:
         method_name = f"${method_name}"
 
-    return (method_name, params, kwargs)
+    return (method_name, args, kwargs)
