@@ -225,23 +225,21 @@ def _get_property_value(component: UnicornView, property_name: str) -> Any:
 
 
 @timed
-def _call_method_name(
-    component: UnicornView, method_name: str, params: List[Any]
-) -> Any:
+def _call_method_name(component: UnicornView, method_name: str, args: List[Any]) -> Any:
     """
     Calls the method name with parameters.
 
     Args:
         param component: Component to call method on.
         param method_name: Method name to call.
-        param params: List of arguments for the method.
+        param args: List of arguments for the method.
     """
 
     if method_name is not None and hasattr(component, method_name):
         func = getattr(component, method_name)
 
-        if params:
-            return func(*params)
+        if args:
+            return func(*args)
         else:
             return func()
 
@@ -361,8 +359,8 @@ def _process_component_request(
             call_method_name = payload.get("name", "")
             assert call_method_name, "Missing 'name' key for callMethod"
 
-            (method_name, params) = parse_call_method_name(call_method_name)
-            return_data = Return(method_name, params)
+            (method_name, args, kwargs) = parse_call_method_name(call_method_name)
+            return_data = Return(method_name, args, kwargs)
             setter_method = {}
 
             if "=" in call_method_name:
@@ -412,7 +410,7 @@ def _process_component_request(
                     component.errors = {}
                     is_reset_called = True
                 elif method_name == "$toggle":
-                    for property_name in params:
+                    for property_name in args:
                         property_value = _get_property_value(component, property_name)
                         property_value = not property_value
 
@@ -421,11 +419,9 @@ def _process_component_request(
                     # Handle the validate special action
                     validate_all_fields = True
                 else:
-                    component.calling(method_name, params)
-                    return_data.value = _call_method_name(
-                        component, method_name, params
-                    )
-                    component.called(method_name, params)
+                    component.calling(method_name, args)
+                    return_data.value = _call_method_name(component, method_name, args)
+                    component.called(method_name, args)
         else:
             raise UnicornViewError(f"Unknown action_type '{action_type}'")
 

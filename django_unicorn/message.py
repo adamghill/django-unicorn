@@ -61,9 +61,10 @@ class ComponentRequest:
 
 
 class Return:
-    def __init__(self, method_name, params=[]):
+    def __init__(self, method_name, args=[], kwargs={}):
         self.method_name = method_name
-        self.params = params
+        self.args = args
+        self.kwargs = kwargs
         self._value = {}
         self.redirect = {}
         self.poll = {}
@@ -101,11 +102,13 @@ class Return:
     def get_data(self):
         try:
             serialized_value = loads(dumps(self.value))
-            serialized_params = loads(dumps(self.params))
+            serialized_args = loads(dumps(self.args))
+            serialized_kwargs = loads(dumps(self.kwargs))
 
             return {
                 "method": self.method_name,
-                "params": serialized_params,
+                "args": serialized_args,
+                "kwargs": serialized_kwargs,
                 "value": serialized_value,
             }
         except Exception as e:

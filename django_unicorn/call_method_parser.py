@@ -13,7 +13,7 @@ from django.utils.dateparse import (
 
 logger = logging.getLogger(__name__)
 
-# Lambdas that attempt to convert something that failed while being parsed by `ast.literal_eval`.
+# Lambdas that attempt to convert something that failed while being parsed by `ast.parse`.
 CASTERS = [
     lambda a: parse_datetime(a),
     lambda a: parse_time(a),
@@ -49,6 +49,8 @@ def parse_kwarg(kwarg: str, raise_if_unparseable=False) -> Dict[str, Any]:
     Parses a potential kwarg as a string into a dictionary.
     For example: `parse_kwarg("test='1'")` == `{"test": "1"}`
     """
+
+    # TODO: Look into using something like `ast.parse(kwarg, "eval")` for this
 
     parsed_kwarg = {}
     kwarg = kwarg.strip()
@@ -102,12 +104,12 @@ def parse_call_method_name(call_method_name: str) -> Tuple[str, List[Any]]:
         Tuple of method_name and a list of arguments.
     """
 
-    # Special function with "$" - remove before parsing with AST
+    dollar_func = False
+
+    # Deal with special methods that start with a "$"
     if call_method_name.startswith("$"):
         dollar_func = True
         call_method_name = call_method_name[1:]
-    else:
-        dollar_func = False
 
     tree = ast.parse(call_method_name, "eval")
     method_name = call_method_name
@@ -122,8 +124,8 @@ def parse_call_method_name(call_method_name: str) -> Tuple[str, List[Any]]:
         # Not returned, but might be usable
         kwargs = {kw.arg: eval_arg(kw.value) for kw in call.keywords}
 
-    # Insert "$" if special function
+    # Add "$" back to special functions
     if dollar_func:
-        method_name = "$" + method_name
+        method_name = f"${method_name}"
 
-    return (method_name, params)
+    return (method_name, params, kwargs)

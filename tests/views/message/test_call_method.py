@@ -125,7 +125,8 @@ def test_message_call_method_return_value(client):
     assert "return" in body
     return_data = body["return"]
     assert return_data.get("method") == "test_return_value"
-    assert return_data.get("params") == []
+    assert return_data.get("args") == []
+    assert return_data.get("kwargs") == {}
     assert return_data.get("value") == "booya"
 
 
