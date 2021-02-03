@@ -50,6 +50,16 @@
       "contributions": [
         "test"
       ]
+    },
+    {
+      "login": "frbor",
+      "name": "Fredrik Borg",
+      "avatar_url": "https://avatars.githubusercontent.com/u/2320183?v=4",
+      "profile": "https://github.com/frbor",
+      "contributions": [
+        "code",
+        "test"
+      ]
     }
   ],
   "contributorsPerLine": 7,
