@@ -52,12 +52,12 @@ def test_nested_setter(client):
 
 
 def test_equal_sign(client):
-    data = {"nested": {"check": False}, "method_param": ""}
+    data = {"nested": {"check": False}, "method_arg": ""}
     message = {
         "actionQueue": [
             {
                 "type": "callMethod",
-                "payload": {"name": "test_method_string_param('does=thiswork?')"},
+                "payload": {"name": "test_method_string_arg('does=thiswork?')"},
             },
         ],
         "data": data,
@@ -69,4 +69,4 @@ def test_equal_sign(client):
     body = _post_message_and_get_body(client, message)
 
     assert not body["errors"]
-    assert body["data"]["method_param"] == "does=thiswork?"
+    assert body["data"]["method_arg"] == "does=thiswork?"

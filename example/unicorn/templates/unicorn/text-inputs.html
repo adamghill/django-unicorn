@@ -61,7 +61,8 @@
     <button unicorn:click="set_name('')">set_name('')</button>
     <button unicorn:click="set_name('blob 2')">set_name('blob 2')</button>
     <button unicorn:click="set_name('abc{}.def')">set_name('abc{}.def')</button>
-    <button unicorn:click="name='human'">name='human'</button>
+    <button unicorn:click="name='howdy'">name='human'</button>
+    <button unicorn:click="set_name(name='test kwarg')">set_name(name='test kwarg')</button>
 
     <br /><br />
     <button unicorn:click='set_name($event.target.value.trim())' value=' button value '>set_name($event.target.value.trim())</button>

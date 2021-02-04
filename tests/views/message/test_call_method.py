@@ -270,11 +270,11 @@ def test_message_call_method_nested_toggle(client):
     assert body["data"].get("nested").get("check") == True
 
 
-def test_message_call_method_params(client):
+def test_message_call_method_args(client):
     data = {"method_count": 0}
     message = {
         "actionQueue": [
-            {"payload": {"name": "test_method_params(3)"}, "type": "callMethod",}
+            {"payload": {"name": "test_method_args(3)"}, "type": "callMethod",}
         ],
         "data": data,
         "checksum": generate_checksum(orjson.dumps(data)),
@@ -291,6 +291,29 @@ def test_message_call_method_params(client):
     body = orjson.loads(response.content)
 
     assert body["data"].get("method_count") == 3
+
+
+def test_message_call_method_kwargs(client):
+    data = {"method_count": 0}
+    message = {
+        "actionQueue": [
+            {"payload": {"name": "test_method_kwargs(count=99)"}, "type": "callMethod",}
+        ],
+        "data": data,
+        "checksum": generate_checksum(orjson.dumps(data)),
+        "id": shortuuid.uuid()[:8],
+        "epoch": time.time(),
+    }
+
+    response = client.post(
+        "/message/tests.views.fake_components.FakeComponent",
+        message,
+        content_type="application/json",
+    )
+
+    body = orjson.loads(response.content)
+
+    assert body["data"].get("method_count") == 99
 
 
 def test_message_call_method_no_validation(client):

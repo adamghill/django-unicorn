@@ -18,17 +18,20 @@ class FakeComponent(UnicornView):
     method_count = 0
     check = False
     nested = {"check": False, "another": {"bool": False}}
-    method_param = ""
+    method_arg = ""
 
     def test_method(self):
         self.method_count += 1
 
-    def test_method_params(self, count):
+    def test_method_args(self, count):
         self.method_count = count
 
-    def test_method_string_param(self, param):
+    def test_method_string_arg(self, param):
         self.method_count += 1
-        self.method_param = param
+        self.method_arg = param
+
+    def test_method_kwargs(self, count=-1):
+        self.method_count = count
 
     def test_redirect(self):
         return redirect("/something-here")

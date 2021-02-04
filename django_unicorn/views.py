@@ -225,7 +225,9 @@ def _get_property_value(component: UnicornView, property_name: str) -> Any:
 
 
 @timed
-def _call_method_name(component: UnicornView, method_name: str, args: List[Any]) -> Any:
+def _call_method_name(
+    component: UnicornView, method_name: str, args: List[Any], kwargs: Dict[str, Any]
+) -> Any:
     """
     Calls the method name with parameters.
 
@@ -233,13 +235,18 @@ def _call_method_name(component: UnicornView, method_name: str, args: List[Any])
         param component: Component to call method on.
         param method_name: Method name to call.
         param args: List of arguments for the method.
+        param kwargs: Dictionary of kwargs for the method.
     """
 
     if method_name is not None and hasattr(component, method_name):
         func = getattr(component, method_name)
 
-        if args:
-            return func(*args)
+        if args and kwargs:
+            return func(*args, **kwargs)
+        elif args:
+            return func(*args, **kwargs)
+        elif kwargs:
+            return func(**kwargs)
         else:
             return func()
 
@@ -420,7 +427,9 @@ def _process_component_request(
                     validate_all_fields = True
                 else:
                     component.calling(method_name, args)
-                    return_data.value = _call_method_name(component, method_name, args)
+                    return_data.value = _call_method_name(
+                        component, method_name, args, kwargs
+                    )
                     component.called(method_name, args)
         else:
             raise UnicornViewError(f"Unknown action_type '{action_type}'")

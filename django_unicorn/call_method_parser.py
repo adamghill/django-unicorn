@@ -141,28 +141,27 @@ def parse_call_method_name(call_method_name: str) -> Tuple[str, List[Any]]:
         Tuple of method_name and a list of arguments.
     """
 
-    dollar_func = False
-
-    # Deal with special methods that start with a "$"
-    if call_method_name.startswith("$"):
-        dollar_func = True
-        call_method_name = call_method_name[1:]
-
-    tree = ast.parse(call_method_name, "eval")
-    method_name = call_method_name
+    is_special_method = False
     args: List[Any] = []
     kwargs: Dict[str, Any] = {}
+    method_name = call_method_name
 
-    if tree.body and isinstance(tree.body[0].value, ast.Call):
+    # Deal with special methods that start with a "$"
+    if method_name.startswith("$"):
+        is_special_method = True
+        method_name = method_name[1:]
+
+    tree = ast.parse(method_name, "eval")
+    statement = tree.body[0].value
+
+    if tree.body and isinstance(statement, ast.Call):
         call = tree.body[0].value
         method_name = call.func.id
         args = [eval_value(arg) for arg in call.args]
-
-        # Not returned, but might be usable
         kwargs = {kw.arg: eval_value(kw.value) for kw in call.keywords}
 
     # Add "$" back to special functions
-    if dollar_func:
+    if is_special_method:
         method_name = f"${method_name}"
 
     return (method_name, args, kwargs)
