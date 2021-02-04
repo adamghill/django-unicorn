@@ -201,6 +201,29 @@ def test_message_call_method_nested_setter(client):
     assert body["data"].get("nested").get("check") == False
 
 
+def test_message_call_method_multiple_nested_setter(client):
+    data = {"nested": {"another": {"bool": True}}}
+    message = {
+        "actionQueue": [
+            {"payload": {"name": "nested.another.bool=False"}, "type": "callMethod",}
+        ],
+        "data": data,
+        "checksum": generate_checksum(orjson.dumps(data)),
+        "id": shortuuid.uuid()[:8],
+        "epoch": time.time(),
+    }
+
+    response = client.post(
+        "/message/tests.views.fake_components.FakeComponent",
+        message,
+        content_type="application/json",
+    )
+
+    body = orjson.loads(response.content)
+
+    assert body["data"].get("nested").get("another").get("bool") == False
+
+
 def test_message_call_method_toggle(client):
     data = {"check": False}
     message = {

@@ -17,7 +17,7 @@ class FakeComponent(UnicornView):
     dictionary = {"name": "test"}
     method_count = 0
     check = False
-    nested = {"check": False}
+    nested = {"check": False, "another": {"bool": False}}
     method_param = ""
 
     def test_method(self):

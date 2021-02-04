@@ -44,53 +44,79 @@ def eval_arg(arg):
     return arg
 
 
+def _get_expr_string(expr: ast.expr) -> str:
+    """
+    Builds a string based on traversing `ast.Attribute` and `ast.Name` expressions.
+
+    Args:
+        expr: Expression node of the the AST tree. Only handles `ast.Attribute` and `ast.Name` expressions.
+
+    Returns:
+        String based on the expression nodes.
+    """
+
+    current_expr = expr
+    expr_str = ""
+
+    while current_expr:
+        if isinstance(current_expr, ast.Name):
+            if not expr_str:
+                expr_str = current_expr.id
+            else:
+                expr_str = f"{current_expr.id}.{expr_str}"
+
+            break
+        elif isinstance(current_expr, ast.Attribute):
+            if not expr_str:
+                expr_str = current_expr.attr
+            else:
+                expr_str = f"{current_expr.attr}.{expr_str}"
+
+            current_expr = current_expr.value
+        else:
+            break
+
+    return expr_str
+
+
 def parse_kwarg(kwarg: str, raise_if_unparseable=False) -> Dict[str, Any]:
     """
     Parses a potential kwarg as a string into a dictionary.
-    For example: `parse_kwarg("test='1'")` == `{"test": "1"}`
+    
+    Example:
+        `parse_kwarg("test='1'")` == `{"test": "1"}`
+
+    Args:
+        kwarg: Potential kwarg as a string. e.g. "test='1'".
+        raise_if_unparseable: Raise an error if the `kwarg` cannot be parsed. Defaults to `False`.
+
+    Returns:
+        Dictionary of key-value pairs.
     """
 
-    # TODO: Look into using something like `ast.parse(kwarg, "eval")` for this
-
-    parsed_kwarg = {}
-    kwarg = kwarg.strip()
-
-    if "=" not in kwarg:
-        raise InvalidKwarg(f"{kwarg} is invalid")
-    if kwarg.startswith("'") or kwarg.startswith('"'):
-        raise InvalidKwarg(
-            f"{kwarg} key cannot start with single quote or double quote"
-        )
-
-    has_equal_sign = False
-    key = ""
-    val = ""
-
-    for c in kwarg:
-        if c == "=":
-            has_equal_sign = True
-        elif has_equal_sign:
-            val += c
-        else:
-            key += c
-
-        if not has_equal_sign and (c == "'" or c == '"'):
-            raise InvalidKwarg(
-                f"{kwarg} key cannot contain a single quote or double quote"
-            )
-
-    # Attempt to parse the value into a primitive, but allow it to be returned if not possible
-    # (the value can be a template variable that will get set from the context when
-    # the templatetag is rendered in which case it can't be parsed in this manner)
     try:
-        val = eval_arg(val)
-    except ValueError:
-        if raise_if_unparseable:
-            raise
+        tree = ast.parse(kwarg, "eval")
 
-    parsed_kwarg[key] = val
+        if tree.body and isinstance(tree.body[0], ast.Assign):
+            assign = tree.body[0]
 
-    return parsed_kwarg
+            try:
+                target = assign.targets[0]
+                key = _get_expr_string(target)
+
+                return {key: ast.literal_eval(assign.value)}
+            except ValueError:
+                if raise_if_unparseable:
+                    raise
+
+                # The value can be a template variable that will get set from the context when
+                # the templatetag is rendered
+                val = _get_expr_string(assign.value)
+                return {target.id: val}
+        else:
+            raise InvalidKwarg(f"'{kwarg}' is invalid")
+    except SyntaxError:
+        raise InvalidKwarg(f"'{kwarg}' could not be parsed")
 
 
 def parse_call_method_name(call_method_name: str) -> Tuple[str, List[Any]]:
