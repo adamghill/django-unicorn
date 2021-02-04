@@ -1,5 +1,6 @@
 import ast
 import logging
+from functools import lru_cache
 from typing import Any, Dict, List, Tuple
 from uuid import UUID
 
@@ -13,7 +14,7 @@ from django.utils.dateparse import (
 
 logger = logging.getLogger(__name__)
 
-# Lambdas that attempt to convert something that failed while being parsed by `ast.parse`.
+# Lambdas that attempt to convert something that failed while being parsed by `ast.literal_eval`.
 CASTERS = [
     lambda a: parse_datetime(a),
     lambda a: parse_time(a),
@@ -25,23 +26,6 @@ CASTERS = [
 
 class InvalidKwarg(Exception):
     pass
-
-
-def eval_arg(arg):
-    try:
-        arg = ast.literal_eval(arg)
-    except SyntaxError:
-        for caster in CASTERS:
-            try:
-                casted_value = caster(arg)
-
-                if casted_value:
-                    arg = casted_value
-                    break
-            except ValueError:
-                pass
-
-    return arg
 
 
 def _get_expr_string(expr: ast.expr) -> str:
@@ -79,6 +63,32 @@ def _get_expr_string(expr: ast.expr) -> str:
     return expr_str
 
 
+@lru_cache(maxsize=128)
+def eval_value(value):
+    """
+    Uses `ast.literal_eval` to parse strings into an appropriate Python primative.
+
+    Also returns an appropriate object for strings that look like they represent datetime, 
+    date, time, duration, or UUID.
+    """
+
+    try:
+        value = ast.literal_eval(value)
+    except SyntaxError:
+        for caster in CASTERS:
+            try:
+                casted_value = caster(value)
+
+                if casted_value:
+                    value = casted_value
+                    break
+            except ValueError:
+                pass
+
+    return value
+
+
+@lru_cache(maxsize=128)
 def parse_kwarg(kwarg: str, raise_if_unparseable=False) -> Dict[str, Any]:
     """
     Parses a potential kwarg as a string into a dictionary.
@@ -104,21 +114,22 @@ def parse_kwarg(kwarg: str, raise_if_unparseable=False) -> Dict[str, Any]:
                 target = assign.targets[0]
                 key = _get_expr_string(target)
 
-                return {key: ast.literal_eval(assign.value)}
+                return {key: eval_value(assign.value)}
             except ValueError:
                 if raise_if_unparseable:
                     raise
 
                 # The value can be a template variable that will get set from the context when
-                # the templatetag is rendered
-                val = _get_expr_string(assign.value)
-                return {target.id: val}
+                # the templatetag is rendered, so just return the expr as a string.
+                value = _get_expr_string(assign.value)
+                return {target.id: value}
         else:
             raise InvalidKwarg(f"'{kwarg}' is invalid")
     except SyntaxError:
         raise InvalidKwarg(f"'{kwarg}' could not be parsed")
 
 
+@lru_cache(maxsize=128)
 def parse_call_method_name(call_method_name: str) -> Tuple[str, List[Any]]:
     """
     Parses the method name from the request payload into a set of parameters to pass to a method.
@@ -145,10 +156,10 @@ def parse_call_method_name(call_method_name: str) -> Tuple[str, List[Any]]:
     if tree.body and isinstance(tree.body[0].value, ast.Call):
         call = tree.body[0].value
         method_name = call.func.id
-        args = [eval_arg(arg) for arg in call.args]
+        args = [eval_value(arg) for arg in call.args]
 
         # Not returned, but might be usable
-        kwargs = {kw.arg: eval_arg(kw.value) for kw in call.keywords}
+        kwargs = {kw.arg: eval_value(kw.value) for kw in call.keywords}
 
     # Add "$" back to special functions
     if dollar_func:
