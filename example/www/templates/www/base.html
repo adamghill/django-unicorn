@@ -5,6 +5,20 @@
         <title>django-unicorn examples</title>
         <link rel="stylesheet" href="{% static 'css/marx.min.css' %}">
         <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+        <style>
+            #menu {
+                list-style: none;
+            }
+            #menu li {
+                display: inline;
+                padding: 0 10px;
+                border-left: solid 1px black;
+            }
+            #menu li:first-child {
+                border-left: none !important;
+            }
+        </style>
+
         {% unicorn_scripts %}
     </head>
 
@@ -14,7 +28,7 @@
 
             <h1>django-unicorn</h1>
 
-            <ul>
+            <ul id="menu">
                 <li><a href="{% url 'www:index' %}">Index</a></li>
                 <li><a href="{% url 'www:template' 'text-inputs' %}">Text inputs</a></li>
                 <li><a href="{% url 'www:template' 'html-inputs' %}">Other inputs</a></li>
@@ -23,6 +37,7 @@
                 <li><a href="{% url 'www:template' 'polling' %}">Polling</a></li>
                 <li><a href="{% url 'www:template' 'models' %}">Models</a></li>
                 <li><a href="{% url 'www:template' 'nested' %}">Nested components (table)</a></li>
+                <li><a href="{% url 'www:template' 'js' %}">JavaScript integration</a></li>
             </ul>
 
             {% block content %}{% endblock content %}
