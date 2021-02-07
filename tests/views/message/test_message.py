@@ -4,7 +4,7 @@ from django.http import JsonResponse
 
 import pytest
 
-from django_unicorn.components import ComponentLoadError
+from django_unicorn.errors import ComponentLoadError
 from django_unicorn.views import message
 
 
@@ -97,7 +97,7 @@ def test_message_component_not_found(client):
 
     assert (
         e.exconly()
-        == "django_unicorn.components.ComponentLoadError: 'test' component could not be loaded."
+        == "django_unicorn.errors.ComponentLoadError: 'test' component could not be loaded."
     )
 
 
@@ -114,7 +114,7 @@ def test_message_component_with_dash(client):
 
     assert (
         e.exconly()
-        == "django_unicorn.components.ComponentLoadError: 'test-a' component could not be loaded."
+        == "django_unicorn.errors.ComponentLoadError: 'test-a' component could not be loaded."
     )
 
 
@@ -131,5 +131,5 @@ def test_message_component_with_dot(client):
 
     assert (
         e.exconly()
-        == "django_unicorn.components.ComponentLoadError: 'test.a' component could not be loaded."
+        == "django_unicorn.errors.ComponentLoadError: 'test.a' component could not be loaded."
     )

@@ -7,21 +7,16 @@ from typing import Any, Callable, Dict, List, Optional, Sequence, Type, Union
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models import Model
 from django.http import HttpRequest
-from django.http.response import HttpResponseRedirect
-from django.template.response import TemplateResponse
-from django.utils.safestring import mark_safe
 from django.views.generic.base import TemplateView
 
-import orjson
-from bs4 import BeautifulSoup
-from bs4.element import Tag
-from bs4.formatter import HTMLFormatter
 from cachetools.lru import LRUCache
 
-from . import serializer
-from .decorators import timed
-from .settings import get_setting
-from .utils import generate_checksum
+from .. import serializer
+from ..decorators import timed
+from ..errors import ComponentLoadError
+from ..settings import get_setting
+from .fields import UnicornField
+from .unicorn_template_response import UnicornTemplateResponse
 
 
 logger = logging.getLogger(__name__)
@@ -34,85 +29,6 @@ views_cache = LRUCache(maxsize=100)
 # Module cache for constructed component classes
 # This can create a subtle race condition so a more long-term solution needs to be found
 constructed_views_cache = LRUCache(maxsize=100)
-
-
-class UnicornField:
-    """
-    Base class to provide a way to serialize a component field quickly.
-    """
-
-    def to_json(self):
-        return self.__dict__
-
-
-class Update:
-    """
-    Base class for updaters.
-    """
-
-    def to_json(self):
-        return self.__dict__
-
-
-class HashUpdate(Update):
-    """
-    Updates the current URL hash from an action method.
-    """
-
-    def __init__(self, hash: str):
-        """
-        Args:
-            param hash: The hash to change. Example: `#model-123`.
-        """
-        self.hash = hash
-
-
-class LocationUpdate(Update):
-    """
-    Updates the current URL from an action method.
-    """
-
-    def __init__(self, redirect: HttpResponseRedirect, title: str = None):
-        """
-        Args:
-            param redirect: The redirect that contains the URL to redirect to.
-            param title: The new title of the page. Optional.
-        """
-        self.redirect = redirect
-        self.title = title
-
-
-class PollUpdate(Update):
-    """
-    Updates the current poll from an action method.
-    """
-
-    def __init__(self, timing: int = None, method: str = None, disable: bool = False):
-        """
-        Args:
-            param timing: The timing that should be used for the poll. Optional. Defaults to `None`
-                which keeps the existing timing.
-            param method: The method that should be used for the poll. Optional. Defaults to `None`
-                which keeps the existing method.
-            param disable: Whether to disable the poll or not not. Optional. Defaults to `False`.
-        """
-        self.timing = timing
-        self.method = method
-        self.disable = disable
-
-
-class ComponentLoadError(Exception):
-    pass
-
-
-class UnsortedAttributes(HTMLFormatter):
-    """
-    Prevent beautifulsoup from re-ordering attributes.
-    """
-
-    def attributes(self, tag: Tag):
-        for k, v in tag.attrs.items():
-            yield k, v
 
 
 def convert_to_snake_case(s: str) -> str:
@@ -201,103 +117,6 @@ def construct_component(
     component._validate_called = False
 
     return component
-
-
-class UnicornTemplateResponse(TemplateResponse):
-    def __init__(
-        self,
-        template,
-        request,
-        context=None,
-        content_type=None,
-        status=None,
-        charset=None,
-        using=None,
-        component=None,
-        init_js=False,
-        **kwargs,
-    ):
-        super().__init__(
-            template=template,
-            request=request,
-            context=context,
-            content_type=content_type,
-            status=status,
-            charset=charset,
-            using=using,
-        )
-
-        self.component = component
-        self.init_js = init_js
-
-    @timed
-    def render(self):
-        response = super().render()
-
-        if not self.component or not self.component.component_id:
-            return response
-
-        content = response.content.decode("utf-8")
-
-        frontend_context_variables = self.component.get_frontend_context_variables()
-        frontend_context_variables_dict = orjson.loads(frontend_context_variables)
-        checksum = generate_checksum(orjson.dumps(frontend_context_variables_dict))
-
-        soup = BeautifulSoup(content, features="html.parser")
-        root_element = UnicornTemplateResponse._get_root_element(soup)
-        root_element["unicorn:id"] = self.component.component_id
-        root_element["unicorn:name"] = self.component.component_name
-        root_element["unicorn:key"] = self.component.component_key
-        root_element["unicorn:checksum"] = checksum
-
-        if self.init_js:
-            init = {
-                "id": self.component.component_id,
-                "name": self.component.component_name,
-                "key": self.component.component_key,
-                "data": orjson.loads(frontend_context_variables),
-            }
-            init = orjson.dumps(init).decode("utf-8")
-            init_script = f"Unicorn.componentInit({init});"
-
-            if self.component.parent:
-                self.component._init_script = init_script
-            else:
-                for child in self.component.children:
-                    init_script = f"{init_script} {child._init_script}"
-
-                script_tag = soup.new_tag("script")
-                script_tag["type"] = "module"
-                script_tag.string = f"if (typeof Unicorn === 'undefined') {{ console.error('Unicorn is missing. Do you need {{% load unicorn %}} or {{% unicorn-scripts %}}?') }} else {{ {init_script} }}"
-                root_element.insert_after(script_tag)
-
-        rendered_template = UnicornTemplateResponse._desoupify(soup)
-        rendered_template = mark_safe(rendered_template)
-
-        response.content = rendered_template
-
-        return response
-
-    @staticmethod
-    def _get_root_element(soup: BeautifulSoup) -> Tag:
-        """
-        Gets the first div element.
-
-        Returns:
-            BeautifulSoup element.
-            
-            Raises an Exception if a div cannot be found.
-        """
-        for element in soup.contents:
-            if element.name:
-                return element
-
-        raise Exception("No root element found")
-
-    @staticmethod
-    def _desoupify(soup):
-        soup.smooth()
-        return soup.encode(formatter=UnsortedAttributes()).decode("utf-8")
 
 
 class UnicornView(TemplateView):
