@@ -101,3 +101,27 @@ def test_is_public_protected(component):
 
 def test_is_public_http_method_names(component):
     assert component._is_public("http_method_names") == False
+
+
+def test_meta_javascript_exclude():
+    class TestComponent(UnicornView):
+        name = "World"
+
+        class Meta:
+            javascript_exclude = ("name",)
+
+    component = TestComponent(component_id="asdf1234", component_name="hello-world")
+    assert "name" not in component.get_frontend_context_variables()
+    assert "name" in component.get_context_data()
+
+
+def test_meta_exclude():
+    class TestComponent(UnicornView):
+        name = "World"
+
+        class Meta:
+            exclude = ("name",)
+
+    component = TestComponent(component_id="asdf1234", component_name="hello-world")
+    assert "name" not in component.get_frontend_context_variables()
+    assert "name" not in component.get_context_data()

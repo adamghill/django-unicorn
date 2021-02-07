@@ -2,7 +2,7 @@ import importlib
 import inspect
 import logging
 import pickle
-from typing import Any, Callable, Dict, List, Optional, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Sequence, Type, Union
 
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models import Model
@@ -471,6 +471,13 @@ class UnicornView(TemplateView):
         attributes = self._attributes()
         frontend_context_variables.update(attributes)
 
+        # Remove any field in `javascript_exclude` from the `frontend_context_variables`
+        if hasattr(self, "Meta") and hasattr(self.Meta, "javascript_exclude"):
+            if isinstance(self.Meta.javascript_exclude, Sequence):
+                for field_name in self.Meta.javascript_exclude:
+                    if field_name in frontend_context_variables:
+                        del frontend_context_variables[field_name]
+
         # Add cleaned values to `frontend_content_variables` based on the widget in form's fields
         form = self._get_form(attributes)
 
@@ -746,7 +753,8 @@ class UnicornView(TemplateView):
         excludes = []
 
         if hasattr(self, "Meta") and hasattr(self.Meta, "exclude"):
-            excludes = self.Meta.exclude
+            if isinstance(self.Meta.exclude, Sequence):
+                excludes = self.Meta.exclude
 
         return not (
             name.startswith("_")
