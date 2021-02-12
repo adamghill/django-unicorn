@@ -1,6 +1,6 @@
 import logging
 from functools import lru_cache
-from typing import Any, Dict, List
+from typing import Dict, List
 
 from django.core.serializers import serialize
 from django.db.models import (
