@@ -223,6 +223,9 @@ export function send(component, callback) {
         });
       });
 
+      // Call any JavaScript functions from the response
+      component.callCalls(responseJson.calls);
+
       const triggeringElements = component.lastTriggeringElements;
       component.lastTriggeringElements = [];
 

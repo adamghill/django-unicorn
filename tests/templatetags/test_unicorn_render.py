@@ -29,6 +29,13 @@ class FakeComponentModel(UnicornView):
         self.model_id = kwargs.get("model_id")
 
 
+class FakeComponentCalls(UnicornView):
+    template_name = "templates/test_component_parent.html"
+
+    def mount(self):
+        self.call("testCall")
+
+
 def test_unicorn_render_kwarg():
     token = Token(
         TokenType.TEXT,
@@ -219,3 +226,33 @@ def test_unicorn_render_parent_component_one_script_tag(settings):
 
     assert "<script" in html
     assert len(re.findall("<script", html)) == 1
+
+
+def test_unicorn_render_calls(settings):
+    settings.DEBUG = True
+    token = Token(
+        TokenType.TEXT,
+        "unicorn 'tests.templatetags.test_unicorn_render.FakeComponentCalls'",
+    )
+    unicorn_node = unicorn(None, token)
+    context = {}
+    html = unicorn_node.render(context)
+
+    assert "<script" in html
+    assert len(re.findall("<script", html)) == 1
+    assert '"calls":[{"fn":"testCall"}]});' in html
+
+
+def test_unicorn_render_calls_no_mount_call(settings):
+    settings.DEBUG = True
+    token = Token(
+        TokenType.TEXT,
+        "unicorn 'tests.templatetags.test_unicorn_render.FakeComponentParent'",
+    )
+    unicorn_node = unicorn(None, token)
+    context = {}
+    html = unicorn_node.render(context)
+
+    assert "<script" in html
+    assert len(re.findall("<script", html)) == 1
+    assert '"calls":[]});' in html

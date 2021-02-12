@@ -78,6 +78,7 @@ class UnicornTemplateResponse(TemplateResponse):
                 "name": self.component.component_name,
                 "key": self.component.component_key,
                 "data": orjson.loads(frontend_context_variables),
+                "calls": self.component.calls,
             }
             init = orjson.dumps(init).decode("utf-8")
             init_script = f"Unicorn.componentInit({init});"

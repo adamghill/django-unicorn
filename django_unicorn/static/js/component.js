@@ -8,7 +8,7 @@ import {
 import { components } from "./store.js";
 import { send } from "./messageSender.js";
 import morphdom from "./morphdom/2.6.1/morphdom.js";
-import { $, contains, hasValue, isEmpty, isFunction, walk } from "./utils.js";
+import { $, hasValue, isEmpty, isFunction, walk } from "./utils.js";
 
 /**
  * Encapsulate component.
@@ -20,7 +20,7 @@ export class Component {
     this.key = args.key;
     this.messageUrl = args.messageUrl;
     this.csrfTokenHeaderName = args.csrfTokenHeaderName;
-    this.data = args.data;
+    this.data = args.data || {};
     this.syncUrl = `${this.messageUrl}/${this.name}`;
 
     this.document = args.document || document;
@@ -49,6 +49,8 @@ export class Component {
     this.init();
     this.refreshEventListeners();
     this.initPolling();
+
+    this.callCalls(args.calls);
   }
 
   /**
@@ -111,6 +113,20 @@ export class Component {
     }
 
     return parentComponent;
+  }
+
+  /**
+   * Call JavaScript functions on the `window`.
+   * @param {Array} calls A list of objects that specify the methods to call.
+   *
+   * `calls`: [{"fn": "someFunctionName"},]
+   */
+  callCalls(calls) {
+    calls = calls || [];
+
+    calls.forEach((call) => {
+      this.window[call.fn]();
+    });
   }
 
   /**

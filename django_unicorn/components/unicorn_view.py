@@ -109,6 +109,7 @@ def construct_component(
         **kwargs,
     )
 
+    component.calls = []
     component.children = []
     component._children_set = False
 
@@ -134,6 +135,9 @@ class UnicornView(TemplateView):
 
     # Dictionary with key: attribute name; value: pickled attribute value
     _resettable_attributes_cache: Dict[str, Any] = {}
+
+    # JavaScript method calls
+    calls = []
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -211,15 +215,39 @@ class UnicornView(TemplateView):
                 )
                 pass
 
+    def call(self, function_name):
+        """
+        Add a JavaScript method name and arguments to be called after the component is rendered.
+        """
+        self.calls.append({"fn": function_name})
+
     def mount(self):
         """
-        Hook that gets called when a component is first created.
+        Hook that gets called when the component is first created.
         """
         pass
 
     def hydrate(self):
         """
-        Hook that gets called when a component's data is hydrated.
+        Hook that gets called when the component's data is hydrated.
+        """
+        pass
+
+    def complete(self):
+        """
+        Hook that gets called when the component's methods are all called.
+        """
+        pass
+
+    def rendered(self, html):
+        """
+        Hook that gets called after the component has been rendered.
+        """
+        pass
+
+    def parent_rendered(self, html):
+        """
+        Hook that gets called after the component's parent has been rendered.
         """
         pass
 
@@ -561,6 +589,9 @@ class UnicornView(TemplateView):
             "update",
             "calling",
             "called",
+            "complete",
+            "rendered",
+            "parent_rendered",
             "validate",
             "is_valid",
             "get_frontend_context_variables",
@@ -568,6 +599,8 @@ class UnicornView(TemplateView):
             "updated",
             "parent",
             "children",
+            "call",
+            "calls",
         )
         excludes = []
 
@@ -628,6 +661,7 @@ class UnicornView(TemplateView):
             component = constructed_views_cache[component_id]
             component.setup(request)
             component._validate_called = False
+            component.calls = []
             logger.debug(f"Retrieve {component_id} from constructed views cache")
 
             return component

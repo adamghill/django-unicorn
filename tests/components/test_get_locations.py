@@ -108,12 +108,8 @@ def test_get_locations_apps_setting_set(settings):
 def test_get_locations_apps_setting_invalid(settings):
     settings.UNICORN["APPS"] = "project"
 
-    expected = [
-        ("HelloWorldView", "project.components.hello_world"),
-    ]
-
     with pytest.raises(AssertionError) as e:
-        actual = get_locations("hello-world")
+        get_locations("hello-world")
 
     assert e.type == AssertionError
     settings.UNICORN["APPS"] = ("unicorn",)

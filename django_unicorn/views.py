@@ -501,6 +501,7 @@ def _process_component_request(
         "id": component_request.id,
         "data": updated_data,
         "errors": component.errors,
+        "calls": component.calls,
         "checksum": generate_checksum(orjson.dumps(component_request.data)),
     }
 
