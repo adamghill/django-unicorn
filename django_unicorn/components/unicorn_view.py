@@ -115,6 +115,7 @@ def construct_component(
 
     component.mount()
     component.hydrate()
+    component.complete()
     component._validate_called = False
 
     return component
@@ -235,7 +236,7 @@ class UnicornView(TemplateView):
 
     def complete(self):
         """
-        Hook that gets called when the component's methods are all called.
+        Hook that gets called after all component methods are executed.
         """
         pass
 
@@ -658,6 +659,8 @@ class UnicornView(TemplateView):
             return component_class
 
         if use_cache and component_id in constructed_views_cache:
+            # Note that `hydrate()` and `complete` don't need to be called here
+            # because this path only happens for re-rendering from the view
             component = constructed_views_cache[component_id]
             component.setup(request)
             component._validate_called = False

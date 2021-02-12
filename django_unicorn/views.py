@@ -434,6 +434,8 @@ def _process_component_request(
         else:
             raise UnicornViewError(f"Unknown action_type '{action_type}'")
 
+    component.complete()
+
     # Re-load frontend context variables to deal with non-serializable properties
     component_request.data = orjson.loads(component.get_frontend_context_variables())
 
@@ -454,6 +456,8 @@ def _process_component_request(
             component.validate(model_names=list(updated_data.keys()))
 
     rendered_component = component.render()
+    component.rendered(rendered_component)
+
     partial_doms = []
 
     if partials and all(partials):
@@ -540,6 +544,7 @@ def _process_component_request(
 
         if not partial_doms:
             parent_dom = parent_component.render()
+            component.parent_rendered(parent_dom)
 
             parent.update(
                 {

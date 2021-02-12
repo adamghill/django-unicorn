@@ -96,6 +96,7 @@ class UnicornTemplateResponse(TemplateResponse):
 
         rendered_template = UnicornTemplateResponse._desoupify(soup)
         rendered_template = mark_safe(rendered_template)
+        self.component.rendered(rendered_template)
 
         response.content = rendered_template
 
