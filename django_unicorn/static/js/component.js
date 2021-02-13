@@ -125,7 +125,7 @@ export class Component {
     calls = calls || [];
 
     calls.forEach((call) => {
-      this.window[call.fn]();
+      this.window[call.fn](...call.args);
     });
   }
 

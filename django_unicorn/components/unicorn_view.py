@@ -216,11 +216,11 @@ class UnicornView(TemplateView):
                 )
                 pass
 
-    def call(self, function_name):
+    def call(self, function_name, *args):
         """
         Add a JavaScript method name and arguments to be called after the component is rendered.
         """
-        self.calls.append({"fn": function_name})
+        self.calls.append({"fn": function_name, "args": args})
 
     def mount(self):
         """

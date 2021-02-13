@@ -7,7 +7,7 @@ class JsView(UnicornView):
         pass
 
     def call_javascript(self):
-        self.call("callAlert")
+        self.call("callAlert", "world")
 
     def choose_state():
         pass

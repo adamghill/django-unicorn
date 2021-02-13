@@ -36,6 +36,13 @@ class FakeComponentCalls(UnicornView):
         self.call("testCall")
 
 
+class FakeComponentCalls2(UnicornView):
+    template_name = "templates/test_component_parent.html"
+
+    def mount(self):
+        self.call("testCall2", "hello")
+
+
 def test_unicorn_render_kwarg():
     token = Token(
         TokenType.TEXT,
@@ -240,7 +247,22 @@ def test_unicorn_render_calls(settings):
 
     assert "<script" in html
     assert len(re.findall("<script", html)) == 1
-    assert '"calls":[{"fn":"testCall"}]});' in html
+    assert '"calls":[{"fn":"testCall","args":[]}]});' in html
+
+
+def test_unicorn_render_calls_with_arg(settings):
+    settings.DEBUG = True
+    token = Token(
+        TokenType.TEXT,
+        "unicorn 'tests.templatetags.test_unicorn_render.FakeComponentCalls2'",
+    )
+    unicorn_node = unicorn(None, token)
+    context = {}
+    html = unicorn_node.render(context)
+
+    assert "<script" in html
+    assert len(re.findall("<script", html)) == 1
+    assert '"calls":[{"fn":"testCall2","args":["hello"]}]});' in html
 
 
 def test_unicorn_render_calls_no_mount_call(settings):
