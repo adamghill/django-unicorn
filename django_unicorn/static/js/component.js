@@ -262,6 +262,32 @@ export class Component {
   }
 
   /**
+   * Check to see if the poll is disabled.
+   */
+  isPollEnabled() {
+    if (!this.poll.disable) {
+      if (hasValue(this.poll.disableData)) {
+        if (this.poll.disableData.startsWith("!")) {
+          // Manually negate this and re-negate it after the check
+          this.poll.disableData = this.poll.disableData.slice(1);
+
+          if (this.data[this.poll.disableData]) {
+            return true;
+          }
+
+          this.poll.disableData = `!${this.poll.disableData}`;
+        } else if (!this.data[this.poll.disableData]) {
+          return true;
+        }
+      } else {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /**
    * Sets up polling if it is defined on the component's root.
    */
   initPolling() {
@@ -287,12 +313,15 @@ export class Component {
 
       this.poll.partial = rootElement.partial;
 
-      // Call the method once before the timer starts
-      this.callMethod(
-        this.poll.method,
-        this.poll.partial,
-        this.handlePollError
-      );
+      if (this.isPollEnabled()) {
+        // Call the method once before the timer starts
+        this.callMethod(
+          this.poll.method,
+          this.poll.partial,
+          this.handlePollError
+        );
+      }
+
       this.startPolling();
     }
   }
@@ -302,35 +331,12 @@ export class Component {
    */
   startPolling() {
     this.poll.timer = setInterval(() => {
-      if (!this.poll.disable) {
-        if (hasValue(this.poll.disableData)) {
-          if (this.poll.disableData.startsWith("!")) {
-            // Manually negate this and re-negate it after the check
-            this.poll.disableData = this.poll.disableData.slice(1);
-
-            if (this.data[this.poll.disableData]) {
-              this.callMethod(
-                this.poll.method,
-                this.poll.partial,
-                this.handlePollError
-              );
-            }
-
-            this.poll.disableData = `!${this.poll.disableData}`;
-          } else if (!this.data[this.poll.disableData]) {
-            this.callMethod(
-              this.poll.method,
-              this.poll.partial,
-              this.handlePollError
-            );
-          }
-        } else {
-          this.callMethod(
-            this.poll.method,
-            this.poll.partial,
-            this.handlePollError
-          );
-        }
+      if (this.isPollEnabled()) {
+        this.callMethod(
+          this.poll.method,
+          this.poll.partial,
+          this.handlePollError
+        );
       }
     }, this.poll.timing);
   }
