@@ -11,6 +11,7 @@ from django.views.decorators.http import require_POST
 
 import orjson
 from bs4 import BeautifulSoup
+from cachetools.lru import LRUCache
 
 from .call_method_parser import InvalidKwarg, parse_call_method_name, parse_kwarg
 from .components import UnicornField, UnicornView
@@ -26,7 +27,14 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
+type_hints_cache = LRUCache(maxsize=100)
+
+
 def handle_error(view_func):
+    """
+    Returns a JSON response with an error if necessary.
+    """
+
     def wrapped_view(*args, **kwargs):
         try:
             return view_func(*args, **kwargs)
@@ -36,6 +44,34 @@ def handle_error(view_func):
             return JsonResponse({"error": str(e)})
 
     return wraps(view_func)(wrapped_view)
+
+
+def _get_type_hints(obj):
+    """
+    Get type hints from an object. These get cached in a local memory cache for quicker look-up later.
+
+    Returns:
+        An empty dictionary if no type hints can be retrieved.
+    """
+    try:
+        if obj in type_hints_cache:
+            return type_hints_cache[obj]
+    except TypeError:
+        # Ignore issues with checking for an object in the cache, e.g. when a Django model is missing a PK
+        pass
+
+    try:
+        type_hints = get_type_hints(obj)
+
+        # Cache the type hints just in case
+        type_hints_cache[obj] = type_hints
+
+        return type_hints
+    except TypeError:
+        #  Return an empty dictionary when there is a TypeError. From `get_type_hints`: "TypeError is
+        # raised if the argument is not of a type that can contain annotations, and an empty dictionary
+        # is returned if no annotations are present"
+        return {}
 
 
 @timed
@@ -66,7 +102,7 @@ def _is_component_field_model_or_unicorn_field(
     component_type_hints = {}
 
     try:
-        component_type_hints = get_type_hints(component_or_field)
+        component_type_hints = _get_type_hints(component_or_field)
 
         if name in component_type_hints:
             is_subclass_of_model = issubclass(component_type_hints[name], Model)
@@ -81,7 +117,7 @@ def _is_component_field_model_or_unicorn_field(
                 if is_subclass_of_model or is_subclass_of_unicorn_field:
                     field = component_type_hints[name]()
                     setattr(component_or_field, name, field)
-    except TypeError as e:
+    except TypeError:
         pass
 
     return is_subclass_of_model or is_subclass_of_unicorn_field
@@ -115,6 +151,15 @@ def _set_property_from_data(
         else:
             _set_property_from_data(field, field.name, value)
     else:
+        type_hints = _get_type_hints(component_or_field)
+
+        if name in type_hints:
+            # Construct the specified type by passing the value in
+            # Usually the value will be a string (because it is coming from JSON)
+            # and basic types can be constructed by passing in a string,
+            # i.e. int("1") or float("1.1")
+            value = type_hints[name](value)
+
         if hasattr(component_or_field, "_set_property"):
             # Can assume that `component_or_field` is a component
             component_or_field._set_property(name, value)

@@ -1,30 +1,18 @@
-import time
-
 import orjson
-import shortuuid
 
-from django_unicorn.utils import generate_checksum
+from tests.views.message.utils import post_and_get_response
 
 
 def test_message_nested_sync_input(client):
     data = {"dictionary": {"name": "test"}}
-    message = {
-        "actionQueue": [
-            {
-                "payload": {"name": "dictionary.name", "value": "test1"},
-                "type": "syncInput",
-            }
-        ],
-        "data": data,
-        "checksum": generate_checksum(orjson.dumps(data)),
-        "id": shortuuid.uuid()[:8],
-        "epoch": time.time(),
-    }
-
-    response = client.post(
-        "/message/tests.views.fake_components.FakeComponent",
-        message,
-        content_type="application/json",
+    action_queue = [
+        {"payload": {"name": "dictionary.name", "value": "test1"}, "type": "syncInput",}
+    ]
+    response = post_and_get_response(
+        client,
+        url="/message/tests.views.fake_components.FakeComponent",
+        data=data,
+        action_queue=action_queue,
     )
 
     body = orjson.loads(response.content)

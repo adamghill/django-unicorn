@@ -7,7 +7,6 @@ from django_unicorn.utils import generate_checksum
 
 
 def post_and_get_response(client, url="", data={}, action_queue=[]):
-    data = {}
     message = {
         "actionQueue": action_queue,
         "data": data,
