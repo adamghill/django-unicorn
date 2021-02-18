@@ -1,4 +1,5 @@
 import logging
+from decimal import Decimal
 from functools import lru_cache
 from typing import Dict, List
 
@@ -80,7 +81,7 @@ def _json_serializer(obj):
     Handle the objects that the `orjson` deserializer can't handle automatically.
 
     The types handled by `orjson` by default: dataclass, datetime, enum, float, int, numpy, str, uuid.
-    The types handled in this class: Django Model, Django QuerySet, any object with `to_json` method.
+    The types handled in this class: Django Model, Django QuerySet, Decimal, or any object with `to_json` method.
 
     TODO: Investigate other ways to serialize objects automatically.
     e.g. Using DRF serializer: https://www.django-rest-framework.org/api-guide/serializers/#serializing-objects
@@ -106,6 +107,8 @@ def _json_serializer(obj):
             return queryset_json
         elif PydanticBaseModel and isinstance(obj, PydanticBaseModel):
             return obj.dict()
+        elif isinstance(obj, Decimal):
+            return str(obj)
         elif hasattr(obj, "to_json"):
             return obj.to_json()
     except Exception as e:

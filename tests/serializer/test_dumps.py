@@ -1,4 +1,5 @@
 import json
+from decimal import Decimal
 
 from django.db.models import (
     SET_NULL,
@@ -38,6 +39,13 @@ class ComplicatedTestModel(Model):
 def test_int():
     expected = '{"name":123}'
     actual = serializer.dumps({"name": 123})
+
+    assert expected == actual
+
+
+def test_decimal():
+    expected = '{"name":"123.1"}'
+    actual = serializer.dumps({"name": Decimal("123.1")})
 
     assert expected == actual
 
