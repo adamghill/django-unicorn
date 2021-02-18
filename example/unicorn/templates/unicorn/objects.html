@@ -83,6 +83,20 @@
         </ul>
     </div>
 
+    <div>
+        <input u:model="float_example" type="text" id="floatExampleId">
+        <br />
+        <input u:model="decimal_example" type="text" id="decimalExampleId">
+        <br />
+        <input u:model="int_example" type="text" id="intExampleId">
+        <br />
+
+        <button type="submit" u:click="add_one_to_float">Add 1 to float</button>
+        <br />
+        float_example: {{ float_example }}
+        <br />
+    </div>
+
     <button u:click="$reset">$reset</button>
     <button u:click="$refresh">$refresh</button>
 </div>

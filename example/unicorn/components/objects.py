@@ -1,4 +1,5 @@
 from datetime import datetime
+from decimal import Decimal as D
 from typing import Optional
 
 from django.utils.timezone import now
@@ -32,11 +33,16 @@ class ObjectsView(UnicornView):
     dictionary = {"name": "dictionary", "nested": {"name": "nested dictionary"}}
     book = Book(title="The Sandman")
     books = Book.objects.all()
-
     date_example = now()
+    float_example: float = 1.1
+    decimal_example = D("1.1")
+    int_example = 4
 
     def get_date(self):
         self.date_example = now()
 
     def set_dictionary(self, val):
         self.dictionary = val
+
+    def add_one_to_float(self):
+        self.float_example += 1
