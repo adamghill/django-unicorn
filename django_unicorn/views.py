@@ -1,5 +1,6 @@
 import copy
 import logging
+from dataclasses import is_dataclass
 from functools import wraps
 from typing import Any, Dict, List, Union, get_type_hints
 
@@ -158,7 +159,11 @@ def _set_property_from_data(
             # Usually the value will be a string (because it is coming from JSON)
             # and basic types can be constructed by passing in a string,
             # i.e. int("1") or float("1.1")
-            value = type_hints[name](value)
+
+            if is_dataclass(type_hints[name]):
+                value = type_hints[name](**value)
+            else:
+                value = type_hints[name](value)
 
         if hasattr(component_or_field, "_set_property"):
             # Can assume that `component_or_field` is a component
