@@ -71,4 +71,3 @@ def test_message_decimal(client):
         "error"
     )  # UnicornViewError/AssertionError returns a a JsonResponse with "error" key
     assert not body["errors"]
-
