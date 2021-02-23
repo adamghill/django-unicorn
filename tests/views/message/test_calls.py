@@ -27,8 +27,7 @@ def test_message_calls(client):
         client, url=FAKE_CALLS_COMPONENT_URL, action_queue=action_queue
     )
 
-    body = response.json()
-    assert body.get("calls") == [{"args": [], "fn": "testCall"}]
+    assert response.get("calls") == [{"args": [], "fn": "testCall"}]
 
 
 def test_message_multiple_calls(client):
@@ -40,8 +39,7 @@ def test_message_multiple_calls(client):
         client, url=FAKE_CALLS_COMPONENT_URL, action_queue=action_queue
     )
 
-    body = response.json()
-    assert body.get("calls") == [
+    assert response.get("calls") == [
         {"args": [], "fn": "testCall"},
         {"args": [], "fn": "testCall2"},
     ]
@@ -56,5 +54,4 @@ def test_message_calls_with_arg(client):
         client, url=FAKE_CALLS_COMPONENT_URL, action_queue=action_queue
     )
 
-    body = response.json()
-    assert body.get("calls") == [{"args": ["hello"], "fn": "testCall3"}]
+    assert response.get("calls") == [{"args": ["hello"], "fn": "testCall3"}]

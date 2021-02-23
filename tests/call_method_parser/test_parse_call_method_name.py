@@ -22,6 +22,13 @@ def test_multiple_args():
     assert actual == expected
 
 
+def test_multiple_args_2():
+    expected = ("set_name", [1, 2], {})
+    actual = parse_call_method_name("set_name(1, 2)")
+
+    assert actual == expected
+
+
 def test_var_with_curly_braces():
     expected = ("set_name", ["{}",], {})
     actual = parse_call_method_name('set_name("{}")')
@@ -32,13 +39,6 @@ def test_var_with_curly_braces():
 def test_one_arg():
     expected = ("set_name", ["1",], {})
     actual = parse_call_method_name('set_name("1")')
-
-    assert actual == expected
-
-
-def test_multiple_args():
-    expected = ("set_name", [1, 2], {})
-    actual = parse_call_method_name("set_name(1, 2)")
 
     assert actual == expected
 

@@ -228,7 +228,6 @@ def test_message_second_request_not_queued_because_after_first(client, settings)
 
 
 @pytest.mark.slow
-@pytest.mark.skip
 def test_message_second_request_not_queued_because_serial_timeout(client, settings):
     _set_serial(settings, True, 0.1)
 
@@ -256,7 +255,6 @@ def test_message_second_request_not_queued_because_serial_timeout(client, settin
 
 
 @pytest.mark.slow
-@pytest.mark.skip
 def test_message_second_request_not_queued_because_serial_disabled(client, settings):
     _set_serial(settings, False, 5)
 

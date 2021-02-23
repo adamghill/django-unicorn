@@ -46,12 +46,10 @@ def test_message_int(client):
         client, url=FAKE_OBJECTS_COMPONENT_URL, data=data, action_queue=action_queue,
     )
 
-    body = orjson.loads(response.content)
-
-    assert not body.get(
+    assert not response.get(
         "error"
     )  # UnicornViewError/AssertionError returns a a JsonResponse with "error" key
-    assert not body["errors"]
+    assert not response["errors"]
 
 
 def test_message_float(client):
@@ -61,12 +59,10 @@ def test_message_float(client):
         client, url=FAKE_OBJECTS_COMPONENT_URL, data=data, action_queue=action_queue,
     )
 
-    body = orjson.loads(response.content)
-
-    assert not body.get(
+    assert not response.get(
         "error"
     )  # UnicornViewError/AssertionError returns a a JsonResponse with "error" key
-    assert not body["errors"]
+    assert not response["errors"]
 
 
 def test_message_decimal(client):
@@ -76,12 +72,10 @@ def test_message_decimal(client):
         client, url=FAKE_OBJECTS_COMPONENT_URL, data=data, action_queue=action_queue,
     )
 
-    body = orjson.loads(response.content)
-
-    assert not body.get(
+    assert not response.get(
         "error"
     )  # UnicornViewError/AssertionError returns a a JsonResponse with "error" key
-    assert not body["errors"]
+    assert not response["errors"]
 
 
 def test_message_dataclass(client):
@@ -91,9 +85,7 @@ def test_message_dataclass(client):
         client, url=FAKE_OBJECTS_COMPONENT_URL, data=data, action_queue=action_queue,
     )
 
-    body = orjson.loads(response.content)
-
-    assert not body.get(
+    assert not response.get(
         "error"
     )  # UnicornViewError/AssertionError returns a a JsonResponse with "error" key
-    assert not body["errors"]
+    assert not response["errors"]

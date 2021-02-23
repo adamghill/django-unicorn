@@ -15,7 +15,5 @@ def test_message_nested_sync_input(client):
         action_queue=action_queue,
     )
 
-    body = orjson.loads(response.content)
-
-    assert not body["errors"]
-    assert body["data"].get("dictionary") == {"name": "test1"}
+    assert not response["errors"]
+    assert response["data"].get("dictionary") == {"name": "test1"}

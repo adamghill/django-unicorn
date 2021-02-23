@@ -21,7 +21,7 @@ from .errors import UnicornViewError
 from .message import ComponentRequest, Return
 from .serializer import dumps, loads
 from .settings import get_cache_alias, get_serial_enabled, get_serial_timeout
-from .utils import generate_checksum
+from .utils import generate_checksum, get_cacheable_component
 
 
 logger = logging.getLogger(__name__)
@@ -508,6 +508,11 @@ def _process_component_request(
     rendered_component = component.render()
     component.rendered(rendered_component)
 
+    cache = caches[get_cache_alias()]
+    component_cache_key = f"unicorn:component:{component.component_id}"
+    cacheable_component = get_cacheable_component(component)
+    cache.set(component_cache_key, cacheable_component)
+
     partial_doms = []
 
     if partials and all(partials):
@@ -582,6 +587,7 @@ def _process_component_request(
     parent_component = component.parent
 
     if parent_component:
+        # TODO: Should parent_component.hydrate() be called?
         parent_frontend_context_variables = loads(
             parent_component.get_frontend_context_variables()
         )
@@ -595,6 +601,10 @@ def _process_component_request(
         if not partial_doms:
             parent_dom = parent_component.render()
             component.parent_rendered(parent_dom)
+
+            component_cache_key = f"unicorn:component:{parent_component.component_id}"
+            cacheable_component = get_cacheable_component(parent_component)
+            cache.set(component_cache_key, cacheable_component)
 
             parent.update(
                 {

@@ -4,6 +4,7 @@ import logging
 import pickle
 from typing import Any, Callable, Dict, List, Optional, Sequence, Type, Union
 
+from django.core.cache import caches
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models import Model
 from django.http import HttpRequest
@@ -11,10 +12,13 @@ from django.views.generic.base import TemplateView
 
 from cachetools.lru import LRUCache
 
+from django_unicorn.settings import get_cache_alias
+
 from .. import serializer
 from ..decorators import timed
-from ..errors import ComponentLoadError
+from ..errors import ComponentLoadError, UnicornCacheError
 from ..settings import get_setting
+from ..utils import get_cacheable_component
 from .fields import UnicornField
 from .unicorn_template_response import UnicornTemplateResponse
 
@@ -29,6 +33,7 @@ views_cache = LRUCache(maxsize=100)
 # Module cache for constructed component classes
 # This can create a subtle race condition so a more long-term solution needs to be found
 constructed_views_cache = LRUCache(maxsize=100)
+COMPONENTS_MODULE_CACHE_ENABLED = True
 
 
 def convert_to_snake_case(s: str) -> str:
@@ -646,6 +651,9 @@ class UnicornView(TemplateView):
         assert component_id, "Component id is required"
         assert component_name, "Component name is required"
 
+        cache = caches[get_cache_alias()]
+        component_cache_key = f"unicorn:component:{component_id}"
+
         @timed
         def _get_component_class(
             module_name: str, class_name: str
@@ -658,16 +666,30 @@ class UnicornView(TemplateView):
 
             return component_class
 
-        if use_cache and component_id in constructed_views_cache:
+        cached_component = cache.get(component_cache_key)
+
+        if cached_component:
+            if cached_component.parent:
+                parent_component_cache_key = (
+                    f"unicorn:component:{cached_component.parent.component_id}"
+                )
+                cached_parent_component = cache.get(parent_component_cache_key)
+
+                if cached_parent_component:
+                    cached_component.parent = cached_parent_component
+                    cached_component.parent.setup(request)
+        else:
+            cached_component = constructed_views_cache.get(component_id)
+
+        if use_cache and cached_component:
             # Note that `hydrate()` and `complete` don't need to be called here
             # because this path only happens for re-rendering from the view
-            component = constructed_views_cache[component_id]
-            component.setup(request)
-            component._validate_called = False
-            component.calls = []
+            cached_component.setup(request)
+            cached_component._validate_called = False
+            cached_component.calls = []
             logger.debug(f"Retrieve {component_id} from constructed views cache")
 
-            return component
+            return cached_component
 
         if component_id in views_cache:
             (component_class, parent, kwargs) = views_cache[component_id]
@@ -705,9 +727,22 @@ class UnicornView(TemplateView):
                     **kwargs,
                 )
 
-                # Put the component's class in a "cache" to skip looking for the component on the next request
+                # Put the component's class in a module cache to skip looking for the component again
                 views_cache[component_id] = (component_class, parent, kwargs)
-                constructed_views_cache[component_id] = component
+
+                # Put the instantiated component into a module cache and the Django cache
+                cacheable_component = None
+
+                try:
+                    cacheable_component = get_cacheable_component(component)
+                except UnicornCacheError as e:
+                    logger.exception(e)
+
+                if cacheable_component:
+                    if COMPONENTS_MODULE_CACHE_ENABLED:
+                        constructed_views_cache[component_id] = cacheable_component
+
+                    cache.set(component_cache_key, cacheable_component)
 
                 return component
             except ModuleNotFoundError as e:
