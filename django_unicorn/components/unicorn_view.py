@@ -156,6 +156,7 @@ class UnicornView(TemplateView):
 
         assert hasattr(self, "component_id"), "Component id is required"
         assert self.component_id, "Component id is required"
+        self.component_cache_key = f"unicorn:component:{self.component_id}"
 
         if "request" in kwargs:
             self.setup(kwargs["request"])
@@ -607,6 +608,7 @@ class UnicornView(TemplateView):
             "children",
             "call",
             "calls",
+            "component_cache_key",
         )
         excludes = []
 
@@ -651,9 +653,6 @@ class UnicornView(TemplateView):
         assert component_id, "Component id is required"
         assert component_name, "Component name is required"
 
-        cache = caches[get_cache_alias()]
-        component_cache_key = f"unicorn:component:{component_id}"
-
         @timed
         def _get_component_class(
             module_name: str, class_name: str
@@ -666,14 +665,19 @@ class UnicornView(TemplateView):
 
             return component_class
 
+        cache = caches[get_cache_alias()]
+        component_cache_key = f"unicorn:component:{component_id}"
         cached_component = cache.get(component_cache_key)
 
         if cached_component:
+            # Get the newest version of the parent from cache if it is available
+            # This needs to happen for Django cache because instances is pickled, so
+            # a change in the view won't be reflected automatically (like with the module
+            # cache) so it needs to be retrieved manually.
             if cached_component.parent:
-                parent_component_cache_key = (
-                    f"unicorn:component:{cached_component.parent.component_id}"
+                cached_parent_component = cache.get(
+                    cached_component.parent.component_cache_key
                 )
-                cached_parent_component = cache.get(parent_component_cache_key)
 
                 if cached_parent_component:
                     cached_component.parent = cached_parent_component
@@ -742,7 +746,9 @@ class UnicornView(TemplateView):
                     if COMPONENTS_MODULE_CACHE_ENABLED:
                         constructed_views_cache[component_id] = cacheable_component
 
-                    cache.set(component_cache_key, cacheable_component)
+                    cache.set(
+                        cacheable_component.component_cache_key, cacheable_component
+                    )
 
                 return component
             except ModuleNotFoundError as e:

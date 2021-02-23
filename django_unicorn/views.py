@@ -509,9 +509,7 @@ def _process_component_request(
     component.rendered(rendered_component)
 
     cache = caches[get_cache_alias()]
-    component_cache_key = f"unicorn:component:{component.component_id}"
-    cacheable_component = get_cacheable_component(component)
-    cache.set(component_cache_key, cacheable_component)
+    cache.set(component.component_cache_key, get_cacheable_component(component))
 
     partial_doms = []
 
@@ -602,9 +600,10 @@ def _process_component_request(
             parent_dom = parent_component.render()
             component.parent_rendered(parent_dom)
 
-            component_cache_key = f"unicorn:component:{parent_component.component_id}"
-            cacheable_component = get_cacheable_component(parent_component)
-            cache.set(component_cache_key, cacheable_component)
+            cache.set(
+                parent_component.component_cache_key,
+                get_cacheable_component(parent_component),
+            )
 
             parent.update(
                 {
@@ -650,14 +649,12 @@ def _handle_component_request(
     cache = caches[get_cache_alias()]
 
     # Add the current request `ComponentRequest` to the cache
-    component_cache_key = (
-        f"unicorn:queue:{component_request.name}:{component_request.id}"
-    )
-    component_requests = cache.get(component_cache_key) or []
+    queue_cache_key = f"unicorn:queue:{component_request.id}"
+    component_requests = cache.get(queue_cache_key) or []
     component_requests.append(component_request)
 
     cache.set(
-        component_cache_key, component_requests, timeout=get_serial_timeout(),
+        queue_cache_key, component_requests, timeout=get_serial_timeout(),
     )
 
     if len(component_requests) > 1:
@@ -669,12 +666,12 @@ def _handle_component_request(
         }
 
     return _handle_queued_component_requests(
-        request, component_request.name, component_cache_key
+        request, component_request.name, queue_cache_key
     )
 
 
 def _handle_queued_component_requests(
-    request: HttpRequest, component_name: str, component_cache_key
+    request: HttpRequest, component_name: str, queue_cache_key
 ) -> Dict:
     """
     Process the current component requests that are stored in cache.
@@ -685,8 +682,8 @@ def _handle_queued_component_requests(
     Args:
         param request: HttpRequest for the view.
         param: component_name: Name of the component, e.g. "hello-world".
-        param: component_cache_key: Cache key created from name of the component and the
-            component id which should be unique for any particular user's request lifecycle.
+        param: queue_cache_key: Cache key created from component id which should be unique
+            for any particular user's request lifecycle.
     
     Returns:
         JSON with the following structure:
@@ -702,10 +699,10 @@ def _handle_queued_component_requests(
     cache = caches[get_cache_alias()]
 
     # Handle current request and any others in the cache by first sorting all of the current requests by ascending order
-    component_requests = cache.get(component_cache_key)
+    component_requests = cache.get(queue_cache_key)
 
     if not component_requests or not isinstance(component_requests, list):
-        raise UnicornViewError(f"No request found for {component_cache_key}")
+        raise UnicornViewError(f"No request found for {queue_cache_key}")
 
     component_requests = sorted(component_requests, key=lambda r: r.epoch)
     first_component_request = component_requests[0]
@@ -716,13 +713,13 @@ def _handle_queued_component_requests(
     first_json_result = _process_component_request(request, first_component_request)
 
     # Re-check for requests after the first request is processed
-    component_requests = cache.get(component_cache_key)
+    component_requests = cache.get(queue_cache_key)
 
     # Check that the request is in the cache before popping it off
     if component_requests:
         component_requests.pop(0)
         cache.set(
-            component_cache_key, component_requests, timeout=get_serial_timeout(),
+            queue_cache_key, component_requests, timeout=get_serial_timeout(),
         )
 
     if component_requests:
@@ -750,7 +747,7 @@ def _handle_queued_component_requests(
 
             component_requests.pop(0)
             cache.set(
-                component_cache_key, component_requests, timeout=get_serial_timeout(),
+                queue_cache_key, component_requests, timeout=get_serial_timeout(),
             )
 
         merged_json_result = _handle_component_request(
