@@ -31,6 +31,7 @@ bpython = "^0.19"
 django-mock-queries = "^2.1.5"
 pydantic = "^1.7.3"
 pywatchman = "^1.4.1"
+django-redis = "^4.12.1"
 
 [build-system]
 requires = ["poetry>=0.12"]
