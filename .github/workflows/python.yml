@@ -45,8 +45,5 @@ jobs:
       - name: isort check
         run: poetry run isort --settings pyproject.toml --check .
 
-      - name: Run tests
-        run: poetry run pytest -m "not slow"
-
-      - name: Run slow tests
-        run: poetry run pytest -m "slow"
+      - name: Run all tests
+        run: poetry run nox
