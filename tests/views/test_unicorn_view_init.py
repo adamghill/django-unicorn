@@ -19,7 +19,7 @@ def test_init_no_component_id():
 
 def test_init_none_component_id():
     with pytest.raises(AssertionError) as e:
-        component = UnicornView(component_name="test", component_id=None)
+        UnicornView(component_name="test", component_id=None)
 
     assert e.exconly() == "AssertionError: Component id is required"
 
