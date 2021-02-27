@@ -1,4 +1,8 @@
 <div>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
     <script>
         function callAlert(name) {
             alert("hello, " + name);
@@ -11,10 +15,43 @@
 
     <div>
         <h2>
-            <code>javascript_exclude</code>
+            <code>javascript_exclude states</code>
         </h2>
         {% for state in states %}
         {{ state }}
         {% endfor %}
+    </div>
+
+    <h2>Select2</h2>
+
+    <div u:ignore>
+        <select unicorn:model="selected_state" class="form-control" id="select2-example" required onchange="Unicorn.call('js', 'select_state', this.value, this.selectedIndex);">
+            {% for state in states %}
+                <option value="{{ state }}">{{ state }}</option>
+            {% endfor %}
+        </select>
+
+        States (in ignored div): {{ states }}
+    </div>
+
+    selected_state: {{ selected_state }}
+
+    <script>
+        $(document).ready(function() {
+            $('#select2-example').select2();
+        });
+    </script>
+
+    <div>
+        States (not in ignored div): {{ states }}<br />
+        <button type="submit" u:click="change_states">Change states</button>
+    </div>
+
+    <div>
+        <input type="text" u:model="select2_datetime" />
+        <button type="submit" u:click="get_now">Get now</button>
+        <div>
+            select2_datetime: {{ select2_datetime }}
+        </div>
     </div>
 </div>

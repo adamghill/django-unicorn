@@ -67,8 +67,24 @@ export function getComponent(componentNameOrKey) {
 /**
  * Call an action on the specified component.
  */
-export function call(componentNameOrKey, methodName) {
+export function call(componentNameOrKey, methodName, ...args) {
   const component = getComponent(componentNameOrKey);
+  let argString = "";
+
+  args.forEach((arg) => {
+    if (typeof arg !== "undefined") {
+      if (typeof arg === "string") {
+        argString = `${argString}'${arg}', `;
+      } else {
+        argString = `${argString}${arg}, `;
+      }
+    }
+  });
+
+  if (argString) {
+    argString = argString.slice(0, -2);
+    methodName = `${methodName}(${argString})`;
+  }
 
   component.callMethod(methodName, null, (err) => {
     console.error(err);

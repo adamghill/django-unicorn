@@ -505,8 +505,18 @@ function morphdomFactory(morphAttrs) {
           return;
         }
 
+        // @unicornModification from @livewireModification.
+        // Don't update an element or its children if it's been ignored
+        if (
+          fromEl.hasAttribute("u:ignore") ||
+          fromEl.hasAttribute("unicorn:ignore")
+        ) {
+          return;
+        }
+
         // update attributes on original DOM element first
         morphAttrs(fromEl, toEl);
+
         // optional
         onElUpdated(fromEl);
 
