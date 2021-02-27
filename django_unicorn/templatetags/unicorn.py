@@ -6,9 +6,6 @@ from django.conf import settings
 import shortuuid
 
 from django_unicorn.call_method_parser import InvalidKwarg, parse_kwarg
-from django_unicorn.errors import UnicornViewError
-
-from ..settings import get_setting
 
 
 register = template.Library()
@@ -16,6 +13,9 @@ register = template.Library()
 
 @register.inclusion_tag("unicorn/scripts.html")
 def unicorn_scripts():
+    # Import here to prevent th potential of this from loading before Django settings
+    from django_unicorn.settings import get_setting
+
     return {"MINIFIED": get_setting("MINIFIED", not settings.DEBUG)}
 
 
