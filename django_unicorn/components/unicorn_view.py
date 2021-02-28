@@ -740,7 +740,7 @@ class UnicornView(TemplateView):
                 try:
                     cacheable_component = get_cacheable_component(component)
                 except UnicornCacheError as e:
-                    logger.exception(e)
+                    logger.warning(e)
 
                 if cacheable_component:
                     if COMPONENTS_MODULE_CACHE_ENABLED:

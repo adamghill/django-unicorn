@@ -17,7 +17,7 @@ from cachetools.lru import LRUCache
 from .call_method_parser import InvalidKwarg, parse_call_method_name, parse_kwarg
 from .components import UnicornField, UnicornView
 from .decorators import timed
-from .errors import UnicornViewError
+from .errors import UnicornCacheError, UnicornViewError
 from .message import ComponentRequest, Return
 from .serializer import dumps, loads
 from .settings import get_cache_alias, get_serial_enabled, get_serial_timeout
@@ -509,7 +509,11 @@ def _process_component_request(
     component.rendered(rendered_component)
 
     cache = caches[get_cache_alias()]
-    cache.set(component.component_cache_key, get_cacheable_component(component))
+
+    try:
+        cache.set(component.component_cache_key, get_cacheable_component(component))
+    except UnicornCacheError as e:
+        logger.warning(e)
 
     partial_doms = []
 
@@ -600,10 +604,13 @@ def _process_component_request(
             parent_dom = parent_component.render()
             component.parent_rendered(parent_dom)
 
-            cache.set(
-                parent_component.component_cache_key,
-                get_cacheable_component(parent_component),
-            )
+            try:
+                cache.set(
+                    parent_component.component_cache_key,
+                    get_cacheable_component(parent_component),
+                )
+            except UnicornCacheError as e:
+                logger.warning(e)
 
             parent.update(
                 {
