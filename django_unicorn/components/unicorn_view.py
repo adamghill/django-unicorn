@@ -2,6 +2,7 @@ import importlib
 import inspect
 import logging
 import pickle
+import sys
 from typing import Any, Callable, Dict, List, Optional, Sequence, Type, Union
 
 from django.core.cache import caches
@@ -33,7 +34,7 @@ views_cache = LRUCache(maxsize=100)
 # Module cache for constructed component classes
 # This can create a subtle race condition so a more long-term solution needs to be found
 constructed_views_cache = LRUCache(maxsize=100)
-COMPONENTS_MODULE_CACHE_ENABLED = True
+COMPONENTS_MODULE_CACHE_ENABLED = "pytest" not in sys.modules
 
 
 def convert_to_snake_case(s: str) -> str:

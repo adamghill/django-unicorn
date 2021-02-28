@@ -7,7 +7,7 @@ from django_unicorn.utils import generate_checksum
 
 
 def post_and_get_response(
-    client, url="", data=None, action_queue=None, component_id=None
+    client, url="", data=None, action_queue=None, component_id=None, hash=None
 ):
     if not data:
         data = {}
@@ -22,9 +22,13 @@ def post_and_get_response(
         "checksum": generate_checksum(orjson.dumps(data)),
         "id": component_id,
         "epoch": time.time(),
+        "hash": hash,
     }
 
     response = client.post(url, message, content_type="application/json",)
-    # body = orjson.loads(response.content)
 
-    return response.json()
+    try:
+        return response.json()
+    except TypeError:
+        # Return the regular response if no JSON for HttpResponseNotModified
+        return response

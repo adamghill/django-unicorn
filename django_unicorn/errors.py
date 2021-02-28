@@ -8,3 +8,7 @@ class UnicornViewError(Exception):
 
 class ComponentLoadError(Exception):
     pass
+
+
+class RenderNotModified(Exception):
+    pass

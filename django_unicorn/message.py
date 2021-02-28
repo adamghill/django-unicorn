@@ -38,6 +38,7 @@ class ComponentRequest:
         assert self.epoch, "Missing epoch"
 
         self.key = self.body.get("key", "")
+        self.hash = self.body.get("hash", "")
 
         self.validate_checksum()
 

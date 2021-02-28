@@ -7,6 +7,7 @@ from typing import Any, Dict, List, Union, get_type_hints
 from django.core.cache import caches
 from django.db.models import Model
 from django.http import HttpRequest, JsonResponse
+from django.http.response import HttpResponseNotModified
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_POST
 
@@ -17,7 +18,7 @@ from cachetools.lru import LRUCache
 from .call_method_parser import InvalidKwarg, parse_call_method_name, parse_kwarg
 from .components import UnicornField, UnicornView
 from .decorators import timed
-from .errors import UnicornCacheError, UnicornViewError
+from .errors import RenderNotModified, UnicornCacheError, UnicornViewError
 from .message import ComponentRequest, Return
 from .serializer import dumps, loads
 from .settings import get_cache_alias, get_serial_enabled, get_serial_timeout
@@ -41,6 +42,8 @@ def handle_error(view_func):
             return view_func(*args, **kwargs)
         except UnicornViewError as e:
             return JsonResponse({"error": str(e)})
+        except RenderNotModified:
+            return HttpResponseNotModified()
         except AssertionError as e:
             return JsonResponse({"error": str(e)})
 
@@ -569,7 +572,18 @@ def _process_component_request(
     if partial_doms:
         res.update({"partials": partial_doms})
     else:
-        res.update({"dom": rendered_component})
+        hash = generate_checksum(rendered_component)
+
+        if (
+            component_request.hash == hash
+            and (not return_data or not return_data.value)
+            and not component.calls
+        ):
+            raise RenderNotModified()
+
+        res.update(
+            {"dom": rendered_component, "hash": hash,}
+        )
 
     if return_data:
         res.update(
@@ -714,20 +728,22 @@ def _handle_queued_component_requests(
     component_requests = sorted(component_requests, key=lambda r: r.epoch)
     first_component_request = component_requests[0]
 
-    # Can't store request on a `ComponentRequest` and cache it because `HttpRequest`
-    # isn't pickleable. Does it matter that a different request gets passed in then
-    # the original request that generated the `ComponentRequest`?
-    first_json_result = _process_component_request(request, first_component_request)
+    try:
+        # Can't store request on a `ComponentRequest` and cache it because `HttpRequest` isn't pickleable
+        first_json_result = _process_component_request(request, first_component_request)
+    except RenderNotModified:
+        # Catching this and re-raising, but need the finally clause to clear the cache
+        raise
+    finally:
+        # Re-check for requests after the first request is processed
+        component_requests = cache.get(queue_cache_key)
 
-    # Re-check for requests after the first request is processed
-    component_requests = cache.get(queue_cache_key)
-
-    # Check that the request is in the cache before popping it off
-    if component_requests:
-        component_requests.pop(0)
-        cache.set(
-            queue_cache_key, component_requests, timeout=get_serial_timeout(),
-        )
+        # Check that the request is in the cache before popping it off
+        if component_requests:
+            component_requests.pop(0)
+            cache.set(
+                queue_cache_key, component_requests, timeout=get_serial_timeout(),
+            )
 
     if component_requests:
         # Create one new `component_request` from all of the queued requests that can be processed

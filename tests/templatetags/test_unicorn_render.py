@@ -4,6 +4,7 @@ from django.template.base import Token, TokenType
 
 from django_unicorn.components import UnicornView
 from django_unicorn.templatetags.unicorn import unicorn
+from django_unicorn.utils import generate_checksum
 from example.coffee.models import Flavor
 
 
@@ -247,7 +248,7 @@ def test_unicorn_render_calls(settings):
 
     assert "<script" in html
     assert len(re.findall("<script", html)) == 1
-    assert '"calls":[{"fn":"testCall","args":[]}]});' in html
+    assert '"calls":[{"fn":"testCall","args":[]}]' in html
 
 
 def test_unicorn_render_calls_with_arg(settings):
@@ -262,7 +263,7 @@ def test_unicorn_render_calls_with_arg(settings):
 
     assert "<script" in html
     assert len(re.findall("<script", html)) == 1
-    assert '"calls":[{"fn":"testCall2","args":["hello"]}]});' in html
+    assert '"calls":[{"fn":"testCall2","args":["hello"]}]' in html
 
 
 def test_unicorn_render_calls_no_mount_call(settings):
@@ -277,4 +278,25 @@ def test_unicorn_render_calls_no_mount_call(settings):
 
     assert "<script" in html
     assert len(re.findall("<script", html)) == 1
-    assert '"calls":[]});' in html
+    assert '"calls":[]' in html
+
+
+def test_unicorn_render_hash(settings):
+    settings.DEBUG = True
+    token = Token(
+        TokenType.TEXT,
+        "unicorn 'tests.templatetags.test_unicorn_render.FakeComponentParent'",
+    )
+    unicorn_node = unicorn(None, token)
+    context = {}
+    html = unicorn_node.render(context)
+
+    assert "<script" in html
+    assert len(re.findall("<script", html)) == 1
+    assert '"hash":"' in html
+
+    # Assert that the content hash is correct
+    script_idx = html.index("<script")
+    rendered_content = html[:script_idx]
+    expected_hash = generate_checksum(rendered_content)
+    assert f'"hash":"{expected_hash}"' in html

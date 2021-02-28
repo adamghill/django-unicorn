@@ -72,6 +72,9 @@ class UnicornTemplateResponse(TemplateResponse):
         root_element["unicorn:key"] = self.component.component_key
         root_element["unicorn:checksum"] = checksum
 
+        # Generate the hash based on the rendered content (without script tag)
+        hash = generate_checksum(UnicornTemplateResponse._desoupify(soup))
+
         if self.init_js:
             init = {
                 "id": self.component.component_id,
@@ -79,6 +82,7 @@ class UnicornTemplateResponse(TemplateResponse):
                 "key": self.component.component_key,
                 "data": orjson.loads(frontend_context_variables),
                 "calls": self.component.calls,
+                "hash": hash,
             }
             init = orjson.dumps(init).decode("utf-8")
             init_script = f"Unicorn.componentInit({init});"

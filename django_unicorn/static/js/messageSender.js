@@ -31,6 +31,7 @@ export function send(component, callback) {
     checksum: component.checksum,
     actionQueue: component.currentActionQueue,
     epoch: Date.now(),
+    hash: component.hash,
   };
 
   const headers = {
@@ -47,6 +48,12 @@ export function send(component, callback) {
     .then((response) => {
       if (response.ok) {
         return response.json();
+      }
+
+      // HTTP status code of 304 is `Not Modified`. This null gets caught in the next promise
+      // and stops any more processing.
+      if (response.status === 304) {
+        return null;
       }
 
       throw Error(
@@ -110,6 +117,7 @@ export function send(component, callback) {
 
       component.errors = responseJson.errors || {};
       component.return = responseJson.return || {};
+      component.hash = responseJson.hash;
 
       const parent = responseJson.parent || {};
       const rerenderedComponent = responseJson.dom || {};
