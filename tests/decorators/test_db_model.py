@@ -3,6 +3,8 @@ import pytest
 from django_unicorn.components import UnicornView
 from django_unicorn.db import DbModel
 from django_unicorn.decorators import db_model
+from django_unicorn.errors import UnicornCacheError
+from django_unicorn.utils import get_cacheable_component
 from example.coffee.models import Flavor
 
 
@@ -78,3 +80,12 @@ def test_missing_db_models():
 
     with pytest.raises(AssertionError):
         component.get_pk({"name": "flavor", "pk": -99})
+
+
+@pytest.mark.django_db
+def test_component_db_model_not_pickleable(component):
+    """
+    This is not ideal and should hopefully be fixable by providing a `__reduce_ex__` method.
+    """
+    with pytest.raises(UnicornCacheError):
+        get_cacheable_component(component)

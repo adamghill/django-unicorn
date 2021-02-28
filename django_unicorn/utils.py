@@ -61,5 +61,9 @@ def get_cacheable_component(component):
         raise UnicornCacheError(
             "Cannot cache component because it is not picklable."
         ) from e
+    except NotImplementedError as e:
+        raise UnicornCacheError(
+            "Cannot cache component because it is not picklable."
+        ) from e
 
     return component
