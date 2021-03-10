@@ -5,7 +5,7 @@
 
 <script>
     var url = "{% url 'django_unicorn:message' %}";
-    Unicorn.init(url);
+    Unicorn.init(url, "{{ CSRF_HEADER_NAME }}");
 </script>
 {% else %}
 <script type="module">
@@ -15,6 +15,6 @@
     window.Unicorn = Unicorn;
 
     var url = "{% url 'django_unicorn:message' %}";
-    Unicorn.init(url);
+    Unicorn.init(url, "{{ CSRF_HEADER_NAME }}");
 </script>
 {% endif %}
