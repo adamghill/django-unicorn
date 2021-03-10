@@ -54,4 +54,12 @@
             select2_datetime: {{ select2_datetime }}
         </div>
     </div>
+
+    <div>
+        <form wire:submit.prevent="upload_file">
+            <input id="blob" type="file" u:model="document" />
+
+            <button type="submit">Upload</button>
+        </form>
+    </div>
 </div>

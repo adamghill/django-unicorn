@@ -2,8 +2,14 @@ from django.utils.timezone import now
 
 from django_unicorn.components import UnicornView
 
+from ..forms import DocumentForm
+
 
 class JsView(UnicornView):
+    form_class = DocumentForm
+
+    document = ""
+
     states = (
         "Alabama",
         "Alaska",
@@ -26,6 +32,9 @@ class JsView(UnicornView):
         print("select_state called", val)
         print("select_state called idx", idx)
         self.selected_state = val
+
+    def upload_file(self):
+        print("UPLOAD")
 
     class Meta:
         javascript_excludes = ("states",)

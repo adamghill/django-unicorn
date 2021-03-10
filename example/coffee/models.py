@@ -1,6 +1,6 @@
 import uuid
 
-from django.db.models import SET_NULL, ForeignKey, Model
+from django.db.models import SET_NULL, FileField, ForeignKey, Model
 from django.db.models.fields import (
     CharField,
     DateField,
@@ -27,3 +27,9 @@ class Flavor(Model):
 
     def __str__(self):
         return self.name
+
+
+class Document(Model):
+    description = CharField(max_length=255, blank=True)
+    document = FileField()
+    uploaded_at = DateTimeField(auto_now_add=True)
