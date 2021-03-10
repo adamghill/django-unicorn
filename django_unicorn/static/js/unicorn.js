@@ -1,15 +1,24 @@
 import { Component } from "./component.js";
-import { isEmpty } from "./utils.js";
+import { isEmpty, hasValue } from "./utils.js";
 import { components } from "./store.js";
 
 let messageUrl = "";
-const csrfTokenHeaderName = "X-CSRFToken";
+let csrfTokenHeaderName = "X-CSRFToken";
 
 /**
  * Initializes the Unicorn object.
  */
-export function init(_messageUrl) {
+export function init(_messageUrl, _csrfTokenHeaderName) {
   messageUrl = _messageUrl;
+
+  if (hasValue(_csrfTokenHeaderName)) {
+    csrfTokenHeaderName = _csrfTokenHeaderName;
+  }
+
+  return {
+    messageUrl,
+    csrfTokenHeaderName,
+  };
 }
 
 /**

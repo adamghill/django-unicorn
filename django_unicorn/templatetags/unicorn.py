@@ -13,10 +13,20 @@ register = template.Library()
 
 @register.inclusion_tag("unicorn/scripts.html")
 def unicorn_scripts():
-    # Import here to prevent th potential of this from loading before Django settings
+    # Import here to prevent the potential of this from loading before Django settings
     from django_unicorn.settings import get_setting
 
-    return {"MINIFIED": get_setting("MINIFIED", not settings.DEBUG)}
+    csrf_header_name = settings.CSRF_HEADER_NAME
+
+    if csrf_header_name.startswith("HTTP_"):
+        csrf_header_name = settings.CSRF_HEADER_NAME[5:]
+
+    csrf_header_name = csrf_header_name.replace("_", "-")
+
+    return {
+        "MINIFIED": get_setting("MINIFIED", not settings.DEBUG),
+        "CSRF_HEADER_NAME": csrf_header_name,
+    }
 
 
 @register.inclusion_tag("unicorn/errors.html", takes_context=True)
