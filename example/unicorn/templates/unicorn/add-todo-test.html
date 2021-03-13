@@ -1,0 +1,11 @@
+<div unicorn:db="todo">
+    <div>
+      <input unicorn:field.defer="description" type="text" id="description" />
+      {{ todo.description }}
+    </div>
+    <div>
+      <input unicorn:field.defer="due_date" type="text" id="due_date" />
+      {{ todo.due_date }}
+    </div>
+    <button unicorn:click="save">Save</button>
+  </div>
