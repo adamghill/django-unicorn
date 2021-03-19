@@ -1,11 +1,10 @@
 from django.shortcuts import redirect
 from django.utils.functional import cached_property
 
-from coffee.models import Flavor
-
 from django_unicorn.components import HashUpdate, LocationUpdate, UnicornView
 from django_unicorn.db import DbModel
 from django_unicorn.decorators import db_model
+from example.coffee.models import Flavor
 
 
 class ModelsView(UnicornView):
@@ -14,7 +13,7 @@ class ModelsView(UnicornView):
     # Demonstrates how to use an instantiated model; class attributes get stored on
     # the class, so django-unicorn handles clearing this with `_resettable_attributes_cache`
     # in components.py
-    class_flavor = Flavor()
+    class_flavor: Flavor = Flavor()
 
     def __init__(self, **kwargs):
         # Demonstrates how to use an instance variable on the class
@@ -41,6 +40,7 @@ class ModelsView(UnicornView):
         id = self.class_flavor.id
         self.reset()
 
+        # Note: this can cause inputs to appear to be cached
         return redirect(f"/models?createdId={id}")
 
     @db_model
