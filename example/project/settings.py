@@ -14,8 +14,10 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    # Internal apps
     "books",
     "coffee",
+    "todos",
     "www",
     # Include django-unicorn package
     "django_unicorn",
