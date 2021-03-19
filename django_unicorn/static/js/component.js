@@ -121,13 +121,38 @@ export class Component {
    * @param {Array} calls A list of objects that specify the methods to call.
    *
    * `calls`: [{"fn": "someFunctionName"},]
+   * `calls`: [{"fn": "someFunctionName", args: ["world"]},]
+   * `calls`: [{"fn": "SomeModule.someFunctionName"},]
+   * `calls`: [{"fn": "SomeModule.someFunctionName", args: ["world", "universe"]},]
+   *
+   * Returns:
+   * Array of results for each method call.
    */
   callCalls(calls) {
     calls = calls || [];
+    const results = [];
 
     calls.forEach((call) => {
-      this.window[call.fn](...call.args);
+      let functionName = call.fn;
+      let module = this.window;
+
+      call.fn.split(".").forEach((obj, idx) => {
+        // only traverse down modules to the first dot, because the last portion is the function name
+        if (idx < call.fn.split(".").length - 1) {
+          module = module[obj];
+          // account for the period when slicing
+          functionName = functionName.slice(obj.length + 1);
+        }
+      });
+
+      if (call.args) {
+        results.push(module[functionName](...call.args));
+      } else {
+        results.push(module[functionName]());
+      }
     });
+
+    return results;
   }
 
   /**

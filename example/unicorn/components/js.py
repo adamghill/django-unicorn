@@ -16,6 +16,9 @@ class JsView(UnicornView):
     def call_javascript(self):
         self.call("callAlert", "world")
 
+    def call_javascript_module(self):
+        self.call("HelloJs.hello", "world!")
+
     def get_now(self):
         self.select2_datetime = now()
 

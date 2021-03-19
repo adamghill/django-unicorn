@@ -7,10 +7,21 @@
         function callAlert(name) {
             alert("hello, " + name);
         }
+
+        var HelloJs = (function() {
+            var self = {};
+
+            self.hello = function(name){
+                alert("Hello " + name)
+            }
+
+            return self;
+        }());
     </script>
 
     <h2>
         <button unicorn:click="call_javascript">Component view calls JavaScript</button>
+        <button unicorn:click="call_javascript_module">Component view calls JavaScript module</button>
     </h2>
 
     <div>
