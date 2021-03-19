@@ -1,6 +1,5 @@
-from coffee.models import Flavor
-
 from django_unicorn.components import UnicornView
+from example.coffee.models import Flavor
 
 
 class TableView(UnicornView):
