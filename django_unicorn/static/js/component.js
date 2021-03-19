@@ -177,10 +177,7 @@ export class Component {
         const element = new Element(el);
 
         if (element.isUnicorn) {
-          if (
-            hasValue(element.field) &&
-            (hasValue(element.db) || hasValue(element.model))
-          ) {
+          if (hasValue(element.field) && hasValue(element.db)) {
             if (!this.attachedDbEvents.some((e) => e.isSame(element))) {
               this.attachedDbEvents.push(element);
               addDbEventListener(this, element);
@@ -226,6 +223,8 @@ export class Component {
           if (hasValue(element.key)) {
             this.keyEls.push(element);
           }
+
+          console.log(element.actions);
 
           element.actions.forEach((action) => {
             if (this.actionEvents[action.eventType]) {
@@ -421,15 +420,19 @@ export class Component {
    */
   setDbModelValues() {
     this.dbEls.forEach((element) => {
-      if (element.db.pk === "") {
+      if (isEmpty(element.db.pk)) {
         // Empty string for the PK implies that the model is not associated to an actual model instance
         element.setValue("");
       } else {
-        if (isEmpty(element.model.name)) {
-          throw Error("Setting a field value requires a model to be set");
+        const dbName = element.db.name || element.model.name;
+
+        if (isEmpty(dbName)) {
+          throw Error(
+            "Setting a field value requires a db or model name to be set"
+          );
         }
 
-        let datas = this.data[element.model.name];
+        let datas = this.data[dbName];
 
         // Force the data to be an array if it isn't already for the next step
         if (!Array.isArray(datas)) {
@@ -438,7 +441,7 @@ export class Component {
 
         datas.forEach((model) => {
           // Convert the model's pk to a string because it will always be a string on the element
-          if (hasValue(model.pk)) {
+          if (hasValue(model) && hasValue(model.pk)) {
             if (model.pk.toString() === element.db.pk) {
               element.setValue(model[element.field.name]);
             }

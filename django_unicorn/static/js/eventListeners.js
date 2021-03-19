@@ -358,26 +358,31 @@ export function addDbEventListener(component, element, eventType) {
   const { el } = element;
 
   el.addEventListener(eventType, (event) => {
-    if (
-      (isEmpty(element.db.name) && isEmpty(element.model.name)) ||
-      isEmpty(element.db.pk)
-    ) {
+    if (isEmpty(element.db.name) && isEmpty(element.model.name)) {
       return;
     }
 
     let isDirty = false;
 
-    for (let i = 0; i < component.data[element.model.name].length; i++) {
-      const dbModel = component.data[element.model.name][i];
+    if (
+      hasValue(element.model.name) &&
+      Object.prototype.hasOwnProperty.call(component.data, element.model.name)
+    ) {
+      for (let i = 0; i < component.data[element.model.name].length; i++) {
+        const dbModel = component.data[element.model.name][i];
 
-      if (dbModel.pk.toString() === element.db.pk) {
-        if (dbModel[element.field.name] !== element.getValue()) {
-          element.handleDirty();
-          isDirty = true;
-        } else {
-          element.handleDirty(true);
+        if (dbModel.pk.toString() === element.db.pk) {
+          if (dbModel[element.field.name] !== element.getValue()) {
+            element.handleDirty();
+            isDirty = true;
+          } else {
+            element.handleDirty(true);
+          }
         }
       }
+    } else {
+      // If the data can't be found consider it always dirty since it's new
+      isDirty = true;
     }
 
     if (element.field.isLazy) {
