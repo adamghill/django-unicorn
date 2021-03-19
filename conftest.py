@@ -13,7 +13,7 @@ def pytest_configure():
     databases = {"default": {"ENGINE": "django.db.backends.sqlite3",}}
 
     installed_apps = [
-        "example.coffee",
+        "example.coffee.apps.Config",
     ]
 
     unicorn_settings = {

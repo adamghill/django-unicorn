@@ -1,1 +1,1 @@
-default_app_config = "coffee.apps.CoffeeConfig"
+default_app_config = "coffee.apps.Config"
