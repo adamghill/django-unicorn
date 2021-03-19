@@ -4,6 +4,13 @@
             border: red 1px solid !important;
         }
     </style>
+
+    <h3>Current flavors</h3>
+    <ul>
+        {% for flavor in flavors %}
+        <li>{{ flavor.id }} - {{ flavor.name }} - {{ flavor.label }}</li>
+        {% endfor %}
+    </ul>
     
     <div>
         <h3>New Flavor (instance variable)</h3>
@@ -31,85 +38,50 @@
         <button unicorn:click="add_class_flavor">Add Flavor (class attribute)</button>
     </div>
 
-    <!-- Can use unicorn:model or unicorn:db -->
-    <div unicorn:model="flavors" unicorn:db="flavor">
-        <div unicorn:pk="">
-            <h3>New flavor with blank PK</h3>
+    <div>
+        <h3>Using unicorn:db</h3>
+
+        <div unicorn:db="flavor">
             <div>
                 <label>Name</label>
-                <input type="text" unicorn:field.defer="name"></input>
-                
-                <strong>Name</strong> {{ flavor.name }}
-            </div>
-            
-            <div>
-                <label>Label</label>
-                <input type="text" unicorn:field.defer="label"></input>
-                
-                <strong>Label</strong> {{ flavor.label }}
-            </div>
-
-            {% comment %}
-            <label>Parent</label>
-            <select>
-                <option value="" selected>None</option>
-                {% for available_flavor in available_flavors %}
-                <option value="{{ available_flavor.pk }}" {% if instance_flavor.parent.pk == available_flavor.pk %}selected{% endif %}>{{ available_flavor.name }}</option>
-                {% endfor %}
-            </select>
-            {% endcomment %}
-        </div>
-        <br />
-
-        <h3>Last 2 added flavors</h3>
-
-        {% for flavor in flavors %}
-        <div unicorn:pk="{{ flavor.pk }}">
-            <h4>PK: {{ flavor.pk }}</h4>
-            <div>
-                <label>Name</label>
-                <input type="text" unicorn:field.lazy="name" u:dirty.class="dirty"></input>
-                
-                <strong>Name</strong> {{ flavor.name }}
+                <input type="text" unicorn:field.defer="name" u:dirty.class="dirty"></input>
             </div>
             
             <div>
                 <label>Label</label>
                 <input type="text" unicorn:field.defer="label" u:dirty.class="dirty"></input>
-                
-                <strong>Label</strong> {{ flavor.label }}
             </div>
 
-            <div>
-                <label>Float value</label>
+            {% for flavor in flavors %}
+            <div unicorn:pk="{{ flavor.pk }}">
+                <h4>{{ flavor.pk }}</h4>
+                <label>Name</label>
+                <input type="text" unicorn:field.defer="name" u:dirty.class="dirty" value="{{ flavor.name }}"></input>
+                {{ flavor.name }}
+                <br />
+
+                <label>Label</label>
+                <input type="text" unicorn:field.defer="label" u:dirty.class="dirty" value="{{ flavor.label }}"></input>
+                {{ flavor.label }}
+                <br />
+
+                <label>Float</label>
                 <input type="text" unicorn:field.defer="float_value"></input>
-                
-                <strong>Float value</strong> {{ flavor.float_value }}
-            </div>
+                {{ flavor.float_value }}
+                <br />
 
-            <div>
                 <label>Decimal value</label>
                 <input type="text" unicorn:field.defer="decimal_value"></input>
-                
-                <strong>Decimal value</strong> {{ flavor.decimal_value }}
+                {{ flavor.decimal_value }}
+                <br />
+
+                <button unicorn:click="delete($model)">delete($model)</button>
             </div>
-
-            <button unicorn:click="delete($model)">delete($model)</button>
-            <br/>
-
-            <!-- todo: get updating parent working correctly -->
-            <label>Parent</label>
-            <select>
-                <option value="" selected>None</option>
-                {% for available_flavor in available_flavors %}
-                <option value="{{ available_flavor.pk }}" {% if flavor.parent.pk == available_flavor.pk %}selected{% endif %}>{{ available_flavor.name }}</option>
-                {% endfor %}
-            </select>
+            {% endfor %}
         </div>
-        {% endfor %}
     </div>
-    <br />
-
+    
+    <br /><br />
     <button unicorn:click="$refresh">$refresh</button>
     <button unicorn:click="$reset">$reset</button>
 </div>
