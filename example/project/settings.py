@@ -17,7 +17,6 @@ INSTALLED_APPS = [
     # Internal apps
     "books",
     "coffee",
-    "todos",
     "www",
     # Include django-unicorn package
     "django_unicorn",
