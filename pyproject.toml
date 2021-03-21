@@ -15,9 +15,9 @@ django = ">=2.2"
 beautifulsoup4 = ">=4.8.0"
 orjson = "^3.2.1"
 shortuuid = "^1.0.1"
-wrapt = "^1.12.1"
 cachetools = "^4.1.1"
 dataclasses = {version = "^0.8.0", python = "<3.7"}
+decorator = "^4.4.2"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2"

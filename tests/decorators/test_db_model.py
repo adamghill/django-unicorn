@@ -38,19 +38,19 @@ def test_happy_path(component):
 @pytest.mark.django_db
 def test_missing_name(component):
     with pytest.raises(AssertionError):
-        component.get_pk({"pk": 1})
+        component.get_pk({"pk": 1}, 1)
 
 
 @pytest.mark.django_db
 def test_missing_pk(component):
     with pytest.raises(AssertionError):
-        component.get_pk({"name": "flavor"})
+        component.get_pk({"name": "flavor"}, 1)
 
 
 @pytest.mark.django_db
 def test_model_not_found(component):
     with pytest.raises(Flavor.DoesNotExist):
-        component.get_pk({"name": "flavor", "pk": -99})
+        component.get_pk({"name": "flavor", "pk": -99}, 1)
 
 
 @pytest.mark.django_db
@@ -83,9 +83,9 @@ def test_missing_db_models():
 
 
 @pytest.mark.django_db
-def test_component_db_model_not_pickleable(component):
+def test_component_db_model_is_pickleable(component):
     """
-    This is not ideal and should hopefully be fixable by providing a `__reduce_ex__` method.
+    Using the `wrapt` library would raise an exception, but the `decorator` library
+    is pickleable, so this should be a-ok
     """
-    with pytest.raises(UnicornCacheError):
-        get_cacheable_component(component)
+    get_cacheable_component(component)
