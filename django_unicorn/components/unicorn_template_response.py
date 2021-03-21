@@ -109,12 +109,12 @@ class UnicornTemplateResponse(TemplateResponse):
     @staticmethod
     def _get_root_element(soup: BeautifulSoup) -> Tag:
         """
-        Gets the first div element.
+        Gets the first element.
 
         Returns:
             BeautifulSoup element.
             
-            Raises an Exception if a div cannot be found.
+            Raises an Exception if an element cannot be found.
         """
         for element in soup.contents:
             if element.name:
