@@ -2,13 +2,27 @@ import logging
 
 from django.http.response import HttpResponseRedirect
 
-from .components import HashUpdate, LocationUpdate, PollUpdate
-from .errors import UnicornViewError
-from .serializer import JSONDecodeError, dumps, loads
-from .utils import generate_checksum
+from django_unicorn.components import HashUpdate, LocationUpdate, PollUpdate
+from django_unicorn.errors import UnicornViewError
+from django_unicorn.serializer import JSONDecodeError, dumps, loads
+from django_unicorn.utils import generate_checksum
 
 
 logger = logging.getLogger(__name__)
+
+
+class Action:
+    """
+    Action that gets queued.
+    """
+
+    def __init__(self, data):
+        self.action_type = data.get("type")
+        self.payload = data.get("payload", {})
+        self.partial = data.get("partial")
+
+    def __repr__(self):
+        return f"Action(action_type='{self.action_type}' payload={self.payload} partial={self.partial})"
 
 
 class ComponentRequest:
@@ -18,6 +32,7 @@ class ComponentRequest:
 
     def __init__(self, request, component_name):
         self.body = {}
+        self.request = request
 
         try:
             self.body = loads(request.body)
@@ -42,7 +57,10 @@ class ComponentRequest:
 
         self.validate_checksum()
 
-        self.action_queue = self.body.get("actionQueue", [])
+        self.action_queue = []
+
+        for action_data in self.body.get("actionQueue", []):
+            self.action_queue.append(Action(action_data))
 
     def __repr__(self):
         return f"ComponentRequest(name='{self.name}' id='{self.id}' key='{self.key}' epoch={self.epoch} data={self.data} action_queue={self.action_queue})"

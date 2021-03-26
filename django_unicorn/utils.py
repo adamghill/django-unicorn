@@ -1,15 +1,19 @@
 import hmac
 import logging
 import pickle
+from typing import get_type_hints as typing_get_type_hints
 
 from django.conf import settings
 
 import shortuuid
+from cachetools.lru import LRUCache
 
 from django_unicorn.errors import UnicornCacheError
 
 
 logger = logging.getLogger(__name__)
+
+type_hints_cache = LRUCache(maxsize=100)
 
 
 def generate_checksum(data):
@@ -71,3 +75,31 @@ def get_cacheable_component(component):
         ) from e
 
     return component
+
+
+def get_type_hints(obj):
+    """
+    Get type hints from an object. These get cached in a local memory cache for quicker look-up later.
+
+    Returns:
+        An empty dictionary if no type hints can be retrieved.
+    """
+    try:
+        if obj in type_hints_cache:
+            return type_hints_cache[obj]
+    except TypeError:
+        # Ignore issues with checking for an object in the cache, e.g. when a Django model is missing a PK
+        pass
+
+    try:
+        type_hints = typing_get_type_hints(obj)
+
+        # Cache the type hints just in case
+        type_hints_cache[obj] = type_hints
+
+        return type_hints
+    except TypeError:
+        # Return an empty dictionary when there is a TypeError. From `get_type_hints`: "TypeError is
+        # raised if the argument is not of a type that can contain annotations, and an empty dictionary
+        # is returned if no annotations are present"
+        return {}

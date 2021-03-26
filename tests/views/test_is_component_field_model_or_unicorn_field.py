@@ -1,5 +1,5 @@
 from django_unicorn.components import UnicornView
-from django_unicorn.views import _is_component_field_model_or_unicorn_field
+from django_unicorn.views.utils import _is_component_field_model_or_unicorn_field
 from example.coffee.models import Flavor
 
 
