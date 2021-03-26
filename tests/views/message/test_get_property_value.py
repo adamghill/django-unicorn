@@ -1,4 +1,4 @@
-from django_unicorn.views import _get_property_value
+from django_unicorn.views.action_parsers.call_method import _get_property_value
 from tests.views.fake_components import FakeComponent
 
 

@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from django_unicorn.components import UnicornView
-from django_unicorn.views import _set_property_value
+from django_unicorn.views.action_parsers.utils import set_property_value
 
 
 @dataclass
@@ -21,7 +21,7 @@ def test_set_property_value_dataclass():
     component = PropertyView(component_name="test", component_id="12345678")
     assert InventoryItem("Hammer", 20) == component.inventory
 
-    _set_property_value(
+    set_property_value(
         component,
         "inventory",
         InventoryItem("Hammer", 20, 1),

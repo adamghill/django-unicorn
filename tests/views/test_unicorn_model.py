@@ -2,7 +2,7 @@ from django.db.models import Model
 from django.db.models.fields import CharField
 
 from django_unicorn.components import UnicornView
-from django_unicorn.views import _set_property_from_data
+from django_unicorn.views.utils import set_property_from_data
 
 
 class FakeModel(Model):
@@ -20,6 +20,6 @@ def test_set_property_from_data_model():
     component = ModelPropertyView(component_name="test", component_id="12345678")
     assert "fake_model" == component.model.name
 
-    _set_property_from_data(component, "model", {"name": "fake_model_updated"})
+    set_property_from_data(component, "model", {"name": "fake_model_updated"})
 
     assert "fake_model_updated" == component.model.name
