@@ -36,6 +36,7 @@ export class Element {
     this.key = null;
     this.events = [];
     this.errors = [];
+    this.file = {};
 
     if (!this.el.attributes) {
       return;
@@ -62,6 +63,15 @@ export class Element {
         this[key].debounceTime = attribute.modifiers.debounce
           ? parseInt(attribute.modifiers.debounce, 10) || -1
           : -1;
+
+        if (this.el.type === "file") {
+          this.file = {
+            accept: this.el.accept,
+            multiple: this.el.multiple,
+          };
+
+          // console.log("this.file", this.file);
+        }
       } else if (attribute.isDb) {
         this.db.name = attribute.value;
       } else if (attribute.isPK) {
