@@ -1,5 +1,7 @@
 from typing import Any, Dict, List
 
+from django.db.models import Model
+
 from django_unicorn.call_method_parser import (
     InvalidKwarg,
     parse_call_method_name,
@@ -7,6 +9,7 @@ from django_unicorn.call_method_parser import (
 )
 from django_unicorn.components import UnicornView
 from django_unicorn.decorators import timed
+from django_unicorn.utils import get_method_arguments, get_type_hints
 from django_unicorn.views.action_parsers.utils import set_property_value
 from django_unicorn.views.objects import ComponentRequest, Return
 from django_unicorn.views.utils import set_property_from_data
@@ -102,6 +105,27 @@ def _call_method_name(
 
     if method_name is not None and hasattr(component, method_name):
         func = getattr(component, method_name)
+
+        if len(args) == 1 or len(kwargs.keys()) == 1:
+            arguments = get_method_arguments(func)
+            type_hints = get_type_hints(func)
+
+            for argument in arguments:
+                if argument in type_hints:
+                    if issubclass(type_hints[argument], Model):
+                        DbModel = type_hints[argument]
+                        key = "pk"
+                        value = None
+
+                        if args:
+                            value = args.pop()
+                        elif kwargs:
+                            (key, value) = list(kwargs.items())[0]
+                            del kwargs[key]
+
+                        model = DbModel.objects.get(**{key: value})
+
+                        args.append(model)
 
         if args and kwargs:
             return func(*args, **kwargs)

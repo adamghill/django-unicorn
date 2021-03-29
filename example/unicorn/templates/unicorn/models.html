@@ -6,82 +6,50 @@
     </style>
 
     <h3>Current flavors</h3>
-    <ul>
-        {% for flavor in flavors %}
-        <li>{{ flavor.id }} - {{ flavor.name }} - {{ flavor.label }}</li>
-        {% endfor %}
-    </ul>
-    
-    <div>
-        <h3>New Flavor (instance variable)</h3>
-
-        <label>Name</label>
-        <input type="text" unicorn:model.defer="instance_flavor.name"></input>
-
-        <label>Label</label>
-        <input type="text" unicorn:model.defer="instance_flavor.label"></input>
-
-        <br />
-        <button unicorn:click="add_instance_flavor">Add Flavor (instance variable)</button>
-    </div>
 
     <div>
-        <h3>New Flavor (class attribute)</h3>
+        <h3>Using unicorn:model with Django models</h3>
 
-        <label>Name</label>
-        <input type="text" unicorn:model.defer="class_flavor.name"></input>
-
-        <label>Label</label>
-        <input type="text" unicorn:model.defer="class_flavor.label"></input>
-
-        <br />
-        <button unicorn:click="add_class_flavor">Add Flavor (class attribute)</button>
-    </div>
-
-    <div>
-        <h3>Using unicorn:db</h3>
-
-        <div unicorn:db="flavor">
+        <div>
             <div>
                 <label>Name</label>
-                <input type="text" unicorn:field.defer="name" u:dirty.class="dirty"></input>
+                <input type="text" unicorn:model="flavor.name"></input>
             </div>
             
             <div>
                 <label>Label</label>
-                <input type="text" unicorn:field.defer="label" u:dirty.class="dirty"></input>
+                <input type="text" unicorn:model="flavor.label"></input>
             </div>
 
+            <button unicorn:click="save_flavor">save_flavor</button>
+
             {% for flavor in flavors %}
-            <div unicorn:pk="{{ flavor.pk }}">
+            <div>
                 <h4>{{ flavor.pk }}</h4>
                 <label>Name</label>
-                <input type="text" unicorn:field.defer="name" u:dirty.class="dirty" value="{{ flavor.name }}"></input>
+                <input type="text" unicorn:model="flavors.{{ forloop.counter0 }}.name" u:dirty.class="dirty"></input>
                 {{ flavor.name }}
                 <br />
 
                 <label>Label</label>
-                <input type="text" unicorn:field.defer="label" u:dirty.class="dirty" value="{{ flavor.label }}"></input>
+                <input type="text" unicorn:model="flavors.{{ forloop.counter0 }}.label" u:dirty.class="dirty"></input>
                 {{ flavor.label }}
                 <br />
 
                 <label>Float</label>
-                <input type="text" unicorn:field.defer="float_value"></input>
+                <input type="text" unicorn:model="flavors.{{ forloop.counter0 }}.float_value"></input>
                 {{ flavor.float_value }}
                 <br />
 
                 <label>Decimal value</label>
-                <input type="text" unicorn:field.defer="decimal_value"></input>
+                <input type="text" unicorn:model="flavors.{{ forloop.counter0 }}.decimal_value"></input>
                 {{ flavor.decimal_value }}
                 <br />
 
-                <button unicorn:click="delete($model)">delete($model)</button>
+                <button unicorn:click="save({{ forloop.counter0 }})">save(flavors_idx)</button>
+                <button unicorn:click="delete({{ flavor.pk }})">delete(flavor.pk)</button>
             </div>
             {% endfor %}
         </div>
     </div>
-    
-    <br /><br />
-    <button unicorn:click="$refresh">$refresh</button>
-    <button unicorn:click="$reset">$reset</button>
 </div>

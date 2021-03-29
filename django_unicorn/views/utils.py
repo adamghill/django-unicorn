@@ -47,7 +47,11 @@ def set_property_from_data(
             if is_dataclass(type_hints[name]):
                 value = type_hints[name](**value)
             else:
-                value = type_hints[name](value)
+                try:
+                    value = type_hints[name](value)
+                except TypeError:
+                    # Ignore this exception because some type-hints can't be instantiated like this (e.g. `List[]`)
+                    pass
 
         if hasattr(component_or_field, "_set_property"):
             # Can assume that `component_or_field` is a component

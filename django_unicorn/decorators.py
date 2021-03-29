@@ -15,7 +15,7 @@ def db_model(func, *args, **kwargs):
         @db_model
         def delete(self, model):
             ...
-    
+
     Will get converted to:
         `component.delete({ 'name': 'modelName', pk: 1})` -> `component.delete(modelInstance)`
     """

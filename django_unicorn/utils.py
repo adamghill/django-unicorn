@@ -1,6 +1,8 @@
 import hmac
 import logging
 import pickle
+from inspect import signature
+from typing import Dict, List, Union
 from typing import get_type_hints as typing_get_type_hints
 
 from django.conf import settings
@@ -8,18 +10,21 @@ from django.conf import settings
 import shortuuid
 from cachetools.lru import LRUCache
 
+import django_unicorn
 from django_unicorn.errors import UnicornCacheError
 
 
 logger = logging.getLogger(__name__)
 
 type_hints_cache = LRUCache(maxsize=100)
+function_signature_cache = LRUCache(maxsize=100)
 
 
-def generate_checksum(data):
+def generate_checksum(data: Union[str, bytes]) -> str:
     """
     Generates a checksum for the passed-in data.
     """
+
     if isinstance(data, str):
         data_bytes = str.encode(data)
     else:
@@ -33,10 +38,11 @@ def generate_checksum(data):
     return checksum
 
 
-def dicts_equal(dictionary_one, dictionary_two):
+def dicts_equal(dictionary_one: Dict, dictionary_two: Dict) -> bool:
     """
     Return True if all keys and values are the same between two dictionaries.
     """
+
     return all(
         k in dictionary_two and dictionary_one[k] == dictionary_two[k]
         for k in dictionary_one
@@ -46,10 +52,13 @@ def dicts_equal(dictionary_one, dictionary_two):
     )
 
 
-def get_cacheable_component(component):
+def get_cacheable_component(
+    component: "django_unicorn.views.UnicornView",
+) -> "django_unicorn.views.UnicornView":
     """
     Converts a component into something that is cacheable/pickleable.
     """
+
     component.request = None
 
     if component.parent:
@@ -77,13 +86,14 @@ def get_cacheable_component(component):
     return component
 
 
-def get_type_hints(obj):
+def get_type_hints(obj) -> Dict:
     """
     Get type hints from an object. These get cached in a local memory cache for quicker look-up later.
 
     Returns:
         An empty dictionary if no type hints can be retrieved.
     """
+
     try:
         if obj in type_hints_cache:
             return type_hints_cache[obj]
@@ -103,3 +113,20 @@ def get_type_hints(obj):
         # raised if the argument is not of a type that can contain annotations, and an empty dictionary
         # is returned if no annotations are present"
         return {}
+
+
+def get_method_arguments(func) -> List[str]:
+    """
+    Gets the arguments for a method.
+
+    Returns:
+        A list of strings, one for each argument.
+    """
+
+    if func in function_signature_cache:
+        return function_signature_cache[func]
+
+    function_signature = signature(func)
+    function_signature_cache[func] = list(function_signature.parameters)
+
+    return function_signature_cache[func]

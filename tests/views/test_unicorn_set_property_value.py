@@ -1,7 +1,10 @@
 from dataclasses import dataclass
 
+import pytest
+
 from django_unicorn.components import UnicornView
 from django_unicorn.views.action_parsers.utils import set_property_value
+from example.coffee.models import Flavor
 
 
 @dataclass
@@ -17,6 +20,15 @@ class PropertyView(UnicornView):
     inventory = InventoryItem("Hammer", 20)
 
 
+class FakeComponent(UnicornView):
+    flavors = []
+
+    def __init__(self, *args, **kwargs):
+        self.flavors = list(Flavor.objects.all())
+
+        super().__init__(**kwargs)
+
+
 def test_set_property_value_dataclass():
     component = PropertyView(component_name="test", component_id="12345678")
     assert InventoryItem("Hammer", 20) == component.inventory
@@ -29,3 +41,21 @@ def test_set_property_value_dataclass():
     )
 
     assert InventoryItem("Hammer", 20, 1) == component.inventory
+
+
+@pytest.mark.django_db
+def test_set_property_value_array():
+    flavor_one = Flavor(name="initial 1")
+    flavor_one.save()
+    flavor_two = Flavor(name="initial 2")
+    flavor_two.save()
+    component = FakeComponent(component_name="test", component_id="12345678")
+
+    set_property_value(
+        component,
+        "flavors.0.name",
+        "test 1",
+        {"flavors": [{"name": "test"}, {"name": "something"}]},
+    )
+
+    assert component.flavors[0].name == "test 1"
