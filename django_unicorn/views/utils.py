@@ -1,5 +1,5 @@
 from dataclasses import is_dataclass
-from typing import Any, Union
+from typing import Any, Iterable, Union
 
 from django.db.models import Model
 from django.db import models
@@ -13,6 +13,8 @@ from django_unicorn.utils import get_type_hints
 def set_property_for_model(model: Model, name: str, value: Any) -> None:
     if attr := getattr(model, name, None):
         if isinstance(attr, models.Manager) and hasattr(attr, 'set'):
+            if not isinstance(value, Iterable):
+                value = [value]
             attr.set(value)
             return
     if name == 'pk':
