@@ -2,11 +2,26 @@ from dataclasses import is_dataclass
 from typing import Any, Union
 
 from django.db.models import Model
+from django.db import models
 
 from django_unicorn.components import UnicornField, UnicornView
+
 from django_unicorn.decorators import timed
 from django_unicorn.utils import get_type_hints
 
+@timed
+def set_property_for_model(model: Model, name: str, value: Any) -> None:
+    if attr := getattr(model, name, None):
+        if isinstance(attr, models.Manager) and hasattr(attr, 'set'):
+            attr.set(value)
+            return
+    if name == 'pk':
+        setattr(model, name, value)
+        return
+    field =  model._meta.get_field(field_name=name)
+    if isinstance(field, models.ForeignKey) and not isinstance(value, field.related_model):
+        value = field.related_model.objects.get(pk=value)
+    setattr(model, name, value)
 
 @timed
 def set_property_from_data(
@@ -17,6 +32,9 @@ def set_property_from_data(
     """
 
     if not hasattr(component_or_field, name):
+        return
+    if isinstance(component_or_field, Model):
+        set_property_for_model(component_or_field, name,value = value)
         return
 
     field = getattr(component_or_field, name)
@@ -48,6 +66,7 @@ def set_property_from_data(
                 value = type_hints[name](**value)
             else:
                 value = type_hints[name](value)
+                
 
         if hasattr(component_or_field, "_set_property"):
             # Can assume that `component_or_field` is a component
