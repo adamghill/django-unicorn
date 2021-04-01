@@ -1,5 +1,7 @@
 from typing import Any
 
+from django.db.models import QuerySet
+
 from django_unicorn.components import UnicornView
 from django_unicorn.decorators import timed
 
@@ -77,6 +79,15 @@ def set_property_value(
                 data_or_dict = data_or_dict.get(property_name_part, {})
         elif isinstance(component_or_field, list):
             # TODO: Check for iterable instad of list? `from collections.abc import Iterable`
+            property_name_part = int(property_name_part)
+
+            if idx == len(property_name_parts) - 1:
+                component_or_field[property_name_part] = property_value
+                data_or_dict[property_name_part] = property_value
+            else:
+                component_or_field = component_or_field[property_name_part]
+                data_or_dict = data_or_dict[property_name_part]
+        elif isinstance(component_or_field, QuerySet):
             property_name_part = int(property_name_part)
 
             if idx == len(property_name_parts) - 1:

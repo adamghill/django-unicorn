@@ -224,8 +224,6 @@ export class Component {
             this.keyEls.push(element);
           }
 
-          console.log(element.actions);
-
           element.actions.forEach((action) => {
             if (this.actionEvents[action.eventType]) {
               this.actionEvents[action.eventType].push({ action, element });

@@ -5,8 +5,6 @@
         }
     </style>
 
-    <h3>Current flavors</h3>
-
     <div>
         <h3>Using unicorn:model with Django models</h3>
 
@@ -46,7 +44,7 @@
                 {{ flavor.decimal_value }}
                 <br />
 
-                <button unicorn:click="save({{ forloop.counter0 }})">save(flavors_idx)</button>
+                <button unicorn:click="save({{ forloop.counter0 }})">save(flavor_idx)</button>
                 <button unicorn:click="delete({{ flavor.pk }})">delete(flavor.pk)</button>
             </div>
             {% endfor %}

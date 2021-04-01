@@ -12,7 +12,7 @@ from example.coffee.models import Flavor
 def test_message_db_input_update(client):
     flavor = Flavor(id=1, name="Enzymatic-Flowery")
     flavor.save()
-    data = {"flavors": [{"pk": flavor.pk, "title": flavor.name}]}
+    data = {"flavors": [{"pk": flavor.pk, "name": flavor.name}]}
 
     message = {
         "actionQueue": [
