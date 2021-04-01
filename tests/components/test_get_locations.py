@@ -1,6 +1,6 @@
 import pytest
 
-from django_unicorn.components import get_locations
+from django_unicorn.components.unicorn_view import get_locations
 
 
 def test_get_locations_kebab_case():

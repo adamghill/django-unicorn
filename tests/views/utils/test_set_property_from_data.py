@@ -5,7 +5,7 @@ from django.db.models import Model, QuerySet
 
 import pytest
 
-from django_unicorn.components import QueryType, UnicornView
+from django_unicorn.components import QuerySetType, UnicornView
 from django_unicorn.views.utils import set_property_from_data
 from example.coffee.models import Flavor
 
@@ -17,11 +17,11 @@ class FakeComponent(UnicornView):
     array: List[str] = []
     model = Flavor(name="test-initial")
     queryset = Flavor.objects.none()
-    queryset_with_typehint: QueryType[Flavor] = []
+    queryset_with_typehint: QuerySetType[Flavor] = []
 
 
 class FakeQuerySetComponent(UnicornView):
-    queryset_with_typehint: QueryType[Flavor] = None
+    queryset_with_typehint: QuerySetType[Flavor] = None
 
 
 class FakeDbComponent(UnicornView):
@@ -35,9 +35,9 @@ class FakeDbComponent(UnicornView):
 
 
 class FakeAllQuerySetComponent(UnicornView):
-    queryset_with_empty_list: QueryType[Flavor] = []
-    queryset_with_none: QueryType[Flavor] = None
-    queryset_with_empty_queryset: QueryType[Flavor] = Flavor.objects.none()
+    queryset_with_empty_list: QuerySetType[Flavor] = []
+    queryset_with_none: QuerySetType[Flavor] = None
+    queryset_with_empty_queryset: QuerySetType[Flavor] = Flavor.objects.none()
     queryset_with_no_typehint = Flavor.objects.none()
 
 

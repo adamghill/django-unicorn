@@ -1,10 +1,10 @@
-from django_unicorn.components import QueryType, UnicornView
+from django_unicorn.components import QuerySetType, UnicornView
 from example.coffee.models import Flavor
 
 
 class ModelsView(UnicornView):
     flavor: Flavor = Flavor()
-    flavors: QueryType[Flavor] = Flavor.objects.none()
+    flavors: QuerySetType[Flavor] = Flavor.objects.none()
 
     def mount(self):
         self.refresh_flavors()

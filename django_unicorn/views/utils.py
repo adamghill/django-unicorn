@@ -4,7 +4,8 @@ from typing import Any, Union
 
 from django.db.models import Model, QuerySet
 
-from django_unicorn.components import QueryType, UnicornField, UnicornView
+from django_unicorn.components import UnicornField, UnicornView
+from django_unicorn.components.typing import QuerySetType
 from django_unicorn.decorators import timed
 from django_unicorn.utils import get_type_hints
 
@@ -138,21 +139,21 @@ def _is_queryset(field, type_hint, value):
 
     return (
         isinstance(field, QuerySet)
-        or (type_hint and get_origin(type_hint) is QueryType)
+        or (type_hint and get_origin(type_hint) is QuerySetType)
     ) and isinstance(value, list)
 
 
 def _create_queryset(field, type_hint, value) -> QuerySet:
     """
-    Create a queryset based on the `value`. If needed, the queryset will be created based on the `QueryType`.
+    Create a queryset based on the `value`. If needed, the queryset will be created based on the `QuerySetType`.
 
     For example, all of these ways fields are equivalent:
 
     ```
     class TestComponent(UnicornView):
-        queryset_with_empty_list: QueryType[SomeModel] = []
-        queryset_with_none: QueryType[SomeModel] = None
-        queryset_with_empty_queryset: QueryType[SomeModel] = SomeModel.objects.none()
+        queryset_with_empty_list: QuerySetType[SomeModel] = []
+        queryset_with_none: QuerySetType[SomeModel] = None
+        queryset_with_empty_queryset: QuerySetType[SomeModel] = SomeModel.objects.none()
         queryset_with_no_typehint = SomeModel.objects.none()
     ```
 
