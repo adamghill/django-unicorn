@@ -41,6 +41,14 @@ class FakeAllQuerySetComponent(UnicornView):
     queryset_with_no_typehint = Flavor.objects.none()
 
 
+def component_queryset_field_asserts(component, field_name):
+    field = getattr(component, field_name)
+    assert isinstance(field, QuerySet)
+    assert field.model == Flavor
+    assert len(field) == 1
+    assert field[0].name == "test-qs"
+
+
 def test_set_property_from_data_str():
     component = FakeComponent(component_name="test", component_id="12345678")
     assert "property_view" == component.string
@@ -95,12 +103,9 @@ def test_set_property_from_data_empty_queryset():
     component = FakeComponent(component_name="test", component_id="12345678")
     assert len(component.queryset) == 0
 
-    set_property_from_data(component, "queryset", [{"name": "test-qs-test"}])
+    set_property_from_data(component, "queryset", [{"name": "test-qs"}])
 
-    assert isinstance(component.queryset, QuerySet)
-    assert component.queryset.model == Flavor
-    assert len(component.queryset) == 1
-    assert component.queryset[0].name == "test-qs-test"
+    component_queryset_field_asserts(component, "queryset")
 
 
 @pytest.mark.django_db
@@ -109,77 +114,43 @@ def test_set_property_from_data_queryset():
     assert len(component.queryset_with_data) == 1
 
     set_property_from_data(
-        component, "queryset_with_data", [{"pk": 1, "name": "test-qs-with-data"}]
+        component, "queryset_with_data", [{"pk": 1, "name": "test-qs"}]
     )
 
-    assert isinstance(component.queryset_with_data, QuerySet)
-    assert component.queryset_with_data.model == Flavor
-    assert len(component.queryset_with_data) == 1
-    assert component.queryset_with_data[0].name == "test-qs-with-data"
+    component_queryset_field_asserts(component, "queryset_with_data")
 
 
 def test_set_property_from_data_queryset_list_with_typehint():
     component = FakeComponent(component_name="test", component_id="12345678")
     assert len(component.queryset_with_typehint) == 0
 
-    set_property_from_data(
-        component, "queryset_with_typehint", [{"name": "test-qs-test-1"}]
-    )
+    set_property_from_data(component, "queryset_with_typehint", [{"name": "test-qs"}])
 
-    assert isinstance(component.queryset_with_typehint, QuerySet)
-    assert component.queryset_with_typehint.model == Flavor
-    assert len(component.queryset_with_typehint) == 1
-    assert component.queryset_with_typehint[0].name == "test-qs-test-1"
+    component_queryset_field_asserts(component, "queryset_with_typehint")
 
 
 def test_set_property_from_data_queryset_none_with_typehint():
     component = FakeQuerySetComponent(component_name="test", component_id="12345678")
     assert component.queryset_with_typehint is None
 
-    set_property_from_data(
-        component, "queryset_with_typehint", [{"name": "test-qs-test-2"}]
-    )
+    set_property_from_data(component, "queryset_with_typehint", [{"name": "test-qs"}])
 
-    assert isinstance(component.queryset_with_typehint, QuerySet)
-    assert component.queryset_with_typehint.model == Flavor
-    assert len(component.queryset_with_typehint) == 1
-    assert component.queryset_with_typehint[0].name == "test-qs-test-2"
+    component_queryset_field_asserts(component, "queryset_with_typehint")
 
 
 def test_set_property_from_data_all_querysets():
     component = FakeAllQuerySetComponent(component_name="test", component_id="12345678")
 
+    set_property_from_data(component, "queryset_with_empty_list", [{"name": "test-qs"}])
+    set_property_from_data(component, "queryset_with_none", [{"name": "test-qs"}])
     set_property_from_data(
-        component, "queryset_with_empty_list", [{"name": "test-all-qs-test"}]
-    )
-    set_property_from_data(
-        component, "queryset_with_none", [{"name": "test-all-qs-test"}]
-    )
-    set_property_from_data(
-        component, "queryset_with_empty_queryset", [{"name": "test-all-qs-test"}]
+        component, "queryset_with_empty_queryset", [{"name": "test-qs"}]
     )
     set_property_from_data(
-        component, "queryset_with_no_typehint", [{"name": "test-all-qs-test"}]
+        component, "queryset_with_no_typehint", [{"name": "test-qs"}]
     )
 
-    assert isinstance(component.queryset_with_empty_list, QuerySet)
-    assert isinstance(component.queryset_with_none, QuerySet)
-    assert isinstance(component.queryset_with_empty_queryset, QuerySet)
-    assert isinstance(component.queryset_with_no_typehint, QuerySet)
-
-    assert component.queryset_with_empty_list.model == Flavor
-    assert component.queryset_with_none.model == Flavor
-    assert component.queryset_with_empty_queryset.model == Flavor
-    assert component.queryset_with_no_typehint.model == Flavor
-
-    assert len(component.queryset_with_empty_list) == 1
-    assert len(component.queryset_with_none) == 1
-    assert len(component.queryset_with_empty_queryset) == 1
-    assert len(component.queryset_with_no_typehint) == 1
-
-    assert (
-        component.queryset_with_empty_list[0].name
-        == component.queryset_with_none[0].name
-        == component.queryset_with_empty_queryset[0].name
-        == component.queryset_with_no_typehint[0].name
-    )
+    component_queryset_field_asserts(component, "queryset_with_empty_list")
+    component_queryset_field_asserts(component, "queryset_with_none")
+    component_queryset_field_asserts(component, "queryset_with_empty_queryset")
+    component_queryset_field_asserts(component, "queryset_with_no_typehint")
