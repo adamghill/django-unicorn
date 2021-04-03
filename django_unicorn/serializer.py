@@ -197,3 +197,21 @@ def loads(str: str) -> dict:
         return orjson.loads(str)
     except orjson.JSONDecodeError as e:
         raise JSONDecodeError from e
+
+
+def model_value(model: Model, *fields: str):
+    """
+    Serializes a model into a dictionary with the fields as specified in the `fields` argument.
+    """
+
+    model_data = {}
+    model_dict = _get_model_dict(model)
+
+    if not fields:
+        return model_dict
+
+    for field in fields:
+        if field in model_dict:
+            model_data[field] = model_dict[field]
+
+    return model_data
