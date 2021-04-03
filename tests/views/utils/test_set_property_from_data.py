@@ -138,6 +138,15 @@ def test_set_property_from_data_queryset_none_with_typehint():
     component_queryset_field_asserts(component, "queryset_with_typehint")
 
 
+def test_set_property_from_data_queryset_parent():
+    component = FakeQuerySetComponent(component_name="test", component_id="12345678")
+    assert component.queryset_with_typehint is None
+
+    set_property_from_data(component, "queryset_with_typehint", [{"name": "test-qs"}])
+
+    component_queryset_field_asserts(component, "queryset_with_typehint")
+
+
 def test_set_property_from_data_all_querysets():
     component = FakeAllQuerySetComponent(component_name="test", component_id="12345678")
 

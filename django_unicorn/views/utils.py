@@ -1,6 +1,6 @@
 import logging
 from dataclasses import is_dataclass
-from typing import Any, Union
+from typing import Any, Dict, Set, Union
 
 from django.db.models import Model, QuerySet
 
@@ -199,10 +199,38 @@ def _create_queryset(field, type_hint, value) -> QuerySet:
 
         for (idx, model) in enumerate(queryset._result_cache):
             if model.pk == model_value.get("pk"):
-                queryset._result_cache[idx] = model_type(**model_value)
+                constructed_model = _construct_model(
+                    model_type, model_value, constructed_models
+                )
+                queryset._result_cache[idx] = constructed_model
                 model_found = True
 
         if not model_found:
-            queryset._result_cache.append(model_type(**model_value))
+            constructed_model = _construct_model(
+                model_type, model_value, constructed_models
+            )
+            queryset._result_cache.append(constructed_model)
 
     return queryset
+
+
+def _construct_model(model_type, model_data: Dict):
+    if not model_data:
+        return None
+
+    model = model_type()
+
+    for field_name in model_data.keys():
+        for field in model._meta.fields:
+            if field.name == field_name or (field_name == "pk" and field.primary_key):
+                # if field.is_relation:
+                #     related_model = _construct_model(
+                #         field.model, model_data[field_name]
+                #     )
+                #     setattr(model, field.name, related_model)
+                # else:
+
+                setattr(model, field.name, model_data[field_name])
+                break
+
+    return model

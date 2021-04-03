@@ -1,7 +1,11 @@
-from django.db.models import Model
-from django.db.models.fields import CharField, DateField
+from django.db import models
 
 
-class Book(Model):
-    title = CharField(max_length=255)
-    date_published = DateField()
+class Book(models.Model):
+    title = models.CharField(max_length=255)
+    date_published = models.DateField()
+
+
+class Author(models.Model):
+    name = models.CharField(max_length=1024)
+    books = models.ManyToManyField(Book)

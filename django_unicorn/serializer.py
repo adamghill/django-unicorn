@@ -39,7 +39,7 @@ def _parse_field_values_from_string(model: Model) -> None:
     """
     Convert the model fields' value to match the field type if appropriate.
 
-    This is mostly to deal field string values that will get saved as a date-related field.
+    This is mostly to deal with field string values that will get saved as a date-related field.
     """
 
     for field in model._meta.fields:

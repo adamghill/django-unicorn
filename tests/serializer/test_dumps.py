@@ -1,17 +1,7 @@
 import json
 from decimal import Decimal
 
-from django.db.models import (
-    SET_NULL,
-    CharField,
-    DateField,
-    DateTimeField,
-    DurationField,
-    ForeignKey,
-    Model,
-    TimeField,
-)
-from django.db.models.fields import CharField
+from django.db import models
 from django.utils.timezone import now
 
 import pytest
@@ -21,16 +11,16 @@ from django_unicorn.utils import dicts_equal
 from example.coffee.models import Flavor
 
 
-class SimpleTestModel(Model):
-    name = CharField(max_length=10)
+class SimpleTestModel(models.Model):
+    name = models.CharField(max_length=10)
 
     class Meta:
         app_label = "tests"
 
 
-class ComplicatedTestModel(Model):
-    name = CharField(max_length=10)
-    parent = ForeignKey("self", blank=True, null=True, on_delete=SET_NULL)
+class ComplicatedTestModel(models.Model):
+    name = models.CharField(max_length=10)
+    parent = models.ForeignKey("self", blank=True, null=True, on_delete=models.SET_NULL)
 
     class Meta:
         app_label = "tests"
@@ -179,7 +169,7 @@ def test_model_foreign_key():
     assert expected == actual
 
 
-def test_model_foreign_key_recurive_parents():
+def test_model_foreign_key_recursive_parent():
     test_model_one = ComplicatedTestModel(id=1, name="abc")
     test_model_two = ComplicatedTestModel(id=2, name="def", parent=test_model_one)
     test_model_one.parent = test_model_two

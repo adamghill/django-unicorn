@@ -14,6 +14,7 @@ def pytest_configure():
 
     installed_apps = [
         "example.coffee.apps.Config",
+        "example.books.apps.Config",
     ]
 
     unicorn_settings = {
