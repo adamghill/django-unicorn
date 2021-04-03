@@ -101,7 +101,12 @@ def _json_serializer(obj):
             queryset_json = []
 
             for model in obj:
-                model_json = _get_model_dict(model)
+                if obj.query.values_select and isinstance(model, dict):
+                    # If the queryset was created with values it's already a dictionary
+                    model_json = model
+                else:
+                    model_json = _get_model_dict(model)
+
                 queryset_json.append(model_json)
 
             return queryset_json

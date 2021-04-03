@@ -1,6 +1,6 @@
 import logging
 from dataclasses import is_dataclass
-from typing import Any, Dict, Set, Union
+from typing import Any, Dict, Union
 
 from django.db.models import Model, QuerySet
 
@@ -198,23 +198,23 @@ def _create_queryset(field, type_hint, value) -> QuerySet:
             queryset._result_cache = []
 
         for (idx, model) in enumerate(queryset._result_cache):
-            if model.pk == model_value.get("pk"):
-                constructed_model = _construct_model(
-                    model_type, model_value, constructed_models
-                )
+            if hasattr(model, "pk") and model.pk == model_value.get("pk"):
+                constructed_model = _construct_model(model_type, model_value)
                 queryset._result_cache[idx] = constructed_model
                 model_found = True
 
         if not model_found:
-            constructed_model = _construct_model(
-                model_type, model_value, constructed_models
-            )
+            constructed_model = _construct_model(model_type, model_value)
             queryset._result_cache.append(constructed_model)
 
     return queryset
 
 
 def _construct_model(model_type, model_data: Dict):
+    """
+    Construct a model based on the type and dictionary data.
+    """
+
     if not model_data:
         return None
 
@@ -223,14 +223,13 @@ def _construct_model(model_type, model_data: Dict):
     for field_name in model_data.keys():
         for field in model._meta.fields:
             if field.name == field_name or (field_name == "pk" and field.primary_key):
-                # if field.is_relation:
-                #     related_model = _construct_model(
-                #         field.model, model_data[field_name]
-                #     )
-                #     setattr(model, field.name, related_model)
-                # else:
+                column_name = field.name
 
-                setattr(model, field.name, model_data[field_name])
+                if field.is_relation:
+                    column_name = field.attname
+
+                setattr(model, column_name, model_data[field_name])
+
                 break
 
     return model
