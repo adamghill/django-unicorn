@@ -4,10 +4,10 @@ from typing import Optional
 
 from django.utils.timezone import now
 
-from books.models import Book
 from pydantic import BaseModel
 
 from django_unicorn.components import UnicornField, UnicornView
+from example.books.models import Book
 
 
 class PublishDateField(UnicornField):
