@@ -1,8 +1,12 @@
 from pathlib import Path
+from webbrowser import open
 
 from django.core.management.base import BaseCommand, CommandError
 
-from ...components import convert_to_pascal_case, convert_to_snake_case
+from django_unicorn.components.unicorn_view import (
+    convert_to_pascal_case,
+    convert_to_snake_case,
+)
 
 
 COMPONENT_FILE = """from django_unicorn.components import UnicornView
@@ -28,9 +32,17 @@ class Command(BaseCommand):
         if not Path("manage.py").exists():
             raise CommandError("Can't find manage.py in current path.")
 
+        first_component = False
+
         if not Path("unicorn").exists():
             Path("unicorn").mkdir()
-            self.stdout.write(self.style.SUCCESS("Create unicorn directory ✨"))
+            self.stdout.write(
+                self.style.SUCCESS(
+                    "Create unicorn directory for your first component! ✨"
+                )
+            )
+
+            first_component = True
 
         for component_name in options["component_names"]:
             snake_case_component_name = convert_to_snake_case(component_name)
@@ -59,8 +71,41 @@ class Command(BaseCommand):
             template_path.write_text(TEMPLATE_FILE)
             self.stdout.write(self.style.SUCCESS(f"Created {template_path}."))
 
+            if first_component:
+                input_value = input(
+                    "\nStarring the GitHub repo helps other Django users find Unicorn. Can you star it for me? [y/N] "
+                )
+
+                if input_value.strip().lower() in ("y", "yes"):
+                    self.stdout.write(
+                        """
+                         ,/
+                        //
+                      ,//
+          __    /|   |//
+      `__/\\_ --(/|___/-/
+   \\|\\_-\\___ __-_`- /-/ \\.
+  |\\_-___,-\\_____--/_)' ) \\
+   \\ -_ /     __ \\( `( __`\\|
+   `\\__|      |\\)      (/|
+',--//-|      \\    | '   /
+  /,---|       \\        /
+ `_/ _,'        |      |
+ __/'/          |      |
+ ___/           \\ (  ) /
+                 \\____/\\
+                        \\
+"""
+                    )
+                    self.stdout.write(
+                        self.style.SUCCESS(
+                            "Thank you for helping spread the word about Unicorn!"
+                        )
+                    )
+                    open("https://github.com/adamghill/django-unicorn", new=2)
+
             self.stdout.write(
-                self.style.SUCCESS(
-                    f"\nMake sure to add '\"unicorn\",' to your INSTALLED_APPS array in your settings file if necessary."
+                self.style.WARNING(
+                    "\nMake sure to add '\"unicorn\",' to your INSTALLED_APPS list in your settings file if necessary."
                 )
             )
