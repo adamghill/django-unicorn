@@ -1,6 +1,7 @@
 from pathlib import Path
 from webbrowser import open
 
+from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 
 from django_unicorn.components.unicorn_view import (
@@ -9,14 +10,14 @@ from django_unicorn.components.unicorn_view import (
 )
 
 
-COMPONENT_FILE = """from django_unicorn.components import UnicornView
+COMPONENT_FILE_CONTENT = """from django_unicorn.components import UnicornView
 
 
 class {pascal_case_component_name}View(UnicornView):
     pass
 """
 
-TEMPLATE_FILE = """<div>
+TEMPLATE_FILE_CONTENT = """<div>
     <!-- put component code here -->
 </div>
 """
@@ -29,16 +30,20 @@ class Command(BaseCommand):
         parser.add_argument("component_names", nargs="+", type=str)
 
     def handle(self, *args, **options):
-        if not Path("manage.py").exists():
-            raise CommandError("Can't find manage.py in current path.")
+        if not hasattr(settings, "BASE_DIR"):
+            raise CommandError("Can't find BASE_DIR for this project.")
 
+        if "component_names" not in options:
+            raise CommandError("Pass in at least one component name.")
+
+        base_path = Path(settings.BASE_DIR)
         first_component = False
 
-        if not Path("unicorn").exists():
-            Path("unicorn").mkdir()
+        if not (base_path / Path("unicorn")).exists():
+            (base_path / Path("unicorn")).mkdir()
             self.stdout.write(
                 self.style.SUCCESS(
-                    "Create unicorn directory for your first component! ✨"
+                    "Created unicorn directory for your first component! ✨\n"
                 )
             )
 
@@ -49,26 +54,58 @@ class Command(BaseCommand):
             pascal_case_component_name = convert_to_pascal_case(component_name)
 
             # Create component
-            if not Path("unicorn/components").exists():
-                Path("unicorn/components").mkdir()
+            component_base_path = base_path / Path("unicorn") / Path("components")
 
-            component_path = Path(f"unicorn/components/{snake_case_component_name}.py")
+            if not component_base_path.exists():
+                component_base_path.mkdir()
+
+            component_path = component_base_path / Path(
+                f"{snake_case_component_name}.py"
+            )
+
+            if component_path.exists():
+                self.stdout.write(
+                    self.style.ERROR(
+                        f"The component for {snake_case_component_name}.py already exists."
+                    )
+                )
+                return
+
             component_path.write_text(
-                COMPONENT_FILE.format(
+                COMPONENT_FILE_CONTENT.format(
                     **{"pascal_case_component_name": pascal_case_component_name}
                 )
             )
             self.stdout.write(self.style.SUCCESS(f"Created {component_path}."))
 
             # Create template
-            if not Path("unicorn/templates/unicorn").exists():
-                if not Path("unicorn/templates").exists():
-                    Path("unicorn/templates").mkdir()
+            template_base_path = (
+                base_path / Path("unicorn") / Path("templates") / Path("unicorn")
+            )
 
-                Path("unicorn/templates/unicorn").mkdir()
+            if not template_base_path.exists():
+                if not (base_path / Path("unicorn") / Path("templates")).exists():
+                    (base_path / Path("unicorn") / Path("templates")).mkdir()
 
-            template_path = Path(f"unicorn/templates/unicorn/{component_name}.html")
-            template_path.write_text(TEMPLATE_FILE)
+                template_base_path.mkdir()
+
+            template_path = (
+                base_path
+                / Path("unicorn")
+                / Path("templates")
+                / Path("unicorn")
+                / Path(f"{component_name}.html")
+            )
+
+            if template_path.exists():
+                self.stdout.write(
+                    self.style.ERROR(
+                        f"The template for {component_name}.html already exists."
+                    )
+                )
+                return
+
+            template_path.write_text(TEMPLATE_FILE_CONTENT)
             self.stdout.write(self.style.SUCCESS(f"Created {template_path}."))
 
             if first_component:
@@ -77,6 +114,12 @@ class Command(BaseCommand):
                 )
 
                 if input_value.strip().lower() in ("y", "yes"):
+                    self.stdout.write(
+                        self.style.SUCCESS(
+                            "Thank you for helping spread the word about Unicorn!"
+                        )
+                    )
+
                     self.stdout.write(
                         """
                          ,/
@@ -97,12 +140,14 @@ class Command(BaseCommand):
                         \\
 """
                     )
+
+                    open("https://github.com/adamghill/django-unicorn", new=2)
+                else:
                     self.stdout.write(
-                        self.style.SUCCESS(
-                            "Thank you for helping spread the word about Unicorn!"
+                        self.style.ERROR(
+                            "Ok, bummer. I hope you will star it for me at https://github.com/adamghill/django-unicorn at some point!"
                         )
                     )
-                    open("https://github.com/adamghill/django-unicorn", new=2)
 
             self.stdout.write(
                 self.style.WARNING(
