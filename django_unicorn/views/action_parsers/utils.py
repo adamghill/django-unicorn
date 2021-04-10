@@ -64,6 +64,7 @@ def set_property_value(
                     is_relation_field = False
 
                     # Set the id property for ForeignKeys
+                    # TODO: Move this to utility function
                     if hasattr(component_or_field, "_meta"):
                         for field in component_or_field._meta.fields:
                             if field.name == property_name_part:
