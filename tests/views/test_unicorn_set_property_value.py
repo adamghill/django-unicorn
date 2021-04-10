@@ -59,3 +59,22 @@ def test_set_property_value_array():
     )
 
     assert component.flavors[0].name == "test 1"
+
+
+@pytest.mark.django_db
+def test_set_property_value_foreign_key():
+    flavor = Flavor(name="initial 1")
+    flavor.save()
+    parent = Flavor(name="initial 2")
+    parent.save()
+    component = FakeComponent(component_name="test", component_id="12345678")
+
+    set_property_value(
+        component,
+        "flavors.0.parent",
+        parent.pk,
+        {"flavors": [{"name": flavor.name, "parent": None},]},
+    )
+
+    assert component.flavors[0].parent_id == parent.pk
+    assert component.flavors[0].parent.pk == parent.pk

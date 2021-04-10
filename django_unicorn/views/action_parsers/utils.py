@@ -61,7 +61,23 @@ def set_property_value(
                     if hasattr(component, updating_function_name):
                         getattr(component, updating_function_name)(property_value)
 
-                    setattr(component_or_field, property_name_part, property_value)
+                    is_relation_field = False
+
+                    # Set the id property for ForeignKeys
+                    if hasattr(component_or_field, "_meta"):
+                        for field in component_or_field._meta.fields:
+                            if field.name == property_name_part:
+                                if field.is_relation:
+                                    setattr(
+                                        component_or_field,
+                                        field.attname,
+                                        property_value,
+                                    )
+                                    is_relation_field = True
+                                    break
+
+                    if not is_relation_field:
+                        setattr(component_or_field, property_name_part, property_value)
 
                     if hasattr(component, updated_function_name):
                         getattr(component, updated_function_name)(property_value)
@@ -77,17 +93,10 @@ def set_property_value(
             else:
                 component_or_field = component_or_field[property_name_part]
                 data_or_dict = data_or_dict.get(property_name_part, {})
-        elif isinstance(component_or_field, list):
+        elif isinstance(component_or_field, list) or isinstance(
+            component_or_field, QuerySet
+        ):
             # TODO: Check for iterable instad of list? `from collections.abc import Iterable`
-            property_name_part = int(property_name_part)
-
-            if idx == len(property_name_parts) - 1:
-                component_or_field[property_name_part] = property_value
-                data_or_dict[property_name_part] = property_value
-            else:
-                component_or_field = component_or_field[property_name_part]
-                data_or_dict = data_or_dict[property_name_part]
-        elif isinstance(component_or_field, QuerySet):
             property_name_part = int(property_name_part)
 
             if idx == len(property_name_parts) - 1:

@@ -24,3 +24,9 @@ class ModelsView(UnicornView):
     def delete(self, flavor_to_delete: Flavor):
         flavor_to_delete.delete()
         self.refresh_flavors()
+
+    def available_flavors(self):
+        return Flavor.objects.all()
+
+    class Meta:
+        javascript_exclude = ("available_flavors",)

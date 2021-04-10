@@ -44,6 +44,16 @@
                 {{ flavor.decimal_value }}
                 <br />
 
+                <label>Parent</label>
+                <select unicorn:model="flavors.{{ forloop.counter0 }}.parent">
+                    <option value="">n/a</option>
+                    {% for available_flavor in available_flavors %}
+                    <option value="{{ available_flavor.pk }}">{{ available_flavor.name }}</option>
+                    {% endfor %}
+                </select>
+                {{ flavor.parent.name }}
+                <br />
+
                 <button unicorn:click="save({{ forloop.counter0 }})">save(flavor_idx)</button>
                 <button unicorn:click="delete({{ flavor.pk }})">delete(flavor.pk)</button>
             </div>
