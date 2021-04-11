@@ -18,7 +18,7 @@ long_running = true
 
 [[commands]]
 name = "t"
-execute = "poetry run pytest -m 'not slow' && poetry run pytest -m 'slow' && npm run-script test"
+execute = "poetry run nox -r && npm run-script test"
 
 [[commands]]
 name = "is"
