@@ -3,7 +3,7 @@
 [[commands]]
 name = "md"
 help = "Do the migration dance"
-execute = "poetry run ./manage.py makemigrations && poetry run ./manage.py migrate"
+execute = "poetry run example/manage.py makemigrations && poetry run example/manage.py migrate"
 
 [[commands]]
 name = "up"
