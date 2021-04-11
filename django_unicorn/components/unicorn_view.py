@@ -10,8 +10,10 @@ from django.core.cache import caches
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models import Model
 from django.http import HttpRequest
+from django.utils.decorators import classonlymethod
 from django.views.generic.base import TemplateView
 
+import shortuuid
 from cachetools.lru import LRUCache
 
 from django_unicorn.settings import get_cache_alias
@@ -43,6 +45,11 @@ COMPONENTS_MODULE_CACHE_ENABLED = "pytest" not in sys.modules
 def convert_to_snake_case(s: str) -> str:
     # TODO: Better handling of dash->snake
     return s.replace("-", "_")
+
+
+def convert_to_dash_case(s: str) -> str:
+    # TODO: Better handling of snake->dash
+    return s.replace("_", "-")
 
 
 def convert_to_pascal_case(s: str) -> str:
@@ -132,10 +139,14 @@ def construct_component(
     return component
 
 
+from django.utils.decorators import classonlymethod
+
+
 class UnicornView(TemplateView):
     response_class = UnicornTemplateResponse
     component_name: str = ""
     component_key: str = ""
+    component_id: str = ""
     request = None
     parent = None
     children = []
@@ -289,17 +300,24 @@ class UnicornView(TemplateView):
         pass
 
     @timed
-    def render(self, init_js=False, extra_context=None) -> str:
+    def render(self, init_js=False, extra_context=None, request=None) -> str:
         """
         Renders a UnicornView component with the public properties available. Delegates to a
         UnicornTemplateResponse to actually render a response.
 
         Args:
             param init_js: Whether or not to include the Javascript required to initialize the component.
+            param extra_context:
+            param request: Set the `request` for rendering. Usually it will be in the context,
+                but it is missing when the component is re-rendered as a direct view, so it needs
+                to be set explicitly.
         """
 
         if extra_context is not None:
             self.extra_context = extra_context
+
+        if request:
+            self.request = request
 
         response = self.render_to_response(
             context=self.get_context_data(),
@@ -325,6 +343,20 @@ class UnicornView(TemplateView):
             self._children_set = True
 
         return rendered_component
+
+    def dispatch(self, request, *args, **kwargs):
+        """
+        Called by the `as_view` class method when utilizing a component directly as a view.
+        """
+
+        self.mount()
+        self.hydrate()
+
+        return self.render_to_response(
+            context=self.get_context_data(),
+            component=self,
+            init_js=True,
+        )
 
     @timed
     def get_frontend_context_variables(self) -> str:
@@ -799,3 +831,18 @@ class UnicornView(TemplateView):
         raise ComponentLoadError(
             f"'{component_name}' component could not be loaded: {last_exception}"
         ) from last_exception
+
+    @classonlymethod
+    def as_view(cls, **initkwargs):
+        if "component_id" not in initkwargs:
+            initkwargs["component_id"] = shortuuid.uuid()[:8]
+
+        if "component_name" not in initkwargs:
+            module_name = cls.__module__
+            module_parts = module_name.split(".")
+            component_name = module_parts[len(module_parts) - 1]
+            component_name = convert_to_dash_case(component_name)
+
+            initkwargs["component_name"] = component_name
+
+        return super().as_view(**initkwargs)

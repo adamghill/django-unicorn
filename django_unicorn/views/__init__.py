@@ -157,7 +157,8 @@ def _process_component_request(
         else:
             component.validate(model_names=list(updated_data.keys()))
 
-    rendered_component = component.render()
+    # Pass the current request so that it can be used inside the component template
+    rendered_component = component.render(request=request)
     component.rendered(rendered_component)
 
     cache = caches[get_cache_alias()]

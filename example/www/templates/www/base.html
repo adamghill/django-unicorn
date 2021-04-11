@@ -1,48 +1,52 @@
 {% load static unicorn %}
 
 <html>
-    <head>
-        <title>django-unicorn examples</title>
-        <link rel="stylesheet" href="{% static 'css/marx.min.css' %}">
-        <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-        <style>
-            #menu {
-                list-style: none;
-            }
-            #menu li {
-                display: inline;
-                padding: 0 10px;
-                border-left: solid 1px black;
-            }
-            #menu li:first-child {
-                border-left: none !important;
-            }
-        </style>
 
-        {% unicorn_scripts %}
-    </head>
+<head>
+  <title>django-unicorn examples</title>
+  <link rel="stylesheet" href="{% static 'css/marx.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+  <style>
+    #menu {
+      list-style: none;
+    }
 
-    <body>
-        <main>
-            {% csrf_token %}
+    #menu li {
+      display: inline;
+      padding: 0 10px;
+      border-left: solid 1px black;
+    }
 
-            <h1>django-unicorn</h1>
+    #menu li:first-child {
+      border-left: none !important;
+    }
+  </style>
 
-            <ul id="menu">
-                <li><a href="{% url 'www:index' %}">Index</a></li>
-                <li><a href="{% url 'www:template' 'text-inputs' %}">Text inputs</a></li>
-                <li><a href="{% url 'www:template' 'html-inputs' %}">Other inputs</a></li>
-                <li><a href="{% url 'www:template' 'objects' %}">Objects</a></li>
-                <li><a href="{% url 'www:template' 'validation' %}">Validation</a></li>
-                <li><a href="{% url 'www:template' 'polling' %}">Polling</a></li>
-                <li><a href="{% url 'www:template' 'models' %}">Models</a></li>
-                <li><a href="{% url 'www:template' 'nested' %}">Nested components (table)</a></li>
-                <li><a href="{% url 'www:template' 'js' %}">JavaScript integration</a></li>
-            </ul>
+  {% unicorn_scripts %}
+</head>
 
-            {% block content %}{% endblock content %}
+<body>
+  <main>
+    {% csrf_token %}
 
-        </main>
-    </body>
+    <h1>django-unicorn</h1>
+
+    <ul id="menu">
+      <li><a href="{% url 'www:index' %}">Index</a></li>
+      <li><a href="{% url 'www:template' 'text-inputs' %}">Text inputs</a></li>
+      <li><a href="{% url 'www:template' 'html-inputs' %}">Other inputs</a></li>
+      <li><a href="{% url 'www:template' 'objects' %}">Objects</a></li>
+      <li><a href="{% url 'www:template' 'validation' %}">Validation</a></li>
+      <li><a href="{% url 'www:template' 'polling' %}">Polling</a></li>
+      <li><a href="{% url 'www:template' 'models' %}">Models</a></li>
+      <li><a href="{% url 'www:template' 'nested' %}">Nested components (table)</a></li>
+      <li><a href="{% url 'www:template' 'js' %}">JavaScript integration</a></li>
+      <li><a href="{% url 'www:direct-view' %}">Direct View</a></li>
+    </ul>
+
+    {% block content %}{% endblock content %}
+
+  </main>
+</body>
 
 </html>

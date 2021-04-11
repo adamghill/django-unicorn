@@ -12,3 +12,11 @@ class ComponentLoadError(Exception):
 
 class RenderNotModified(Exception):
     pass
+
+
+class MissingComponentElement(Exception):
+    pass
+
+
+class MissingComponentViewElement(Exception):
+    pass

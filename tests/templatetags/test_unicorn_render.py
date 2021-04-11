@@ -1,7 +1,6 @@
 import re
 
-from django.http.request import HttpRequest
-from django.template import Context, RequestContext
+from django.template import Context
 from django.template.base import Token, TokenType
 
 import pytest

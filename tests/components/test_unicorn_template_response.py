@@ -5,6 +5,7 @@ from django_unicorn.components.unicorn_template_response import (
     UnicornTemplateResponse,
     get_root_element,
 )
+from django_unicorn.errors import MissingComponentElement, MissingComponentViewElement
 
 
 def test_get_root_element():
@@ -43,10 +44,31 @@ def test_get_root_element_no_element():
     component_html = "\n"
     soup = BeautifulSoup(component_html, features="html.parser")
 
-    with pytest.raises(Exception):
+    with pytest.raises(MissingComponentElement):
         actual = get_root_element(soup)
 
         assert str(actual) == expected
+
+
+def test_get_root_element_direct_view():
+    # Annoyingly beautifulsoup adds a blank string on the attribute
+    expected = '<div unicorn:view="">test</div>'
+
+    component_html = (
+        "<html><head></head>≤body><div unicorn:view>test</div></body></html>"
+    )
+    soup = BeautifulSoup(component_html, features="html.parser")
+    actual = get_root_element(soup)
+
+    assert str(actual) == expected
+
+
+def test_get_root_element_direct_view_no_view():
+    component_html = "<html><head></head>≤body><div>test</div></body></html>"
+    soup = BeautifulSoup(component_html, features="html.parser")
+
+    with pytest.raises(MissingComponentViewElement):
+        get_root_element(soup)
 
 
 def test_desoupify():

@@ -11,6 +11,7 @@ from bs4.formatter import HTMLFormatter
 from django_unicorn.utils import sanitize_html
 
 from ..decorators import timed
+from ..errors import MissingComponentElement, MissingComponentViewElement
 from ..utils import generate_checksum
 
 
@@ -132,15 +133,26 @@ class UnicornTemplateResponse(TemplateResponse):
 
 def get_root_element(soup: BeautifulSoup) -> Tag:
     """
-    Gets the first tag element.
+    Gets the first tag element for the component or the first element with a `unicorn:view` attribute for a direct view.
 
     Returns:
         BeautifulSoup tag element.
 
-        Raises an Exception if an element cannot be found.
+        Raises `Exception` if an element cannot be found.
     """
+
     for element in soup.contents:
         if isinstance(element, Tag) and element.name:
+            if element.name == "html":
+                view_element = element.find_next(attrs={"unicorn:view": True})
+
+                if not view_element:
+                    raise MissingComponentViewElement(
+                        "An element with an `unicorn:view` attribute is required for a direct view"
+                    )
+
+                return view_element
+
             return element
 
-    raise Exception("No root element found")
+    raise MissingComponentElement("No root element for the component was found")
