@@ -64,10 +64,20 @@ def set_property_value(
                     is_relation_field = False
 
                     # Set the id property for ForeignKeys
-                    # TODO: Move this to utility function
+                    # TODO: Move some of this to utility function
                     if hasattr(component_or_field, "_meta"):
-                        for field in component_or_field._meta.fields:
-                            if field.name == property_name_part:
+                        for field in component_or_field._meta.get_fields():
+                            if field.is_relation and field.many_to_many:
+                                related_name = field.related_name or f"{field.name}_set"
+
+                                if related_name == property_name_part:
+                                    related_descriptor = getattr(
+                                        component_or_field, related_name
+                                    )
+                                    related_descriptor.set(property_value)
+                                    is_relation_field = True
+                                    break
+                            elif field.name == property_name_part:
                                 if field.is_relation:
                                     setattr(
                                         component_or_field,

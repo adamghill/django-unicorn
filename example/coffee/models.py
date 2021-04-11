@@ -19,3 +19,13 @@ class Flavor(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Taste(models.Model):
+    name = models.CharField(max_length=255)
+    flavor = models.ManyToManyField(Flavor)
+
+
+class Origin(models.Model):
+    name = models.CharField(max_length=255)
+    flavor = models.ManyToManyField(Flavor, related_name="origins")

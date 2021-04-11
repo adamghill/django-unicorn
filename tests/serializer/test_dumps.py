@@ -80,6 +80,8 @@ def test_model_with_datetime(db):
             "time": None,
             "duration": None,
             "pk": None,
+            "taste_set": [],
+            "origins": [],
         }
     }
 
@@ -104,6 +106,8 @@ def test_model_with_datetime_as_string(db):
             "time": None,
             "duration": None,
             "pk": None,
+            "taste_set": [],
+            "origins": [],
         }
     }
 
@@ -128,6 +132,8 @@ def test_model_with_time_as_string(db):
             "time": time,
             "duration": None,
             "pk": None,
+            "taste_set": [],
+            "origins": [],
         }
     }
 
@@ -152,6 +158,8 @@ def test_model_with_duration_as_string(db):
             "time": None,
             "duration": "-1 19:00:00",
             "pk": None,
+            "taste_set": [],
+            "origins": [],
         }
     }
 
@@ -204,6 +212,8 @@ def test_dumps_queryset(db):
                 "time": None,
                 "duration": None,
                 "pk": 1,
+                "taste_set": [],
+                "origins": [],
             },
             {
                 "name": "name2",
@@ -217,6 +227,8 @@ def test_dumps_queryset(db):
                 "time": None,
                 "duration": None,
                 "pk": 2,
+                "taste_set": [],
+                "origins": [],
             },
         ]
     }
@@ -241,6 +253,8 @@ def test_get_model_dict():
         "datetime": None,
         "time": None,
         "duration": None,
+        "taste_set": [],
+        "origins": [],
     }
 
     assert expected == actual

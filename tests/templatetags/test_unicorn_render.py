@@ -2,6 +2,8 @@ import re
 
 from django.template.base import Token, TokenType
 
+import pytest
+
 from django_unicorn.components import UnicornView
 from django_unicorn.templatetags.unicorn import unicorn
 from django_unicorn.utils import generate_checksum
@@ -163,6 +165,7 @@ def test_unicorn_render_parent_with_model_id(settings):
     )
 
 
+@pytest.mark.django_db
 def test_unicorn_render_parent_with_model_pk(settings):
     settings.DEBUG = True
     token = Token(

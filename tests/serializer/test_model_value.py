@@ -1,5 +1,7 @@
 from django.db import models
 
+import pytest
+
 from django_unicorn.components import ModelValueMixin
 from django_unicorn.serializer import model_value
 from example.coffee.models import Flavor
@@ -20,6 +22,8 @@ def test_model_value_all_fields():
         "pk": None,
         "time": None,
         "uuid": str(flavor.uuid),
+        "taste_set": [],
+        "origins": [],
     }
 
     actual = model_value(flavor)
@@ -36,6 +40,7 @@ def test_model_value_one_field():
     assert expected == actual
 
 
+@pytest.mark.django_db
 def test_model_value_multiple_field():
     expected = {
         "pk": 77,

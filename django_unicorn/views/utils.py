@@ -34,7 +34,12 @@ def set_property_from_data(
     Sets properties on the component based on passed-in data.
     """
 
-    if not hasattr(component_or_field, name):
+    try:
+        if not hasattr(component_or_field, name):
+            return
+    except ValueError:
+        # Treat ValueError the same as a missing field because trying to access a many-to-many
+        # field before the model's pk will throw this exception
         return
 
     field = getattr(component_or_field, name)

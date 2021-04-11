@@ -1,5 +1,5 @@
 from django_unicorn.components import QuerySetType, UnicornView
-from example.coffee.models import Flavor
+from example.coffee.models import Flavor, Taste
 
 
 class ModelsView(UnicornView):
@@ -28,5 +28,11 @@ class ModelsView(UnicornView):
     def available_flavors(self):
         return Flavor.objects.all()
 
+    def available_tastes(self):
+        return Taste.objects.all()
+
     class Meta:
-        javascript_exclude = ("available_flavors",)
+        javascript_exclude = (
+            "available_flavors",
+            "available_tastes",
+        )

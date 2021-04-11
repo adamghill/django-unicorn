@@ -54,6 +54,20 @@
                 {{ flavor.parent.name }}
                 <br />
 
+                <label>Taste</label>
+                <select unicorn:model="flavors.{{ forloop.counter0 }}.taste_set" multiple>
+                    {% for available_taste in available_tastes %}
+                    <option value="{{ available_taste.pk }}">{{ available_taste.name }}</option>
+                    {% endfor %}
+                </select>
+
+                <ul>
+                {% for taste in flavor.taste_set.all %}
+                    <li>{{ taste.name }}</li>
+                {% endfor %}
+                </ul>
+                <br />
+
                 <button unicorn:click="save({{ forloop.counter0 }})">save(flavor_idx)</button>
                 <button unicorn:click="delete({{ flavor.pk }})">delete(flavor.pk)</button>
             </div>

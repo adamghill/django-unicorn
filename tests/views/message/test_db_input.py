@@ -58,6 +58,8 @@ def test_message_db_input_update(client):
                 "date": None,
                 "time": None,
                 "duration": None,
+                "taste_set": [],
+                "origins": [],
             }
         ]
     }
@@ -114,6 +116,8 @@ def test_message_db_input_create(client):
                 "time": None,
                 "duration": None,
                 "pk": 1,
+                "taste_set": [],
+                "origins": [],
             }
         ]
     }

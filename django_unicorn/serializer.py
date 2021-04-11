@@ -73,6 +73,20 @@ def _get_model_dict(model: Model) -> dict:
     model_json = model_json.get("fields")
     model_json["pk"] = model_pk
 
+    for field in model._meta.get_fields():
+        if field.is_relation and field.many_to_many:
+            related_name = field.related_name or f"{field.name}_set"
+            pks = []
+
+            try:
+                related_descriptor = getattr(model, related_name)
+                pks = list(related_descriptor.values_list("pk", flat=True))
+            except ValueError:
+                # ValueError is throuwn when the model doesn't have an id already set
+                pass
+
+            model_json[related_name] = pks
+
     return model_json
 
 
