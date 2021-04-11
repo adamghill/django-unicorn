@@ -1,5 +1,6 @@
 import logging
 import time
+import warnings
 
 from django.conf import settings
 
@@ -19,6 +20,10 @@ def db_model(func, *args, **kwargs):
     Will get converted to:
         `component.delete({ 'name': 'modelName', pk: 1})` -> `component.delete(modelInstance)`
     """
+
+    warnings.warn(
+        "db_model is deprecated and will be removed in 0.28.0", stacklevel=2,
+    )
 
     instance = args[0]
     model_dictionary = args[1]
