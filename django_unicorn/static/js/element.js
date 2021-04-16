@@ -31,8 +31,8 @@ export class Element {
     this.actions = [];
     this.db = {};
     this.field = {};
+    this.partials = [];
     this.target = null;
-    this.partial = {};
     this.key = null;
     this.events = [];
     this.errors = [];
@@ -100,11 +100,11 @@ export class Element {
         this.target = attribute.value;
       } else if (attribute.isPartial) {
         if (attribute.modifiers.id) {
-          this.partial.id = attribute.value;
+          this.partials.push({ id: attribute.value });
         } else if (attribute.modifiers.key) {
-          this.partial.key = attribute.value;
+          this.partials.push({ key: attribute.value });
         } else {
-          this.partial.target = attribute.value;
+          this.partials.push({ target: attribute.value });
         }
       } else if (attribute.eventType) {
         const action = {};

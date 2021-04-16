@@ -101,6 +101,8 @@ def _process_component_request(
     for action in component_request.action_queue:
         if action.partial:
             partials.append(action.partial)
+        else:
+            partials = action.partials
 
         if action.action_type == "syncInput":
             sync_input.handle(component_request, component, action.payload)

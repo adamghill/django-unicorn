@@ -239,11 +239,11 @@ export function addActionEventListener(component, eventType) {
           if (action.key) {
             if (action.key === toKebabCase(event.key)) {
               handleLoading(component, targetElement);
-              component.callMethod(action.name, targetElement.partial);
+              component.callMethod(action.name, targetElement.partials);
             }
           } else {
             handleLoading(component, targetElement);
-            component.callMethod(action.name, targetElement.partial);
+            component.callMethod(action.name, targetElement.partials);
           }
         }
       });
@@ -291,7 +291,7 @@ export function addModelEventListener(component, element, eventType) {
         name: element.model.name,
         value: element.getValue(),
       },
-      partial: element.partial,
+      partials: element.partials,
     };
 
     if (!component.lastTriggeringElements.some((e) => e.isSame(element))) {
@@ -408,7 +408,7 @@ export function addDbEventListener(component, element, eventType) {
         db: element.db,
         fields: {},
       },
-      partial: element.partial,
+      partials: element.partials,
     };
 
     action.payload.fields[element.field.name] = element.getValue();

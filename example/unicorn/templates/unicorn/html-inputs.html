@@ -12,6 +12,7 @@
         <button unicorn:click="$toggle('is_checked', 'another_check')">Toggle booleans (normal)</button><br />
         <button unicorn:click="$toggle('is_checked', 'another_check')" u:partial.key="boolean-toggles-key">Toggle booleans (partial.key)</button>
         <button unicorn:click="$toggle('is_checked', 'another_check')" u:partial.id="boolean-toggles-id">Toggle booleans (partial.id)</button><br />
+        <button unicorn:click="$toggle('is_checked', 'another_check')" u:partial.id="boolean-toggles-id" u:partial.key="boolean-toggles-key">Toggle booleans (multiple partials)</button><br />
         <button unicorn:click="$toggle('is_checked', 'another_check')" u:partial="boolean-toggles-id">Toggle booleans (partial boolean-toggles-id)</button>
         <button unicorn:click="$toggle('is_checked', 'another_check')" u:partial="boolean-toggles-key">Toggle booleans (partial boolean-toggles-key)</button>
     </div>

@@ -19,10 +19,11 @@ class Action:
     def __init__(self, data):
         self.action_type = data.get("type")
         self.payload = data.get("payload", {})
-        self.partial = data.get("partial")
+        self.partial = data.get("partial")  # this is deprecated, but leaving it for now
+        self.partials = data.get("partials", [])
 
     def __repr__(self):
-        return f"Action(action_type='{self.action_type}' payload={self.payload} partial={self.partial})"
+        return f"Action(action_type='{self.action_type}' payload={self.payload} partials={self.partials})"
 
 
 class ComponentRequest:

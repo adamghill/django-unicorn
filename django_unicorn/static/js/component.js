@@ -249,11 +249,11 @@ export class Component {
   /**
    * Calls the method for a particular component.
    */
-  callMethod(methodName, partial, errCallback) {
+  callMethod(methodName, partials, errCallback) {
     const action = {
       type: "callMethod",
       payload: { name: methodName },
-      partial,
+      partials,
     };
     this.actionQueue.push(action);
 
@@ -334,13 +334,13 @@ export class Component {
         false
       );
 
-      this.poll.partial = rootElement.partial;
+      this.poll.partials = rootElement.partials;
 
       if (this.isPollEnabled()) {
         // Call the method once before the timer starts
         this.callMethod(
           this.poll.method,
-          this.poll.partial,
+          this.poll.partials,
           this.handlePollError
         );
       }
@@ -357,7 +357,7 @@ export class Component {
       if (this.isPollEnabled()) {
         this.callMethod(
           this.poll.method,
-          this.poll.partial,
+          this.poll.partials,
           this.handlePollError
         );
       }
