@@ -163,3 +163,12 @@ def test_set_property_from_data_all_querysets():
     component_queryset_field_asserts(component, "queryset_with_none")
     component_queryset_field_asserts(component, "queryset_with_empty_queryset")
     component_queryset_field_asserts(component, "queryset_with_no_typehint")
+
+
+@pytest.mark.django_db
+def test_set_property_from_data_many_to_many():
+    component = FakeComponent(component_name="test", component_id="12345678")
+    component.model.pk = 1
+
+    # No `TypeError: Direct assignment to the reverse side of a many-to-many set is prohibited.` error gets raised
+    set_property_from_data(component.model, "taste_set", [])
