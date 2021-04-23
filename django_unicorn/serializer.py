@@ -75,7 +75,11 @@ def _get_model_dict(model: Model) -> dict:
 
     for field in model._meta.get_fields():
         if field.is_relation and field.many_to_many:
-            related_name = field.related_name or f"{field.name}_set"
+            related_name = field.name
+
+            if field.auto_created:
+                related_name = field.related_name or f"{field.name}_set"
+
             pks = []
 
             try:

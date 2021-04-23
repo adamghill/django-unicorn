@@ -68,7 +68,12 @@ def set_property_value(
                     if hasattr(component_or_field, "_meta"):
                         for field in component_or_field._meta.get_fields():
                             if field.is_relation and field.many_to_many:
-                                related_name = field.related_name or f"{field.name}_set"
+                                related_name = field.name
+
+                                if field.auto_created:
+                                    related_name = (
+                                        field.related_name or f"{field.name}_set"
+                                    )
 
                                 if related_name == property_name_part:
                                     related_descriptor = getattr(

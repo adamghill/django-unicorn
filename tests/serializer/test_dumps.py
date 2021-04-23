@@ -8,7 +8,7 @@ import pytest
 
 from django_unicorn import serializer
 from django_unicorn.utils import dicts_equal
-from example.coffee.models import Flavor
+from example.coffee.models import Flavor, Taste
 
 
 class SimpleTestModel(models.Model):
@@ -256,6 +256,48 @@ def test_get_model_dict():
         "taste_set": [],
         "origins": [],
     }
+
+    assert expected == actual
+
+
+@pytest.mark.django_db
+def test_get_model_dict_many_to_many_is_referenced():
+    taste = Taste(name="Bitter")
+    taste.save()
+    flavor_one = Flavor(name="name1", label="label1")
+    flavor_one.save()
+    flavor_one.taste_set.add(taste)
+    actual = serializer._get_model_dict(flavor_one)
+
+    expected = {
+        "pk": 1,
+        "name": "name1",
+        "label": "label1",
+        "parent": None,
+        "decimal_value": None,
+        "float_value": None,
+        "uuid": str(flavor_one.uuid),
+        "date": None,
+        "datetime": None,
+        "time": None,
+        "duration": None,
+        "taste_set": [taste.pk],
+        "origins": [],
+    }
+
+    assert expected == actual
+
+
+@pytest.mark.django_db
+def test_get_model_dict_many_to_many_references_model():
+    taste = Taste(name="Bitter")
+    taste.save()
+    flavor_one = Flavor(name="name1", label="label1")
+    flavor_one.save()
+    flavor_one.taste_set.add(taste)
+    actual = serializer._get_model_dict(taste)
+
+    expected = {"name": taste.name, "flavor": [flavor_one.pk], "pk": taste.pk}
 
     assert expected == actual
 
