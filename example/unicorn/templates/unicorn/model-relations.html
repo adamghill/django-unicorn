@@ -1,0 +1,32 @@
+{% load static %}
+
+<div>
+    {% if is_editing %}
+
+    <input type="text" class="form-control" placeholder="Name" unicorn:model.defer="board.board_name" />
+
+
+    <select class="form-control" unicorn:model.defer="board.board_status">
+        {% for status in board_statuses %}
+        <option value="{{ status.pk }}">{{ status.status_name }}</option>
+        {% endfor%}
+    </select>
+
+
+    <button unicorn:click="save" type="button" class="btn btn-primary ">
+        Save
+    </button>
+    <button unicorn:click="cancel" type="button" class="btn btn-secondary ">
+        Cancel
+    </button>
+    {% else %}
+
+    <h3>{{ board.board_name }}</h3>
+    <p class="card-text">Status: {{ board.board_status.status_name }}</p>
+    <button unicorn:click="edit" type="button" class="btn btn-primary">Edit</button>
+
+    {% endif %}
+
+
+
+</div>

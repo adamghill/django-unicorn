@@ -1,0 +1,43 @@
+[
+{
+    "model": "electronics.board_status",
+    "pk": 2,
+    "fields": {
+        "status_name": "Broken",
+        "badge_class": "danger",
+        "custom_color": null,
+        "force_custom_color": false
+    }
+},
+{
+    "model": "electronics.board",
+    "pk": 1,
+    "fields": {
+        "board_name": "Arduino Uno",
+        "board_revision": 1.0,
+        "board_variant": "A",
+        "board_category": null,
+        "board_added_on": "2021-04-23T20:14:15Z",
+        "board_added_by": null,
+        "board_last_edited_on": "2021-04-23T20:21:08Z",
+        "board_last_edited_by": null,
+        "board_status": null,
+        "board_last_component_upload_on": null,
+        "board_last_component_upload_by": null,
+        "board_value_update_datetime": null,
+        "board_cover_picture": null,
+        "board_appears_on_tania": false,
+        "board_group_visibility": [
+            1
+        ]
+    }
+},
+{
+    "model": "auth.group",
+    "pk": 1,
+    "fields": {
+        "name": "users",
+        "permissions": []
+    }
+}
+]

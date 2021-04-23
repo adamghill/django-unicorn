@@ -18,10 +18,13 @@ INSTALLED_APPS = [
     "books",
     "coffee",
     "www",
+    "electronics",
     # Include django-unicorn package
     "django_unicorn",
     # Include internal unicorn app
     "unicorn",
+    
+    'mptt',
 ]
 
 MIDDLEWARE = [
