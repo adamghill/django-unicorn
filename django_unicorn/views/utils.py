@@ -59,7 +59,8 @@ def set_property_from_data(
                 key_value = value[key]
                 set_property_from_data(field, key, key_value)
         else:
-            set_property_from_data(field, field.name, value)
+            # set_property_from_data(field, field.name, value)
+            setattr(component_or_field, name, field)
     elif hasattr(field, "related_val"):
         # Use `related_val` to check for many-to-many
         field.set(value)
