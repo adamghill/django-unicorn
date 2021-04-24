@@ -69,7 +69,7 @@ def test_message_bad_checksum(client):
 def test_message_no_component_id(client):
     data = {
         "data": {},
-        "checksum": "FpZ5q8E2",
+        "checksum": "DVVk97cx",
         "epoch": time.time(),
     }
     response = post_json(client, data)
@@ -78,7 +78,7 @@ def test_message_no_component_id(client):
 
 
 def test_message_no_epoch(client):
-    data = {"data": {}, "checksum": "FpZ5q8E2", "id": "abc"}
+    data = {"data": {}, "checksum": "DVVk97cx", "id": "abc"}
     response = post_json(client, data)
 
     assert_json_error(response, "Missing epoch")
@@ -87,7 +87,7 @@ def test_message_no_epoch(client):
 def test_message_component_not_found(client):
     data = {
         "data": {},
-        "checksum": "FpZ5q8E2",
+        "checksum": "DVVk97cx",
         "id": "asdf",
         "epoch": time.time(),
     }
@@ -104,7 +104,7 @@ def test_message_component_not_found(client):
 def test_message_component_with_dash(client):
     data = {
         "data": {},
-        "checksum": "FpZ5q8E2",
+        "checksum": "DVVk97cx",
         "id": "asdf",
         "epoch": time.time(),
     }
@@ -121,7 +121,7 @@ def test_message_component_with_dash(client):
 def test_message_component_with_dot(client):
     data = {
         "data": {},
-        "checksum": "FpZ5q8E2",
+        "checksum": "DVVk97cx",
         "id": "asdf",
         "epoch": time.time(),
     }

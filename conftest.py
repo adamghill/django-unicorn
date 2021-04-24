@@ -31,6 +31,7 @@ def pytest_configure():
     }
 
     settings.configure(
+        SECRET_KEY="this-is-a-secret",
         TEMPLATES=templates,
         ROOT_URLCONF="django_unicorn.urls",
         DATABASES=databases,
