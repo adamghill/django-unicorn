@@ -11,6 +11,7 @@ from django.db.models import Model
 from django.http import HttpRequest
 from django.views.generic.base import TemplateView
 
+import shortuuid
 from cachetools.lru import LRUCache
 
 from django_unicorn.settings import get_cache_alias
@@ -40,6 +41,11 @@ COMPONENTS_MODULE_CACHE_ENABLED = "pytest" not in sys.modules
 def convert_to_snake_case(s: str) -> str:
     # TODO: Better handling of dash->snake
     return s.replace("-", "_")
+
+
+def convert_to_dash_case(s: str) -> str:
+    # TODO: Better handling of snake->dash
+    return s.replace("_", "-")
 
 
 def convert_to_pascal_case(s: str) -> str:
@@ -127,10 +133,14 @@ def construct_component(
     return component
 
 
+from django.utils.decorators import classonlymethod
+
+
 class UnicornView(TemplateView):
     response_class = UnicornTemplateResponse
     component_name: str = ""
     component_key: str = ""
+    component_id: str = ""
     request = None
     parent = None
     children = []
@@ -315,6 +325,15 @@ class UnicornView(TemplateView):
             self._children_set = True
 
         return rendered_component
+
+    def dispatch(self, request, *args, **kwargs):
+        """
+        Called by the `as_view` class method when utilizing a component directly as a view.
+        """
+
+        return self.render_to_response(
+            context=self.get_context_data(), component=self, init_js=True,
+        )
 
     @timed
     def get_frontend_context_variables(self) -> str:
@@ -760,3 +779,18 @@ class UnicornView(TemplateView):
         raise ComponentLoadError(
             f"'{component_name}' component could not be loaded."
         ) from last_exception
+
+    @classonlymethod
+    def as_view(cls, **initkwargs):
+        if "component_id" not in initkwargs:
+            initkwargs["component_id"] = shortuuid.uuid()[:8]
+
+        if "component_name" not in initkwargs:
+            module_name = cls.__module__
+            module_parts = module_name.split(".")
+            component_name = module_parts[len(module_parts) - 1]
+            component_name = convert_to_dash_case(component_name)
+
+            initkwargs["component_name"] = component_name
+
+        return super().as_view(**initkwargs)
