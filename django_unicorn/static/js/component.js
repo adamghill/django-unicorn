@@ -328,6 +328,15 @@ export class Component {
               clearInterval(this.poll.timer);
             }
           } else {
+            // tab gets focus -> call poll method once and
+            // start polling at intervals
+            if (this.isPollEnabled()) {
+              this.callMethod(
+                this.poll.method,
+                this.poll.partials,
+                this.handlePollError
+              );
+            }
             this.startPolling();
           }
         },
