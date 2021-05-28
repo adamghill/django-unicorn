@@ -328,16 +328,8 @@ export class Component {
               clearInterval(this.poll.timer);
             }
           } else {
-            // tab gets focus -> call poll method once and
-            // start polling at intervals
-            if (this.isPollEnabled()) {
-              this.callMethod(
-                this.poll.method,
-                this.poll.partials,
-                this.handlePollError
-              );
-            }
-            this.startPolling();
+            // Call the poll method once the tab is visible again
+            this.startPolling(true);
           }
         },
         false
@@ -345,23 +337,23 @@ export class Component {
 
       this.poll.partials = rootElement.partials;
 
-      if (this.isPollEnabled()) {
-        // Call the method once before the timer starts
-        this.callMethod(
-          this.poll.method,
-          this.poll.partials,
-          this.handlePollError
-        );
-      }
-
-      this.startPolling();
+      // Call the method once before the timer starts
+      this.startPolling(true);
     }
   }
 
   /**
    * Starts polling and handles stopping the polling if there is an error.
    */
-  startPolling() {
+  startPolling(fireImmediately) {
+    if (fireImmediately && this.isPollEnabled()) {
+      this.callMethod(
+        this.poll.method,
+        this.poll.partials,
+        this.handlePollError
+      );
+    }
+
     this.poll.timer = setInterval(() => {
       if (this.isPollEnabled()) {
         this.callMethod(
