@@ -19,8 +19,8 @@
 
 ## Bump version
 
-1. `dj t`
-1. `npm run build`
+1. `poe t`
+1. `poe b`
 1. `poetry version major|minor|patch`
 1. Commit/tag/push version bump
 1. `poetry publish --build -r test`

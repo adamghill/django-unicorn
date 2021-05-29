@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "django-unicorn"
-version = "0.27.2"
+version = "0.28.0"
 description = "A magical full-stack framework for Django."
 authors = ["Adam Hill <unicorn@adamghill.com>"]
 license = "MIT"
@@ -33,6 +33,7 @@ pydantic = "^1.7.3"
 pywatchman = "^1.4.1"
 django-redis = "^4.12.1"
 nox = "^2020.12.31"
+poethepoet = "^0.10.0"
 
 [build-system]
 requires = ["poetry>=0.12"]
@@ -57,3 +58,15 @@ testpaths = [
 markers = [
     "slow: marks tests as slow",
 ]
+
+[tool.poe.tasks]
+r = "example/manage.py runserver 0:8080"
+mm = "example/manage.py makemigrations"
+mi = "example/manage.py migrate"
+md = ["mm", "mi"]
+m = "./manage.py"
+tp = "nox -r"
+tj = "npm run-script test"
+t = ["tp", "tj"]
+is = "isort --settings pyproject.toml ."
+b = "npm run build"
