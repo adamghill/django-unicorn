@@ -69,6 +69,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "GitRon",
+      "name": "Ron",
+      "avatar_url": "https://avatars.githubusercontent.com/u/3176075?v=4",
+      "profile": "http://ambient-innovation.com",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
