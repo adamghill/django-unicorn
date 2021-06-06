@@ -1,4 +1,9 @@
-from django_unicorn.utils import generate_checksum, get_method_arguments, get_type_hints
+from django_unicorn.utils import (
+    generate_checksum,
+    get_method_arguments,
+    get_type_hints,
+    sanitize_html,
+)
 
 
 def test_generate_checksum_bytes(settings):
@@ -56,4 +61,11 @@ def test_get_type_hints_missing_type_hints():
 
     expected = {}
     actual = get_type_hints(test_func)
+    assert actual == expected
+
+
+def test_sanitize_html():
+    expected = '{"id":"abcd123","name":"text-inputs","key":"asdf","data":{"name":"World","testing_thing":"Whatever \\u003C/script\\u003E \\u003Cscript\\u003Ealert(\'uh oh\')\\u003C/script\\u003E"},"calls":[],"hash":"hjkl"}'
+    data = '{"id":"abcd123","name":"text-inputs","key":"asdf","data":{"name":"World","testing_thing":"Whatever </script> <script>alert(\'uh oh\')</script>"},"calls":[],"hash":"hjkl"}'
+    actual = sanitize_html(data)
     assert actual == expected

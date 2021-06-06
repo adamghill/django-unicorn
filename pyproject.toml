@@ -70,3 +70,4 @@ tj = "npm run-script test"
 t = ["tp", "tj"]
 is = "isort --settings pyproject.toml ."
 b = "npm run build"
+pyt = "pytest -m 'not slow'"

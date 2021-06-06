@@ -8,6 +8,8 @@ from bs4 import BeautifulSoup
 from bs4.element import Tag
 from bs4.formatter import HTMLFormatter
 
+from django_unicorn.utils import sanitize_html
+
 from ..decorators import timed
 from ..utils import generate_checksum
 
@@ -85,18 +87,32 @@ class UnicornTemplateResponse(TemplateResponse):
                 "hash": hash,
             }
             init = orjson.dumps(init).decode("utf-8")
-            init_script = f"Unicorn.componentInit({init});"
+            json_element_id = f"unicorn:data:{self.component.component_id}"
+            init_script = f"Unicorn.componentInit(JSON.parse(document.getElementById('{json_element_id}').textContent));"
+
+            json_tag = soup.new_tag("script")
+            json_tag["type"] = "application/json"
+            json_tag["id"] = json_element_id
+            json_tag.string = sanitize_html(init)
 
             if self.component.parent:
                 self.component._init_script = init_script
+                self.component._json_tag = json_tag
             else:
+                json_tags = []
+                json_tags.append(json_tag)
+
                 for child in self.component.children:
                     init_script = f"{init_script} {child._init_script}"
+                    json_tags.append(child._json_tag)
 
                 script_tag = soup.new_tag("script")
                 script_tag["type"] = "module"
                 script_tag.string = f"if (typeof Unicorn === 'undefined') {{ console.error('Unicorn is missing. Do you need {{% load unicorn %}} or {{% unicorn_scripts %}}?') }} else {{ {init_script} }}"
                 root_element.insert_after(script_tag)
+
+                for t in json_tags:
+                    root_element.insert_after(t)
 
         rendered_template = UnicornTemplateResponse._desoupify(soup)
         rendered_template = mark_safe(rendered_template)
