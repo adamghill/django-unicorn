@@ -6,6 +6,8 @@ from typing import Dict, List, Union
 from typing import get_type_hints as typing_get_type_hints
 
 from django.conf import settings
+from django.utils.html import _json_script_escapes, format_html
+from django.utils.safestring import mark_safe
 
 import shortuuid
 from cachetools.lru import LRUCache
@@ -130,3 +132,16 @@ def get_method_arguments(func) -> List[str]:
     function_signature_cache[func] = list(function_signature.parameters)
 
     return function_signature_cache[func]
+
+
+def sanitize_html(str):
+    """
+    Escape all the HTML/XML special characters with their unicode escapes, so
+    value is safe to be output in JSON.
+
+    This is the same internals as `django.utils.html.json_script` except it takes a string
+    instead of an object to avoid calling DjangoJSONEncoder.
+    """
+
+    str = str.translate(_json_script_escapes)
+    return mark_safe(str)

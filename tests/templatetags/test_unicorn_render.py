@@ -207,8 +207,8 @@ def test_unicorn_render_component_one_script_tag(settings):
     context = {}
     html = unicorn_node.render(context)
 
-    assert "<script" in html
-    assert len(re.findall("<script", html)) == 1
+    assert '<script type="module"' in html
+    assert len(re.findall('<script type="module"', html)) == 1
 
 
 def test_unicorn_render_child_component_no_script_tag(settings):
@@ -235,8 +235,8 @@ def test_unicorn_render_parent_component_one_script_tag(settings):
     context = {}
     html = unicorn_node.render(context)
 
-    assert "<script" in html
-    assert len(re.findall("<script", html)) == 1
+    assert '<script type="module"' in html
+    assert len(re.findall('<script type="module"', html)) == 1
 
 
 def test_unicorn_render_calls(settings):
@@ -249,8 +249,8 @@ def test_unicorn_render_calls(settings):
     context = {}
     html = unicorn_node.render(context)
 
-    assert "<script" in html
-    assert len(re.findall("<script", html)) == 1
+    assert '<script type="module"' in html
+    assert len(re.findall('<script type="module"', html)) == 1
     assert '"calls":[{"fn":"testCall","args":[]}]' in html
 
 
@@ -264,8 +264,8 @@ def test_unicorn_render_calls_with_arg(settings):
     context = {}
     html = unicorn_node.render(context)
 
-    assert "<script" in html
-    assert len(re.findall("<script", html)) == 1
+    assert '<script type="module"' in html
+    assert len(re.findall('<script type="module"', html)) == 1
     assert '"calls":[{"fn":"testCall2","args":["hello"]}]' in html
 
 
@@ -279,8 +279,8 @@ def test_unicorn_render_calls_no_mount_call(settings):
     context = {}
     html = unicorn_node.render(context)
 
-    assert "<script" in html
-    assert len(re.findall("<script", html)) == 1
+    assert '<script type="module"' in html
+    assert len(re.findall('<script type="module"', html)) == 1
     assert '"calls":[]' in html
 
 
@@ -294,8 +294,8 @@ def test_unicorn_render_hash(settings):
     context = {}
     html = unicorn_node.render(context)
 
-    assert "<script" in html
-    assert len(re.findall("<script", html)) == 1
+    assert '<script type="module"' in html
+    assert len(re.findall('<script type="module"', html)) == 1
     assert '"hash":"' in html
 
     # Assert that the content hash is correct
