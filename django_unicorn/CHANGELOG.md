@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.29.0
+
+- Sanitize initial JSON to prevent XSS
+
+[All changes since 0.28.0](https://github.com/adamghill/django-unicorn/compare/0.28.0...0.29.0).
+
 ## v0.28.0
 
 - Re-fire poll method when tab/window comes back into focus after losing visibility (https://github.com/adamghill/django-unicorn/pull/202 by [frbor](https://github.com/frbor))
