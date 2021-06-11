@@ -113,3 +113,16 @@ def test_get_locations_apps_setting_invalid(settings):
 
     assert e.type == AssertionError
     settings.UNICORN["APPS"] = ("unicorn",)
+
+
+def test_get_locations_installed_app_with_app_config(settings):
+    unicorn_apps = settings.UNICORN["APPS"]
+    del settings.UNICORN["APPS"]
+    settings.INSTALLED_APPS = ("example.coffee.apps.Config",)
+
+    expected = [("HelloWorldView", "example.coffee.components.hello_world",)]
+    actual = get_locations("hello-world")
+
+    assert expected == actual
+    settings.UNICORN["APPS"] = unicorn_apps
+

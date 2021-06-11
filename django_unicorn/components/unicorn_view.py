@@ -5,6 +5,7 @@ import pickle
 import sys
 from typing import Any, Callable, Dict, List, Optional, Sequence, Type, Union
 
+from django.conf import settings
 from django.core.cache import caches
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models import Model
@@ -28,7 +29,9 @@ logger = logging.getLogger(__name__)
 
 
 # TODO: Make maxsize configurable
-# Module cache to store the found component classes
+location_cache = LRUCache(maxsize=100)
+
+# Module cache to store the found component class by id
 views_cache = LRUCache(maxsize=100)
 
 # Module cache for constructed component classes
@@ -49,7 +52,6 @@ def convert_to_pascal_case(s: str) -> str:
 
 
 def get_locations(component_name):
-    # TODO: django.conf setting bool that defines whether to look in all installed apps for components
     locations = []
 
     if "." in component_name:
@@ -78,7 +80,7 @@ def get_locations(component_name):
     class_name = f"{class_name}View"
     module_name = convert_to_snake_case(component_name)
 
-    unicorn_apps = get_setting("APPS", ["unicorn"])
+    unicorn_apps = get_setting("APPS", settings.INSTALLED_APPS)
 
     assert (
         isinstance(unicorn_apps, list)
@@ -87,6 +89,11 @@ def get_locations(component_name):
     ), "APPS is expected to be a list, tuple or set"
 
     for app in unicorn_apps:
+        # Handle an installed app that actually points to an app config
+        if ".apps." in app:
+            app_config_idx = app.index(".apps.")
+            app = app[:app_config_idx]
+
         app_module_name = f"{app}.components.{module_name}"
         locations.append((class_name, app_module_name))
 
@@ -712,7 +719,12 @@ class UnicornView(TemplateView):
 
             return component
 
-        locations = get_locations(component_name)
+        locations = []
+
+        if component_name in location_cache:
+            locations.append(location_cache[component_name])
+        else:
+            locations = get_locations(component_name)
 
         # Store the last exception that got raised while looking for a component in case it is useful context
         last_exception: Union[
@@ -732,7 +744,10 @@ class UnicornView(TemplateView):
                     **kwargs,
                 )
 
-                # Put the component's class in a module cache to skip looking for the component again
+                # Put the location for the component name in a module cache
+                location_cache[component_name] = (class_name, module_name)
+
+                # Put the component's class in a module cache
                 views_cache[component_id] = (component_class, parent, kwargs)
 
                 # Put the instantiated component into a module cache and the Django cache
