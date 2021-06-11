@@ -125,4 +125,3 @@ def test_get_locations_installed_app_with_app_config(settings):
 
     assert expected == actual
     settings.UNICORN["APPS"] = unicorn_apps
-
