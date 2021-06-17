@@ -45,6 +45,12 @@
         </div>
 
         <div>
+            <label>Email field (TEST)</label>
+            <input unicorn:model="email" type="text" id="emailId">
+            {% verbatim %}{{ email }}{% endverbatim %}: {{ email }}
+        </div>
+
+        <div>
             <a href="blob" unicorn:click.prevent="text='prevent?'">set_text_no_validation()</a>
             <button unicorn:click="set_text_no_validation">set_text_no_validation()</button>
             <button unicorn:click="set_text_with_validation">set_text_with_validation()</button>
