@@ -30,8 +30,16 @@ class Command(BaseCommand):
         parser.add_argument("component_names", nargs="+", type=str)
 
     def handle(self, *args, **options):
-        if not hasattr(settings, "BASE_DIR"):
-            raise CommandError("Can't find BASE_DIR for this project.")
+        # Default from `django-cookiecutter`
+        base_path = getattr(settings, "APPS_DIR", None)
+
+        if not base_path:
+            # Default from new Django project
+            base_path = getattr(settings, "BASE_DIR", None)
+
+        if not base_path:
+            # Fallback to the current directory
+            base_path = os.getcwd()
 
         if "component_names" not in options:
             raise CommandError("Pass in at least one component name.")
