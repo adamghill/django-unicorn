@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from webbrowser import open
 
@@ -27,7 +28,10 @@ class Command(BaseCommand):
     help = "Creates a new component for `django-unicorn`"
 
     def add_arguments(self, parser):
-        parser.add_argument("component_names", nargs="+", type=str)
+        parser.add_argument("app_name", type=str)
+        parser.add_argument(
+            "component_names", nargs="+", type=str, help="Names of components"
+        )
 
     def handle(self, *args, **options):
         # Default from `django-cookiecutter`
@@ -44,28 +48,41 @@ class Command(BaseCommand):
         if "component_names" not in options:
             raise CommandError("Pass in at least one component name.")
 
-        base_path = Path(settings.BASE_DIR)
-        first_component = False
+        app_name = options["app_name"]
+        app_directory = Path(base_path) / Path(app_name)
 
-        if not (base_path / Path("unicorn")).exists():
-            (base_path / Path("unicorn")).mkdir()
+        is_app_directory_correct = input(
+            f"\nUse '{app_directory}' for the app directory? [Y/n] "
+        )
+
+        if is_app_directory_correct.strip().lower() in ("n", "no"):
+            return
+
+        is_new_app = False
+        is_first_component = False
+
+        if not app_directory.exists():
+            is_new_app = True
+            app_directory.mkdir()
+            (app_directory / Path("__init__.py")).touch(exist_ok=True)
+
+        # Create component
+        component_base_path = app_directory / Path("components")
+
+        if not component_base_path.exists():
+            component_base_path.mkdir()
+
             self.stdout.write(
-                self.style.SUCCESS(
-                    "Created unicorn directory for your first component! ✨\n"
-                )
+                self.style.SUCCESS(f"Created your first component in {app_name}! ✨\n")
             )
 
-            first_component = True
+            is_first_component = True
+
+        (component_base_path / Path("__init__.py")).touch(exist_ok=True)
 
         for component_name in options["component_names"]:
             snake_case_component_name = convert_to_snake_case(component_name)
             pascal_case_component_name = convert_to_pascal_case(component_name)
-
-            # Create component
-            component_base_path = base_path / Path("unicorn") / Path("components")
-
-            if not component_base_path.exists():
-                component_base_path.mkdir()
 
             component_path = component_base_path / Path(
                 f"{snake_case_component_name}.py"
@@ -74,54 +91,44 @@ class Command(BaseCommand):
             if component_path.exists():
                 self.stdout.write(
                     self.style.ERROR(
-                        f"The component for {snake_case_component_name}.py already exists."
+                        f"Skipping creating {snake_case_component_name}.py because it already exists."
                     )
                 )
-                return
-
-            component_path.write_text(
-                COMPONENT_FILE_CONTENT.format(
-                    **{"pascal_case_component_name": pascal_case_component_name}
+            else:
+                component_path.write_text(
+                    COMPONENT_FILE_CONTENT.format(
+                        **{"pascal_case_component_name": pascal_case_component_name}
+                    )
                 )
-            )
-            self.stdout.write(self.style.SUCCESS(f"Created {component_path}."))
+                self.stdout.write(self.style.SUCCESS(f"Created {component_path}."))
 
             # Create template
-            template_base_path = (
-                base_path / Path("unicorn") / Path("templates") / Path("unicorn")
-            )
+            template_base_path = app_directory / Path("templates") / Path("unicorn")
 
             if not template_base_path.exists():
-                if not (base_path / Path("unicorn") / Path("templates")).exists():
-                    (base_path / Path("unicorn") / Path("templates")).mkdir()
+                if not (app_directory / Path("templates")).exists():
+                    (app_directory / Path("templates")).mkdir()
 
                 template_base_path.mkdir()
 
-            template_path = (
-                base_path
-                / Path("unicorn")
-                / Path("templates")
-                / Path("unicorn")
-                / Path(f"{component_name}.html")
-            )
+            template_path = template_base_path / Path(f"{component_name}.html")
 
             if template_path.exists():
                 self.stdout.write(
                     self.style.ERROR(
-                        f"The template for {component_name}.html already exists."
+                        f"Skipping creating {component_name}.html because it already exists."
                     )
                 )
-                return
+            else:
+                template_path.write_text(TEMPLATE_FILE_CONTENT)
+                self.stdout.write(self.style.SUCCESS(f"Created {template_path}."))
 
-            template_path.write_text(TEMPLATE_FILE_CONTENT)
-            self.stdout.write(self.style.SUCCESS(f"Created {template_path}."))
-
-            if first_component:
-                input_value = input(
+            if is_first_component:
+                will_star_repo = input(
                     "\nStarring the GitHub repo helps other Django users find Unicorn. Can you star it for me? [y/N] "
                 )
 
-                if input_value.strip().lower() in ("y", "yes"):
+                if will_star_repo.strip().lower() in ("y", "yes"):
                     self.stdout.write(
                         self.style.SUCCESS(
                             "Thank you for helping spread the word about Unicorn!"
@@ -153,12 +160,13 @@ class Command(BaseCommand):
                 else:
                     self.stdout.write(
                         self.style.ERROR(
-                            "Ok, bummer. I hope you will star it for me at https://github.com/adamghill/django-unicorn at some point!"
+                            "That's a bummer, but I understand. I hope you will star it for me later!"
                         )
                     )
 
-            self.stdout.write(
-                self.style.WARNING(
-                    "\nMake sure to add '\"unicorn\",' to your INSTALLED_APPS list in your settings file if necessary."
+            if is_new_app or app_name not in settings.INSTALLED_APPS:
+                self.stdout.write(
+                    self.style.WARNING(
+                        f'\nMake sure to add `"{app_name}",` to your INSTALLED_APPS list in your settings file if necessary.'
+                    )
                 )
-            )
