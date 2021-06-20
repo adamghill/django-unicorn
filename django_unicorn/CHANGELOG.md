@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.30.0
+
+- Look in all `INSTALLED_APPS` for components instead of only in a `unicorn` app [210](https://github.com/adamghill/django-unicorn/issues/210)
+- Support `settings.APPS_DIR` which is the default for `django-cookiecutter` instead of just `settings.BASE_DIR` [214](https://github.com/adamghill/django-unicorn/issues/214)
+
+** Breaking changes **
+
+- Require an application name when running the `startunicorn` management command for where the component should be created
+
+[All changes since 0.29.0](https://github.com/adamghill/django-unicorn/compare/0.29.0...0.30.0).
+
 ## v0.29.0
 
 - Sanitize initial JSON to prevent XSS
