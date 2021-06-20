@@ -1,6 +1,6 @@
 import os
+import webbrowser
 from pathlib import Path
-from webbrowser import open
 
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
@@ -45,11 +45,16 @@ class Command(BaseCommand):
             # Fallback to the current directory
             base_path = os.getcwd()
 
+        base_path = Path(base_path)
+
+        if "app_name" not in options:
+            raise CommandError("An application name is required.")
+
         if "component_names" not in options:
-            raise CommandError("Pass in at least one component name.")
+            raise CommandError("At least one component name is required.")
 
         app_name = options["app_name"]
-        app_directory = Path(base_path) / Path(app_name)
+        app_directory = base_path / app_name
 
         is_app_directory_correct = input(
             f"\nUse '{app_directory}' for the app directory? [Y/n] "
@@ -64,10 +69,11 @@ class Command(BaseCommand):
         if not app_directory.exists():
             is_new_app = True
             app_directory.mkdir()
-            (app_directory / Path("__init__.py")).touch(exist_ok=True)
+
+        (app_directory / "__init__.py").touch(exist_ok=True)
 
         # Create component
-        component_base_path = app_directory / Path("components")
+        component_base_path = app_directory / "components"
 
         if not component_base_path.exists():
             component_base_path.mkdir()
@@ -78,15 +84,13 @@ class Command(BaseCommand):
 
             is_first_component = True
 
-        (component_base_path / Path("__init__.py")).touch(exist_ok=True)
+        (component_base_path / "__init__.py").touch(exist_ok=True)
 
         for component_name in options["component_names"]:
             snake_case_component_name = convert_to_snake_case(component_name)
             pascal_case_component_name = convert_to_pascal_case(component_name)
 
-            component_path = component_base_path / Path(
-                f"{snake_case_component_name}.py"
-            )
+            component_path = component_base_path / f"{snake_case_component_name}.py"
 
             if component_path.exists():
                 self.stdout.write(
@@ -103,15 +107,15 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.SUCCESS(f"Created {component_path}."))
 
             # Create template
-            template_base_path = app_directory / Path("templates") / Path("unicorn")
+            template_base_path = app_directory / "templates" / "unicorn"
 
             if not template_base_path.exists():
-                if not (app_directory / Path("templates")).exists():
-                    (app_directory / Path("templates")).mkdir()
+                if not (app_directory / "templates").exists():
+                    (app_directory / "templates").mkdir()
 
                 template_base_path.mkdir()
 
-            template_path = template_base_path / Path(f"{component_name}.html")
+            template_path = template_base_path / f"{component_name}.html"
 
             if template_path.exists():
                 self.stdout.write(
@@ -156,7 +160,9 @@ class Command(BaseCommand):
 """
                     )
 
-                    open("https://github.com/adamghill/django-unicorn", new=2)
+                    webbrowser.open(
+                        "https://github.com/adamghill/django-unicorn", new=2
+                    )
                 else:
                     self.stdout.write(
                         self.style.ERROR(
@@ -164,7 +170,7 @@ class Command(BaseCommand):
                         )
                     )
 
-            if is_new_app or app_name not in settings.INSTALLED_APPS:
+            if is_new_app:
                 self.stdout.write(
                     self.style.WARNING(
                         f'\nMake sure to add `"{app_name}",` to your INSTALLED_APPS list in your settings file if necessary.'
