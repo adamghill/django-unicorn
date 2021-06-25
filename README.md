@@ -5,6 +5,7 @@
 <p align="center">The magical full-stack framework for Django ✨</p>
 
 ![PyPI](https://img.shields.io/pypi/v/django-unicorn?color=blue&style=flat-square)
+![Sponsors](https://www.sponsorama.dev/api/button/sponsor-count/adamghill)
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 [![All Contributors](https://img.shields.io/badge/all_contributors-9-orange.svg?style=flat-square)](#contributors-)
