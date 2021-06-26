@@ -4,6 +4,7 @@ from pathlib import Path
 
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
+from django.apps import apps
 
 from django_unicorn.components.unicorn_view import (
     convert_to_pascal_case,
@@ -54,21 +55,16 @@ class Command(BaseCommand):
             raise CommandError("At least one component name is required.")
 
         app_name = options["app_name"]
-        app_directory = base_path / app_name
+        try:
+            app_directory = Path(apps.get_app_config(app_name).path)
+        except LookupError:
+            # this app does not exist yet
+            raise CommandError(
+                f"An app named '{app_name}' does not exist yet. "
+                "You have to create it first."
+            )
 
-        is_app_directory_correct = input(
-            f"\nUse '{app_directory}' for the app directory? [Y/n] "
-        )
-
-        if is_app_directory_correct.strip().lower() in ("n", "no"):
-            return
-
-        is_new_app = False
         is_first_component = False
-
-        if not app_directory.exists():
-            is_new_app = True
-            app_directory.mkdir()
 
         (app_directory / "__init__.py").touch(exist_ok=True)
 
@@ -169,10 +165,3 @@ class Command(BaseCommand):
                             "That's a bummer, but I understand. I hope you will star it for me later!"
                         )
                     )
-
-            if is_new_app:
-                self.stdout.write(
-                    self.style.WARNING(
-                        f'\nMake sure to add `"{app_name}",` to your INSTALLED_APPS list in your settings file if necessary.'
-                    )
-                )
