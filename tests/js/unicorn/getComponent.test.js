@@ -1,6 +1,6 @@
 import test from "ava";
-import { getComponent } from "../../../django_unicorn/static/js/unicorn.js";
-import { components } from "../../../django_unicorn/static/js/store.js";
+import { getComponent } from "../../../django_unicorn/static/django_unicorn/js/unicorn.js";
+import { components } from "../../../django_unicorn/static/django_unicorn/js/store.js";
 import { getComponent as getComponentUtil } from "../utils.js";
 
 test("getComponent by name", (t) => {

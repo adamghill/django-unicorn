@@ -1,7 +1,7 @@
 import test from "ava";
 import fetchMock from "fetch-mock";
 import { getComponent } from "../utils.js";
-import { send } from "../../../django_unicorn/static/js/messageSender.js";
+import { send } from "../../../django_unicorn/static/django_unicorn/js/messageSender.js";
 
 test.cb("call_method redirect", (t) => {
   const html = `

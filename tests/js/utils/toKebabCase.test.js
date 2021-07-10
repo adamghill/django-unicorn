@@ -1,5 +1,5 @@
 import test from "ava";
-import { toKebabCase } from "../../../django_unicorn/static/js/utils";
+import { toKebabCase } from "../../../django_unicorn/static/django_unicorn/js/utils";
 
 test("Enter to kebab case", (t) => {
   t.is(toKebabCase("Enter"), "enter");
