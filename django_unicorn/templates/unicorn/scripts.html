@@ -1,7 +1,7 @@
 {% load static %}
 
 {% if MINIFIED %}
-<script src="{% static 'django_unicorn/js/unicorn.min.js' %}"></script>
+<script src="{% static 'unicorn/js/unicorn.min.js' %}"></script>
 
 <script>
   var url = "{% url 'django_unicorn:message' %}";
@@ -9,7 +9,7 @@
 </script>
 {% else %}
 <script type="module">
-  import * as Unicorn from "{% static 'django_unicorn/js/unicorn.js' %}";
+  import * as Unicorn from "{% static 'unicorn/js/unicorn.js' %}";
 
     // Set Unicorn to the global so it can be used by components
     window.Unicorn = Unicorn;

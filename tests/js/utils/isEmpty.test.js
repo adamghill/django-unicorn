@@ -1,5 +1,5 @@
 import test from "ava";
-import { isEmpty } from "../../../django_unicorn/static/django_unicorn/js/utils";
+import { isEmpty } from "../../../django_unicorn/static/unicorn/js/utils";
 
 test("undefined isEmpty", (t) => {
   t.true(isEmpty(undefined));

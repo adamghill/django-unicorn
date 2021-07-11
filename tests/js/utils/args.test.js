@@ -1,5 +1,5 @@
 import test from "ava";
-import { args } from "../../../django_unicorn/static/django_unicorn/js/utils.js";
+import { args } from "../../../django_unicorn/static/unicorn/js/utils.js";
 
 test("one arg", (t) => {
   const functionArgs = args("test($event.target.value)");

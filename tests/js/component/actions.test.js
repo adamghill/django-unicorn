@@ -1,6 +1,6 @@
 import test from "ava";
 import { getComponent } from "../utils.js";
-import { isEmpty } from "../../../django_unicorn/static/django_unicorn/js/utils.js";
+import { isEmpty } from "../../../django_unicorn/static/unicorn/js/utils.js";
 
 test("action", (t) => {
   const component = getComponent();
