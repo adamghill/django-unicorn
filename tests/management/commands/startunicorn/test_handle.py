@@ -1,5 +1,6 @@
 import io
 import os
+import uuid
 
 from django.core.management.base import CommandError
 
@@ -23,16 +24,24 @@ def test_handle_no_args(settings):
 def test_handle_new_app(settings, tmp_path, monkeypatch, capsys):
     settings.BASE_DIR = tmp_path
 
-    # Reply "y" then "n"
+    # Reply "y" to create new app then "n" to star the repo
     monkeypatch.setattr("sys.stdin", io.StringIO("y\nn\n"))
 
-    app_name = "test123"
-    component_names = ["hello-world"]
+    # Prevent the `startapp` command from actually creating a new app
+    monkeypatch.setattr(
+        "django_unicorn.management.commands.startunicorn.call_command",
+        lambda *args, **kwargs: None,
+    )
+
+    app_name = f"test-{uuid.uuid4()}".replace("-", "_")
+    component_names = [
+        "hello-world",
+    ]
     Command().handle(app_name=app_name, component_names=component_names)
 
-    assert (tmp_path / f"{app_name}/components/__init__.py").exists()
-    assert (tmp_path / f"{app_name}/components/hello_world.py").exists()
-    assert (tmp_path / f"{app_name}/templates/unicorn/hello-world.html").exists()
+    assert (tmp_path / app_name / "components/__init__.py").exists()
+    assert (tmp_path / app_name / "components/hello_world.py").exists()
+    assert (tmp_path / app_name / "templates/unicorn/hello-world.html").exists()
 
     captured = capsys.readouterr()
     assert "Starring the GitHub repo " in captured.out
@@ -41,19 +50,24 @@ def test_handle_new_app(settings, tmp_path, monkeypatch, capsys):
 
 def test_handle_existing_app(settings, tmp_path, monkeypatch, capsys):
     settings.BASE_DIR = tmp_path
+    app_name = f"test-{uuid.uuid4()}".replace("-", "_")
 
-    app_name = "test123"
-    (tmp_path / app_name).mkdir()
+    monkeypatch.setattr(
+        "django_unicorn.management.commands.startunicorn.get_app_path",
+        lambda a: tmp_path / app_name,
+    )
 
-    # Reply "y" then "n"
-    monkeypatch.setattr("sys.stdin", io.StringIO("y\nn\n"))
+    # Reply "n" to starring question
+    monkeypatch.setattr("sys.stdin", io.StringIO("n\n"))
 
-    component_names = ["hello-world"]
+    component_names = [
+        "hello-world",
+    ]
     Command().handle(app_name=app_name, component_names=component_names)
 
-    assert (tmp_path / f"{app_name}/components/__init__.py").exists()
-    assert (tmp_path / f"{app_name}/components/hello_world.py").exists()
-    assert (tmp_path / f"{app_name}/templates/unicorn/hello-world.html").exists()
+    assert (tmp_path / app_name / "components/__init__.py").exists()
+    assert (tmp_path / app_name / "components/hello_world.py").exists()
+    assert (tmp_path / app_name / "templates/unicorn/hello-world.html").exists()
 
     captured = capsys.readouterr()
     assert "Starring the GitHub repo " in captured.out
@@ -63,20 +77,24 @@ def test_handle_existing_app(settings, tmp_path, monkeypatch, capsys):
 
 def test_handle_existing_component(settings, tmp_path, monkeypatch, capsys):
     settings.BASE_DIR = tmp_path
+    app_name = f"test-{uuid.uuid4()}".replace("-", "_")
 
-    app_name = "test123"
+    monkeypatch.setattr(
+        "django_unicorn.management.commands.startunicorn.get_app_path",
+        lambda a: tmp_path / app_name,
+    )
+
     (tmp_path / app_name).mkdir()
     (tmp_path / app_name / "components").mkdir()
 
-    # Reply "y"
-    monkeypatch.setattr("sys.stdin", io.StringIO("y\n"))
-
-    component_names = ["hello-world"]
+    component_names = [
+        "hello-world",
+    ]
     Command().handle(app_name=app_name, component_names=component_names)
 
-    assert (tmp_path / f"{app_name}/components/__init__.py").exists()
-    assert (tmp_path / f"{app_name}/components/hello_world.py").exists()
-    assert (tmp_path / f"{app_name}/templates/unicorn/hello-world.html").exists()
+    assert (tmp_path / app_name / "components/__init__.py").exists()
+    assert (tmp_path / app_name / "components/hello_world.py").exists()
+    assert (tmp_path / app_name / "templates/unicorn/hello-world.html").exists()
 
     captured = capsys.readouterr()
     assert "Starring the GitHub repo " not in captured.out
@@ -85,21 +103,25 @@ def test_handle_existing_component(settings, tmp_path, monkeypatch, capsys):
 
 def test_handle_existing_templates(settings, tmp_path, monkeypatch, capsys):
     settings.BASE_DIR = tmp_path
+    app_name = f"test-{uuid.uuid4()}".replace("-", "_")
 
-    app_name = "test123"
+    monkeypatch.setattr(
+        "django_unicorn.management.commands.startunicorn.get_app_path",
+        lambda a: tmp_path / app_name,
+    )
+
     (tmp_path / app_name).mkdir()
     (tmp_path / app_name / "components").mkdir()
     (tmp_path / app_name / "templates").mkdir()
 
-    # Reply "y"
-    monkeypatch.setattr("sys.stdin", io.StringIO("y\n"))
-
-    component_names = ["hello-world"]
+    component_names = [
+        "hello-world",
+    ]
     Command().handle(app_name=app_name, component_names=component_names)
 
-    assert (tmp_path / f"{app_name}/components/__init__.py").exists()
-    assert (tmp_path / f"{app_name}/components/hello_world.py").exists()
-    assert (tmp_path / f"{app_name}/templates/unicorn/hello-world.html").exists()
+    assert (tmp_path / app_name / "components/__init__.py").exists()
+    assert (tmp_path / app_name / "components/hello_world.py").exists()
+    assert (tmp_path / app_name / "templates/unicorn/hello-world.html").exists()
 
     captured = capsys.readouterr()
     assert "Starring the GitHub repo " not in captured.out
@@ -108,17 +130,21 @@ def test_handle_existing_templates(settings, tmp_path, monkeypatch, capsys):
 
 def test_handle_existing_unicorn_templates(settings, tmp_path, monkeypatch, capsys):
     settings.BASE_DIR = tmp_path
+    app_name = f"test-{uuid.uuid4()}".replace("-", "_")
 
-    app_name = "test123"
+    monkeypatch.setattr(
+        "django_unicorn.management.commands.startunicorn.get_app_path",
+        lambda a: tmp_path / app_name,
+    )
+
     (tmp_path / app_name).mkdir()
     (tmp_path / app_name / "components").mkdir()
     (tmp_path / app_name / "templates").mkdir()
-    (tmp_path / app_name / "templates" / "unicorn").mkdir()
+    (tmp_path / app_name / "templates/unicorn").mkdir()
 
-    # Reply "y"
-    monkeypatch.setattr("sys.stdin", io.StringIO("y\n"))
-
-    component_names = ["hello-world"]
+    component_names = [
+        "hello-world",
+    ]
     Command().handle(app_name=app_name, component_names=component_names)
 
     assert (tmp_path / f"{app_name}/components/__init__.py").exists()
@@ -130,33 +156,49 @@ def test_handle_existing_unicorn_templates(settings, tmp_path, monkeypatch, caps
     assert "Make sure to add " not in captured.out
 
 
-def test_handle_reply_no(settings, tmp_path, monkeypatch, capsys):
+def test_handle_reply_n(settings, tmp_path, monkeypatch, capsys):
     settings.BASE_DIR = tmp_path
 
     # Reply "n"
     monkeypatch.setattr("sys.stdin", io.StringIO("n\n"))
 
-    app_name = "test123"
-    component_names = ["hello-world"]
-    Command().handle(app_name=app_name, component_names=component_names)
+    app_name = f"test-{uuid.uuid4()}".replace("-", "_")
+    component_names = [
+        "hello-world",
+    ]
+
+    with pytest.raises(CommandError):
+        Command().handle(app_name=app_name, component_names=component_names)
 
     assert not (tmp_path / f"{app_name}/components/__init__.py").exists()
     assert not (tmp_path / f"{app_name}/components/hello_world.py").exists()
     assert not (tmp_path / f"{app_name}/templates/unicorn/hello-world.html").exists()
 
     captured = capsys.readouterr()
+    assert "cannot be found." in captured.out
     assert "Make sure to add " not in captured.out
+
+
+def test_handle_reply_no(settings, tmp_path, monkeypatch, capsys):
+    settings.BASE_DIR = tmp_path
 
     # Reply "no"
     monkeypatch.setattr("sys.stdin", io.StringIO("no\n"))
 
-    Command().handle(app_name=app_name, component_names=component_names)
+    app_name = f"test-{uuid.uuid4()}".replace("-", "_")
+    component_names = [
+        "hello-world",
+    ]
+
+    with pytest.raises(CommandError):
+        Command().handle(app_name=app_name, component_names=component_names)
 
     assert not (tmp_path / f"{app_name}/components/__init__.py").exists()
     assert not (tmp_path / f"{app_name}/components/hello_world.py").exists()
     assert not (tmp_path / f"{app_name}/templates/unicorn/hello-world.html").exists()
 
     captured = capsys.readouterr()
+    assert "cannot be found." in captured.out
     assert "Make sure to add " not in captured.out
 
 
@@ -172,14 +214,22 @@ def test_handle_reply_yes_star(settings, tmp_path, monkeypatch, capsys):
 
     monkeypatch.setattr("webbrowser.open", webbrowser_open)
 
-    app_name = "test123"
-    component_names = ["hello-world"]
+    # Prevent the `startapp` command from actually creating a new app
+    monkeypatch.setattr(
+        "django_unicorn.management.commands.startunicorn.call_command",
+        lambda *args, **kwargs: None,
+    )
+
+    app_name = f"test-{uuid.uuid4()}".replace("-", "_")
+    component_names = [
+        "hello-world",
+    ]
 
     Command().handle(app_name=app_name, component_names=component_names)
 
-    assert (tmp_path / f"{app_name}/components/__init__.py").exists()
-    assert (tmp_path / f"{app_name}/components/hello_world.py").exists()
-    assert (tmp_path / f"{app_name}/templates/unicorn/hello-world.html").exists()
+    assert (tmp_path / app_name / "components/__init__.py").exists()
+    assert (tmp_path / app_name / "components/hello_world.py").exists()
+    assert (tmp_path / app_name / "templates/unicorn/hello-world.html").exists()
 
     captured = capsys.readouterr()
     assert "Starring the GitHub repo " in captured.out

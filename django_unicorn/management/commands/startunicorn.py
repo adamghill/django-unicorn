@@ -2,9 +2,10 @@ import os
 import webbrowser
 from pathlib import Path
 
-from django.conf import settings
-from django.core.management.base import BaseCommand, CommandError
 from django.apps import apps
+from django.conf import settings
+from django.core.management import call_command
+from django.core.management.base import BaseCommand, CommandError
 
 from django_unicorn.components.unicorn_view import (
     convert_to_pascal_case,
@@ -23,6 +24,14 @@ TEMPLATE_FILE_CONTENT = """<div>
     <!-- put component code here -->
 </div>
 """
+
+
+def get_app_path(app_name: str) -> Path:
+    """
+    Gets the directory path for an installed application.
+    """
+
+    return Path(apps.get_app_config(app_name).path)
 
 
 class Command(BaseCommand):
@@ -55,18 +64,31 @@ class Command(BaseCommand):
             raise CommandError("At least one component name is required.")
 
         app_name = options["app_name"]
+        is_new_app = False
+
         try:
-            app_directory = Path(apps.get_app_config(app_name).path)
+            app_directory = get_app_path(app_name)
         except LookupError:
-            # this app does not exist yet
-            raise CommandError(
-                f"An app named '{app_name}' does not exist yet. "
-                "You have to create it first."
+            should_create_app = input(
+                f"\n'{app_name}' cannot be found. Should it be created automatically with `startapp {app_name}`? [y/N] "
             )
+
+            if should_create_app.strip().lower() in ("y", "yes"):
+                call_command(
+                    "startapp", app_name, verbosity=0,
+                )
+                app_directory = base_path / app_name
+
+                is_new_app = True
+            else:
+                raise CommandError(
+                    f"An app named '{app_name}' does not exist yet. You might need to create it first."
+                )
 
         is_first_component = False
 
-        (app_directory / "__init__.py").touch(exist_ok=True)
+        if not app_directory.exists():
+            app_directory.mkdir()
 
         # Create component
         component_base_path = app_directory / "components"
@@ -75,7 +97,7 @@ class Command(BaseCommand):
             component_base_path.mkdir()
 
             self.stdout.write(
-                self.style.SUCCESS(f"Created your first component in {app_name}! ✨\n")
+                self.style.SUCCESS(f"Created your first component in '{app_name}'! ✨\n")
             )
 
             is_first_component = True
@@ -165,3 +187,10 @@ class Command(BaseCommand):
                             "That's a bummer, but I understand. I hope you will star it for me later!"
                         )
                     )
+
+            if is_new_app:
+                self.stdout.write(
+                    self.style.WARNING(
+                        f'\nMake sure to add `"{app_name}",` to your INSTALLED_APPS list in your settings file if necessary.'
+                    )
+                )
