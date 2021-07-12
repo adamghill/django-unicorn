@@ -1,0 +1,74 @@
+{% load unicorn static %}
+
+{% block content %}
+
+<div>
+    
+  <hr>
+  <!-- <div unicorn:loading unicorn:change="refresh_dt()">Update in progress ...</div>
+  <div unicorn:loading.remove> -->
+      
+          {% if is_adding %}
+              <div class="form-group row">
+                  <label for="inputqty" class="col-sm-6 col-form-label">How many flavors? </label>
+                  <div class="col-sm-6">
+                  <input type="number" class="form-control" id="inputqty" value="1" placeholder="Board Quantity" unicorn:model="bc_qty">
+                  </div>
+              </div>
+              <button type="button" class="btn btn-primary" unicorn:click="create">Create flavors</button>
+              <button type="button" class="btn btn-danger" unicorn:click="cancel">Cancel</button>
+
+          {% else %}
+              <button unicorn:click="add_flavor">
+                  Create New Flavor
+              </button>
+          {% endif %} 
+          <hr>
+
+      
+          
+
+      
+      
+
+
+  <!-- </div> -->
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<!-- DataTables  & Plugins -->
+<script src="{% static 'js/datatables/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'js/datatables-bs4/js/dataTables.bootstrap4.min.js' %}"></script>
+<script src="{% static 'js/datatables-responsive/js/dataTables.responsive.min.js' %}"></script>
+<script src="{% static 'js/datatables-responsive/js/responsive.bootstrap4.min.js' %}"></script>
+<script src="{% static 'js/datatables-buttons/js/dataTables.buttons.min.js' %}"></script>
+<script src="{% static 'js/datatables-buttons/js/buttons.bootstrap4.min.js' %}"></script>
+<script src="{% static 'js/jszip/jszip.min.js' %}"></script>
+<script src="{% static 'js/pdfmake/pdfmake.min.js' %}"></script>
+<script src="{% static 'js/pdfmake/vfs_fonts.js' %}"></script>
+<script src="{% static 'js/datatables-buttons/js/buttons.html5.min.js' %}"></script>
+<script src="{% static 'js/datatables-buttons/js/buttons.print.min.js' %}"></script>
+<script src="{% static 'js/datatables-buttons/js/buttons.colVis.min.js' %}"></script>
+
+<script>
+  $(function () {
+    refresh_dt();
+    
+  });
+
+  function refresh_dt()
+  {
+    $("#board_catalog_table").DataTable({
+      "responsive": true,
+      "lengthChange": false,
+      "autoWidth": false,
+      "ordering": true,
+      "info": true,
+      "buttons": ["copy", "csv", "excel", "pdf", "print"]
+    }).buttons().container().appendTo('#board_catalog_table_wrapper .col-md-6:eq(0)');
+  }
+</script>
+
+{% endblock %}

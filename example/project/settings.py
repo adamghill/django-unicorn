@@ -22,6 +22,8 @@ INSTALLED_APPS = [
     "django_unicorn",
     # Include internal unicorn app
     "unicorn",
+    # "adminlte3",
+    # "adminlte3_theme",
 ]
 
 MIDDLEWARE = [

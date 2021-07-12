@@ -1,0 +1,46 @@
+{% extends "www/base.html" %}
+{% load unicorn %}
+{% block content %}
+{% unicorn 'add-flavor' %}
+
+<h5 class="my-2">List of Flavors</h5>
+<table id="board_catalog_table" class="table table-bordered table-striped">
+    <thead>
+    <tr>
+    <th>Name</th>
+    <th>ID</th>
+    <th>Taste</th>
+    <th>Creation Date</th>
+    <th>Decimal Value</th>
+    <th>Duration</th>
+
+    <th>Actions</th>
+
+    </tr>
+    </thead>
+    <tbody>
+    {% for flavor in flavor_list %}
+        <tr>
+            <td>{{ flavor.name }}</td>
+            <td>
+            {{ flavor.id }}
+            </td>
+            {% for taste in taste_list %}
+            {% if taste.flavor %}
+                <td>{{ taste.name }}</td>
+            {% else %}
+                <td class="text-danger text-lg">N/A</td>
+            {% endif %}
+            {% endfor %}
+            <td>{{ board.bc_creation_date }}</td>
+            <td>{{ board.bc_note }}</td>
+            <td>Fix field</td>
+            
+            <td>{% unicorn 'add-taste' key=flavor.id flavor_id=flavor.id%}</td>
+            
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+{% endblock content %}
