@@ -1,46 +1,34 @@
 {% extends "www/base.html" %}
-{% load unicorn %}
+{% load static unicorn %}
 {% block content %}
 {% unicorn 'add-flavor' %}
 
-<h5 class="my-2">List of Flavors</h5>
-<table id="board_catalog_table" class="table table-bordered table-striped">
-    <thead>
-    <tr>
-    <th>Name</th>
-    <th>ID</th>
-    <th>Taste</th>
-    <th>Creation Date</th>
-    <th>Decimal Value</th>
-    <th>Duration</th>
+  <!-- DataTables  & Plugins -->
+  <script
+  src="https://code.jquery.com/jquery-3.6.0.min.js"
+  integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+  crossorigin="anonymous"></script>
+  <script src="{% static 'js/datatables/jquery.dataTables.min.js' %}"></script>
+  <script src="{% static 'js/datatables-bs4/js/dataTables.bootstrap4.min.js' %}"></script>
+  <script src="{% static 'js/datatables-responsive/js/dataTables.responsive.min.js' %}"></script>
+  <script src="{% static 'js/datatables-responsive/js/responsive.bootstrap4.min.js' %}"></script>
 
-    <th>Actions</th>
 
-    </tr>
-    </thead>
-    <tbody>
-    {% for flavor in flavor_list %}
-        <tr>
-            <td>{{ flavor.name }}</td>
-            <td>
-            {{ flavor.id }}
-            </td>
-            {% for taste in taste_list %}
-            {% if taste.flavor %}
-                <td>{{ taste.name }}</td>
-            {% else %}
-                <td class="text-danger text-lg">N/A</td>
-            {% endif %}
-            {% endfor %}
-            <td>{{ board.bc_creation_date }}</td>
-            <td>{{ board.bc_note }}</td>
-            <td>Fix field</td>
-            
-            <td>{% unicorn 'add-taste' key=flavor.id flavor_id=flavor.id%}</td>
-            
-        </tr>
-    {% endfor %}
-    </tbody>
-</table>
+  <script>
+    $(function () {
+      refresh_dt();
+      
+    });
 
-{% endblock content %}
+    function refresh_dt()
+    {
+      $("#flavor-table").DataTable({
+        "responsive": true,
+        "lengthChange": false,
+        "autoWidth": false,
+        "ordering": true,
+        "info": true
+      });
+    }
+  </script>
+{% endblock %}

@@ -28,6 +28,18 @@
 
             <h1>django-unicorn</h1>
 
+                        <ul id="menu">
+                <li><a href="{% url 'www:index' %}">Index</a></li>
+                <li><a href="{% url 'www:template' 'text-inputs' %}">Text inputs</a></li>
+                <li><a href="{% url 'www:template' 'html-inputs' %}">Other inputs</a></li>
+                <li><a href="{% url 'www:template' 'objects' %}">Objects</a></li>
+                <li><a href="{% url 'www:template' 'validation' %}">Validation</a></li>
+                <li><a href="{% url 'www:template' 'polling' %}">Polling</a></li>
+                <li><a href="{% url 'www:template' 'models' %}">Models</a></li>
+                <li><a href="{% url 'www:template' 'nested' %}">Nested components (table)</a></li>
+                <li><a href="{% url 'www:template' 'js' %}">JavaScript integration</a></li>
+                <li><a href="{% url 'www:template' 'add-flavor' %}">Dynamic Load errors</a></li>
+            </ul>
 
             {% block content %}{% endblock content %}
 

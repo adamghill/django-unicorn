@@ -2,10 +2,10 @@ from django_unicorn.components import QuerySetType, UnicornView
 from example.coffee.models import Flavor, Taste
 
 class AddFlavorView(UnicornView):
-    flavor_id = None
     is_adding = False
-    flavor_obj = None
+    flavors = None
     flavor_qty = 1
+    flavor_id = None
 
     def __init__(self, *args, **kwargs):
         super().__init__(**kwargs)  # calling super is required
@@ -18,9 +18,7 @@ class AddFlavorView(UnicornView):
         if int(self.flavor_qty) > 0:
             for i in range(int(self.flavor_qty)):
 
-                flavor = Flavor(
-                    flavor = Flavor.objects.get(id = 1)
-                )
+                flavor = Flavor.objects.create(id = self.flavor_id)
                 flavor.save()
                 print("create flavor")
         
@@ -37,7 +35,7 @@ class AddFlavorView(UnicornView):
         self.show_table()
        
     def show_table(self):
-        self.flavor_obj = Flavor.objects.get(id = 1)
+        self.flavors = Flavor.objects.all()
 
     def mount(self):
         self.show_table()
