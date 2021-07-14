@@ -28,12 +28,10 @@ class AddTasteView(UnicornView):
             #crea un taste per ogni qty che l'utente ha stabilito
             for i in range(int(self.taste_qty)):        
                 #trova i taste collegati al flavor della riga
-                flavor = Flavor(
-                    taste = Taste.objects.get(pk = self.taste_id)
+                taste = Taste.objects.create(id = self.taste_id)
                     #edita il flavor per impostarne la foreign key alla primary key del taste?
                     #non dovrebbe anche generare un taste nuovo con un create() ?
-                )
-                flavor.save() #salva taste
+                taste.save() #salva taste
                 print("create taste in flavor")
         
         #spegne adding
