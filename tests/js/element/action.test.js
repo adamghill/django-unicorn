@@ -8,6 +8,7 @@ test("click", (t) => {
   const action = element.actions[0];
   t.is(action.name, "test()");
   t.is(action.eventType, "click");
+  t.is(action.debounceTime, 0);
 });
 
 test("keydown.enter", (t) => {
@@ -48,6 +49,27 @@ test("click.discard", (t) => {
   t.true(action.isDiscard);
   t.is(action.eventType, "click");
   t.is(action.key, undefined);
+});
+
+test("click.debounce", (t) => {
+  const html = "<a href='#' unicorn:click.debounce-99='test()'>Test()</a>";
+  const element = getElement(html);
+
+  const action = element.actions[0];
+  t.is(action.debounceTime, 99);
+  t.is(action.eventType, "click");
+  t.is(action.key, undefined);
+});
+
+test("click.keyup.enter.debounce", (t) => {
+  const html =
+    "<a href='#' unicorn:click.keyup.enter.debounce-99='test()'>Test()</a>";
+  const element = getElement(html);
+
+  const action = element.actions[0];
+  t.is(action.debounceTime, 99);
+  t.is(action.eventType, "click");
+  t.is(action.key, "enter");
 });
 
 test("click.discard model changes", (t) => {

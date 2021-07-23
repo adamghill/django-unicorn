@@ -249,7 +249,7 @@ export class Component {
   /**
    * Calls the method for a particular component.
    */
-  callMethod(methodName, partials, errCallback) {
+  callMethod(methodName, debounceTime, partials, errCallback) {
     const action = {
       type: "callMethod",
       payload: { name: methodName },
@@ -257,8 +257,8 @@ export class Component {
     };
     this.actionQueue.push(action);
 
-    // No debounce timeout for action methods to remove any perceived lag
-    this.queueMessage(0, (triggeringElements, _, err) => {
+    // Debounce timeout defaults to 0 in element.js to remove any perceived lag, but can be overridden
+    this.queueMessage(debounceTime, (triggeringElements, _, err) => {
       if (err && isFunction(errCallback)) {
         errCallback(err);
       } else if (err) {
@@ -349,6 +349,7 @@ export class Component {
     if (fireImmediately && this.isPollEnabled()) {
       this.callMethod(
         this.poll.method,
+        0,
         this.poll.partials,
         this.handlePollError
       );
@@ -358,6 +359,7 @@ export class Component {
       if (this.isPollEnabled()) {
         this.callMethod(
           this.poll.method,
+          0,
           this.poll.partials,
           this.handlePollError
         );

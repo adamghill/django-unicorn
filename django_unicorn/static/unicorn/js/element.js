@@ -113,6 +113,7 @@ export class Element {
         action.isPrevent = false;
         action.isStop = false;
         action.isDiscard = false;
+        action.debounceTime = 0;
 
         if (attribute.modifiers) {
           Object.keys(attribute.modifiers).forEach((modifier) => {
@@ -122,6 +123,10 @@ export class Element {
               action.isStop = true;
             } else if (modifier === "discard") {
               action.isDiscard = true;
+            } else if (modifier === "debounce") {
+              action.debounceTime = attribute.modifiers.debounce
+                ? parseInt(attribute.modifiers.debounce, 10) || 0
+                : 0;
             } else {
               // Assume the modifier is a keycode
               action.key = modifier;

@@ -95,7 +95,7 @@ export function call(componentNameOrKey, methodName, ...args) {
     methodName = `${methodName}(${argString})`;
   }
 
-  component.callMethod(methodName, null, (err) => {
+  component.callMethod(methodName, 0, null, (err) => {
     console.error(err);
   });
 }

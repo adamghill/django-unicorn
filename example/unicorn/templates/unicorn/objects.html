@@ -1,102 +1,108 @@
 <div>
-    <div>
-        <label>Dictionaries (original)</label>
-        <input u:model="dictionary.name" type="text" id="dictionary">
-        <input u:model="dictionary.nested.name" type="text" id="nestedDictionary">
+  <div>
+    <label>Dictionaries (original)</label>
+    <input u:model="dictionary.name" type="text" id="dictionary">
+    <input u:model="dictionary.nested.name" type="text" id="nestedDictionary">
 
-        <br />
-        dictionary.name: {{ dictionary.name }}<br />
-        dictionary.nested.name: {{ dictionary.nested.name }}<br />
-        <button u:click='set_dictionary({"name": 1, "nested": {"name": 2}})'>set dictionary(1)</button>
-        <button u:click='dictionary.nested.name=2'>set dictionary(2)</button>
-    </div>
+    <br />
+    dictionary.name: {{ dictionary.name }}<br />
+    dictionary.nested.name: {{ dictionary.nested.name }}<br />
+    <button u:click='set_dictionary({"name": 1, "nested": {"name": 2}})'>set dictionary 1,2</button>
+    <button u:click='dictionary.nested.name=3'>set dictionary,nested.name=3</button>
+    <button u:click.debounce-1000='set_dictionary({"name": 4, "nested": {"name": 5}})'>debounce set
+      dictionary 4,5</button>
+  </div>
 
-    <div u:model="dictionary">
-        <label>Dictionaries (model parent)</label>
-        <input u:field="name" type="text" id="dictionary2">
-        <input u:field="nested.name" type="text" id="nestedDictionary2">
+  <div u:model="dictionary">
+    <label>Dictionaries (model parent)</label>
+    <input u:field="name" type="text" id="dictionary2">
+    <input u:field="nested.name" type="text" id="nestedDictionary2">
 
-        <br />
-        dictionary.name: {{ dictionary.name }}<br />
-        dictionary.nested.name: {{ dictionary.nested.name }}<br />
-        <button u:click='set_dictionary({"name": 1, "nested": {"name": 2}})'>set dictionary(1)</button>
-        <button u:click='dictionary.nested.name=2'>set dictionary(2)</button>
-    </div>
+    <br />
+    dictionary.name: {{ dictionary.name }}<br />
+    dictionary.nested.name: {{ dictionary.nested.name }}<br />
+    <button u:click='set_dictionary({"name": 1, "nested": {"name": 2}})'>set dictionary(1)</button>
+    <button u:click='dictionary.nested.name=2'>set dictionary(2)</button>
+  </div>
 
-    <div>
-        <label>Pydantic field</label>
-        <input u:model="pydantic_field.title" type="text" id="pydanticField">
-        <input u:model="pydantic_field.publish_date" type="text" id="datetimePydanticField">
+  <div>
+    <label>Pydantic field</label>
+    <input u:model="pydantic_field.title" type="text" id="pydanticField">
+    <input u:model="pydantic_field.publish_date" type="text" id="datetimePydanticField">
 
-        <br />
-        pydantic_field.title: {{ pydantic_field.title }}<br />
-        pydantic_field.publish_date: {{ pydantic_field.publish_date }}<br />
-    </div>
-    
-    <div>
-        <label>Nested unicorn field property (original)</label>
-        <input u:model="unicorn_field.title" type="text" id="unicornField">
-        <input u:model="unicorn_field.publish_date_field.year" type="text" id="nestedUnicornField">
-        <input u:model="unicorn_field.publish_date" type="text" id="nestedDatetimeUnicornField">
+    <br />
+    pydantic_field.title: {{ pydantic_field.title }}<br />
+    pydantic_field.publish_date: {{ pydantic_field.publish_date }}<br />
+  </div>
 
-        <br />
-        unicorn_field.title: {{ unicorn_field.title }}<br />
-        unicorn_field.publish_date_field.year: {{ unicorn_field.publish_date_field.year }}<br />
+  <div>
+    <label>Nested unicorn field property (original)</label>
+    <input u:model="unicorn_field.title" type="text" id="unicornField">
+    <input u:model="unicorn_field.publish_date_field.year" type="text" id="nestedUnicornField">
+    <input u:model="unicorn_field.publish_date" type="text" id="nestedDatetimeUnicornField">
 
-        <br />
-        <button u:click="unicorn_field={'title': 'title1', 'publish_date': 'blob', 'publish_date_field': {'year': 1999}}">Set with dictionary</button>
-    </div>
+    <br />
+    unicorn_field.title: {{ unicorn_field.title }}<br />
+    unicorn_field.publish_date_field.year: {{ unicorn_field.publish_date_field.year }}<br />
 
-    <div u:model="unicorn_field">
-        <label>Nested unicorn field property (model parent)</label>
-        <input u:field="title" type="text" id="unicornField2">
-        <input u:field="publish_date_field.year" type="text" id="nestedUnicornField2">
-        <input u:field="publish_date" type="text" id="nestedDatetimeUnicornField2">
+    <br />
+    <button
+      u:click="unicorn_field={'title': 'title1', 'publish_date': 'blob', 'publish_date_field': {'year': 1999}}">Set with
+      dictionary</button>
+  </div>
 
-        <br />
-        unicorn_field.title: {{ unicorn_field.title }}<br />
-        unicorn_field.publish_date_field.year: {{ unicorn_field.publish_date_field.year }}<br />
+  <div u:model="unicorn_field">
+    <label>Nested unicorn field property (model parent)</label>
+    <input u:field="title" type="text" id="unicornField2">
+    <input u:field="publish_date_field.year" type="text" id="nestedUnicornField2">
+    <input u:field="publish_date" type="text" id="nestedDatetimeUnicornField2">
 
-        <br />
-        <button u:click="unicorn_field={'title': 'title1', 'publish_date': 'blob', 'publish_date_field': {'year': 1999}}">Set with dictionary</button>
-    </div>
+    <br />
+    unicorn_field.title: {{ unicorn_field.title }}<br />
+    unicorn_field.publish_date_field.year: {{ unicorn_field.publish_date_field.year }}<br />
 
-    <div>
-        <label>Django models</label>
-        <input u:model="book.title" type="text" id="bookId">
+    <br />
+    <button
+      u:click="unicorn_field={'title': 'title1', 'publish_date': 'blob', 'publish_date_field': {'year': 1999}}">Set with
+      dictionary</button>
+  </div>
 
-        <br />
-        book.title: {{ book.title }} 📖
-    </div>
+  <div>
+    <label>Django models</label>
+    <input u:model="book.title" type="text" id="bookId">
 
-    <div>
-        <label>Django queryset (limited to readonly for now)</label>
-        <input u:model="books.0.title" type="text" id="booksId" readonly>
+    <br />
+    book.title: {{ book.title }} 📖
+  </div>
 
-        <br />
-        Book queryset
+  <div>
+    <label>Django queryset (limited to readonly for now)</label>
+    <input u:model="books.0.title" type="text" id="booksId" readonly>
 
-        <ul>
-            {% for b in books %}
-            <li>Book in queryset: {{ b.title }}</li>
-            {% endfor %}
-        </ul>
-    </div>
+    <br />
+    Book queryset
 
-    <div>
-        <input u:model="float_example" type="text" id="floatExampleId">
-        <br />
-        <input u:model="decimal_example" type="text" id="decimalExampleId">
-        <br />
-        <input u:model="int_example" type="text" id="intExampleId">
-        <br />
+    <ul>
+      {% for b in books %}
+      <li>Book in queryset: {{ b.title }}</li>
+      {% endfor %}
+    </ul>
+  </div>
 
-        <button type="submit" u:click="add_one_to_float">Add 1 to float</button>
-        <br />
-        float_example: {{ float_example }}
-        <br />
-    </div>
+  <div>
+    <input u:model="float_example" type="text" id="floatExampleId">
+    <br />
+    <input u:model="decimal_example" type="text" id="decimalExampleId">
+    <br />
+    <input u:model="int_example" type="text" id="intExampleId">
+    <br />
 
-    <button u:click="$reset">$reset</button>
-    <button u:click="$refresh">$refresh</button>
+    <button type="submit" u:click="add_one_to_float">Add 1 to float</button>
+    <br />
+    float_example: {{ float_example }}
+    <br />
+  </div>
+
+  <button u:click="$reset">$reset</button>
+  <button u:click="$refresh">$refresh</button>
 </div>

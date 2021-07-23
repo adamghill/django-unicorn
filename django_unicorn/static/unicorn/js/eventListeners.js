@@ -239,11 +239,19 @@ export function addActionEventListener(component, eventType) {
           if (action.key) {
             if (action.key === toKebabCase(event.key)) {
               handleLoading(component, targetElement);
-              component.callMethod(action.name, targetElement.partials);
+              component.callMethod(
+                action.name,
+                action.debounceTime,
+                targetElement.partials
+              );
             }
           } else {
             handleLoading(component, targetElement);
-            component.callMethod(action.name, targetElement.partials);
+            component.callMethod(
+              action.name,
+              action.debounceTime,
+              targetElement.partials
+            );
           }
         }
       });
