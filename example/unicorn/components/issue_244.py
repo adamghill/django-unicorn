@@ -6,7 +6,6 @@ from example.coffee.models import Flavor
 
 
 class Issue244View(UnicornView):
-    first_load = True
     items_per_page = 10
     title = ""
     page_index = 1
@@ -15,24 +14,24 @@ class Issue244View(UnicornView):
 
     class Meta:
         exclude = ()
-        javascript_exclude = ("paginator", "page", "http_request", "_search_documents")
+        javascript_exclude = (
+            "paginator",
+            "page",
+        )
 
     def mount(self):
         print("mount")
         self._search_documents()
 
-    def hydrate(self):
-        print("hydrate first_load", self.first_load)
-        if self.first_load is True:
-            self._search_documents()
-
-        self.first_load = False
-
     def _search_documents(self):
+        print("  _search_documents")
+
         qs = Flavor.objects.filter()
 
         if self.title:
             qs = qs.filter(name__icontains=self.title)
+
+        qs = qs.order_by("name")
 
         paginator = Paginator(qs, self.items_per_page)
         self.paginator = paginator
@@ -40,12 +39,15 @@ class Issue244View(UnicornView):
         return self.page
 
     def search_documents(self):
+        print("search_documents")
         self._search_documents()
 
     def next_page(self):
+        print("next_page")
         self.page_index += 1
         self._search_documents()
 
     def previous_page(self):
+        print("previous_page")
         self.page_index = max(self.page_index - 1, 1)
         self._search_documents()
