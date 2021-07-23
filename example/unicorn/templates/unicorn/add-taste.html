@@ -1,27 +1,19 @@
 {% load unicorn static %}
 
-
 <div>
-
-      
-          {% if is_adding %}
-              <div class="form-group row">
-                  <label for="inputqty" class="col-sm-6 col-form-label">How many tastes? </label>
-                  <div class="col-sm-6">
-                  <input type="number" class="form-control" id="inputqty" value="1" placeholder="Tastes Quantity" unicorn:model="taste_qty">
-                  </div>
-              </div>
-              <button type="button" class="btn btn-primary" unicorn:click="create_taste">Create Tastes</button>
-              <button type="button" class="btn btn-danger" unicorn:click="cancel_taste">Cancel</button>
-
-          {% else %}
-              <button unicorn:click="add_taste">
-                  Create New Taste
-              </button>
-              
-          {% endif %} 
-          
-              
-      
-          </div>
-
+  {% if is_adding %}
+  <div class="form-group row">
+    <label for="inputqty" class="col-sm-6 col-form-label">How many tastes? </label>
+    <div class="col-sm-6">
+      <input type="number" class="form-control" id="inputqty" value="1" placeholder="Tastes Quantity"
+        unicorn:model="taste_qty">
+    </div>
+  </div>
+  <button type="button" class="btn btn-primary" unicorn:click="create_taste">Create Tastes</button>
+  <button type="button" class="btn btn-danger" unicorn:click="cancel_taste">Cancel</button>
+  {% else %}
+  <button unicorn:click="add_taste">
+    Create New Taste
+  </button>
+  {% endif %}
+</div>
