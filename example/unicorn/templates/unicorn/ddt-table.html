@@ -1,0 +1,29 @@
+{% load unicorn static %}
+
+<div>
+  {% unicorn 'filter' parent=view %}
+  <table class="table table-bordered table-striped">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Short Description</th>
+        <th>Creation Date</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for ddt in ddts %}
+      <tr>
+        <td>{{ ddt.id }}</td>
+        <td>{{ ddt.name }}</td>
+        <td>{{ ddt.ldo_short_description }}</td>
+        <td>{{ ddt.ldo_creation_date }}</td>
+        <td>{{ ddt.ldo_status }}</td>
+        <td>(Add edit button)</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
