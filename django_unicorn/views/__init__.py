@@ -13,6 +13,7 @@ import orjson
 from bs4 import BeautifulSoup
 
 from django_unicorn.components import UnicornView
+from django_unicorn.components.unicorn_template_response import get_root_element
 from django_unicorn.decorators import timed
 from django_unicorn.errors import RenderNotModified, UnicornCacheError, UnicornViewError
 from django_unicorn.serializer import dumps, loads
@@ -216,6 +217,10 @@ def _process_component_request(
             and not component.calls
         ):
             raise RenderNotModified()
+
+        # Make sure that partials with comments or blank lines before the root element only return the root element
+        soup = BeautifulSoup(rendered_component, features="html.parser")
+        rendered_component = str(get_root_element(soup))
 
         res.update(
             {"dom": rendered_component, "hash": hash,}

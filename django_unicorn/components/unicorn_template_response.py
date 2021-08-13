@@ -68,7 +68,7 @@ class UnicornTemplateResponse(TemplateResponse):
         checksum = generate_checksum(orjson.dumps(frontend_context_variables_dict))
 
         soup = BeautifulSoup(content, features="html.parser")
-        root_element = UnicornTemplateResponse._get_root_element(soup)
+        root_element = get_root_element(soup)
         root_element["unicorn:id"] = self.component.component_id
         root_element["unicorn:name"] = self.component.component_name
         root_element["unicorn:key"] = self.component.component_key
@@ -123,22 +123,22 @@ class UnicornTemplateResponse(TemplateResponse):
         return response
 
     @staticmethod
-    def _get_root_element(soup: BeautifulSoup) -> Tag:
-        """
-        Gets the first element.
-
-        Returns:
-            BeautifulSoup element.
-            
-            Raises an Exception if an element cannot be found.
-        """
-        for element in soup.contents:
-            if element.name:
-                return element
-
-        raise Exception("No root element found")
-
-    @staticmethod
     def _desoupify(soup):
         soup.smooth()
         return soup.encode(formatter=UnsortedAttributes()).decode("utf-8")
+
+
+def get_root_element(soup: BeautifulSoup) -> Tag:
+    """
+    Gets the first tag element.
+
+    Returns:
+        BeautifulSoup tag element.
+
+        Raises an Exception if an element cannot be found.
+    """
+    for element in soup.contents:
+        if isinstance(element, Tag) and element.name:
+            return element
+
+    raise Exception("No root element found")
