@@ -1,10 +1,16 @@
 <div>
-    <button unicorn:click="$reset">Reset the component</button>
-    <br />
-    <br />
+  <button unicorn:click="$reset">Reset the component</button>
+  <br />
+  <br />
 
-    <label></label>
-    <input unicorn:model="name" type="text" id="name" unicorn:key="key1">
+  <label></label>
+  <input unicorn:model="name" type="text" id="name" unicorn:key="key1">
 
-    Hello, {{ name|default:'World' }}!
+  Hello, {{ name|default:'World' }}!
 </div>
+
+<script type="application/javascript">
+  window.addEventListener('DOMContentLoaded', (event) => {
+    Unicorn.addEventListener('updated', (component) => console.log('got updated', component));
+  });
+</script>

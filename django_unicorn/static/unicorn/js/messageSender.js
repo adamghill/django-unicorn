@@ -215,6 +215,8 @@ export function send(component, callback) {
         );
       }
 
+      component.triggerLifecycleEvent("updated");
+
       // Re-init to refresh the root and checksum based on the new data
       component.init();
 

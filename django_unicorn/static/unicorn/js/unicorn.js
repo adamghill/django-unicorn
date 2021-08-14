@@ -1,6 +1,6 @@
 import { Component } from "./component.js";
 import { isEmpty, hasValue } from "./utils.js";
-import { components } from "./store.js";
+import { components, lifecycleEvents } from "./store.js";
 
 let messageUrl = "";
 let csrfTokenHeaderName = "X-CSRFToken";
@@ -107,4 +107,17 @@ export function getReturnValue(componentNameOrKey) {
   const component = getComponent(componentNameOrKey);
 
   return component.return.value;
+}
+
+/**
+ * Adds an event listener for particular events.
+ * @param {String} eventName The event to register under. Current events are: `updated`.
+ * @param {Function} callback Function to call when the event gets fired.
+ */
+export function addEventListener(eventName, callback) {
+  if (!(eventName in lifecycleEvents)) {
+    lifecycleEvents[eventName] = [];
+  }
+
+  lifecycleEvents[eventName].push(callback);
 }
