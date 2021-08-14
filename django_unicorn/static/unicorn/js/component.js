@@ -5,7 +5,7 @@ import {
   addDbEventListener,
   addModelEventListener,
 } from "./eventListeners.js";
-import { components } from "./store.js";
+import { components, lifecycleEvents } from "./store.js";
 import { send } from "./messageSender.js";
 import morphdom from "./morphdom/2.6.1/morphdom.js";
 import { $, hasValue, isEmpty, isFunction, walk } from "./utils.js";
@@ -508,6 +508,12 @@ export class Component {
       debounce(send, 250, false)(this, callback);
     } else {
       debounce(send, debounceTime, false)(this, callback);
+    }
+  }
+
+  triggerLifecycleEvent(eventName) {
+    if (eventName in lifecycleEvents) {
+      lifecycleEvents[eventName].forEach((cb) => cb(this));
     }
   }
 }
