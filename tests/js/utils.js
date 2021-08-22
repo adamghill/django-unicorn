@@ -4,6 +4,15 @@ import { Element } from "../../django_unicorn/static/unicorn/js/element.js";
 import { Component } from "../../django_unicorn/static/unicorn/js/component.js";
 
 /**
+ * Mock some browser globals using a fake DOM
+ */
+export function setBrowserMocks() {
+  const dom = new JSDOM("<div></div>");
+  global.document = dom.window.document;
+  global.NodeFilter = dom.window.NodeFilter;
+}
+
+/**
  * Gets a fake DOM document based on the passed-in HTML fragement.
  * @param {String} html HTML fragment.
  */
