@@ -8,7 +8,14 @@ import {
 import { components } from "./store.js";
 import { send } from "./messageSender.js";
 import morphdom from "./morphdom/2.6.1/morphdom.js";
-import { $, hasValue, isEmpty, isFunction, walk, FilterSkipNested } from "./utils.js";
+import {
+  $,
+  hasValue,
+  isEmpty,
+  isFunction,
+  walk,
+  FilterSkipNested,
+} from "./utils.js";
 
 /**
  * Encapsulate component.
@@ -164,79 +171,83 @@ export class Component {
     this.dbEls = [];
 
     try {
-      this.walker(this.root, (el) => {
-        if (el.isSameNode(this.root)) {
-          // Skip the component root element
-          return;
-        }
-
-        const element = new Element(el);
-
-        if (element.isUnicorn) {
-          if (hasValue(element.field) && hasValue(element.db)) {
-            if (!this.attachedDbEvents.some((e) => e.isSame(element))) {
-              this.attachedDbEvents.push(element);
-              addDbEventListener(this, element);
-
-              // If a field is lazy, also add an event listener for input for dirty states
-              if (element.field.isLazy) {
-                // This input event for isLazy will be stopped after dirty is checked when the event fires
-                addDbEventListener(this, element, "input");
-              }
-            }
-
-            if (!this.dbEls.some((e) => e.isSame(element))) {
-              this.dbEls.push(element);
-            }
-          } else if (
-            hasValue(element.model) &&
-            isEmpty(element.db) &&
-            isEmpty(element.field)
-          ) {
-            if (!this.attachedModelEvents.some((e) => e.isSame(element))) {
-              this.attachedModelEvents.push(element);
-              addModelEventListener(this, element);
-
-              // If a model is lazy, also add an event listener for input for dirty states
-              if (element.model.isLazy) {
-                // This input event for isLazy will be stopped after dirty is checked when the event fires
-                addModelEventListener(this, element, "input");
-              }
-            }
-
-            if (!this.modelEls.some((e) => e.isSame(element))) {
-              this.modelEls.push(element);
-            }
-          } else if (hasValue(element.loading)) {
-            this.loadingEls.push(element);
-
-            // Hide loading elements that are shown when an action happens
-            if (element.loading.show) {
-              element.hide();
-            }
+      this.walker(
+        this.root,
+        (el) => {
+          if (el.isSameNode(this.root)) {
+            // Skip the component root element
+            return;
           }
 
-          if (hasValue(element.key)) {
-            this.keyEls.push(element);
-          }
+          const element = new Element(el);
 
-          element.actions.forEach((action) => {
-            if (this.actionEvents[action.eventType]) {
-              this.actionEvents[action.eventType].push({ action, element });
-            } else {
-              this.actionEvents[action.eventType] = [{ action, element }];
+          if (element.isUnicorn) {
+            if (hasValue(element.field) && hasValue(element.db)) {
+              if (!this.attachedDbEvents.some((e) => e.isSame(element))) {
+                this.attachedDbEvents.push(element);
+                addDbEventListener(this, element);
 
-              if (
-                !this.attachedEventTypes.some((et) => et === action.eventType)
-              ) {
-                this.attachedEventTypes.push(action.eventType);
-                addActionEventListener(this, action.eventType);
-                element.events.push(action.eventType);
+                // If a field is lazy, also add an event listener for input for dirty states
+                if (element.field.isLazy) {
+                  // This input event for isLazy will be stopped after dirty is checked when the event fires
+                  addDbEventListener(this, element, "input");
+                }
+              }
+
+              if (!this.dbEls.some((e) => e.isSame(element))) {
+                this.dbEls.push(element);
+              }
+            } else if (
+              hasValue(element.model) &&
+              isEmpty(element.db) &&
+              isEmpty(element.field)
+            ) {
+              if (!this.attachedModelEvents.some((e) => e.isSame(element))) {
+                this.attachedModelEvents.push(element);
+                addModelEventListener(this, element);
+
+                // If a model is lazy, also add an event listener for input for dirty states
+                if (element.model.isLazy) {
+                  // This input event for isLazy will be stopped after dirty is checked when the event fires
+                  addModelEventListener(this, element, "input");
+                }
+              }
+
+              if (!this.modelEls.some((e) => e.isSame(element))) {
+                this.modelEls.push(element);
+              }
+            } else if (hasValue(element.loading)) {
+              this.loadingEls.push(element);
+
+              // Hide loading elements that are shown when an action happens
+              if (element.loading.show) {
+                element.hide();
               }
             }
-          });
-        }
-      }, FilterSkipNested);
+
+            if (hasValue(element.key)) {
+              this.keyEls.push(element);
+            }
+
+            element.actions.forEach((action) => {
+              if (this.actionEvents[action.eventType]) {
+                this.actionEvents[action.eventType].push({ action, element });
+              } else {
+                this.actionEvents[action.eventType] = [{ action, element }];
+
+                if (
+                  !this.attachedEventTypes.some((et) => et === action.eventType)
+                ) {
+                  this.attachedEventTypes.push(action.eventType);
+                  addActionEventListener(this, action.eventType);
+                  element.events.push(action.eventType);
+                }
+              }
+            });
+          }
+        },
+        FilterSkipNested
+      );
     } catch (err) {
       // nothing
     }
