@@ -105,13 +105,33 @@ export function toKebabCase(str) {
 }
 
 /**
+ * Filter to accept any element (use with walk) 
+ */
+ export const FilterAny = {
+  acceptNode: (node) => NodeFilter.FILTER_ACCEPT
+}
+
+/**
+ * Filter to skip nested components (use with walk)
+ */
+export const FilterSkipNested = {
+  acceptNode: (node) => {
+    if (node.getAttribute("unicorn:checksum")) {
+      // with a tree walker, child nodes are also rejected
+      return NodeFilter.FILTER_REJECT;
+    }
+    return NodeFilter.FILTER_ACCEPT;
+  }
+}
+
+/**
  * Traverses the DOM looking for child elements.
  */
-export function walk(el, callback) {
+export function walk(el, callback, filter=FilterAny) {
   const walker = document.createTreeWalker(
     el,
     NodeFilter.SHOW_ELEMENT,
-    null,
+    filter,
     false
   );
 
