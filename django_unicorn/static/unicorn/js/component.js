@@ -8,7 +8,7 @@ import {
 import { components } from "./store.js";
 import { send } from "./messageSender.js";
 import morphdom from "./morphdom/2.6.1/morphdom.js";
-import { $, hasValue, isEmpty, isFunction, walk } from "./utils.js";
+import { $, hasValue, isEmpty, isFunction, walk, FilterSkipNested } from "./utils.js";
 
 /**
  * Encapsulate component.
@@ -169,10 +169,6 @@ export class Component {
           // Skip the component root element
           return;
         }
-        if (el.getAttribute("unicorn:checksum")) {
-          // Skip nested components
-          throw Error();
-        }
 
         const element = new Element(el);
 
@@ -240,7 +236,7 @@ export class Component {
             }
           });
         }
-      });
+      }, FilterSkipNested);
     } catch (err) {
       // nothing
     }
