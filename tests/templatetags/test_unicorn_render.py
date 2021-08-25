@@ -46,6 +46,10 @@ class FakeComponentCalls2(UnicornView):
         self.call("testCall2", "hello")
 
 
+class FakeComponentParentNested(UnicornView):
+    template_name = "templates/test_component_parent_nested.html"
+
+
 def test_unicorn_render_kwarg():
     token = Token(
         TokenType.TEXT,
@@ -303,3 +307,15 @@ def test_unicorn_render_hash(settings):
     rendered_content = html[:script_idx]
     expected_hash = generate_checksum(rendered_content)
     assert f'"hash":"{expected_hash}"' in html
+
+
+def test_unicorn_render_parent_nested_multiple_layers(settings):
+    settings.DEBUG = True
+    token = Token(
+        TokenType.TEXT,
+        "unicorn 'tests.templatetags.test_unicorn_render.FakeComponentParentNested'",
+    )
+    unicorn_node = unicorn(None, token)
+    context = {}
+    html = unicorn_node.render(context)
+    assert html.count("componentInit") == 3

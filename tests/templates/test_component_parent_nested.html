@@ -1,0 +1,6 @@
+{% load unicorn %}
+
+<div>
+    parent nested (3 layers)
+    {% unicorn 'tests.templatetags.test_unicorn_render.FakeComponentParent' parent=view %}
+</div>
