@@ -98,8 +98,10 @@ class UnicornTemplateResponse(TemplateResponse):
             # Include init script and json tags from child components
             json_tags = [json_tag]
             for child in self.component.children:
-                init_script = f"{init_script} {child._init_script}"
-                json_tags.extend(child._json_tags)
+                if hasattr(child, "_init_script"):
+                    init_script = f"{init_script} {child._init_script}"
+                if hasattr(child, "_json_tags"):
+                    json_tags.extend(child._json_tags)
 
             # Defer rendering the init script and json tag until the outermost
             # component (without a parent) is rendered
