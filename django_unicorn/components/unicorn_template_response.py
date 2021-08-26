@@ -95,17 +95,18 @@ class UnicornTemplateResponse(TemplateResponse):
             json_tag["id"] = json_element_id
             json_tag.string = sanitize_html(init)
 
+            # Include init script and json tags from child components
+            json_tags = [json_tag]
+            for child in self.component.children:
+                init_script = f"{init_script} {child._init_script}"
+                json_tags.extend(child._json_tags)
+
+            # Defer rendering the init script and json tag until the outermost
+            # component (without a parent) is rendered
             if self.component.parent:
                 self.component._init_script = init_script
-                self.component._json_tag = json_tag
+                self.component._json_tags = json_tags
             else:
-                json_tags = []
-                json_tags.append(json_tag)
-
-                for child in self.component.children:
-                    init_script = f"{init_script} {child._init_script}"
-                    json_tags.append(child._json_tag)
-
                 script_tag = soup.new_tag("script")
                 script_tag["type"] = "module"
                 script_tag.string = f"if (typeof Unicorn === 'undefined') {{ console.error('Unicorn is missing. Do you need {{% load unicorn %}} or {{% unicorn_scripts %}}?') }} else {{ {init_script} }}"
