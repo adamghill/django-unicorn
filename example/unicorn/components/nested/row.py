@@ -6,12 +6,12 @@ class RowView(UnicornView):
     model: Flavor = None
     is_editing = False
 
-    def edit(self):
-        self.is_editing = True
+    # def edit(self):
+    #     self.is_editing = True
 
-    def cancel(self):
-        self.is_editing = False
+    # def cancel(self):
+    #     self.is_editing = False
 
-    def save(self):
-        self.model.save()
-        self.is_editing = False
+    # def save(self):
+    #     self.model.save()
+    #     self.is_editing = False
