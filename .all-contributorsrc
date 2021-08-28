@@ -87,6 +87,16 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "joshiggins",
+      "name": "Josh Higgins",
+      "avatar_url": "https://avatars.githubusercontent.com/u/5124298?v=4",
+      "profile": "https://github.com/joshiggins",
+      "contributions": [
+        "test",
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
