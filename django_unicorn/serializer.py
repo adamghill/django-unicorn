@@ -175,7 +175,7 @@ def _fix_floats(current: Dict, data: Dict = None, paths: List = []) -> None:
                 _piece = _piece[path]
 
 
-@lru_cache(maxsize=128)
+@lru_cache(maxsize=128, typed=True)
 def _dumps(serialized_data):
     dict_data = orjson.loads(serialized_data)
     _fix_floats(dict_data)
