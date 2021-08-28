@@ -9,9 +9,7 @@ def pytest_configure():
             "BACKEND": "django.template.backends.django.DjangoTemplates",
             "DIRS": ["tests"],
             "OPTIONS": {
-                "libraries": {
-                    "unicorn": "django_unicorn.templatetags.unicorn",
-                }
+                "libraries": {"unicorn": "django_unicorn.templatetags.unicorn",}
             },
         }
     ]
