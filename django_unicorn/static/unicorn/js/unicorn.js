@@ -121,3 +121,11 @@ export function addEventListener(eventName, callback) {
 
   lifecycleEvents[eventName].push(callback);
 }
+
+/**
+ * Trigger a component update by dispatching an event for a particular element.
+ */
+export function trigger(componentNameOrKey, elementKey) {
+  const component = getComponent(componentNameOrKey);
+  component.trigger(elementKey);
+}

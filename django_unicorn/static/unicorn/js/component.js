@@ -518,9 +518,28 @@ export class Component {
     }
   }
 
+  /**
+   * Triggers the event's callback if it is defined.
+   * @param {String} eventName The event name to trigger. Current options: "updated".
+   */
   triggerLifecycleEvent(eventName) {
     if (eventName in lifecycleEvents) {
       lifecycleEvents[eventName].forEach((cb) => cb(this));
     }
+  }
+
+  /**
+   * Manually trigger a model's `input` or `blur` event to force a component update.
+   *
+   * Useful when setting an element's value manually which won't trigger the correct event to fire.
+   * @param {String} key Key of the element.
+   */
+  trigger(key) {
+    this.modelEls.forEach((element) => {
+      if (element.key === key) {
+        const eventType = element.model.isLazy ? "blur" : "input";
+        element.el.dispatchEvent(new Event(eventType));
+      }
+    });
   }
 }
