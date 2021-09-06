@@ -32,7 +32,6 @@ export function componentInit(args) {
   components[component.id] = component;
 
   component.setModelValues();
-  component.setDbModelValues();
 }
 
 /**
