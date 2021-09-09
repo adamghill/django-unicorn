@@ -39,6 +39,7 @@ export class Component {
     this.modelEls = [];
     this.loadingEls = [];
     this.keyEls = [];
+    this.visibilityEls = [];
     this.errors = {};
     this.return = {};
     this.poll = {};
@@ -53,6 +54,7 @@ export class Component {
 
     this.init();
     this.refreshEventListeners();
+    this.initVisibility();
     this.initPolling();
 
     this.callCalls(args.calls);
@@ -206,6 +208,10 @@ export class Component {
               this.keyEls.push(element);
             }
 
+            if (hasValue(element.visibility)) {
+              this.visibilityEls.push(element);
+            }
+
             element.actions.forEach((action) => {
               if (this.actionEvents[action.eventType]) {
                 this.actionEvents[action.eventType].push({ action, element });
@@ -253,6 +259,42 @@ export class Component {
         this.setModelValues(triggeringElements, true);
       }
     });
+  }
+
+  /**
+   * Initializes `visible` elements.
+   */
+  initVisibility() {
+    if (
+      typeof window !== "undefined" &&
+      "IntersectionObserver" in window &&
+      "IntersectionObserverEntry" in window &&
+      "intersectionRatio" in window.IntersectionObserverEntry.prototype
+    ) {
+      this.visibilityEls.forEach((element) => {
+        const observer = new IntersectionObserver(
+          (entries) => {
+            const entry = entries[0];
+
+            if (entry.isIntersecting) {
+              this.callMethod(
+                element.visibility.method,
+                element.visibility.debounceTime,
+                element.partials,
+                (err) => {
+                  if (err) {
+                    console.error(err);
+                  }
+                }
+              );
+            }
+          },
+          { threshold: [element.visibility.threshold] }
+        );
+
+        observer.observe(element.el);
+      });
+    }
   }
 
   /**

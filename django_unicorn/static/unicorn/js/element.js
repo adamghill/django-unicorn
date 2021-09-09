@@ -31,6 +31,7 @@ export class Element {
     this.actions = [];
     this.partials = [];
     this.target = null;
+    this.visibility = {};
     this.key = null;
     this.events = [];
     this.errors = [];
@@ -97,6 +98,19 @@ export class Element {
         } else {
           this.partials.push({ target: attribute.value });
         }
+      } else if (attribute.isVisible) {
+        let threshold = attribute.modifiers.threshold || 0;
+
+        if (threshold > 1) {
+          // Convert the whole number into a percentage
+          threshold /= 100;
+        }
+
+        this.visibility.method = attribute.value;
+        this.visibility.threshold = threshold;
+        this.visibility.debounceTime = attribute.modifiers.debounce
+          ? parseInt(attribute.modifiers.debounce, 10) || 0
+          : 0;
       } else if (attribute.eventType) {
         const action = {};
         action.name = attribute.value;

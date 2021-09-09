@@ -15,6 +15,7 @@ export class Attribute {
     this.isTarget = false;
     this.isPartial = false;
     this.isDirty = false;
+    this.isVisible = false;
     this.isKey = false;
     this.isError = false;
     this.modifiers = {};
@@ -45,6 +46,8 @@ export class Attribute {
         this.isPartial = true;
       } else if (contains(this.name, ":dirty")) {
         this.isDirty = true;
+      } else if (contains(this.name, ":visible")) {
+        this.isVisible = true;
       } else if (this.name === "unicorn:key" || this.name === "u:key") {
         this.isKey = true;
       } else if (contains(this.name, ":error:")) {
