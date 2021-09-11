@@ -40,6 +40,7 @@ export class Component {
     this.loadingEls = [];
     this.keyEls = [];
     this.visibilityEls = [];
+    this.scrollEls = [];
     this.errors = {};
     this.return = {};
     this.poll = {};
@@ -55,6 +56,7 @@ export class Component {
     this.init();
     this.refreshEventListeners();
     this.initVisibility();
+    this.initScroll();
     this.initPolling();
 
     this.callCalls(args.calls);
@@ -212,6 +214,10 @@ export class Component {
               this.visibilityEls.push(element);
             }
 
+            if (hasValue(element.scroll)) {
+              this.scrollEls.push(element);
+            }
+
             element.actions.forEach((action) => {
               if (this.actionEvents[action.eventType]) {
                 this.actionEvents[action.eventType].push({ action, element });
@@ -295,6 +301,26 @@ export class Component {
         observer.observe(element.el);
       });
     }
+  }
+
+  /**
+   * Call the method when scrolled to bottom
+   */
+  initScroll() {
+    this.scrollEls.forEach((element) => {
+        window.addEventListener('scroll', () => {
+          if(window.scrollY + window.innerHeight >= document.documentElement.scrollHeight) {
+            this.callMethod(
+              element.scroll.method,
+              (err) => {
+                if (err) {
+                  console.error(err);
+                }
+              }
+            )
+          }
+        })
+    });
   }
 
   /**

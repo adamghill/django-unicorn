@@ -16,6 +16,7 @@ export class Attribute {
     this.isPartial = false;
     this.isDirty = false;
     this.isVisible = false;
+    this.isScroll = false;
     this.isKey = false;
     this.isError = false;
     this.modifiers = {};
@@ -48,6 +49,8 @@ export class Attribute {
         this.isDirty = true;
       } else if (contains(this.name, ":visible")) {
         this.isVisible = true;
+      } else if (contains(this.name, ":scroll")) {
+        this.isScroll = true;
       } else if (this.name === "unicorn:key" || this.name === "u:key") {
         this.isKey = true;
       } else if (contains(this.name, ":error:")) {
