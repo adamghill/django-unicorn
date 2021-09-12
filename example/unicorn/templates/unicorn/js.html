@@ -66,10 +66,25 @@
       select2_datetime: {{ select2_datetime }}
     </div>
   </div>
+  <br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br />
+
+  <h1># times the following element was scrolled into view:</h1>
 
   <div unicorn:key="visibility">
-    <span unicorn:visible.threshold-25.debounce-1000="increase_counter" unicorn:partial="visibility">
-      Number of times this span was scrolled into view: {{ scroll_counter }}
+    <span unicorn:visible="increase_counter" unicorn:partial="visibility">
+      <h2>{{ scroll_counter }}</2>
     </span>
+  </div><br /><br /><br /><br /><br /><br /><br /><br /><br />
+
+  <div>
+    <ol>
+      {% for flavor in flavors %}
+      <li>{{ flavor }}</li>
+      {% endfor %}
+    </ol>
+
+    <br />
+    <span unicorn:visible="load_more_flavors" />
   </div>
+
 </div>

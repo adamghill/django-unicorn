@@ -1,6 +1,7 @@
 from django.utils.timezone import now
 
-from django_unicorn.components import UnicornView
+from django_unicorn.components import QuerySetType, UnicornView
+from example.coffee.models import Flavor
 
 
 class JsView(UnicornView):
@@ -13,6 +14,11 @@ class JsView(UnicornView):
     selected_state = ""
     select2_datetime = now()
     scroll_counter = 0
+    flavors: QuerySetType[Flavor] = Flavor.objects.none()
+    limit = 5
+
+    def mount(self):
+        self.set_flavors()
 
     def call_javascript(self):
         self.call("callAlert", "world")
@@ -33,6 +39,13 @@ class JsView(UnicornView):
 
     def increase_counter(self):
         self.scroll_counter += 1
+
+    def set_flavors(self):
+        self.flavors = Flavor.objects.all()[: self.limit]
+
+    def load_more_flavors(self):
+        self.limit += 5
+        self.set_flavors()
 
     class Meta:
         javascript_excludes = ("states",)
