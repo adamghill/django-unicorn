@@ -167,6 +167,8 @@ export class Component {
   refreshEventListeners() {
     this.actionEvents = {};
     this.modelEls = [];
+    this.loadingEls = [];
+    this.visibilityEls = [];
 
     try {
       this.walker(

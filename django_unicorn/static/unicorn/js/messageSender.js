@@ -223,6 +223,9 @@ export function send(component, callback) {
       // Reset all event listeners
       component.refreshEventListeners();
 
+      // Check for visibility elements
+      component.initVisibility();
+
       // Re-add unicorn validation messages from errors
       component.modelEls.forEach((element) => {
         Object.keys(component.errors).forEach((modelName) => {
