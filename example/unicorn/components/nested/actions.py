@@ -1,21 +1,14 @@
 from django_unicorn.components import UnicornView
-from example.coffee.models import Flavor
+from typing import Callable
 
 
 class ActionsView(UnicornView):
-    model: Flavor = None
-    is_editing = False
+    # In this example the ActionsView is completely controlled by the
+    # RowView and it doesn't really "own" these - its useful to put them
+    # on the class for type hints and/or default values, but we don't
+    # want to give the impression they are ActionsView's own state
 
-    def edit(self):
-        self.is_editing = True
-
-        # this doesn't do what you expect because resulting dom is scoped to
-        # this component and the parent component won't get morphed
-        self.parent.is_editing = True
-
-    def cancel(self):
-        self.is_editing = False
-
-    def save(self):
-        self.model.save()
-        self.is_editing = False
+    is_editing: bool
+    on_edit: Callable
+    on_cancel: Callable
+    on_save: Callable

@@ -24,5 +24,13 @@
         n/a
         {% endif %}
     </td>
-    {% unicorn 'nested.actions' parent=view key=model.id model=model is_editing=is_editing %}
+
+    {% unicorn 'nested.actions' parent=view key=model.id is_editing=is_editing on_edit=on_edit on_cancel=on_cancel on_save=on_save %}
+
+    <!-- there could be a short form if the kwarg has the same name as the attribute?
+         since tags cannot span multiple lines
+    
+    {% unicorn 'nested.actions' parent=view key=model.id is_editing on_edit on_cancel on_save %}
+    -->
+
 </tr>
