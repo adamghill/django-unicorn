@@ -223,8 +223,21 @@ export function send(component, callback) {
       // Reset all event listeners
       component.refreshEventListeners();
 
-      // Check for visibility elements
-      component.initVisibility();
+      // Check for visibility elements if the last return value from the method wasn't false
+      let reInitVisbility = true;
+
+      component.visibilityEls.forEach((el) => {
+        if (
+          el.visibility.method === component.return.method &&
+          component.return.value === false
+        ) {
+          reInitVisbility = false;
+        }
+      });
+
+      if (reInitVisbility) {
+        component.initVisibility();
+      }
 
       // Re-add unicorn validation messages from errors
       component.modelEls.forEach((element) => {

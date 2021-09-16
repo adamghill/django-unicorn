@@ -32,6 +32,9 @@ class JsView(UnicornView):
         self.selected_state = val
 
     def increase_counter(self):
+        if self.scroll_counter >= 2:
+            return False
+
         self.scroll_counter += 1
 
     class Meta:
