@@ -97,6 +97,15 @@
         "test",
         "code"
       ]
+    },
+    {
+      "login": "MayasMess",
+      "name": "Amayas Messara",
+      "avatar_url": "https://avatars.githubusercontent.com/u/51958712?v=4",
+      "profile": "https://github.com/MayasMess",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
