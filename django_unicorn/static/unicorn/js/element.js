@@ -1,5 +1,5 @@
 import { Attribute } from "./attribute.js";
-import { isEmpty, generateDbKey, hasValue } from "./utils.js";
+import { isEmpty, hasValue } from "./utils.js";
 
 /**
  * Encapsulate DOM element for Unicorn-related information.
@@ -29,10 +29,9 @@ export class Element {
     this.loading = {};
     this.dirty = {};
     this.actions = [];
-    this.db = {};
-    this.field = {};
     this.partials = [];
     this.target = null;
+    this.visibility = {};
     this.key = null;
     this.events = [];
     this.errors = [];
@@ -49,11 +48,8 @@ export class Element {
         this.isUnicorn = true;
       }
 
-      if (attribute.isModel || attribute.isField) {
-        let key = "model";
-        if (attribute.isField) {
-          key = "field";
-        }
+      if (attribute.isModel) {
+        const key = "model";
 
         this[key].name = attribute.value;
         this[key].eventType = attribute.modifiers.lazy ? "blur" : "input";
@@ -62,10 +58,6 @@ export class Element {
         this[key].debounceTime = attribute.modifiers.debounce
           ? parseInt(attribute.modifiers.debounce, 10) || -1
           : -1;
-      } else if (attribute.isDb) {
-        this.db.name = attribute.value;
-      } else if (attribute.isPK) {
-        this.db.pk = attribute.value;
       } else if (attribute.isPoll) {
         this.poll.method = attribute.value ? attribute.value : "refresh";
         this.poll.timing = 2000;
@@ -106,6 +98,19 @@ export class Element {
         } else {
           this.partials.push({ target: attribute.value });
         }
+      } else if (attribute.isVisible) {
+        let threshold = attribute.modifiers.threshold || 0;
+
+        if (threshold > 1) {
+          // Convert the whole number into a percentage
+          threshold /= 100;
+        }
+
+        this.visibility.method = attribute.value;
+        this.visibility.threshold = threshold;
+        this.visibility.debounceTime = attribute.modifiers.debounce
+          ? parseInt(attribute.modifiers.debounce, 10) || 0
+          : 0;
       } else if (attribute.eventType) {
         const action = {};
         action.name = attribute.value;
@@ -146,51 +151,6 @@ export class Element {
         this.errors.push({ code, message: attribute.value });
       }
     }
-
-    // Look in parent elements if the db.pk or db.name is missing
-    if (this.isUnicorn && hasValue(this.field)) {
-      const dbAttrs = ["pk", "name"];
-      let elToCheck = this;
-
-      // Look for `db.pk` and `db.name`
-      dbAttrs.forEach((attr) => {
-        elToCheck = this;
-
-        while (isEmpty(this.db[attr])) {
-          if (elToCheck.isUnicorn && hasValue(elToCheck.db[attr])) {
-            this.db[attr] = elToCheck.db[attr];
-          }
-
-          if (elToCheck.isRoot()) {
-            break;
-          }
-
-          elToCheck = elToCheck.parent;
-        }
-      });
-
-      // Look for model.name
-      elToCheck = this;
-
-      while (isEmpty(this.model.name)) {
-        if (elToCheck.isUnicorn && hasValue(elToCheck.model.name)) {
-          if (hasValue(this.field) && isEmpty(this.db)) {
-            // Handle a model + field that is not a db
-            this.model = this.field; // Make sure to keep all modifiers from the field for the model
-            this.model.name = `${elToCheck.model.name}.${this.field.name}`;
-            this.field = {};
-          } else {
-            this.model.name = elToCheck.model.name;
-          }
-        }
-
-        if (elToCheck.isRoot()) {
-          break;
-        }
-
-        elToCheck = elToCheck.parent;
-      }
-    }
   }
 
   /**
@@ -212,13 +172,6 @@ export class Element {
    */
   show() {
     this.el.hidden = null;
-  }
-
-  /**
-   * A key that takes into consideration the db name and pk.
-   */
-  dbKey() {
-    return generateDbKey(this);
   }
 
   /**

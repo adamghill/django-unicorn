@@ -91,7 +91,7 @@ def get_locations(component_name):
     for app in unicorn_apps:
         # Handle an installed app that actually points to an app config
         if ".apps." in app:
-            app_config_idx = app.index(".apps.")
+            app_config_idx = app.rindex(".apps.")
             app = app[:app_config_idx]
 
         app_module_name = f"{app}.components.{module_name}"

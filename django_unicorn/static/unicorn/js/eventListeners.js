@@ -1,11 +1,4 @@
-import {
-  $,
-  args,
-  generateDbKey,
-  hasValue,
-  isEmpty,
-  toKebabCase,
-} from "./utils.js";
+import { $, args, hasValue, toKebabCase } from "./utils.js";
 import { Element } from "./element.js";
 
 /**
@@ -137,30 +130,6 @@ export function addActionEventListener(component, eventType) {
                 component.actionQueue.push(actionForQueue);
               }
             });
-
-            // Add the value of any child element of the target that is a lazy db to the action queue
-            const dbElsInTargetScope = component.dbEls.filter((e) =>
-              e.el.isSameNode(childEl)
-            );
-
-            dbElsInTargetScope.forEach((dbElement) => {
-              if (hasValue(dbElement.model) && dbElement.model.isLazy) {
-                const actionForQueue = {
-                  type: "dbInput",
-                  payload: {
-                    model: dbElement.model.name,
-                    db: dbElement.db.name,
-                    pk: dbElement.db.pk,
-                    fields: {},
-                  },
-                };
-                actionForQueue.payload.fields[
-                  dbElement.field.name
-                ] = dbElement.getValue();
-
-                component.actionQueue.push(actionForQueue);
-              }
-            });
           });
 
           if (action.isPrevent) {
@@ -203,35 +172,6 @@ export function addActionEventListener(component, eventType) {
                 }
               } else {
                 action.name = action.name.replace(eventArg, "");
-              }
-            } else if (eventArg === "$model") {
-              const db = {};
-              let elToCheck = targetElement;
-
-              while (elToCheck.parent && (isEmpty(db.name) || isEmpty(db.pk))) {
-                if (elToCheck.db.name) {
-                  db.name = elToCheck.db.name;
-                }
-
-                if (elToCheck.db.pk) {
-                  db.pk = elToCheck.db.pk;
-                }
-
-                if (elToCheck.isRoot()) {
-                  break;
-                }
-
-                elToCheck = elToCheck.parent;
-              }
-
-              if (db.name && db.pk) {
-                action.name = action.name.replace(
-                  "$model",
-                  JSON.stringify({
-                    pk: db.pk,
-                    name: db.name,
-                  })
-                );
               }
             }
           });
@@ -347,112 +287,8 @@ export function addModelEventListener(component, element, eventType) {
           }
 
           component.setModelValues(triggeringElements, forceModelUpdate);
-          component.setDbModelValues();
         }
       }
     );
-  });
-}
-
-/**
- * Adds a db event listener to the element.
- * @param {Component} component Component that contains the element.
- * @param {Element} Element that will get the event attached.
- * @param {string} eventType Event type to listen for. Optional; will use `field.eventType` by default.
- */
-export function addDbEventListener(component, element, eventType) {
-  eventType = eventType || element.field.eventType;
-  element.events.push(eventType);
-  const { el } = element;
-
-  el.addEventListener(eventType, (event) => {
-    if (isEmpty(element.db.name) && isEmpty(element.model.name)) {
-      return;
-    }
-
-    let isDirty = false;
-
-    if (
-      hasValue(element.model.name) &&
-      Object.prototype.hasOwnProperty.call(component.data, element.model.name)
-    ) {
-      for (let i = 0; i < component.data[element.model.name].length; i++) {
-        const dbModel = component.data[element.model.name][i];
-
-        if (dbModel.pk.toString() === element.db.pk) {
-          if (dbModel[element.field.name] !== element.getValue()) {
-            element.handleDirty();
-            isDirty = true;
-          } else {
-            element.handleDirty(true);
-          }
-        }
-      }
-    } else {
-      // If the data can't be found consider it always dirty since it's new
-      isDirty = true;
-    }
-
-    if (element.field.isLazy) {
-      // Lazy models fire an input and blur so that the dirty check above works as expected.
-      // This will prevent the input event from doing anything.
-      if (eventType === "input") {
-        return;
-      }
-      // Lazy non-dirty elements can bail
-      if (!isDirty) {
-        return;
-      }
-    }
-
-    if (!component.lastTriggeringElements.some((e) => e.isSame(element))) {
-      component.lastTriggeringElements.push(element);
-    }
-
-    const action = {
-      type: "dbInput",
-      payload: {
-        model: element.model.name,
-        db: element.db,
-        fields: {},
-      },
-      partials: element.partials,
-    };
-
-    action.payload.fields[element.field.name] = element.getValue();
-
-    if (element.field.isDefer) {
-      let foundActionIdx = -1;
-
-      // Update the existing action with the current value
-      component.actionQueue.forEach((a, idx) => {
-        if (generateDbKey(a.payload) === element.dbKey()) {
-          a.payload.fields[element.field.name] = element.getValue();
-          foundActionIdx = idx;
-        }
-      });
-
-      // Add a new action
-      if (isDirty && foundActionIdx === -1) {
-        component.actionQueue.push(action);
-      }
-
-      // Remove the found action that isn't dirty
-      if (!isDirty && foundActionIdx > -1) {
-        component.actionQueue.splice(foundActionIdx);
-      }
-
-      return;
-    }
-
-    component.actionQueue.push(action);
-
-    component.queueMessage(element.model.debounceTime, (_, __, err) => {
-      if (err) {
-        console.error(err);
-      } else {
-        component.setDbModelValues();
-      }
-    });
   });
 }

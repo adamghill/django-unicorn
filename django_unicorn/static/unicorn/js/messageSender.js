@@ -215,11 +215,29 @@ export function send(component, callback) {
         );
       }
 
+      component.triggerLifecycleEvent("updated");
+
       // Re-init to refresh the root and checksum based on the new data
       component.init();
 
       // Reset all event listeners
       component.refreshEventListeners();
+
+      // Check for visibility elements if the last return value from the method wasn't false
+      let reInitVisbility = true;
+
+      component.visibilityEls.forEach((el) => {
+        if (
+          el.visibility.method === component.return.method &&
+          component.return.value === false
+        ) {
+          reInitVisbility = false;
+        }
+      });
+
+      if (reInitVisbility) {
+        component.initVisibility();
+      }
 
       // Re-add unicorn validation messages from errors
       component.modelEls.forEach((element) => {

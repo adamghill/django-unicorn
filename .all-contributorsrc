@@ -97,6 +97,25 @@
         "test",
         "code"
       ]
+    },
+    {
+      "login": "MayasMess",
+      "name": "Amayas Messara",
+      "avatar_url": "https://avatars.githubusercontent.com/u/51958712?v=4",
+      "profile": "https://github.com/MayasMess",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "apoorvaeternity",
+      "name": "Apoorva Pandey",
+      "avatar_url": "https://avatars.githubusercontent.com/u/21103831?v=4",
+      "profile": "http://www.apoorvapandey.com",
+      "contributions": [
+        "test",
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,

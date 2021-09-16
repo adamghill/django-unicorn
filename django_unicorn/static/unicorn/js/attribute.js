@@ -10,14 +10,13 @@ export class Attribute {
     this.value = this.attribute.value;
     this.isUnicorn = false;
     this.isModel = false;
-    this.isField = false;
     this.isPoll = false;
     this.isLoading = false;
     this.isTarget = false;
     this.isPartial = false;
     this.isDirty = false;
+    this.isVisible = false;
     this.isKey = false;
-    this.isPK = false;
     this.isError = false;
     this.modifiers = {};
     this.eventType = null;
@@ -35,10 +34,6 @@ export class Attribute {
       // Use `contains` when there could be modifiers
       if (contains(this.name, ":model")) {
         this.isModel = true;
-      } else if (contains(this.name, ":field")) {
-        this.isField = true;
-      } else if (contains(this.name, ":db")) {
-        this.isDb = true;
       } else if (contains(this.name, ":poll.disable")) {
         this.isPollDisable = true;
       } else if (contains(this.name, ":poll")) {
@@ -51,10 +46,10 @@ export class Attribute {
         this.isPartial = true;
       } else if (contains(this.name, ":dirty")) {
         this.isDirty = true;
+      } else if (contains(this.name, ":visible")) {
+        this.isVisible = true;
       } else if (this.name === "unicorn:key" || this.name === "u:key") {
         this.isKey = true;
-      } else if (this.name === "unicorn:pk" || this.name === "u:pk") {
-        this.isPK = true;
       } else if (contains(this.name, ":error:")) {
         this.isError = true;
       } else {

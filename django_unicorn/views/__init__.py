@@ -23,7 +23,7 @@ from django_unicorn.settings import (
     get_serial_timeout,
 )
 from django_unicorn.utils import generate_checksum, get_cacheable_component
-from django_unicorn.views.action_parsers import call_method, db_input, sync_input
+from django_unicorn.views.action_parsers import call_method, sync_input
 from django_unicorn.views.objects import ComponentRequest
 from django_unicorn.views.utils import set_property_from_data
 
@@ -59,7 +59,6 @@ def _process_component_request(
         2. set all of the properties on the view from the data
         3. execute the type
             - update the properties based on the payload for "syncInput"
-            - create/update the Django Model based on the payload for "dbInput"
             - call the method specified for "callMethod"
         4. validate any fields specified in a Django form
         5. construct a `dict` that will get returned in a `JsonResponse` later on
@@ -107,8 +106,6 @@ def _process_component_request(
 
         if action.action_type == "syncInput":
             sync_input.handle(component_request, component, action.payload)
-        elif action.action_type == "dbInput":
-            db_input.handle(component, action.payload)
         elif action.action_type == "callMethod":
             (
                 component,

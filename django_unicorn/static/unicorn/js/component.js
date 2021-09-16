@@ -2,10 +2,9 @@ import { debounce } from "./delayers.js";
 import { Element } from "./element.js";
 import {
   addActionEventListener,
-  addDbEventListener,
   addModelEventListener,
 } from "./eventListeners.js";
-import { components } from "./store.js";
+import { components, lifecycleEvents } from "./store.js";
 import { send } from "./messageSender.js";
 import morphdom from "./morphdom/2.6.1/morphdom.js";
 import {
@@ -38,9 +37,9 @@ export class Component {
 
     this.root = undefined;
     this.modelEls = [];
-    this.dbEls = [];
     this.loadingEls = [];
     this.keyEls = [];
+    this.visibilityEls = [];
     this.errors = {};
     this.return = {};
     this.poll = {};
@@ -52,10 +51,10 @@ export class Component {
     this.actionEvents = {};
     this.attachedEventTypes = [];
     this.attachedModelEvents = [];
-    this.attachedDbEvents = [];
 
     this.init();
     this.refreshEventListeners();
+    this.initVisibility();
     this.initPolling();
 
     this.callCalls(args.calls);
@@ -168,7 +167,8 @@ export class Component {
   refreshEventListeners() {
     this.actionEvents = {};
     this.modelEls = [];
-    this.dbEls = [];
+    this.loadingEls = [];
+    this.visibilityEls = [];
 
     try {
       this.walker(
@@ -182,26 +182,7 @@ export class Component {
           const element = new Element(el);
 
           if (element.isUnicorn) {
-            if (hasValue(element.field) && hasValue(element.db)) {
-              if (!this.attachedDbEvents.some((e) => e.isSame(element))) {
-                this.attachedDbEvents.push(element);
-                addDbEventListener(this, element);
-
-                // If a field is lazy, also add an event listener for input for dirty states
-                if (element.field.isLazy) {
-                  // This input event for isLazy will be stopped after dirty is checked when the event fires
-                  addDbEventListener(this, element, "input");
-                }
-              }
-
-              if (!this.dbEls.some((e) => e.isSame(element))) {
-                this.dbEls.push(element);
-              }
-            } else if (
-              hasValue(element.model) &&
-              isEmpty(element.db) &&
-              isEmpty(element.field)
-            ) {
+            if (hasValue(element.model)) {
               if (!this.attachedModelEvents.some((e) => e.isSame(element))) {
                 this.attachedModelEvents.push(element);
                 addModelEventListener(this, element);
@@ -227,6 +208,10 @@ export class Component {
 
             if (hasValue(element.key)) {
               this.keyEls.push(element);
+            }
+
+            if (hasValue(element.visibility)) {
+              this.visibilityEls.push(element);
             }
 
             element.actions.forEach((action) => {
@@ -274,9 +259,44 @@ export class Component {
         // Can hard-code `forceModelUpdate` to `true` since it is always required for
         // `callMethod` actions
         this.setModelValues(triggeringElements, true);
-        this.setDbModelValues();
       }
     });
+  }
+
+  /**
+   * Initializes `visible` elements.
+   */
+  initVisibility() {
+    if (
+      typeof window !== "undefined" &&
+      "IntersectionObserver" in window &&
+      "IntersectionObserverEntry" in window &&
+      "intersectionRatio" in window.IntersectionObserverEntry.prototype
+    ) {
+      this.visibilityEls.forEach((element) => {
+        const observer = new IntersectionObserver(
+          (entries) => {
+            const entry = entries[0];
+
+            if (entry.isIntersecting) {
+              this.callMethod(
+                element.visibility.method,
+                element.visibility.debounceTime,
+                element.partials,
+                (err) => {
+                  if (err) {
+                    console.error(err);
+                  }
+                }
+              );
+            }
+          },
+          { threshold: [element.visibility.threshold] }
+        );
+
+        observer.observe(element.el);
+      });
+    }
   }
 
   /**
@@ -424,42 +444,6 @@ export class Component {
   }
 
   /**
-   * Sets all db model values.
-   */
-  setDbModelValues() {
-    this.dbEls.forEach((element) => {
-      if (isEmpty(element.db.pk)) {
-        // Empty string for the PK implies that the model is not associated to an actual model instance
-        element.setValue("");
-      } else {
-        const dbName = element.db.name || element.model.name;
-
-        if (isEmpty(dbName)) {
-          throw Error(
-            "Setting a field value requires a db or model name to be set"
-          );
-        }
-
-        let datas = this.data[dbName];
-
-        // Force the data to be an array if it isn't already for the next step
-        if (!Array.isArray(datas)) {
-          datas = [datas];
-        }
-
-        datas.forEach((model) => {
-          // Convert the model's pk to a string because it will always be a string on the element
-          if (hasValue(model) && hasValue(model.pk)) {
-            if (model.pk.toString() === element.db.pk) {
-              element.setValue(model[element.field.name]);
-            }
-          }
-        });
-      }
-    });
-  }
-
-  /**
    * Sets all model values.
    * @param {[Element]} triggeringElements The elements that triggered the event.
    */
@@ -516,5 +500,30 @@ export class Component {
     } else {
       debounce(send, debounceTime, false)(this, callback);
     }
+  }
+
+  /**
+   * Triggers the event's callback if it is defined.
+   * @param {String} eventName The event name to trigger. Current options: "updated".
+   */
+  triggerLifecycleEvent(eventName) {
+    if (eventName in lifecycleEvents) {
+      lifecycleEvents[eventName].forEach((cb) => cb(this));
+    }
+  }
+
+  /**
+   * Manually trigger a model's `input` or `blur` event to force a component update.
+   *
+   * Useful when setting an element's value manually which won't trigger the correct event to fire.
+   * @param {String} key Key of the element.
+   */
+  trigger(key) {
+    this.modelEls.forEach((element) => {
+      if (element.key === key) {
+        const eventType = element.model.isLazy ? "blur" : "input";
+        element.el.dispatchEvent(new Event(eventType));
+      }
+    });
   }
 }

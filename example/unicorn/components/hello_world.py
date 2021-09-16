@@ -1,3 +1,5 @@
+from django.utils.timezone import now
+
 from django_unicorn.components import UnicornView
 
 
@@ -8,3 +10,4 @@ class HelloWorldView(UnicornView):
 
     def set_name(self):
         self.name = "set_name method called"
+        return "set_name called at " + now().strftime("%H:%M:%S.%f")
