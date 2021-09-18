@@ -794,5 +794,5 @@ class UnicornView(TemplateView):
                 last_exception = e
 
         raise ComponentLoadError(
-            f"'{component_name}' component could not be loaded."
+            f"'{component_name}' component could not be loaded:\n    {last_exception}"
         ) from last_exception
