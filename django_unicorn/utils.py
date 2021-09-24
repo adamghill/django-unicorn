@@ -65,24 +65,12 @@ def get_cacheable_component(
 
     if component.parent:
         component.parent = get_cacheable_component(component.parent)
-
+        
     try:
         pickle.dumps(component)
-    except TypeError as e:
+    except (TypeError, AttributeError, NotImplementedError, pickle.PicklingError) as e:
         raise UnicornCacheError(
-            "Cannot cache component because it is not picklable."
-        ) from e
-    except AttributeError as e:
-        raise UnicornCacheError(
-            "Cannot cache component because it is not picklable."
-        ) from e
-    except NotImplementedError as e:
-        raise UnicornCacheError(
-            "Cannot cache component because it is not picklable."
-        ) from e
-    except pickle.PicklingError as e:
-        raise UnicornCacheError(
-            "Cannot cache component because it is not picklable."
+            f"Cannot cache component '{type(component)}' because it is not picklable: {type(e)}: {e}"
         ) from e
 
     return component
