@@ -13,7 +13,7 @@ class ExampleComponent(UnicornView):
         return "World"
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture()
 def component():
     return ExampleComponent(component_id="asdf1234", component_name="example")
 
@@ -80,6 +80,39 @@ def test_get_frontend_context_variables(component):
     frontend_context_variables_dict = orjson.loads(frontend_context_variables)
     assert len(frontend_context_variables_dict) == 1
     assert frontend_context_variables_dict.get("name") == "World"
+
+
+def test_get_frontend_context_variables_xss(component):
+    # Set component.name to a potential XSS attack
+    component.name = '<a><style>@keyframes x{}</style><a style="animation-name:x" onanimationend="alert(1)"></a>'
+
+    frontend_context_variables = component.get_frontend_context_variables()
+    frontend_context_variables_dict = orjson.loads(frontend_context_variables)
+    assert len(frontend_context_variables_dict) == 1
+    assert (
+        frontend_context_variables_dict.get("name")
+        == "&lt;a&gt;&lt;style&gt;@keyframes x{}&lt;/style&gt;&lt;a style=&quot;animation-name:x&quot; onanimationend=&quot;alert(1)&quot;&gt;&lt;/a&gt;"
+    )
+
+
+def test_get_frontend_context_variables_safe(component):
+    # Set component.name to a potential XSS attack
+    component.name = '<a><style>@keyframes x{}</style><a style="animation-name:x" onanimationend="alert(1)"></a>'
+
+    class Meta:
+        safe = [
+            "name",
+        ]
+
+    setattr(component, "Meta", Meta())
+
+    frontend_context_variables = component.get_frontend_context_variables()
+    frontend_context_variables_dict = orjson.loads(frontend_context_variables)
+    assert len(frontend_context_variables_dict) == 1
+    assert (
+        frontend_context_variables_dict.get("name")
+        == '<a><style>@keyframes x{}</style><a style="animation-name:x" onanimationend="alert(1)"></a>'
+    )
 
 
 def test_get_context_data(component):

@@ -6,7 +6,7 @@ from typing import Dict, List, Union
 from typing import get_type_hints as typing_get_type_hints
 
 from django.conf import settings
-from django.utils.html import _json_script_escapes, format_html
+from django.utils.html import _json_script_escapes
 from django.utils.safestring import mark_safe
 
 import shortuuid
