@@ -380,9 +380,9 @@ class UnicornView(TemplateView):
                 isinstance(frontend_context_variable_value, str)
                 and frontend_context_variable_key not in safe_fields
             ):
-                frontend_context_variables[
-                    frontend_context_variable_key
-                ] = conditional_escape(frontend_context_variable_value)
+                frontend_context_variables[frontend_context_variable_key] = escape(
+                    frontend_context_variable_value
+                )
 
         encoded_frontend_context_variables = serializer.dumps(
             frontend_context_variables
@@ -794,5 +794,5 @@ class UnicornView(TemplateView):
                 last_exception = e
 
         raise ComponentLoadError(
-            f"'{component_name}' component could not be loaded:\n    {last_exception}"
+            f"'{component_name}' component could not be loaded: {last_exception}"
         ) from last_exception
