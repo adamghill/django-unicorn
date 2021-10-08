@@ -1,5 +1,67 @@
 # Changelog
 
+## v0.36.0
+
+- Security fix: for CVE-2021-42053 to prevent XSS attacks (reported by [Jeffallan](https://github.com/Jeffallan)).
+
+** Breaking changes **
+
+- responses will be HTML encoded going forward (to explicitly opt-in to previous behavior use [safe](advanced.md#safe))
+
+[All changes since 0.35.3](https://github.com/adamghill/django-unicorn/compare/0.35.3...0.36.0).
+
+## v0.35.3
+
+- Fix: Handle when there are multiple apps sub-directories [273](https://github.com/adamghill/django-unicorn/pull/273) by [apoorvaeternity](https://github.com/apoorvaeternity).
+
+[All changes since 0.35.2](https://github.com/adamghill/django-unicorn/compare/0.35.2...0.35.3).
+
+## v0.35.2
+
+- Fix: Make sure `visible:elements` trigger as expected in more cases.
+- Prevent the visibile element from continuing to trigger if the visbility element method returns `False`.
+
+[All changes since 0.35.0](https://github.com/adamghill/django-unicorn/compare/0.35.0...0.35.2).
+
+## v0.35.0
+
+- [Trigger](advanced.md#trigger-model-update) an `input` or `blur` event for a model element from JavaScript
+- [Visibility](visibility.md) event with `unicorn:visible` attribute
+
+**Breaking changes**
+
+- `db_model` Python decorator, `unicorn:db`, `unicorn:field`, `unicorn:pk` template attributes are removed.
+
+[All changes since 0.34.0](https://github.com/adamghill/django-unicorn/compare/0.34.0...0.35.0).
+
+## v0.34.0
+
+- Initial prototype for component template [lifecycle events](templates.md#lifecycle-events).
+- Fix: elements after a child component would not get initialized [262](https://github.com/adamghill/django-unicorn/pull/262) by [joshiggins](https://github.com/joshiggins).
+- Fix: cache would fail in some instances [258](https://github.com/adamghill/django-unicorn/issues/258).
+
+[All changes since 0.33.0](https://github.com/adamghill/django-unicorn/compare/0.33.0...0.34.0).
+
+## v0.33.0
+
+- Fix: Allow comments, blank lines, or text at the top of component templates before the root element.
+
+[All changes since 0.32.0](https://github.com/adamghill/django-unicorn/compare/0.32.0...0.33.0).
+
+## v0.32.0
+
+- Add debounce support to actions.
+
+[All changes since 0.31.0](https://github.com/adamghill/django-unicorn/compare/0.31.0...0.32.0).
+
+## v0.31.0
+
+- Move JavaScript static assets into `unicorn` sub-folder
+- Determine correct path for installed app passed to `startunicorn` management command
+- Call `startapp` management command if app is not already installed
+
+[All changes since 0.30.0](https://github.com/adamghill/django-unicorn/compare/0.30.0...0.31.0).
+
 ## v0.30.0
 
 - Look in all `INSTALLED_APPS` for components instead of only in a `unicorn` app [210](https://github.com/adamghill/django-unicorn/issues/210)
