@@ -1,11 +1,12 @@
 import copy
 import logging
 from functools import wraps
-from typing import Dict
+from typing import Dict, Sequence
 
 from django.core.cache import caches
 from django.http import HttpRequest, JsonResponse
 from django.http.response import HttpResponseNotModified
+from django.utils.safestring import mark_safe
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_POST
 
@@ -125,6 +126,20 @@ def _process_component_request(
 
     # Re-load frontend context variables to deal with non-serializable properties
     component_request.data = orjson.loads(component.get_frontend_context_variables())
+
+    # Get set of attributes that should be marked as `safe`
+    safe_fields = []
+    if hasattr(component, "Meta") and hasattr(component.Meta, "safe"):
+        if isinstance(component.Meta.safe, Sequence):
+            for field_name in component.Meta.safe:
+                if field_name in component._attributes().keys():
+                    safe_fields.append(field_name)
+
+    # Mark safe attributes as such before rendering
+    for field_name in safe_fields:
+        value = getattr(component, field_name)
+        if isinstance(value, str):
+            setattr(component, field_name, mark_safe(value))
 
     # Send back all available data for reset or refresh actions
     updated_data = component_request.data

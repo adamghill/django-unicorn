@@ -1,5 +1,3 @@
-import orjson
-
 from tests.views.message.utils import post_and_get_response
 
 

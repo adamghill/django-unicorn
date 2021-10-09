@@ -23,6 +23,15 @@ class FakeComponentKwargs(UnicornView):
         self.hello = kwargs.get("test_kwarg")
 
 
+class FakeComponentKwargsWithHtmlEntity(UnicornView):
+    template_name = "templates/test_component_kwargs_with_html_entity.html"
+    hello = "world"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(**kwargs)
+        self.hello = kwargs.get("test_kwarg")
+
+
 class FakeComponentModel(UnicornView):
     template_name = "templates/test_component_model.html"
     model_id = None
@@ -55,7 +64,7 @@ def test_unicorn_render_kwarg():
     context = {}
     actual = unicorn_node.render(context)
 
-    assert "->tested!<-" in actual
+    assert "<b>tested!</b>" in actual
 
 
 def test_unicorn_render_context_variable():
@@ -67,7 +76,19 @@ def test_unicorn_render_context_variable():
     context = {"test_var": {"nested": "variable!"}}
     actual = unicorn_node.render(context)
 
-    assert "->variable!<-" in actual
+    assert "<b>variable!</b>" in actual
+
+
+def test_unicorn_render_with_invalid_html():
+    token = Token(
+        TokenType.TEXT,
+        "unicorn 'tests.templatetags.test_unicorn_render.FakeComponentKwargsWithHtmlEntity' test_kwarg=test_var.nested",
+    )
+    unicorn_node = unicorn(None, token)
+    context = {"test_var": {"nested": "variable!"}}
+    actual = unicorn_node.render(context)
+
+    assert "-&gt;variable!&lt;-" in actual
 
 
 def test_unicorn_render_parent(settings):

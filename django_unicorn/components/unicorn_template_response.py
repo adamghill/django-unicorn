@@ -1,10 +1,10 @@
 import logging
 
 from django.template.response import TemplateResponse
-from django.utils.safestring import mark_safe
 
 import orjson
 from bs4 import BeautifulSoup
+from bs4.dammit import EntitySubstitution
 from bs4.element import Tag
 from bs4.formatter import HTMLFormatter
 
@@ -21,6 +21,9 @@ class UnsortedAttributes(HTMLFormatter):
     """
     Prevent beautifulsoup from re-ordering attributes.
     """
+
+    def __init__(self):
+        super().__init__(entity_substitution=EntitySubstitution.substitute_html)
 
     def attributes(self, tag: Tag):
         for k, v in tag.attrs.items():
@@ -115,7 +118,6 @@ class UnicornTemplateResponse(TemplateResponse):
                     root_element.insert_after(t)
 
         rendered_template = UnicornTemplateResponse._desoupify(soup)
-        rendered_template = mark_safe(rendered_template)
         self.component.rendered(rendered_template)
 
         response.content = rendered_template

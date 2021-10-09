@@ -10,7 +10,6 @@ from django.core.cache import caches
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models import Model
 from django.http import HttpRequest
-from django.utils.html import conditional_escape
 from django.views.generic.base import TemplateView
 
 from cachetools.lru import LRUCache
@@ -341,14 +340,6 @@ class UnicornView(TemplateView):
                     if field_name in frontend_context_variables:
                         del frontend_context_variables[field_name]
 
-        safe_fields = []
-        # Keep a list of fields that are safe to not sanitize from `frontend_context_variables`
-        if hasattr(self, "Meta") and hasattr(self.Meta, "safe"):
-            if isinstance(self.Meta.safe, Sequence):
-                for field_name in self.Meta.safe:
-                    if field_name in frontend_context_variables:
-                        safe_fields.append(field_name)
-
         # Add cleaned values to `frontend_content_variables` based on the widget in form's fields
         form = self._get_form(attributes)
 
@@ -371,18 +362,6 @@ class UnicornView(TemplateView):
                             or frontend_context_variables[key].strip() != value
                         ):
                             frontend_context_variables[key] = value
-
-        for (
-            frontend_context_variable_key,
-            frontend_context_variable_value,
-        ) in frontend_context_variables.items():
-            if (
-                isinstance(frontend_context_variable_value, str)
-                and frontend_context_variable_key not in safe_fields
-            ):
-                frontend_context_variables[frontend_context_variable_key] = escape(
-                    frontend_context_variable_value
-                )
 
         encoded_frontend_context_variables = serializer.dumps(
             frontend_context_variables
