@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.36.1
+
+- More verbose error messages when components can't be loaded ([nerdoc](https://github.com/nerdoc)).
+- More complete handling to prevent XSS attacks.
+
+[All changes since 0.36.0](https://github.com/adamghill/django-unicorn/compare/0.36.0...0.36.1).
+
 ## v0.36.0
 
 - Security fix: for CVE-2021-42053 to prevent XSS attacks (reported by [Jeffallan](https://github.com/Jeffallan)).
