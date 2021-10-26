@@ -195,9 +195,10 @@ export class Element {
 
   /**
    * Handle loading for the element.
+   * @param {bool} revert Whether or not the revert the loading class.
    */
-  handleLoading() {
-    this.handleInterfacer("loading");
+  handleLoading(revert) {
+    this.handleInterfacer("loading", revert);
   }
 
   /**

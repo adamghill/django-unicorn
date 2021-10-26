@@ -1,4 +1,6 @@
 import test from "ava";
+import fetchMock from "fetch-mock";
+import { send } from "../../../django_unicorn/static/unicorn/js/messageSender.js";
 import { getComponent, getElement } from "../utils.js";
 
 test("click", (t) => {
@@ -311,6 +313,59 @@ test("event action loading class", (t) => {
   el.click();
   t.is(el.classList.length, 1);
   t.is(el.classList[0], "loading");
+});
+
+test.cb("event action loading attr 500 reverts", (t) => {
+  const html = `
+<div unicorn:id="5jypjiyb" unicorn:name="text-inputs" unicorn:checksum="GXzew3Km">
+  <button unicorn:click='test()' u:loading.attr="disabled"></button>
+</div>`;
+  const component = getComponent(html);
+
+  t.is(component.attachedEventTypes.length, 1);
+  t.is(component.actionEvents.click.length, 1);
+
+  const { el } = component.actionEvents.click[0].element;
+  t.true(typeof el.attributes.disabled === "undefined");
+
+  el.click();
+  t.false(typeof el.attributes.disabled === "undefined");
+
+  // mock the fetch
+  global.fetch = fetchMock.sandbox().mock().post("/test/text-inputs", 500);
+
+  send(component, (_, __, err) => {
+    t.true(typeof el.attributes.disabled === "undefined");
+    fetchMock.reset();
+    t.end();
+  });
+});
+
+test.cb("event action loading class 500 reverts", (t) => {
+  const html = `
+<div unicorn:id="5jypjiyb" unicorn:name="text-inputs" unicorn:checksum="GXzew3Km">
+  <button unicorn:click='test()' u:loading.class="loading-class"></button>
+</div>`;
+  const component = getComponent(html);
+
+  t.is(component.attachedEventTypes.length, 1);
+  t.is(component.actionEvents.click.length, 1);
+
+  const { el } = component.actionEvents.click[0].element;
+  t.is(el.classList.length, 0);
+
+  el.click();
+  t.is(el.classList.length, 1);
+  t.is(el.classList[0], "loading-class");
+
+  // mock the fetch
+  global.fetch = fetchMock.sandbox().mock().post("/test/text-inputs", 500);
+
+  send(component, (_, __, err) => {
+    t.is(el.classList.length, 0);
+    fetchMock.reset();
+    t.end();
+  });
 });
 
 test("event action loading remove class", (t) => {
