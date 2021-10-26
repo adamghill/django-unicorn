@@ -50,6 +50,19 @@ export function send(component, callback) {
         return response.json();
       }
 
+      // Revert targeted loading elements, loading states,
+      // and dirty states when the response is not ok (includes 304)
+      component.loadingEls.forEach((loadingElement) => {
+        if (loadingElement.loading.hide) {
+          loadingElement.show();
+        } else if (loadingElement.loading.show) {
+          loadingElement.hide();
+        }
+
+        loadingElement.handleLoading(true);
+        loadingElement.handleDirty(true);
+      });
+
       // HTTP status code of 304 is `Not Modified`. This null gets caught in the next promise
       // and stops any more processing.
       if (response.status === 304) {
