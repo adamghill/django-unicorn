@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.37.0
+
+- Revert loading and dirty elements when the server returns a 304 (not modified) or a 500 error.
+
+[All changes since 0.36.1](https://github.com/adamghill/django-unicorn/compare/0.36.1...0.37.0).
+
 ## v0.36.1
 
 - More verbose error messages when components can't be loaded ([nerdoc](https://github.com/nerdoc)).
