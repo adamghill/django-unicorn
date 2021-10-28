@@ -1,0 +1,9 @@
+<td>
+  {% if is_editing %}
+  <!-- on_save etc in the ActionsView context will be bound methods of the RowView instance -->
+  <button unicorn:click="on_save">Save</button>
+  <button unicorn:click.discard="on_cancel">Cancel</button>
+  {% else %}
+  <button unicorn:click="on_edit">Edit</button>
+  {% endif %}
+</td>
