@@ -17,7 +17,7 @@ keywords = ["django", "python", "javascript", "fullstack"]
 python = "^3.6"
 django = ">=2.2"
 beautifulsoup4 = ">=4.8.0"
-orjson = "^3.2.1"
+orjson = "^3.6.0"
 shortuuid = "^1.0.1"
 cachetools = "^4.1.1"
 dataclasses = {version = "^0.8.0", python = "<3.7"}
