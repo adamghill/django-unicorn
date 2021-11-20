@@ -295,7 +295,7 @@ class UnicornView(TemplateView):
         """
         Renders a UnicornView component with the public properties available. Delegates to a
         UnicornTemplateResponse to actually render a response.
- 
+
         Args:
             param init_js: Whether or not to include the Javascript required to initialize the component.
         """
@@ -333,12 +333,19 @@ class UnicornView(TemplateView):
         attributes = self._attributes()
         frontend_context_variables.update(attributes)
 
+        exclude_field_attributes = ()
+
         # Remove any field in `javascript_exclude` from `frontend_context_variables`
         if hasattr(self, "Meta") and hasattr(self.Meta, "javascript_exclude"):
             if isinstance(self.Meta.javascript_exclude, Sequence):
                 for field_name in self.Meta.javascript_exclude:
-                    if field_name in frontend_context_variables:
-                        del frontend_context_variables[field_name]
+                    if "." in field_name:
+                        # Because the dictionary value could be an object, we can't just remove the attribute, so
+                        # store field attributes for later to remove them from the serialized dictionary
+                        exclude_field_attributes.append(field_name)
+                    else:
+                        if field_name in frontend_context_variables:
+                            del frontend_context_variables[field_name]
 
         # Add cleaned values to `frontend_content_variables` based on the widget in form's fields
         form = self._get_form(attributes)
@@ -364,7 +371,8 @@ class UnicornView(TemplateView):
                             frontend_context_variables[key] = value
 
         encoded_frontend_context_variables = serializer.dumps(
-            frontend_context_variables
+            frontend_context_variables,
+            exclude_field_attributes=exclude_field_attributes,
         )
 
         return encoded_frontend_context_variables
@@ -653,7 +661,7 @@ class UnicornView(TemplateView):
                 to be differentiated. Optional.
             param parent: The parent component of the current component.
             param kwargs: Keyword arguments for the component passed in from the template. Defaults to `{}`.
-        
+
         Returns:
             Instantiated `UnicornView` component.
             Raises `ComponentLoadError` if the component could not be loaded.

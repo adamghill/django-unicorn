@@ -1,7 +1,7 @@
 import logging
 from decimal import Decimal
 from functools import lru_cache
-from typing import Dict, List
+from typing import Dict, List, Tuple, Any
 
 from django.core.serializers import serialize
 from django.db.models import (
@@ -141,7 +141,7 @@ def _json_serializer(obj):
     raise TypeError
 
 
-def _fix_floats(current: Dict, data: Dict = None, paths: List = []) -> None:
+def _fix_floats(current: Dict, data: Dict = None, paths: List = None) -> None:
     """
     Recursively change any Python floats to a string so that JavaScript
     won't convert the float to an integer when deserializing.
@@ -152,6 +152,9 @@ def _fix_floats(current: Dict, data: Dict = None, paths: List = []) -> None:
 
     if data is None:
         data = current
+
+    if paths is None:
+        paths = []
 
     if isinstance(current, dict):
         for key, val in current.items():
@@ -176,32 +179,76 @@ def _fix_floats(current: Dict, data: Dict = None, paths: List = []) -> None:
 
 
 @lru_cache(maxsize=128, typed=True)
-def _dumps(serialized_data):
+def _dumps(
+    serialized_data: bytes, exclude_field_attributes: Tuple[str] = None
+) -> bytes:
+    """
+    Dump serialized data with custom massaging to fix floats and remove specific keys as needed.
+    """
+
     dict_data = orjson.loads(serialized_data)
     _fix_floats(dict_data)
+    _exclude_field_attributes(dict_data, exclude_field_attributes)
 
-    dumped_data = orjson.dumps(dict_data).decode("utf-8")
+    dumped_data = orjson.dumps(dict_data)
     return dumped_data
 
 
-def dumps(data: dict, fix_floats: bool = True) -> str:
+def _exclude_field_attributes(
+    dict_data: Dict[Any, Any], exclude_field_attributes: Tuple[str] = None
+) -> None:
+    """
+    Remove the field attribute from `dict_data`. Handles nested attributes with a dot.
+
+    Example:
+    _exclude_field_attributes({"1": {"2": {"3": "4"}}}, ("1.2.3",)) == {"1": {"2": {}}}
+    """
+
+    if exclude_field_attributes:
+        for field in exclude_field_attributes:
+            field_splits = field.split(".")
+
+            if len(field_splits) > 2:
+                remaining_field_attributes = field[field.index(".") + 1 :]
+                remaining_dict_data = dict_data[field_splits[0]]
+
+                return _exclude_field_attributes(
+                    remaining_dict_data, (remaining_field_attributes,)
+                )
+            elif len(field_splits) == 2:
+                (field_name, field_attr) = field_splits
+                del dict_data[field_name][field_attr]
+
+
+def dumps(
+    data: Dict, fix_floats: bool = True, exclude_field_attributes: Tuple[str] = None
+) -> str:
     """
     Converts the passed-in dictionary to a string representation.
 
     Handles the following objects: dataclass, datetime, enum, float, int, numpy, str, uuid,
-    Django Model, Django QuerySet, any object with `to_json` method.
+    Django Model, Django QuerySet, Pydantic models (`PydanticBaseModel`), any object with `to_json` method.
 
     Args:
         param fix_floats: Whether any floats should be converted to strings. Defaults to `True`,
             but will be faster without it.
-    
-    Returns a string which deviates from `orjson.dumps`, but seems more useful.
+        param exclude_field_attributes: Tuple of strings with field attributes to remove, i.e. "1.2"
+            to remove the key `2` from `{"1": {"2": "3"}}`
+
+    Returns a `str` instead of `bytes` (which deviates from `orjson.dumps`), but seems more useful.
     """
 
     serialized_data = orjson.dumps(data, default=_json_serializer)
 
     if fix_floats:
-        return _dumps(serialized_data)
+        # Handle excluded field attributes in `_dumps` to reduce the amount of serialization/deserialization needed
+        serialized_data = _dumps(
+            serialized_data, exclude_field_attributes=exclude_field_attributes
+        )
+    elif exclude_field_attributes:
+        dict_data = orjson.loads(serialized_data)
+        _exclude_field_attributes(dict_data, exclude_field_attributes)
+        serialized_data = orjson.dumps(dict_data)
 
     return serialized_data.decode("utf-8")
 

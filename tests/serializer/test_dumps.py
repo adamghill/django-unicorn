@@ -361,3 +361,74 @@ def test_pydantic():
     actual = serializer.dumps(Book())
 
     assert expected == actual
+
+
+def test_exclude_field_attributes():
+    expected = '{"book":{"title":"The Grapes of Wrath"}}'
+
+    actual = serializer.dumps(
+        {"book": {"title": "The Grapes of Wrath", "author": "John Steinbeck"}},
+        exclude_field_attributes=("book.author",),
+    )
+
+    assert expected == actual
+
+
+def test_exclude_field_attributes_no_fix_floats():
+    expected = '{"book":{"title":"The Grapes of Wrath"}}'
+
+    actual = serializer.dumps(
+        {"book": {"title": "The Grapes of Wrath", "author": "John Steinbeck"}},
+        fix_floats=False,
+        exclude_field_attributes=("book.author",),
+    )
+
+    assert expected == actual
+
+
+def test_exclude_field_attributes_nested():
+    expected = '{"classic":{"book":{"title":"The Grapes of Wrath"}}}'
+
+    actual = serializer.dumps(
+        {
+            "classic": {
+                "book": {"title": "The Grapes of Wrath", "author": "John Steinbeck"}
+            }
+        },
+        exclude_field_attributes=("classic.book.author",),
+    )
+
+    assert expected == actual
+
+
+def test_exclude_field_attributes_invalid_field_attribute():
+    expected = '{"book":{"title":"The Grapes of Wrath","author":"John Steinbeck"}}'
+
+    actual = serializer.dumps(
+        {"book": {"title": "The Grapes of Wrath", "author": "John Steinbeck"}},
+        exclude_field_attributes=("blob"),
+    )
+
+    assert expected == actual
+
+
+def test_exclude_field_attributes_empty_string():
+    expected = '{"book":{"title":"The Grapes of Wrath","author":"John Steinbeck"}}'
+
+    actual = serializer.dumps(
+        {"book": {"title": "The Grapes of Wrath", "author": "John Steinbeck"}},
+        exclude_field_attributes=(""),
+    )
+
+    assert expected == actual
+
+
+def test_exclude_field_attributes_none():
+    expected = '{"book":{"title":"The Grapes of Wrath","author":"John Steinbeck"}}'
+
+    actual = serializer.dumps(
+        {"book": {"title": "The Grapes of Wrath", "author": "John Steinbeck"}},
+        exclude_field_attributes=None,
+    )
+
+    assert expected == actual
