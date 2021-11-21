@@ -1,7 +1,7 @@
 import logging
 from decimal import Decimal
 from functools import lru_cache
-from typing import Dict, List, Tuple, Any
+from typing import Any, Dict, List, Tuple
 
 from django.core.serializers import serialize
 from django.db.models import (
