@@ -8,8 +8,14 @@ def pytest_configure():
         {
             "BACKEND": "django.template.backends.django.DjangoTemplates",
             "DIRS": ["tests"],
+            "OPTIONS": {
+                "context_processors": [
+                    "django.template.context_processors.request",
+                ],
+            },
         }
     ]
+
     databases = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
@@ -17,6 +23,7 @@ def pytest_configure():
     }
 
     installed_apps = [
+        "django_unicorn",
         "example.coffee.apps.Config",
         "example.books.apps.Config",
     ]
@@ -37,7 +44,7 @@ def pytest_configure():
     settings.configure(
         SECRET_KEY="this-is-a-secret",
         TEMPLATES=templates,
-        ROOT_URLCONF="django_unicorn.urls",
+        ROOT_URLCONF="tests.urls",
         DATABASES=databases,
         INSTALLED_APPS=installed_apps,
         UNIT_TEST=True,

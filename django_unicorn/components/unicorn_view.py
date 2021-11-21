@@ -291,7 +291,7 @@ class UnicornView(TemplateView):
         pass
 
     @timed
-    def render(self, init_js=False) -> str:
+    def render(self, init_js=False, extra_context=None) -> str:
         """
         Renders a UnicornView component with the public properties available. Delegates to a
         UnicornTemplateResponse to actually render a response.
@@ -299,6 +299,9 @@ class UnicornView(TemplateView):
         Args:
             param init_js: Whether or not to include the Javascript required to initialize the component.
         """
+
+        if extra_context is not None:
+            self.extra_context = extra_context
 
         response = self.render_to_response(
             context=self.get_context_data(),

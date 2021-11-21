@@ -9,6 +9,10 @@
   <input unicorn:model="name" type="text" id="name" unicorn:key="key1">
 
   Hello, {{ name|default:'World' }}!
+
+  <div>
+    Request path context variable: '{{ request.path }}'
+  </div>
 </div>
 
 <script type="application/javascript">
