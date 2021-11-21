@@ -14,7 +14,12 @@ def test_message_call_method(client):
         client,
         url="/message/tests.views.fake_components.FakeComponent",
         data=data,
-        action_queue=[{"payload": {"name": "test_method"}, "type": "callMethod",}],
+        action_queue=[
+            {
+                "payload": {"name": "test_method"},
+                "type": "callMethod",
+            }
+        ],
     )
 
     assert response["data"].get("method_count") == 1
@@ -23,7 +28,12 @@ def test_message_call_method(client):
 def test_message_call_method_redirect(client):
     data = {}
     message = {
-        "actionQueue": [{"payload": {"name": "test_redirect"}, "type": "callMethod",}],
+        "actionQueue": [
+            {
+                "payload": {"name": "test_redirect"},
+                "type": "callMethod",
+            }
+        ],
         "data": data,
         "checksum": generate_checksum(orjson.dumps(data)),
         "id": shortuuid.uuid()[:8],
@@ -48,7 +58,10 @@ def test_message_call_method_refresh_redirect(client):
     data = {}
     message = {
         "actionQueue": [
-            {"payload": {"name": "test_refresh_redirect"}, "type": "callMethod",}
+            {
+                "payload": {"name": "test_refresh_redirect"},
+                "type": "callMethod",
+            }
         ],
         "data": data,
         "checksum": generate_checksum(orjson.dumps(data)),
@@ -75,7 +88,10 @@ def test_message_call_method_hash_update(client):
     data = {}
     message = {
         "actionQueue": [
-            {"payload": {"name": "test_hash_update"}, "type": "callMethod",}
+            {
+                "payload": {"name": "test_hash_update"},
+                "type": "callMethod",
+            }
         ],
         "data": data,
         "checksum": generate_checksum(orjson.dumps(data)),
@@ -99,7 +115,10 @@ def test_message_call_method_return_value(client):
     data = {}
     message = {
         "actionQueue": [
-            {"payload": {"name": "test_return_value"}, "type": "callMethod",}
+            {
+                "payload": {"name": "test_return_value"},
+                "type": "callMethod",
+            }
         ],
         "data": data,
         "checksum": generate_checksum(orjson.dumps(data)),
@@ -127,7 +146,10 @@ def test_message_call_method_poll_update(client):
     data = {}
     message = {
         "actionQueue": [
-            {"payload": {"name": "test_poll_update"}, "type": "callMethod",}
+            {
+                "payload": {"name": "test_poll_update"},
+                "type": "callMethod",
+            }
         ],
         "data": data,
         "checksum": generate_checksum(orjson.dumps(data)),
@@ -153,7 +175,12 @@ def test_message_call_method_poll_update(client):
 def test_message_call_method_setter(client):
     data = {"method_count": 0}
     message = {
-        "actionQueue": [{"payload": {"name": "method_count=2"}, "type": "callMethod",}],
+        "actionQueue": [
+            {
+                "payload": {"name": "method_count=2"},
+                "type": "callMethod",
+            }
+        ],
         "data": data,
         "checksum": generate_checksum(orjson.dumps(data)),
         "id": shortuuid.uuid()[:8],
@@ -175,7 +202,10 @@ def test_message_call_method_nested_setter(client):
     data = {"nested": {"check": True}}
     message = {
         "actionQueue": [
-            {"payload": {"name": "nested.check=False"}, "type": "callMethod",}
+            {
+                "payload": {"name": "nested.check=False"},
+                "type": "callMethod",
+            }
         ],
         "data": data,
         "checksum": generate_checksum(orjson.dumps(data)),
@@ -198,7 +228,10 @@ def test_message_call_method_multiple_nested_setter(client):
     data = {"nested": {"another": {"bool": True}}}
     message = {
         "actionQueue": [
-            {"payload": {"name": "nested.another.bool=False"}, "type": "callMethod",}
+            {
+                "payload": {"name": "nested.another.bool=False"},
+                "type": "callMethod",
+            }
         ],
         "data": data,
         "checksum": generate_checksum(orjson.dumps(data)),
@@ -221,7 +254,10 @@ def test_message_call_method_toggle(client):
     data = {"check": False}
     message = {
         "actionQueue": [
-            {"payload": {"name": "$toggle('check')"}, "type": "callMethod",}
+            {
+                "payload": {"name": "$toggle('check')"},
+                "type": "callMethod",
+            }
         ],
         "data": data,
         "checksum": generate_checksum(orjson.dumps(data)),
@@ -244,7 +280,10 @@ def test_message_call_method_nested_toggle(client):
     data = {"nested": {"check": False}}
     message = {
         "actionQueue": [
-            {"payload": {"name": "$toggle('nested.check')"}, "type": "callMethod",}
+            {
+                "payload": {"name": "$toggle('nested.check')"},
+                "type": "callMethod",
+            }
         ],
         "data": data,
         "checksum": generate_checksum(orjson.dumps(data)),
@@ -267,7 +306,10 @@ def test_message_call_method_args(client):
     data = {"method_count": 0}
     message = {
         "actionQueue": [
-            {"payload": {"name": "test_method_args(3)"}, "type": "callMethod",}
+            {
+                "payload": {"name": "test_method_args(3)"},
+                "type": "callMethod",
+            }
         ],
         "data": data,
         "checksum": generate_checksum(orjson.dumps(data)),
@@ -290,7 +332,10 @@ def test_message_call_method_kwargs(client):
     data = {"method_count": 0}
     message = {
         "actionQueue": [
-            {"payload": {"name": "test_method_kwargs(count=99)"}, "type": "callMethod",}
+            {
+                "payload": {"name": "test_method_kwargs(count=99)"},
+                "type": "callMethod",
+            }
         ],
         "data": data,
         "checksum": generate_checksum(orjson.dumps(data)),
@@ -313,7 +358,10 @@ def test_message_call_method_no_validation(client):
     data = {}
     message = {
         "actionQueue": [
-            {"payload": {"name": "set_text_no_validation"}, "type": "callMethod",}
+            {
+                "payload": {"name": "set_text_no_validation"},
+                "type": "callMethod",
+            }
         ],
         "data": data,
         "checksum": generate_checksum(orjson.dumps(data)),
@@ -336,7 +384,10 @@ def test_message_call_method_validation(client):
     data = {}
     message = {
         "actionQueue": [
-            {"payload": {"name": "set_text_with_validation"}, "type": "callMethod",}
+            {
+                "payload": {"name": "set_text_with_validation"},
+                "type": "callMethod",
+            }
         ],
         "data": data,
         "checksum": generate_checksum(orjson.dumps(data)),
@@ -363,7 +414,10 @@ def test_message_call_method_reset(client):
     message = {
         "actionQueue": [
             {"payload": {"name": "method_count=2"}, "type": "callMethod"},
-            {"payload": {"name": "$reset"}, "type": "callMethod",},
+            {
+                "payload": {"name": "$reset"},
+                "type": "callMethod",
+            },
         ],
         "data": data,
         "checksum": generate_checksum(orjson.dumps(data)),
@@ -388,7 +442,12 @@ def test_message_call_method_reset(client):
 def test_message_call_method_refresh(client):
     data = {"method_count": 1}
     message = {
-        "actionQueue": [{"payload": {"name": "$refresh"}, "type": "callMethod",},],
+        "actionQueue": [
+            {
+                "payload": {"name": "$refresh"},
+                "type": "callMethod",
+            },
+        ],
         "data": data,
         "checksum": generate_checksum(orjson.dumps(data)),
         "id": shortuuid.uuid()[:8],
@@ -420,7 +479,12 @@ def test_message_call_method_caches_disabled(client, monkeypatch, settings):
         client,
         url="/message/tests.views.fake_components.FakeComponent",
         data={"method_count": 0},
-        action_queue=[{"payload": {"name": "test_method"}, "type": "callMethod",}],
+        action_queue=[
+            {
+                "payload": {"name": "test_method"},
+                "type": "callMethod",
+            }
+        ],
         component_id=component_id,
     )
 
@@ -451,7 +515,12 @@ def test_message_call_method_module_cache_disabled(client, monkeypatch, settings
         client,
         url="/message/tests.views.fake_components.FakeComponent",
         data={"method_count": 0},
-        action_queue=[{"payload": {"name": "test_method"}, "type": "callMethod",}],
+        action_queue=[
+            {
+                "payload": {"name": "test_method"},
+                "type": "callMethod",
+            }
+        ],
         component_id=component_id,
     )
 
@@ -481,7 +550,12 @@ def test_message_call_method_cache_backend_dummy(client, monkeypatch, settings):
         client,
         url="/message/tests.views.fake_components.FakeComponent",
         data={"method_count": 0},
-        action_queue=[{"payload": {"name": "test_method"}, "type": "callMethod",}],
+        action_queue=[
+            {
+                "payload": {"name": "test_method"},
+                "type": "callMethod",
+            }
+        ],
         component_id=component_id,
     )
 

@@ -33,7 +33,9 @@ def generate_checksum(data: Union[str, bytes]) -> str:
         data_bytes = data
 
     checksum = hmac.new(
-        str.encode(settings.SECRET_KEY), data_bytes, digestmod="sha256",
+        str.encode(settings.SECRET_KEY),
+        data_bytes,
+        digestmod="sha256",
     ).hexdigest()
     checksum = shortuuid.uuid(checksum)[:8]
 

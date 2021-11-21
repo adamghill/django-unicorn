@@ -10,7 +10,11 @@ def pytest_configure():
             "DIRS": ["tests"],
         }
     ]
-    databases = {"default": {"ENGINE": "django.db.backends.sqlite3",}}
+    databases = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+        }
+    }
 
     installed_apps = [
         "example.coffee.apps.Config",

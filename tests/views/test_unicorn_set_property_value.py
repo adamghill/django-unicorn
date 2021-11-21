@@ -73,7 +73,11 @@ def test_set_property_value_foreign_key():
         component,
         "flavors.0.parent",
         parent.pk,
-        {"flavors": [{"name": flavor.name, "parent": None},]},
+        {
+            "flavors": [
+                {"name": flavor.name, "parent": None},
+            ]
+        },
     )
 
     assert component.flavors[0].parent_id == parent.pk

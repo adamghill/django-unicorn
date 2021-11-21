@@ -28,7 +28,9 @@ logger = logging.getLogger(__name__)
 
 @timed
 def set_property_from_data(
-    component_or_field: Union[UnicornView, UnicornField, Model], name: str, value: Any,
+    component_or_field: Union[UnicornView, UnicornField, Model],
+    name: str,
+    value: Any,
 ) -> None:
     """
     Sets properties on the component based on passed-in data.
@@ -43,8 +45,8 @@ def set_property_from_data(
         return
 
     field = getattr(component_or_field, name)
-    component_field_is_model_or_unicorn_field = _is_component_field_model_or_unicorn_field(
-        component_or_field, name
+    component_field_is_model_or_unicorn_field = (
+        _is_component_field_model_or_unicorn_field(component_or_field, name)
     )
 
     # UnicornField and Models are always a dictionary (can be nested)
@@ -90,7 +92,8 @@ def set_property_from_data(
 
 @timed
 def _is_component_field_model_or_unicorn_field(
-    component_or_field: Union[UnicornView, UnicornField, Model], name: str,
+    component_or_field: Union[UnicornView, UnicornField, Model],
+    name: str,
 ) -> bool:
     """
     Determines whether a component's field is a Django `Model` or `UnicornField` either

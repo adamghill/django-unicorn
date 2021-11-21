@@ -121,7 +121,12 @@ def test_get_locations_installed_app_with_app_config(settings):
         "example.coffee.apps.Config",
     ]
 
-    expected = [("HelloWorldView", "example.coffee.components.hello_world",)]
+    expected = [
+        (
+            "HelloWorldView",
+            "example.coffee.components.hello_world",
+        )
+    ]
     actual = get_locations("hello-world")
 
     assert expected == actual

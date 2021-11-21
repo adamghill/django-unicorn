@@ -79,9 +79,15 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
-    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",},
-    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",},
-    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",},
+    {
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
+    },
 ]
 
 
@@ -97,24 +103,45 @@ STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
 
-UNICORN = {"SERIAL": {"ENABLED": True, "TIMEOUT": 5,}, "CACHE_ALIAS": "default"}
+UNICORN = {
+    "SERIAL": {
+        "ENABLED": True,
+        "TIMEOUT": 5,
+    },
+    "CACHE_ALIAS": "default",
+}
 
 
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
     "handlers": {
-        "console": {"class": "logging.StreamHandler",},
-        "null": {"class": "logging.NullHandler",},
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+        "null": {
+            "class": "logging.NullHandler",
+        },
     },
-    "root": {"handlers": ["console"], "level": "WARNING",},
+    "root": {
+        "handlers": ["console"],
+        "level": "WARNING",
+    },
     "loggers": {
         "django": {
             "handlers": ["console"],
             "level": os.getenv("DJANGO_LOG_LEVEL", "INFO"),
             "propagate": False,
         },
-        "django.server": {"handlers": ["null"], "level": "INFO", "propagate": False,},
-        "profile": {"handlers": ["console"], "level": "INFO", "propagate": False,},
+        "django.server": {
+            "handlers": ["null"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "profile": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
     },
 }

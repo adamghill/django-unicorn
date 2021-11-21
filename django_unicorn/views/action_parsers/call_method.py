@@ -49,7 +49,10 @@ def handle(component_request: ComponentRequest, component: UnicornView, payload:
             )
 
             # Set component properties based on request data
-            for (property_name, property_value,) in component_request.data.items():
+            for (
+                property_name,
+                property_value,
+            ) in component_request.data.items():
                 set_property_from_data(component, property_name, property_value)
             component.hydrate()
 

@@ -57,7 +57,12 @@ def test_message_single(client, settings):
     data = {"counter": 0}
     component_id = shortuuid.uuid()[:8]
     message = {
-        "actionQueue": [{"payload": {"name": "slow_action"}, "type": "callMethod",}],
+        "actionQueue": [
+            {
+                "payload": {"name": "slow_action"},
+                "type": "callMethod",
+            }
+        ],
         "data": data,
         "checksum": generate_checksum(orjson.dumps(data)),
         "id": component_id,
@@ -81,7 +86,12 @@ def test_message_two(client, settings):
     data = {"counter": 0}
     component_id = shortuuid.uuid()[:8]
     message = {
-        "actionQueue": [{"payload": {"name": "slow_action"}, "type": "callMethod",}],
+        "actionQueue": [
+            {
+                "payload": {"name": "slow_action"},
+                "type": "callMethod",
+            }
+        ],
         "data": data,
         "checksum": generate_checksum(orjson.dumps(data)),
         "id": component_id,
@@ -108,7 +118,12 @@ def test_message_multiple(client, settings):
     data = {"counter": 0}
     component_id = shortuuid.uuid()[:8]
     message = {
-        "actionQueue": [{"payload": {"name": "slow_action"}, "type": "callMethod",}],
+        "actionQueue": [
+            {
+                "payload": {"name": "slow_action"},
+                "type": "callMethod",
+            }
+        ],
         "data": data,
         "checksum": generate_checksum(orjson.dumps(data)),
         "id": component_id,
@@ -136,7 +151,12 @@ def test_message_multiple_return_is_correct(client, settings):
     data = {"counter": 0}
     component_id = shortuuid.uuid()[:8]
     message = {
-        "actionQueue": [{"payload": {"name": "slow_action"}, "type": "callMethod",}],
+        "actionQueue": [
+            {
+                "payload": {"name": "slow_action"},
+                "type": "callMethod",
+            }
+        ],
         "data": data,
         "checksum": generate_checksum(orjson.dumps(data)),
         "id": component_id,
@@ -170,7 +190,12 @@ def test_message_multiple_with_updated_data(client, settings):
     data = {"counter": 0}
     component_id = shortuuid.uuid()[:8]
     message = {
-        "actionQueue": [{"payload": {"name": "slow_action"}, "type": "callMethod",}],
+        "actionQueue": [
+            {
+                "payload": {"name": "slow_action"},
+                "type": "callMethod",
+            }
+        ],
         "data": data,
         "checksum": generate_checksum(orjson.dumps(data)),
         "id": component_id,
@@ -207,7 +232,12 @@ def test_message_second_request_not_queued_because_after_first(client, settings)
     data = {"counter": 0}
     component_id = shortuuid.uuid()[:8]
     message = {
-        "actionQueue": [{"payload": {"name": "slow_action"}, "type": "callMethod",}],
+        "actionQueue": [
+            {
+                "payload": {"name": "slow_action"},
+                "type": "callMethod",
+            }
+        ],
         "data": data,
         "checksum": generate_checksum(orjson.dumps(data)),
         "id": component_id,
@@ -234,7 +264,12 @@ def test_message_second_request_not_queued_because_serial_timeout(client, settin
     data = {"counter": 0}
     component_id = shortuuid.uuid()[:8]
     message = {
-        "actionQueue": [{"payload": {"name": "slow_action"}, "type": "callMethod",}],
+        "actionQueue": [
+            {
+                "payload": {"name": "slow_action"},
+                "type": "callMethod",
+            }
+        ],
         "data": data,
         "checksum": generate_checksum(orjson.dumps(data)),
         "id": component_id,
@@ -261,7 +296,12 @@ def test_message_second_request_not_queued_because_serial_disabled(client, setti
     data = {"counter": 0}
     component_id = shortuuid.uuid()[:8]
     message = {
-        "actionQueue": [{"payload": {"name": "slow_action"}, "type": "callMethod",}],
+        "actionQueue": [
+            {
+                "payload": {"name": "slow_action"},
+                "type": "callMethod",
+            }
+        ],
         "data": data,
         "checksum": generate_checksum(orjson.dumps(data)),
         "id": component_id,
@@ -291,7 +331,12 @@ def test_message_second_request_not_queued_because_dummy_cache(client, settings)
     data = {"counter": 0}
     component_id = shortuuid.uuid()[:8]
     message = {
-        "actionQueue": [{"payload": {"name": "slow_action"}, "type": "callMethod",}],
+        "actionQueue": [
+            {
+                "payload": {"name": "slow_action"},
+                "type": "callMethod",
+            }
+        ],
         "data": data,
         "checksum": generate_checksum(orjson.dumps(data)),
         "id": component_id,

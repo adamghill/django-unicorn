@@ -26,7 +26,10 @@ def test_set_property_value_str():
     data = {"string": "property_view_updated"}
 
     set_property_value(
-        component, "string", string, data,
+        component,
+        "string",
+        string,
+        data,
     )
 
     assert component.string == string
@@ -67,7 +70,10 @@ def test_set_property_value_model():
     data = {"model": {}}
 
     set_property_value(
-        component, "model", model, data,
+        component,
+        "model",
+        model,
+        data,
     )
 
     assert component.model.name == model.name
@@ -87,7 +93,10 @@ def test_set_property_value_queryset():
     data = {"queryset": []}
 
     set_property_value(
-        component, "queryset", queryset, data,
+        component,
+        "queryset",
+        queryset,
+        data,
     )
 
     assert len(queryset) == 2
@@ -109,7 +118,10 @@ def test_set_property_value_many_to_many_is_referenced():
     data = {"model": {}}
 
     set_property_value(
-        component, "model.taste_set", [taste.pk], data,
+        component,
+        "model.taste_set",
+        [taste.pk],
+        data,
     )
 
     assert data["model"]["taste_set"] == [taste.pk]
@@ -131,7 +143,10 @@ def test_set_property_value_many_to_many_references_model():
     data = {"taste": {}}
 
     set_property_value(
-        component, "taste.flavor", [flavor.pk], data,
+        component,
+        "taste.flavor",
+        [flavor.pk],
+        data,
     )
 
     assert data["taste"]["flavor"] == [flavor.pk]

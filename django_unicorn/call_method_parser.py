@@ -68,7 +68,7 @@ def eval_value(value):
     """
     Uses `ast.literal_eval` to parse strings into an appropriate Python primative.
 
-    Also returns an appropriate object for strings that look like they represent datetime, 
+    Also returns an appropriate object for strings that look like they represent datetime,
     date, time, duration, or UUID.
     """
 
@@ -92,7 +92,7 @@ def eval_value(value):
 def parse_kwarg(kwarg: str, raise_if_unparseable=False) -> Dict[str, Any]:
     """
     Parses a potential kwarg as a string into a dictionary.
-    
+
     Example:
         `parse_kwarg("test='1'")` == `{"test": "1"}`
 

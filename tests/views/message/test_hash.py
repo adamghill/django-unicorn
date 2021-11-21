@@ -21,7 +21,10 @@ def test_message_hash_no_change(client):
         url="/message/tests.views.fake_components.FakeComponent",
         data=data,
         action_queue=[
-            {"payload": {"name": "test_method_kwargs(count=0)"}, "type": "callMethod",}
+            {
+                "payload": {"name": "test_method_kwargs(count=0)"},
+                "type": "callMethod",
+            }
         ],
         component_id=component_id,
         hash=hash,
@@ -45,7 +48,10 @@ def test_message_hash_changes(client):
         url="/message/tests.views.fake_components.FakeComponent",
         data=data,
         action_queue=[
-            {"payload": {"name": "test_method_kwargs(count=1)"}, "type": "callMethod",}
+            {
+                "payload": {"name": "test_method_kwargs(count=1)"},
+                "type": "callMethod",
+            }
         ],
         component_id=component_id,
         hash=hash,
@@ -69,7 +75,10 @@ def test_message_hash_no_change_but_return_value(client):
         url="/message/tests.views.fake_components.FakeComponent",
         data=data,
         action_queue=[
-            {"payload": {"name": "test_return_value"}, "type": "callMethod",}
+            {
+                "payload": {"name": "test_return_value"},
+                "type": "callMethod",
+            }
         ],
         component_id=component_id,
         hash=hash,
@@ -94,7 +103,12 @@ def test_message_hash_no_change_but_return_redirect(client):
         client,
         url="/message/tests.views.fake_components.FakeComponent",
         data=data,
-        action_queue=[{"payload": {"name": "test_redirect"}, "type": "callMethod",}],
+        action_queue=[
+            {
+                "payload": {"name": "test_redirect"},
+                "type": "callMethod",
+            }
+        ],
         component_id=component_id,
         hash=hash,
     )
@@ -118,7 +132,12 @@ def test_message_hash_no_change_but_return_hash_update(client):
         client,
         url="/message/tests.views.fake_components.FakeComponent",
         data=data,
-        action_queue=[{"payload": {"name": "test_hash_update"}, "type": "callMethod",}],
+        action_queue=[
+            {
+                "payload": {"name": "test_hash_update"},
+                "type": "callMethod",
+            }
+        ],
         component_id=component_id,
         hash=hash,
     )
@@ -142,7 +161,12 @@ def test_message_hash_no_change_but_return_poll_update(client):
         client,
         url="/message/tests.views.fake_components.FakeComponent",
         data=data,
-        action_queue=[{"payload": {"name": "test_poll_update"}, "type": "callMethod",}],
+        action_queue=[
+            {
+                "payload": {"name": "test_poll_update"},
+                "type": "callMethod",
+            }
+        ],
         component_id=component_id,
         hash=hash,
     )
@@ -167,7 +191,10 @@ def test_message_hash_no_change_but_return_location_update(client):
         url="/message/tests.views.fake_components.FakeComponent",
         data=data,
         action_queue=[
-            {"payload": {"name": "test_refresh_redirect"}, "type": "callMethod",}
+            {
+                "payload": {"name": "test_refresh_redirect"},
+                "type": "callMethod",
+            }
         ],
         component_id=component_id,
         hash=hash,
@@ -192,7 +219,12 @@ def test_message_hash_no_change_but_calls(client):
         client,
         url="/message/tests.views.message.test_calls.FakeCallsComponent",
         data=data,
-        action_queue=[{"payload": {"name": "test_call"}, "type": "callMethod",}],
+        action_queue=[
+            {
+                "payload": {"name": "test_call"},
+                "type": "callMethod",
+            }
+        ],
         component_id=component_id,
         hash=hash,
     )

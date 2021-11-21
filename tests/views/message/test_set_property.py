@@ -20,7 +20,9 @@ def _post_message_and_get_body(client, message):
 def test_setter(client):
     data = {"nested": {"check": False}, "check": False}
     message = {
-        "actionQueue": [{"type": "callMethod", "payload": {"name": "check=True"}},],
+        "actionQueue": [
+            {"type": "callMethod", "payload": {"name": "check=True"}},
+        ],
         "data": data,
         "checksum": generate_checksum(orjson.dumps(data)),
         "id": shortuuid.uuid()[:8],

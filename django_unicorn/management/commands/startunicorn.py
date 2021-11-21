@@ -75,7 +75,9 @@ class Command(BaseCommand):
 
             if should_create_app.strip().lower() in ("y", "yes"):
                 call_command(
-                    "startapp", app_name, verbosity=0,
+                    "startapp",
+                    app_name,
+                    verbosity=0,
                 )
                 app_directory = base_path / app_name
 

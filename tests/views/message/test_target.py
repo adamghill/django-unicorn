@@ -21,7 +21,11 @@ def test_message_generated_checksum_matches_dom_checksum(client):
     data = {"clicked": False}
     message = {
         "actionQueue": [
-            {"payload": {"name": "test_method"}, "type": "callMethod", "target": None,}
+            {
+                "payload": {"name": "test_method"},
+                "type": "callMethod",
+                "target": None,
+            }
         ],
         "data": data,
         "checksum": generate_checksum(orjson.dumps(data)),

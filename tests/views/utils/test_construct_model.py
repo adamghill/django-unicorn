@@ -70,7 +70,13 @@ def test_construct_model_many_to_many():
     book.save()
     author.books.add(book)
 
-    author_data = {"pk": author.pk, "name": author.name, "books": [book.pk,]}
+    author_data = {
+        "pk": author.pk,
+        "name": author.name,
+        "books": [
+            book.pk,
+        ],
+    }
 
     actual = _construct_model(Author, author_data)
 

@@ -25,7 +25,11 @@ def post_and_get_response(
         "hash": hash,
     }
 
-    response = client.post(url, message, content_type="application/json",)
+    response = client.post(
+        url,
+        message,
+        content_type="application/json",
+    )
 
     try:
         return response.json()

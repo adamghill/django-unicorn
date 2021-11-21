@@ -41,9 +41,17 @@ FAKE_OBJECTS_COMPONENT_URL = (
 
 def test_message_int(client):
     data = {"int_example": "4"}
-    action_queue = [{"payload": {"name": "assert_int"}, "type": "callMethod",}]
+    action_queue = [
+        {
+            "payload": {"name": "assert_int"},
+            "type": "callMethod",
+        }
+    ]
     response = post_and_get_response(
-        client, url=FAKE_OBJECTS_COMPONENT_URL, data=data, action_queue=action_queue,
+        client,
+        url=FAKE_OBJECTS_COMPONENT_URL,
+        data=data,
+        action_queue=action_queue,
     )
 
     assert not response.get(
@@ -54,9 +62,17 @@ def test_message_int(client):
 
 def test_message_float(client):
     data = {"float_example": "1.3"}
-    action_queue = [{"payload": {"name": "assert_float"}, "type": "callMethod",}]
+    action_queue = [
+        {
+            "payload": {"name": "assert_float"},
+            "type": "callMethod",
+        }
+    ]
     response = post_and_get_response(
-        client, url=FAKE_OBJECTS_COMPONENT_URL, data=data, action_queue=action_queue,
+        client,
+        url=FAKE_OBJECTS_COMPONENT_URL,
+        data=data,
+        action_queue=action_queue,
     )
 
     assert not response.get(
@@ -67,9 +83,17 @@ def test_message_float(client):
 
 def test_message_decimal(client):
     data = {"decimal_example": "1.5"}
-    action_queue = [{"payload": {"name": "assert_decimal"}, "type": "callMethod",}]
+    action_queue = [
+        {
+            "payload": {"name": "assert_decimal"},
+            "type": "callMethod",
+        }
+    ]
     response = post_and_get_response(
-        client, url=FAKE_OBJECTS_COMPONENT_URL, data=data, action_queue=action_queue,
+        client,
+        url=FAKE_OBJECTS_COMPONENT_URL,
+        data=data,
+        action_queue=action_queue,
     )
 
     assert not response.get(
@@ -80,9 +104,17 @@ def test_message_decimal(client):
 
 def test_message_dataclass(client):
     data = {"dataclass_example": {"hello": "world"}}
-    action_queue = [{"payload": {"name": "assert_dataclass"}, "type": "callMethod",}]
+    action_queue = [
+        {
+            "payload": {"name": "assert_dataclass"},
+            "type": "callMethod",
+        }
+    ]
     response = post_and_get_response(
-        client, url=FAKE_OBJECTS_COMPONENT_URL, data=data, action_queue=action_queue,
+        client,
+        url=FAKE_OBJECTS_COMPONENT_URL,
+        data=data,
+        action_queue=action_queue,
     )
 
     assert not response.get(

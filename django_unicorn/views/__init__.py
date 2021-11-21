@@ -235,22 +235,31 @@ def _process_component_request(
         rendered_component = str(get_root_element(soup))
 
         res.update(
-            {"dom": rendered_component, "hash": hash,}
+            {
+                "dom": rendered_component,
+                "hash": hash,
+            }
         )
 
     if return_data:
         res.update(
-            {"return": return_data.get_data(),}
+            {
+                "return": return_data.get_data(),
+            }
         )
 
         if return_data.redirect:
             res.update(
-                {"redirect": return_data.redirect,}
+                {
+                    "redirect": return_data.redirect,
+                }
             )
 
         if return_data.poll:
             res.update(
-                {"poll": return_data.poll,}
+                {
+                    "poll": return_data.poll,
+                }
             )
 
     parent_component = component.parent
@@ -300,11 +309,11 @@ def _handle_component_request(
         - processing all of the component requests in the cache and returning the resulting value if
             it is the first component request for that particular component name + component id combination
         - return a `dict` saying that the request has been queued
-    
+
     Args:
         param request: HttpRequest for the function-based view.
         param: component_request: Component request to process.
-    
+
     Returns:
         `dict` with the following structure:
         {
@@ -331,7 +340,9 @@ def _handle_component_request(
     component_requests.append(component_request)
 
     cache.set(
-        queue_cache_key, component_requests, timeout=get_serial_timeout(),
+        queue_cache_key,
+        component_requests,
+        timeout=get_serial_timeout(),
     )
 
     if len(component_requests) > 1:
@@ -361,7 +372,7 @@ def _handle_queued_component_requests(
         param: component_name: Name of the component, e.g. "hello-world".
         param: queue_cache_key: Cache key created from component id which should be unique
             for any particular user's request lifecycle.
-    
+
     Returns:
         JSON with the following structure:
         {
@@ -398,7 +409,9 @@ def _handle_queued_component_requests(
         if component_requests:
             component_requests.pop(0)
             cache.set(
-                queue_cache_key, component_requests, timeout=get_serial_timeout(),
+                queue_cache_key,
+                component_requests,
+                timeout=get_serial_timeout(),
             )
 
     if component_requests:
@@ -426,7 +439,9 @@ def _handle_queued_component_requests(
 
             component_requests.pop(0)
             cache.set(
-                queue_cache_key, component_requests, timeout=get_serial_timeout(),
+                queue_cache_key,
+                component_requests,
+                timeout=get_serial_timeout(),
             )
 
         merged_json_result = _handle_component_request(
@@ -450,7 +465,7 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
     Args:
         param request: HttpRequest for the function-based view.
         param: component_name: Name of the component, e.g. "hello-world".
-    
+
     Returns:
         `JsonRequest` with the following structure in the body:
         {

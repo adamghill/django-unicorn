@@ -20,7 +20,10 @@ class FakeComponentSafe(UnicornView):
 def test_html_entities_encoded(client):
     data = {"hello": "test"}
     action_queue = [
-        {"payload": {"name": "hello", "value": "<b>test1</b>"}, "type": "syncInput",}
+        {
+            "payload": {"name": "hello", "value": "<b>test1</b>"},
+            "type": "syncInput",
+        }
     ]
     response = post_and_get_response(
         client,
@@ -37,7 +40,10 @@ def test_html_entities_encoded(client):
 def test_safe_html_entities_not_encoded(client):
     data = {"hello": "test"}
     action_queue = [
-        {"payload": {"name": "hello", "value": "<b>test1</b>"}, "type": "syncInput",}
+        {
+            "payload": {"name": "hello", "value": "<b>test1</b>"},
+            "type": "syncInput",
+        }
     ]
     response = post_and_get_response(
         client,

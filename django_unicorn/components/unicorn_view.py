@@ -301,7 +301,9 @@ class UnicornView(TemplateView):
         """
 
         response = self.render_to_response(
-            context=self.get_context_data(), component=self, init_js=init_js,
+            context=self.get_context_data(),
+            component=self,
+            init_js=init_js,
         )
 
         # render_to_response() could only return a HttpResponse, so check for render()
