@@ -30,7 +30,7 @@ jobs:
         run: poetry install
 
       - name: black check
-        run: poetry run black . --check --exclude migrations
+        run: poetry run black . --check --extend-exclude migrations
 
       - name: isort check
         run: poetry run isort --settings pyproject.toml --check .
