@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.37.1
+
+- Support nested field attributes for `javascript_exclude`.
+
+[All changes since 0.37.0](https://github.com/adamghill/django-unicorn/compare/0.37.0...0.37.1).
+
 ## v0.37.0
 
 - Revert loading and dirty elements when the server returns a 304 (not modified) or a 500 error.
