@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.38.0
+
+- Include request context in component templates.
+
+[All changes since 0.37.2](https://github.com/adamghill/django-unicorn/compare/0.37.2...0.38.0).
+
 ## v0.37.2
 
 - Fix: nested field attributes for `javascript_exclude`.
