@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.37.2
+
+- Fix: nested field attributes for `javascript_exclude`.
+
+[All changes since 0.37.1](https://github.com/adamghill/django-unicorn/compare/0.37.1...0.37.2).
+
 ## v0.37.1
 
 - Support nested field attributes for `javascript_exclude`.
