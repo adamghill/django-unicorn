@@ -335,7 +335,7 @@ class UnicornView(TemplateView):
         attributes = self._attributes()
         frontend_context_variables.update(attributes)
 
-        exclude_field_attributes = ()
+        exclude_field_attributes = []
 
         # Remove any field in `javascript_exclude` from `frontend_context_variables`
         if hasattr(self, "Meta") and hasattr(self.Meta, "javascript_exclude"):
@@ -374,7 +374,7 @@ class UnicornView(TemplateView):
 
         encoded_frontend_context_variables = serializer.dumps(
             frontend_context_variables,
-            exclude_field_attributes=exclude_field_attributes,
+            exclude_field_attributes=tuple(exclude_field_attributes),
         )
 
         return encoded_frontend_context_variables

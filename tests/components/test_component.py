@@ -115,6 +115,45 @@ def test_meta_javascript_exclude():
     assert "name" in component.get_context_data()
 
 
+def test_meta_javascript_exclude_nested_with_tuple():
+    class TestComponent(UnicornView):
+        name = {"Universe": {"World": "Earth"}}
+
+        class Meta:
+            javascript_exclude = ("name.Universe",)
+
+    expected = '{"name":{}}'
+    component = TestComponent(component_id="asdf1234", component_name="hello-world")
+    assert expected == component.get_frontend_context_variables()
+
+
+def test_meta_javascript_exclude_nested_multiple_with_spaces():
+    class TestComponent(UnicornView):
+        name = {"Universe": {"World": "Earth"}}
+        another = {"Neutral Milk Hotel": {"album": {"On Avery Island": 1996}}}
+
+        class Meta:
+            javascript_exclude = ("name.Universe", "another.Neutral Milk Hotel.album")
+
+    expected = '{"another":{"Neutral Milk Hotel":{}},"name":{}}'
+    component = TestComponent(component_id="asdf1234", component_name="hello-world")
+    assert expected == component.get_frontend_context_variables()
+
+
+def test_meta_javascript_exclude_nested_with_list():
+    class TestComponent(UnicornView):
+        name = {"Universe": {"World": "Earth"}}
+
+        class Meta:
+            javascript_exclude = [
+                "name.Universe",
+            ]
+
+    expected = '{"name":{}}'
+    component = TestComponent(component_id="asdf1234", component_name="hello-world")
+    assert expected == component.get_frontend_context_variables()
+
+
 def test_meta_exclude():
     class TestComponent(UnicornView):
         name = "World"
