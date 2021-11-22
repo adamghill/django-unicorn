@@ -1,5 +1,9 @@
+from unittest.mock import MagicMock
+
+from django_unicorn.components import UnicornView
 from django_unicorn.utils import (
     generate_checksum,
+    get_cacheable_component,
     get_method_arguments,
     get_type_hints,
     sanitize_html,
@@ -69,3 +73,27 @@ def test_sanitize_html():
     data = '{"id":"abcd123","name":"text-inputs","key":"asdf","data":{"name":"World","testing_thing":"Whatever </script> <script>alert(\'uh oh\')</script>"},"calls":[],"hash":"hjkl"}'
     actual = sanitize_html(data)
     assert actual == expected
+
+
+class FakeComponent(UnicornView):
+    pass
+
+
+def test_get_cacheable_component_request_is_none():
+    component = FakeComponent(component_id="asdf123498", component_name="hello-world")
+    component.request = MagicMock()
+    assert component.request
+
+    actual = get_cacheable_component(component)
+
+    assert actual.request is None
+
+
+def test_get_cacheable_component_extra_context_is_none():
+    component = FakeComponent(component_id="asdf123499", component_name="hello-world")
+    component.extra_context = MagicMock()
+    assert component.extra_context
+
+    actual = get_cacheable_component(component)
+
+    assert actual.extra_context is None

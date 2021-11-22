@@ -65,6 +65,9 @@ def get_cacheable_component(
 
     component.request = None
 
+    if component.extra_context:
+        component.extra_context = None
+
     if component.parent:
         component.parent = get_cacheable_component(component.parent)
 
