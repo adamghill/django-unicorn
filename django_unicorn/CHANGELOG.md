@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.38.1
+
+- Fix: Allow components to be `pickled` so they can be cached.
+
+[All changes since 0.38.0](https://github.com/adamghill/django-unicorn/compare/0.38.0...0.38.1).
+
 ## v0.38.0
 
 - Include request context in component templates.
