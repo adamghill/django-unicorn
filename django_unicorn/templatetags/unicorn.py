@@ -146,7 +146,12 @@ class UnicornNode(template.Node):
             kwargs=resolved_kwargs,
             request=request,
         )
-        rendered_component = view.render(init_js=True)
+
+        extra_context = {}
+        for c in context:
+            extra_context.update(c)
+
+        rendered_component = view.render(init_js=True, extra_context=extra_context)
 
         return rendered_component
 

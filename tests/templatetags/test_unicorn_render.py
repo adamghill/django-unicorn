@@ -1,5 +1,7 @@
 import re
 
+from django.http.request import HttpRequest
+from django.template import Context, RequestContext
 from django.template.base import Token, TokenType
 
 import pytest
@@ -55,6 +57,11 @@ class FakeComponentCalls2(UnicornView):
         self.call("testCall2", "hello")
 
 
+def test_unicorn_has_context_processors_in_context(client):
+    response = client.get("/test")
+    assert "WSGIRequest" in response.content.decode()
+
+
 def test_unicorn_render_kwarg():
     token = Token(
         TokenType.TEXT,
@@ -62,7 +69,7 @@ def test_unicorn_render_kwarg():
     )
     unicorn_node = unicorn(None, token)
     context = {}
-    actual = unicorn_node.render(context)
+    actual = unicorn_node.render(Context(context))
 
     assert "<b>tested!</b>" in actual
 
@@ -74,7 +81,7 @@ def test_unicorn_render_context_variable():
     )
     unicorn_node = unicorn(None, token)
     context = {"test_var": {"nested": "variable!"}}
-    actual = unicorn_node.render(context)
+    actual = unicorn_node.render(Context(context))
 
     assert "<b>variable!</b>" in actual
 
@@ -86,7 +93,7 @@ def test_unicorn_render_with_invalid_html():
     )
     unicorn_node = unicorn(None, token)
     context = {"test_var": {"nested": "variable!"}}
-    actual = unicorn_node.render(context)
+    actual = unicorn_node.render(Context(context))
 
     assert "-&gt;variable!&lt;-" in actual
 
@@ -100,7 +107,7 @@ def test_unicorn_render_parent(settings):
     unicorn_node = unicorn(None, token)
     view = FakeComponentParent(component_name="test", component_id="asdf")
     context = {"view": view}
-    unicorn_node.render(context)
+    unicorn_node.render(Context(context))
 
     assert unicorn_node.parent
     assert (
@@ -118,7 +125,7 @@ def test_unicorn_render_parent_with_key(settings):
     unicorn_node = unicorn(None, token)
     view = FakeComponentParent(component_name="test", component_id="asdf")
     context = {"view": view}
-    unicorn_node.render(context)
+    unicorn_node.render(Context(context))
 
     assert (
         unicorn_node.component_id
@@ -135,7 +142,7 @@ def test_unicorn_render_parent_with_id(settings):
     unicorn_node = unicorn(None, token)
     view = FakeComponentParent(component_name="test", component_id="asdf")
     context = {"view": view}
-    unicorn_node.render(context)
+    unicorn_node.render(Context(context))
 
     assert (
         unicorn_node.component_id
@@ -152,7 +159,7 @@ def test_unicorn_render_parent_with_pk(settings):
     unicorn_node = unicorn(None, token)
     view = FakeComponentParent(component_name="test", component_id="asdf")
     context = {"view": view}
-    unicorn_node.render(context)
+    unicorn_node.render(Context(context))
 
     assert (
         unicorn_node.component_id
@@ -178,7 +185,7 @@ def test_unicorn_render_parent_with_model_id(settings):
             return {"id": self.id}
 
     context = {"view": view, "model": Model()}
-    unicorn_node.render(context)
+    unicorn_node.render(Context(context))
 
     assert (
         unicorn_node.component_id
@@ -197,8 +204,9 @@ def test_unicorn_render_parent_with_model_pk(settings):
     view = FakeComponentParent(component_name="test", component_id="asdf")
 
     flavor = Flavor(pk=187)
+
     context = {"view": view, "model": flavor}
-    unicorn_node.render(context)
+    unicorn_node.render(Context(context))
 
     assert (
         unicorn_node.component_id
@@ -213,7 +221,7 @@ def test_unicorn_render_id_use_pk():
     )
     unicorn_node = unicorn(None, token)
     context = {"model": {"pk": 123}}
-    actual = unicorn_node.render(context)
+    actual = unicorn_node.render(Context(context))
 
     assert "==123==" in actual
 
@@ -226,7 +234,7 @@ def test_unicorn_render_component_one_script_tag(settings):
     )
     unicorn_node = unicorn(None, token)
     context = {}
-    html = unicorn_node.render(context)
+    html = unicorn_node.render(Context(context))
 
     assert '<script type="module"' in html
     assert len(re.findall('<script type="module"', html)) == 1
@@ -241,7 +249,7 @@ def test_unicorn_render_child_component_no_script_tag(settings):
     unicorn_node = unicorn(None, token)
     view = FakeComponentParent(component_name="test", component_id="asdf")
     context = {"view": view}
-    html = unicorn_node.render(context)
+    html = unicorn_node.render(Context(context))
 
     assert "<script" not in html
 
@@ -254,7 +262,7 @@ def test_unicorn_render_parent_component_one_script_tag(settings):
     )
     unicorn_node = unicorn(None, token)
     context = {}
-    html = unicorn_node.render(context)
+    html = unicorn_node.render(Context(context))
 
     assert '<script type="module"' in html
     assert len(re.findall('<script type="module"', html)) == 1
@@ -268,7 +276,7 @@ def test_unicorn_render_calls(settings):
     )
     unicorn_node = unicorn(None, token)
     context = {}
-    html = unicorn_node.render(context)
+    html = unicorn_node.render(Context(context))
 
     assert '<script type="module"' in html
     assert len(re.findall('<script type="module"', html)) == 1
@@ -283,7 +291,7 @@ def test_unicorn_render_calls_with_arg(settings):
     )
     unicorn_node = unicorn(None, token)
     context = {}
-    html = unicorn_node.render(context)
+    html = unicorn_node.render(Context(context))
 
     assert '<script type="module"' in html
     assert len(re.findall('<script type="module"', html)) == 1
@@ -298,7 +306,7 @@ def test_unicorn_render_calls_no_mount_call(settings):
     )
     unicorn_node = unicorn(None, token)
     context = {}
-    html = unicorn_node.render(context)
+    html = unicorn_node.render(Context(context))
 
     assert '<script type="module"' in html
     assert len(re.findall('<script type="module"', html)) == 1
@@ -313,7 +321,7 @@ def test_unicorn_render_hash(settings):
     )
     unicorn_node = unicorn(None, token)
     context = {}
-    html = unicorn_node.render(context)
+    html = unicorn_node.render(Context(context))
 
     assert '<script type="module"' in html
     assert len(re.findall('<script type="module"', html)) == 1
