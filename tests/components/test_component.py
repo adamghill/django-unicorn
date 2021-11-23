@@ -4,6 +4,7 @@ import orjson
 import pytest
 
 from django_unicorn.components import UnicornView
+from django_unicorn.serializer import InvalidFieldNameError
 
 
 class ExampleComponent(UnicornView):
@@ -73,6 +74,74 @@ def test_init_methods(component):
     methods = component._methods()
     assert len(methods) == 1
     assert methods["get_name"]() == "World"
+
+
+def test_get_frontend_context_variables_javascript_exclude(component):
+    class Meta:
+        javascript_exclude = ("name",)
+
+    setattr(component, "Meta", Meta)
+
+    frontend_context_variables = component.get_frontend_context_variables()
+    frontend_context_variables_dict = orjson.loads(frontend_context_variables)
+    assert len(frontend_context_variables_dict) == 0
+    assert "name" not in frontend_context_variables_dict
+
+
+def test_get_frontend_context_variables_javascript_exclude_invalid_field(component):
+    class Meta:
+        javascript_exclude = ("blob",)
+
+    setattr(component, "Meta", Meta)
+
+    with pytest.raises(InvalidFieldNameError):
+        component.get_frontend_context_variables()
+
+
+def test_get_frontend_context_variables_exclude_field(component):
+    # Use internal class prevent class cache from causing issues
+    class ExampleComponentWithMetaExclude(UnicornView):
+        name = "world"
+
+        class Meta:
+            exclude = ("name",)
+
+    component = ExampleComponentWithMetaExclude(
+        component_id="asdf1234", component_name="example"
+    )
+
+    frontend_context_variables = component.get_frontend_context_variables()
+    frontend_context_variables_dict = orjson.loads(frontend_context_variables)
+    assert len(frontend_context_variables_dict) == 0
+    assert "name" not in frontend_context_variables_dict
+
+
+def test_get_frontend_context_variables_exclude_field_invalid_type(component):
+    # Use internal class prevent class cache from causing issues
+    class ExampleComponentWithMetaInvalidExclude(UnicornView):
+        name = "world"
+
+        class Meta:
+            exclude = ""
+
+    with pytest.raises(AssertionError):
+        ExampleComponentWithMetaInvalidExclude(
+            component_id="asdf1234", component_name="example"
+        )
+
+
+def test_get_frontend_context_variables_exclude_invalid_field():
+    # Use internal class prevent class cache from causing issues
+    class ExampleComponentWithMetaInvalidExclude(UnicornView):
+        pass
+
+        class Meta:
+            exclude = ("blob",)
+
+    with pytest.raises(InvalidFieldNameError):
+        ExampleComponentWithMetaInvalidExclude(
+            component_id="asdf1234", component_name="example"
+        )
 
 
 def test_get_frontend_context_variables(component):

@@ -21,6 +21,8 @@ from django.utils.dateparse import (
 
 import orjson
 
+from .utils import is_non_string_sequence
+
 
 try:
     from pydantic import BaseModel as PydanticBaseModel
@@ -33,6 +35,28 @@ logger = logging.getLogger(__name__)
 
 class JSONDecodeError(Exception):
     pass
+
+
+class InvalidFieldNameError(Exception):
+    def __init__(self, field_name: str, data: Dict = None):
+        message = f"Cannot resolve '{field_name}'."
+
+        if data:
+            available = ", ".join(data.keys())
+            message = f"{message} Choices are: {available}"
+
+        super().__init__(message)
+
+
+class InvalidFieldAttributeError(Exception):
+    def __init__(self, field_name: str, field_attr: str, data: Dict = None):
+        message = f"Cannot resolve '{field_attr}'."
+
+        if data:
+            available = ", ".join(data[field_name].keys())
+            message = f"{message} Choices on '{field_name}' are: {available}"
+
+        super().__init__(message)
 
 
 def _parse_field_values_from_string(model: Model) -> None:
@@ -204,6 +228,10 @@ def _exclude_field_attributes(
     _exclude_field_attributes({"1": {"2": {"3": "4"}}}, ("1.2.3",)) == {"1": {"2": {}}}
     """
 
+    assert exclude_field_attributes is None or is_non_string_sequence(
+        exclude_field_attributes
+    ), "exclude_field_attributes type needs to be a sequence"
+
     if exclude_field_attributes:
         for field in exclude_field_attributes:
             field_splits = field.split(".")
@@ -217,6 +245,15 @@ def _exclude_field_attributes(
                 )
             elif len(field_splits) == 2:
                 (field_name, field_attr) = field_splits
+
+                if field_name not in dict_data:
+                    raise InvalidFieldNameError(field_name=field_name, data=dict_data)
+
+                if field_attr not in dict_data[field_name]:
+                    raise InvalidFieldAttributeError(
+                        field_name=field_name, field_attr=field_attr, data=dict_data
+                    )
+
                 del dict_data[field_name][field_attr]
 
 

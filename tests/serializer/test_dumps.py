@@ -7,6 +7,7 @@ from django.utils.timezone import now
 import pytest
 
 from django_unicorn import serializer
+from django_unicorn.serializer import InvalidFieldAttributeError, InvalidFieldNameError
 from django_unicorn.utils import dicts_equal
 from example.coffee.models import Flavor, Taste
 
@@ -417,7 +418,7 @@ def test_exclude_field_attributes_invalid_field_attribute():
 
     actual = serializer.dumps(
         {"book": {"title": "The Grapes of Wrath", "author": "John Steinbeck"}},
-        exclude_field_attributes=("blob"),
+        exclude_field_attributes=("blob",),
     )
 
     assert expected == actual
@@ -428,7 +429,7 @@ def test_exclude_field_attributes_empty_string():
 
     actual = serializer.dumps(
         {"book": {"title": "The Grapes of Wrath", "author": "John Steinbeck"}},
-        exclude_field_attributes=(""),
+        exclude_field_attributes=("",),
     )
 
     assert expected == actual
@@ -443,3 +444,37 @@ def test_exclude_field_attributes_none():
     )
 
     assert expected == actual
+
+
+def test_exclude_field_attributes_invalid_name():
+    with pytest.raises(InvalidFieldNameError) as e:
+        serializer.dumps(
+            {"book": {"title": "The Grapes of Wrath", "author": "John Steinbeck"}},
+            exclude_field_attributes=("blob.monster",),
+        )
+
+    assert (
+        e.exconly()
+        == "django_unicorn.serializer.InvalidFieldNameError: Cannot resolve 'blob'. Choices are: book"
+    )
+
+
+def test_exclude_field_attributes_invalid_attribute():
+    with pytest.raises(InvalidFieldAttributeError) as e:
+        serializer.dumps(
+            {"book": {"title": "The Grapes of Wrath", "author": "John Steinbeck"}},
+            exclude_field_attributes=("book.blob",),
+        )
+
+    assert (
+        e.exconly()
+        == "django_unicorn.serializer.InvalidFieldAttributeError: Cannot resolve 'blob'. Choices on 'book' are: title, author"
+    )
+
+
+def test_exclude_field_attributes_invalid_type():
+    with pytest.raises(AssertionError) as e:
+        serializer.dumps(
+            {"book": {"title": "The Grapes of Wrath", "author": "John Steinbeck"}},
+            exclude_field_attributes=("book.blob"),
+        )

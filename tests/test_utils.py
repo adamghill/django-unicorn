@@ -6,6 +6,7 @@ from django_unicorn.utils import (
     get_cacheable_component,
     get_method_arguments,
     get_type_hints,
+    is_non_string_sequence,
     sanitize_html,
 )
 
@@ -97,3 +98,31 @@ def test_get_cacheable_component_extra_context_is_none():
     actual = get_cacheable_component(component)
 
     assert actual.extra_context is None
+
+
+def test_is_non_string_sequence_list():
+    assert is_non_string_sequence(
+        [
+            "",
+        ]
+    )
+
+
+def test_is_non_string_sequence_tuple():
+    assert is_non_string_sequence(("",))
+
+
+def test_is_non_string_sequence_set():
+    assert is_non_string_sequence(
+        {
+            "",
+        }
+    )
+
+
+def test_is_non_string_sequence_string():
+    assert not is_non_string_sequence("")
+
+
+def test_is_non_string_sequence_bytes():
+    assert not is_non_string_sequence(b"")

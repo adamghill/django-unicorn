@@ -20,7 +20,7 @@ from .. import serializer
 from ..decorators import timed
 from ..errors import ComponentLoadError, UnicornCacheError
 from ..settings import get_setting
-from ..utils import get_cacheable_component
+from ..utils import get_cacheable_component, is_non_string_sequence
 from .fields import UnicornField
 from .unicorn_template_response import UnicornTemplateResponse
 
@@ -82,10 +82,8 @@ def get_locations(component_name):
 
     unicorn_apps = get_setting("APPS", settings.INSTALLED_APPS)
 
-    assert (
-        isinstance(unicorn_apps, list)
-        or isinstance(unicorn_apps, tuple)
-        or isinstance(unicorn_apps, set)
+    assert is_non_string_sequence(
+        unicorn_apps
     ), "APPS is expected to be a list, tuple or set"
 
     for app in unicorn_apps:
@@ -349,8 +347,12 @@ class UnicornView(TemplateView):
                         # store field attributes for later to remove them from the serialized dictionary
                         exclude_field_attributes.append(field_name)
                     else:
-                        if field_name in frontend_context_variables:
-                            del frontend_context_variables[field_name]
+                        if field_name not in frontend_context_variables:
+                            raise serializer.InvalidFieldNameError(
+                                field_name=field_name, data=frontend_context_variables
+                            )
+
+                        del frontend_context_variables[field_name]
 
         # Add cleaned values to `frontend_content_variables` based on the widget in form's fields
         form = self._get_form(attributes)
@@ -634,8 +636,17 @@ class UnicornView(TemplateView):
         excludes = []
 
         if hasattr(self, "Meta") and hasattr(self.Meta, "exclude"):
-            if isinstance(self.Meta.exclude, Sequence):
-                excludes = self.Meta.exclude
+            assert is_non_string_sequence(
+                self.Meta.exclude
+            ), "Meta.exclude should be a list, tuple, or set"
+
+            for exclude in self.Meta.exclude:
+                if not hasattr(self, exclude):
+                    raise serializer.InvalidFieldNameError(
+                        field_name=exclude, data=self._attributes()
+                    )
+
+            excludes = self.Meta.exclude
 
         return not (
             name.startswith("_")

@@ -32,7 +32,4 @@ class ModelsView(UnicornView):
         return Taste.objects.all()
 
     class Meta:
-        javascript_exclude = (
-            "available_flavors",
-            "available_tastes",
-        )
+        javascript_exclude = ("flavor.taste_set",)

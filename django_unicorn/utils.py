@@ -1,3 +1,4 @@
+import collections.abc
 import hmac
 import logging
 import pickle
@@ -138,3 +139,18 @@ def sanitize_html(str):
 
     str = str.translate(_json_script_escapes)
     return mark_safe(str)
+
+
+def is_non_string_sequence(obj):
+    """
+    Checks whether the object is a sequence (i.e. `list`, `tuple`, `set`), but _not_ `str` or `bytes` type.
+    Helpful when you expect to loop over `obj`, but explicitly don't want to allow `str`.
+    """
+
+    if (
+        isinstance(obj, collections.abc.Sequence)
+        or isinstance(obj, collections.abc.Set)
+    ) and not isinstance(obj, (str, collections.abc.ByteString)):
+        return True
+
+    return False
