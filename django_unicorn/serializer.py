@@ -108,7 +108,10 @@ def _get_model_dict(model: Model) -> dict:
 
             try:
                 related_descriptor = getattr(model, related_name)
-                pks = list(related_descriptor.values_list("pk", flat=True))
+
+                # Get `pk` from `all` because it will re-use the cached data if the m-2-m field is prefetched
+                # Using `values_list("pk", flat=True)` or `only()` won't use the cached prefetched values
+                pks = [m.pk for m in related_descriptor.all()]
             except ValueError:
                 # ValueError is throuwn when the model doesn't have an id already set
                 pass
