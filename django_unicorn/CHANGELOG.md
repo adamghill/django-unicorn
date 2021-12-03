@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.39.0
+
+- Explicit error messages when an invalid component field is excluded
+- Better support for serializing many-to-many fields which have been prefetched to reduce the number of database calls
+- Support excluding many-to-many fields with `javascript_exclude`
+
+[All changes since 0.39.0](https://github.com/adamghill/django-unicorn/compare/0.38.1...0.39.0).
+
 ## v0.38.1
 
 - Fix: Allow components to be `pickled` so they can be cached.
