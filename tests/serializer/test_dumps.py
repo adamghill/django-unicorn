@@ -197,6 +197,90 @@ def test_model_foreign_key_recursive_parent():
 
 
 @pytest.mark.django_db
+def test_model_many_to_many(django_assert_num_queries):
+    flavor_one = Flavor(name="name1", label="label1")
+    flavor_one.save()
+
+    taste1 = Taste(name="Bitter1")
+    taste1.save()
+    taste2 = Taste(name="Bitter2")
+    taste2.save()
+    taste3 = Taste(name="Bitter3")
+    taste3.save()
+
+    flavor_one.taste_set.add(taste1)
+    flavor_one.taste_set.add(taste2)
+    flavor_one.taste_set.add(taste3)
+
+    with django_assert_num_queries(2):
+        actual = serializer.dumps(flavor_one)
+
+    expected = {
+        "name": "name1",
+        "label": "label1",
+        "parent": None,
+        "float_value": None,
+        "decimal_value": None,
+        "uuid": str(flavor_one.uuid),
+        "datetime": None,
+        "date": None,
+        "time": None,
+        "duration": None,
+        "pk": 1,
+        "taste_set": [taste1.pk, taste2.pk, taste3.pk],
+        "origins": [],
+    }
+
+    assert expected == json.loads(actual)
+
+
+@pytest.mark.django_db
+def test_model_many_to_many_with_excludes(django_assert_num_queries):
+    flavor_one = Flavor(name="name1", label="label1")
+    flavor_one.save()
+
+    taste1 = Taste(name="Bitter1")
+    taste1.save()
+    taste2 = Taste(name="Bitter2")
+    taste2.save()
+    taste3 = Taste(name="Bitter3")
+    taste3.save()
+
+    flavor_one.taste_set.add(taste1)
+    flavor_one.taste_set.add(taste2)
+    flavor_one.taste_set.add(taste3)
+
+    # This shouldn't make any database calls because the many-to-manys are excluded and
+    # all of the other data is already set
+    with django_assert_num_queries(0):
+        actual = serializer.dumps(
+            {"flavor": flavor_one},
+            exclude_field_attributes=(
+                "flavor.taste_set",
+                "flavor.origins",
+            ),
+        )
+
+    expected = {
+        "flavor": {
+            "name": "name1",
+            "label": "label1",
+            "parent": None,
+            "float_value": None,
+            "decimal_value": None,
+            "uuid": str(flavor_one.uuid),
+            "datetime": None,
+            "date": None,
+            "time": None,
+            "duration": None,
+            "pk": 1,
+        }
+    }
+
+    assert expected == json.loads(actual)
+
+
+@pytest.mark.django_db
 def test_dumps_queryset(db):
     flavor_one = Flavor(name="name1", label="label1")
     flavor_one.save()
@@ -269,13 +353,20 @@ def test_get_model_dict():
 
 
 @pytest.mark.django_db
-def test_get_model_dict_many_to_many_is_referenced():
-    taste = Taste(name="Bitter")
-    taste.save()
+def test_get_model_dict_many_to_many_is_referenced(django_assert_num_queries):
     flavor_one = Flavor(name="name1", label="label1")
     flavor_one.save()
-    flavor_one.taste_set.add(taste)
-    actual = serializer._get_model_dict(flavor_one)
+
+    taste1 = Taste(name="Bitter")
+    taste1.save()
+    taste2 = Taste(name="Bitter2")
+    taste2.save()
+    taste3 = Taste(name="Bitter3")
+    taste3.save()
+
+    flavor_one.taste_set.add(taste1)
+    flavor_one.taste_set.add(taste2)
+    flavor_one.taste_set.add(taste3)
 
     expected = {
         "pk": 1,
@@ -289,9 +380,59 @@ def test_get_model_dict_many_to_many_is_referenced():
         "datetime": None,
         "time": None,
         "duration": None,
-        "taste_set": [taste.pk],
+        "taste_set": [taste1.pk, taste2.pk, taste3.pk],
         "origins": [],
     }
+
+    flavor_one = Flavor.objects.filter(id=flavor_one.id).first()
+
+    with django_assert_num_queries(2):
+        actual = serializer._get_model_dict(flavor_one)
+
+    assert expected == actual
+
+
+@pytest.mark.django_db
+def test_get_model_dict_many_to_many_is_referenced_prefetched(
+    django_assert_num_queries,
+):
+    flavor_one = Flavor(name="name1", label="label1")
+    flavor_one.save()
+
+    taste1 = Taste(name="Bitter")
+    taste1.save()
+    taste2 = Taste(name="Bitter2")
+    taste2.save()
+    taste3 = Taste(name="Bitter3")
+    taste3.save()
+
+    flavor_one.taste_set.add(taste1)
+    flavor_one.taste_set.add(taste2)
+    flavor_one.taste_set.add(taste3)
+
+    expected = {
+        "pk": 1,
+        "name": "name1",
+        "label": "label1",
+        "parent": None,
+        "decimal_value": None,
+        "float_value": None,
+        "uuid": str(flavor_one.uuid),
+        "date": None,
+        "datetime": None,
+        "time": None,
+        "duration": None,
+        "taste_set": [taste1.pk, taste2.pk, taste3.pk],
+        "origins": [],
+    }
+
+    flavor_one = (
+        Flavor.objects.prefetch_related("taste_set").filter(id=flavor_one.id).first()
+    )
+
+    # prefetch_related should reduce the database calls
+    with django_assert_num_queries(1):
+        actual = serializer._get_model_dict(flavor_one)
 
     assert expected == actual
 

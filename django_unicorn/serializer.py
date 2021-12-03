@@ -99,10 +99,16 @@ def _get_model_dict(model: Model) -> dict:
 
     for field in model._meta.get_fields():
         if field.is_relation and field.many_to_many:
+            exclude_field_attributes = getattr(
+                model, "__unicorn__exclude_field_attribute", []
+            )
             related_name = field.name
 
             if field.auto_created:
                 related_name = field.related_name or f"{field.name}_set"
+
+            if related_name in exclude_field_attributes:
+                continue
 
             pks = []
 
@@ -231,10 +237,6 @@ def _exclude_field_attributes(
     _exclude_field_attributes({"1": {"2": {"3": "4"}}}, ("1.2.3",)) == {"1": {"2": {}}}
     """
 
-    assert exclude_field_attributes is None or is_non_string_sequence(
-        exclude_field_attributes
-    ), "exclude_field_attributes type needs to be a sequence"
-
     if exclude_field_attributes:
         for field in exclude_field_attributes:
             field_splits = field.split(".")
@@ -277,6 +279,40 @@ def dumps(
 
     Returns a `str` instead of `bytes` (which deviates from `orjson.dumps`), but seems more useful.
     """
+
+    assert exclude_field_attributes is None or is_non_string_sequence(
+        exclude_field_attributes
+    ), "exclude_field_attributes type needs to be a sequence"
+
+    # This explicitly handles excluding many-to-many fields with a hacky private `__unicorn__exclude_field_attribute`
+    # attribute that gets used later in `_get_model_json`
+    if exclude_field_attributes:
+        updated_exclude_field_attributes = set()
+
+        for field_attributes in exclude_field_attributes:
+            field_attributes_split = field_attributes.split(".")
+            field_attribute = field_attributes_split[0]
+
+            for key in data.keys():
+                if isinstance(data[key], Model) and key == field_attribute:
+                    remaining_field_attributes = field_attributes_split[1:]
+
+                    if hasattr(data[key], "__unicorn__exclude_field_attribute"):
+                        data[key].__unicorn__exclude_field_attribute.append(
+                            remaining_field_attributes[0]
+                        )
+                    else:
+                        setattr(
+                            data[key],
+                            "__unicorn__exclude_field_attribute",
+                            remaining_field_attributes,
+                        )
+                    break
+                else:
+                    updated_exclude_field_attributes.add(field_attributes)
+
+        # Convert list to tuple again so it's hashable for `lru_cache`
+        exclude_field_attributes = tuple(updated_exclude_field_attributes)
 
     serialized_data = orjson.dumps(data, default=_json_serializer)
 

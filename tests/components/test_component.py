@@ -202,11 +202,14 @@ def test_meta_javascript_exclude_nested_multiple_with_spaces():
         another = {"Neutral Milk Hotel": {"album": {"On Avery Island": 1996}}}
 
         class Meta:
-            javascript_exclude = ("name.Universe", "another.Neutral Milk Hotel.album")
+            javascript_exclude = ("another.Neutral Milk Hotel.album",)
 
-    expected = '{"another":{"Neutral Milk Hotel":{}},"name":{}}'
+    expected = (
+        '{"another":{"Neutral Milk Hotel":{}},"name":{"Universe":{"World":"Earth"}}}'
+    )
     component = TestComponent(component_id="asdf1234", component_name="hello-world")
-    assert expected == component.get_frontend_context_variables()
+    actual = component.get_frontend_context_variables()
+    assert expected == actual
 
 
 def test_meta_javascript_exclude_nested_with_list():
