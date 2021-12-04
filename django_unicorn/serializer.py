@@ -1,7 +1,7 @@
 import logging
 from decimal import Decimal
 from functools import lru_cache
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from django.core.serializers import serialize
 from django.db.models import (
@@ -82,6 +82,31 @@ def _parse_field_values_from_string(model: Model) -> None:
             setattr(model, field.attname, parse_duration(val))
 
 
+def _get_many_to_many_field_related_names(model: Model) -> List[str]:
+    """
+    Get the many-to-many fields for a particular model. Returns either the automatically
+    defined field name (i.e. something_set) or the related name.
+    """
+
+    # Use this internal method so that the fields can be cached
+    @lru_cache(maxsize=128, typed=True)
+    def _get_many_to_many_field_related_names_from_meta(meta):
+        names = []
+
+        for field in meta.get_fields():
+            if field.is_relation and field.many_to_many:
+                related_name = field.name
+
+                if field.auto_created:
+                    related_name = field.related_name or f"{field.name}_set"
+
+                names.append(related_name)
+
+        return names
+
+    return _get_many_to_many_field_related_names_from_meta(model._meta)
+
+
 def _get_model_dict(model: Model) -> dict:
     """
     Serializes Django models. Uses the built-in Django JSON serializer, but moves the data around to
@@ -97,32 +122,27 @@ def _get_model_dict(model: Model) -> dict:
     model_json = model_json.get("fields")
     model_json["pk"] = model_pk
 
-    for field in model._meta.get_fields():
-        if field.is_relation and field.many_to_many:
-            exclude_field_attributes = getattr(
-                model, "__unicorn__exclude_field_attribute", []
-            )
-            related_name = field.name
+    exclude_field_related_names = getattr(
+        model, "__unicorn__exclude_field_related_names", []
+    )
 
-            if field.auto_created:
-                related_name = field.related_name or f"{field.name}_set"
+    for related_name in _get_many_to_many_field_related_names(model):
+        if related_name in exclude_field_related_names:
+            continue
 
-            if related_name in exclude_field_attributes:
-                continue
+        pks = []
 
-            pks = []
+        try:
+            related_descriptor = getattr(model, related_name)
 
-            try:
-                related_descriptor = getattr(model, related_name)
+            # Get `pk` from `all` because it will re-use the cached data if the m-2-m field is prefetched
+            # Using `values_list("pk", flat=True)` or `only()` won't use the cached prefetched values
+            pks = [m.pk for m in related_descriptor.all()]
+        except ValueError:
+            # ValueError is throuwn when the model doesn't have an id already set
+            pass
 
-                # Get `pk` from `all` because it will re-use the cached data if the m-2-m field is prefetched
-                # Using `values_list("pk", flat=True)` or `only()` won't use the cached prefetched values
-                pks = [m.pk for m in related_descriptor.all()]
-            except ValueError:
-                # ValueError is throuwn when the model doesn't have an id already set
-                pass
-
-            model_json[related_name] = pks
+        model_json[related_name] = pks
 
     return model_json
 
@@ -262,6 +282,58 @@ def _exclude_field_attributes(
                 del dict_data[field_name][field_attr]
 
 
+def _handle_many_to_many_excluded_field_attributes(
+    data: Dict, exclude_field_attributes: Optional[Tuple[str]]
+) -> Optional[Tuple[str]]:
+    """
+    Explicitly handle excluding many-to-many fields on models with a semi-hacky private
+    `__unicorn__exclude_field_related_names attribute that gets used later in `_get_model_json`.
+    Since the many-to-many field won't be serialized, remove it from the list so it won't
+    be tried to be removed in `_exclude_field_attributes`.
+    """
+
+    if exclude_field_attributes:
+        many_to_many_field_attributes = set()
+
+        for field_attributes in exclude_field_attributes:
+            if "." not in field_attributes:
+                continue
+
+            (field_attribute, exclude_field_related_name, *_) = field_attributes.split(
+                "."
+            )
+
+            for key in data.keys():
+                if isinstance(data[key], Model) and key == field_attribute:
+                    model = data[key]
+
+                    many_to_many_related_names = _get_many_to_many_field_related_names(
+                        model
+                    )
+
+                    if exclude_field_related_name in many_to_many_related_names:
+                        if hasattr(model, "__unicorn__exclude_field_related_names"):
+                            model.__unicorn__exclude_field_related_names.append(
+                                exclude_field_related_name
+                            )
+                        else:
+                            setattr(
+                                model,
+                                "__unicorn__exclude_field_related_names",
+                                [exclude_field_related_name],
+                            )
+
+                        many_to_many_field_attributes.add(field_attributes)
+                        break
+
+        # Convert list to tuple again so it's hashable for `lru_cache`
+        exclude_field_attributes = tuple(
+            set(exclude_field_attributes) - many_to_many_field_attributes
+        )
+
+    return exclude_field_attributes
+
+
 def dumps(
     data: Dict, fix_floats: bool = True, exclude_field_attributes: Tuple[str] = None
 ) -> str:
@@ -284,35 +356,9 @@ def dumps(
         exclude_field_attributes
     ), "exclude_field_attributes type needs to be a sequence"
 
-    # This explicitly handles excluding many-to-many fields with a hacky private `__unicorn__exclude_field_attribute`
-    # attribute that gets used later in `_get_model_json`
-    if exclude_field_attributes:
-        updated_exclude_field_attributes = set()
-
-        for field_attributes in exclude_field_attributes:
-            field_attributes_split = field_attributes.split(".")
-            field_attribute = field_attributes_split[0]
-
-            for key in data.keys():
-                if isinstance(data[key], Model) and key == field_attribute:
-                    remaining_field_attributes = field_attributes_split[1:]
-
-                    if hasattr(data[key], "__unicorn__exclude_field_attribute"):
-                        data[key].__unicorn__exclude_field_attribute.append(
-                            remaining_field_attributes[0]
-                        )
-                    else:
-                        setattr(
-                            data[key],
-                            "__unicorn__exclude_field_attribute",
-                            remaining_field_attributes,
-                        )
-                    break
-                else:
-                    updated_exclude_field_attributes.add(field_attributes)
-
-        # Convert list to tuple again so it's hashable for `lru_cache`
-        exclude_field_attributes = tuple(updated_exclude_field_attributes)
+    exclude_field_attributes = _handle_many_to_many_excluded_field_attributes(
+        data, exclude_field_attributes
+    )
 
     serialized_data = orjson.dumps(data, default=_json_serializer)
 
