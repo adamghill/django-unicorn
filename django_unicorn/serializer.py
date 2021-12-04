@@ -122,14 +122,7 @@ def _get_model_dict(model: Model) -> dict:
     model_json = model_json.get("fields")
     model_json["pk"] = model_pk
 
-    exclude_field_related_names = getattr(
-        model, "__unicorn__exclude_field_related_names", []
-    )
-
     for related_name in _get_many_to_many_field_related_names(model):
-        if related_name in exclude_field_related_names:
-            continue
-
         pks = []
 
         try:
@@ -282,58 +275,6 @@ def _exclude_field_attributes(
                 del dict_data[field_name][field_attr]
 
 
-def _handle_many_to_many_excluded_field_attributes(
-    data: Dict, exclude_field_attributes: Optional[Tuple[str]]
-) -> Optional[Tuple[str]]:
-    """
-    Explicitly handle excluding many-to-many fields on models with a semi-hacky private
-    `__unicorn__exclude_field_related_names attribute that gets used later in `_get_model_json`.
-    Since the many-to-many field won't be serialized, remove it from the list so it won't
-    be tried to be removed in `_exclude_field_attributes`.
-    """
-
-    if exclude_field_attributes:
-        many_to_many_field_attributes = set()
-
-        for field_attributes in exclude_field_attributes:
-            if "." not in field_attributes:
-                continue
-
-            (field_attribute, exclude_field_related_name, *_) = field_attributes.split(
-                "."
-            )
-
-            for key in data.keys():
-                if isinstance(data[key], Model) and key == field_attribute:
-                    model = data[key]
-
-                    many_to_many_related_names = _get_many_to_many_field_related_names(
-                        model
-                    )
-
-                    if exclude_field_related_name in many_to_many_related_names:
-                        if hasattr(model, "__unicorn__exclude_field_related_names"):
-                            model.__unicorn__exclude_field_related_names.append(
-                                exclude_field_related_name
-                            )
-                        else:
-                            setattr(
-                                model,
-                                "__unicorn__exclude_field_related_names",
-                                [exclude_field_related_name],
-                            )
-
-                        many_to_many_field_attributes.add(field_attributes)
-                        break
-
-        # Convert list to tuple again so it's hashable for `lru_cache`
-        exclude_field_attributes = tuple(
-            set(exclude_field_attributes) - many_to_many_field_attributes
-        )
-
-    return exclude_field_attributes
-
-
 def dumps(
     data: Dict, fix_floats: bool = True, exclude_field_attributes: Tuple[str] = None
 ) -> str:
@@ -355,10 +296,6 @@ def dumps(
     assert exclude_field_attributes is None or is_non_string_sequence(
         exclude_field_attributes
     ), "exclude_field_attributes type needs to be a sequence"
-
-    exclude_field_attributes = _handle_many_to_many_excluded_field_attributes(
-        data, exclude_field_attributes
-    )
 
     serialized_data = orjson.dumps(data, default=_json_serializer)
 

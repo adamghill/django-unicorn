@@ -250,8 +250,11 @@ def test_model_many_to_many_with_excludes(django_assert_num_queries):
     flavor_one.taste_set.add(taste2)
     flavor_one.taste_set.add(taste3)
 
-    # This shouldn't make any database calls because the many-to-manys are excluded and
-    # all of the other data is already set
+    flavor_one = Flavor.objects.prefetch_related("taste_set", "origins").get(
+        pk=flavor_one.pk
+    )
+
+    # This shouldn't make any database calls because of the prefetch_related
     with django_assert_num_queries(0):
         actual = serializer.dumps(
             {"flavor": flavor_one},
