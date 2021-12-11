@@ -1,0 +1,72 @@
+{% load unicorn static %}
+
+
+<div>
+
+  <button onclick="refresh_dt()">Refresh datatable</button>
+    
+  <hr>
+  <div unicorn:loading unicorn:change="refresh_dt()">Update in progress ...</div>
+  <div unicorn:loading.remove>
+      
+    {% if is_adding %}
+      <div class="form-group row">
+          <label for="inputqty" class="col-sm-6 col-form-label">How many flavors? </label>
+          <div class="col-sm-6">
+          <input type="number" class="form-control" id="inputqty" value="1" placeholder="Flavor Quantity" unicorn:model="flavor_qty">
+          </div>
+      </div>
+      <button type="button" class="btn btn-primary" unicorn:click="create">Create flavors</button>
+      <button type="button" class="btn btn-danger" unicorn:click="cancel">Cancel</button>
+
+    {% else %}
+      <button unicorn:click="add_flavor">
+          Create New Flavor
+      </button>
+    {% endif %} 
+    <hr>
+
+        
+    <h5 class="my-2">List of Flavors</h5>
+    <table id="flavor-table" class="table table-bordered table-striped">
+        <thead>
+        <tr>
+        <th>Name</th>
+        <th>ID</th>
+        <th>Taste</th>
+        <th>Creation Date</th>
+        <th>Decimal Value</th>
+
+        <th>Actions</th>
+
+        </tr>
+        </thead>
+        <tbody>
+        {% for flavor in flavors %}
+            <tr>
+                <td>{{ flavor.name }}</td>
+                <td>
+                {{ flavor.id }}
+                </td>
+                <td>
+                {% for taste in flavor.flavor_set.all %}
+                  {{ taste.name }}
+                {% endfor %}
+                </td>
+                <td>{{ flavor.datetime }}</td>
+                <td>{{ flavor.decimal_value }}</td>
+                
+                <td>{% unicorn 'add-taste' key=flavor.id flavor_id=flavor.id %}</td>
+                
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+            
+{% unicorn 'very-far-button' %}
+
+  </div>
+</div>
+
+
+

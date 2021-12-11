@@ -1,0 +1,36 @@
+{% extends "www/base.html" %}
+{% load static unicorn %}
+{% block content %}
+{% unicorn 'add-flavor' %}
+
+  <!-- DataTables  & Plugins -->
+  <script
+  src="https://code.jquery.com/jquery-3.6.0.min.js"
+  integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+  crossorigin="anonymous"></script>
+  <script src="{% static 'js/datatables/jquery.dataTables.min.js' %}"></script>
+  <script src="{% static 'js/datatables-bs4/js/dataTables.bootstrap4.min.js' %}"></script>
+  <script src="{% static 'js/datatables-responsive/js/dataTables.responsive.min.js' %}"></script>
+  <script src="{% static 'js/datatables-responsive/js/responsive.bootstrap4.min.js' %}"></script>
+
+
+
+  <script>
+    $(function () {
+      refresh_dt();
+      
+    });
+
+    function refresh_dt()
+    {
+      $("#flavor-table").DataTable({
+        "responsive": true,
+        "lengthChange": false,
+        "autoWidth": false,
+        "ordering": true,
+        "info": true
+      });
+      alert("Datatable refreshed!");
+    }
+  </script>
+{% endblock %}
