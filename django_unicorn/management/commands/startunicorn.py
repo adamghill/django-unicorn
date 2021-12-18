@@ -106,7 +106,20 @@ class Command(BaseCommand):
 
         (component_base_path / "__init__.py").touch(exist_ok=True)
 
+        nested_paths = []
+
         for component_name in options["component_names"]:
+            if "." in component_name:
+                (*nested_paths, component_name) = component_name.split(".")
+
+                for nested_path in nested_paths:
+                    component_base_path /= nested_path
+
+                    if not component_base_path.exists():
+                        component_base_path.mkdir()
+
+                    (component_base_path / "__init__.py").touch(exist_ok=True)
+
             snake_case_component_name = convert_to_snake_case(component_name)
             pascal_case_component_name = convert_to_pascal_case(component_name)
 
@@ -134,6 +147,12 @@ class Command(BaseCommand):
                     (app_directory / "templates").mkdir()
 
                 template_base_path.mkdir()
+
+            for nested_path in nested_paths:
+                template_base_path /= nested_path
+
+                if not template_base_path.exists():
+                    template_base_path.mkdir()
 
             template_path = template_base_path / f"{component_name}.html"
 
