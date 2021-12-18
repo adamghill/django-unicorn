@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.40.0
+
+- Add direct view so that components can be added directly to urls without being required to be included in a regular Django template.
+- Add capability for `startunicorn` to created components in sub-folders (#299)[https://github.com/adamghill/django-unicorn/issues/299]
+
+[All changes since 0.39.1](https://github.com/adamghill/django-unicorn/compare/0.39.1...0.40.0).
+
 ## v0.39.1
 
 - Prefer `prefetch_related` to reduce database calls for many-to-many fields.
