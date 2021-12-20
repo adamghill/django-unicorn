@@ -2,7 +2,7 @@ import re
 
 from django.http.request import HttpRequest
 from django.template import Context, RequestContext
-from django.template.base import Token, TokenType
+from django.template.base import Parser, Token, TokenType
 
 import pytest
 
@@ -10,6 +10,10 @@ from django_unicorn.components import UnicornView
 from django_unicorn.templatetags.unicorn import unicorn
 from django_unicorn.utils import generate_checksum
 from example.coffee.models import Flavor
+
+
+class FakeComponent(UnicornView):
+    template_name = "templates/test_component.html"
 
 
 class FakeComponentParent(UnicornView):
@@ -67,7 +71,7 @@ def test_unicorn_render_kwarg():
         TokenType.TEXT,
         "unicorn 'tests.templatetags.test_unicorn_render.FakeComponentKwargs' test_kwarg='tested!'",
     )
-    unicorn_node = unicorn(None, token)
+    unicorn_node = unicorn(Parser([]), token)
     context = {}
     actual = unicorn_node.render(Context(context))
 
@@ -79,7 +83,7 @@ def test_unicorn_render_context_variable():
         TokenType.TEXT,
         "unicorn 'tests.templatetags.test_unicorn_render.FakeComponentKwargs' test_kwarg=test_var.nested",
     )
-    unicorn_node = unicorn(None, token)
+    unicorn_node = unicorn(Parser([]), token)
     context = {"test_var": {"nested": "variable!"}}
     actual = unicorn_node.render(Context(context))
 
@@ -91,7 +95,7 @@ def test_unicorn_render_with_invalid_html():
         TokenType.TEXT,
         "unicorn 'tests.templatetags.test_unicorn_render.FakeComponentKwargsWithHtmlEntity' test_kwarg=test_var.nested",
     )
-    unicorn_node = unicorn(None, token)
+    unicorn_node = unicorn(Parser([]), token)
     context = {"test_var": {"nested": "variable!"}}
     actual = unicorn_node.render(Context(context))
 
@@ -104,7 +108,7 @@ def test_unicorn_render_parent(settings):
         TokenType.TEXT,
         "unicorn 'tests.templatetags.test_unicorn_render.FakeComponentKwargs' parent=view",
     )
-    unicorn_node = unicorn(None, token)
+    unicorn_node = unicorn(Parser([]), token)
     view = FakeComponentParent(component_name="test", component_id="asdf")
     context = {"view": view}
     unicorn_node.render(Context(context))
@@ -122,7 +126,7 @@ def test_unicorn_render_parent_with_key(settings):
         TokenType.TEXT,
         "unicorn 'tests.templatetags.test_unicorn_render.FakeComponentKwargs' parent=view key='blob'",
     )
-    unicorn_node = unicorn(None, token)
+    unicorn_node = unicorn(Parser([]), token)
     view = FakeComponentParent(component_name="test", component_id="asdf")
     context = {"view": view}
     unicorn_node.render(Context(context))
@@ -139,7 +143,7 @@ def test_unicorn_render_parent_with_id(settings):
         TokenType.TEXT,
         "unicorn 'tests.templatetags.test_unicorn_render.FakeComponentKwargs' parent=view id='flob'",
     )
-    unicorn_node = unicorn(None, token)
+    unicorn_node = unicorn(Parser([]), token)
     view = FakeComponentParent(component_name="test", component_id="asdf")
     context = {"view": view}
     unicorn_node.render(Context(context))
@@ -156,7 +160,7 @@ def test_unicorn_render_parent_with_pk(settings):
         TokenType.TEXT,
         "unicorn 'tests.templatetags.test_unicorn_render.FakeComponentKwargs' parent=view pk=99",
     )
-    unicorn_node = unicorn(None, token)
+    unicorn_node = unicorn(Parser([]), token)
     view = FakeComponentParent(component_name="test", component_id="asdf")
     context = {"view": view}
     unicorn_node.render(Context(context))
@@ -173,7 +177,7 @@ def test_unicorn_render_parent_with_model_id(settings):
         TokenType.TEXT,
         "unicorn 'tests.templatetags.test_unicorn_render.FakeComponentKwargs' parent=view model=model",
     )
-    unicorn_node = unicorn(None, token)
+    unicorn_node = unicorn(Parser([]), token)
     view = FakeComponentParent(component_name="test", component_id="asdf")
 
     # Fake a model that only has an id
@@ -200,7 +204,7 @@ def test_unicorn_render_parent_with_model_pk(settings):
         TokenType.TEXT,
         "unicorn 'tests.templatetags.test_unicorn_render.FakeComponentKwargs' parent=view model=model",
     )
-    unicorn_node = unicorn(None, token)
+    unicorn_node = unicorn(Parser([]), token)
     view = FakeComponentParent(component_name="test", component_id="asdf")
 
     flavor = Flavor(pk=187)
@@ -219,7 +223,7 @@ def test_unicorn_render_id_use_pk():
         TokenType.TEXT,
         "unicorn 'tests.templatetags.test_unicorn_render.FakeComponentModel' model_id=model.id",
     )
-    unicorn_node = unicorn(None, token)
+    unicorn_node = unicorn(Parser([]), token)
     context = {"model": {"pk": 123}}
     actual = unicorn_node.render(Context(context))
 
@@ -232,7 +236,7 @@ def test_unicorn_render_component_one_script_tag(settings):
         TokenType.TEXT,
         "unicorn 'tests.templatetags.test_unicorn_render.FakeComponentKwargs'",
     )
-    unicorn_node = unicorn(None, token)
+    unicorn_node = unicorn(Parser([]), token)
     context = {}
     html = unicorn_node.render(Context(context))
 
@@ -246,7 +250,7 @@ def test_unicorn_render_child_component_no_script_tag(settings):
         TokenType.TEXT,
         "unicorn 'tests.templatetags.test_unicorn_render.FakeComponentKwargs' parent=view",
     )
-    unicorn_node = unicorn(None, token)
+    unicorn_node = unicorn(Parser([]), token)
     view = FakeComponentParent(component_name="test", component_id="asdf")
     context = {"view": view}
     html = unicorn_node.render(Context(context))
@@ -260,7 +264,7 @@ def test_unicorn_render_parent_component_one_script_tag(settings):
         TokenType.TEXT,
         "unicorn 'tests.templatetags.test_unicorn_render.FakeComponentParent'",
     )
-    unicorn_node = unicorn(None, token)
+    unicorn_node = unicorn(Parser([]), token)
     context = {}
     html = unicorn_node.render(Context(context))
 
@@ -274,7 +278,7 @@ def test_unicorn_render_calls(settings):
         TokenType.TEXT,
         "unicorn 'tests.templatetags.test_unicorn_render.FakeComponentCalls'",
     )
-    unicorn_node = unicorn(None, token)
+    unicorn_node = unicorn(Parser([]), token)
     context = {}
     html = unicorn_node.render(Context(context))
 
@@ -289,7 +293,7 @@ def test_unicorn_render_calls_with_arg(settings):
         TokenType.TEXT,
         "unicorn 'tests.templatetags.test_unicorn_render.FakeComponentCalls2'",
     )
-    unicorn_node = unicorn(None, token)
+    unicorn_node = unicorn(Parser([]), token)
     context = {}
     html = unicorn_node.render(Context(context))
 
@@ -304,7 +308,7 @@ def test_unicorn_render_calls_no_mount_call(settings):
         TokenType.TEXT,
         "unicorn 'tests.templatetags.test_unicorn_render.FakeComponentParent'",
     )
-    unicorn_node = unicorn(None, token)
+    unicorn_node = unicorn(Parser([]), token)
     context = {}
     html = unicorn_node.render(Context(context))
 
@@ -319,7 +323,7 @@ def test_unicorn_render_hash(settings):
         TokenType.TEXT,
         "unicorn 'tests.templatetags.test_unicorn_render.FakeComponentParent'",
     )
-    unicorn_node = unicorn(None, token)
+    unicorn_node = unicorn(Parser([]), token)
     context = {}
     html = unicorn_node.render(Context(context))
 
@@ -332,3 +336,16 @@ def test_unicorn_render_hash(settings):
     rendered_content = html[:script_idx]
     expected_hash = generate_checksum(rendered_content)
     assert f'"hash":"{expected_hash}"' in html
+
+
+def test_unicorn_render_with_component_name_from_context():
+    token = Token(
+        TokenType.TEXT,
+        "unicorn component_name",
+    )
+    unicorn_node = unicorn(Parser([]), token)
+    context = {"component_name": "tests.templatetags.test_unicorn_render.FakeComponent"}
+    unicorn_node.render(Context(context))
+
+    # Success if no exception was raised so far
+    assert True
