@@ -1,11 +1,12 @@
 import re
 
 from django.template import Context
-from django.template.base import Token, TokenType
+from django.template.base import Parser, Token, TokenType
 
 import pytest
 
 from django_unicorn.components import UnicornView
+from django_unicorn.errors import ComponentNotValid
 from django_unicorn.templatetags.unicorn import unicorn
 from django_unicorn.utils import generate_checksum
 from example.coffee.models import Flavor
@@ -344,7 +345,24 @@ def test_unicorn_render_with_component_name_from_context():
     )
     unicorn_node = unicorn(Parser([]), token)
     context = {"component_name": "tests.templatetags.test_unicorn_render.FakeComponent"}
-    unicorn_node.render(Context(context))
+    html = unicorn_node.render(Context(context))
 
-    # Success if no exception was raised so far
-    assert True
+    assert '<script type="module"' in html
+    assert len(re.findall('<script type="module"', html)) == 1
+
+
+def test_unicorn_render_with_invalid_component_name_from_context():
+    token = Token(
+        TokenType.TEXT,
+        "unicorn bad_component_name",
+    )
+    unicorn_node = unicorn(Parser([]), token)
+    context = {"component_name": "tests.templatetags.test_unicorn_render.FakeComponent"}
+
+    with pytest.raises(ComponentNotValid) as e:
+        unicorn_node.render(Context(context))
+
+    assert (
+        e.exconly()
+        == "django_unicorn.errors.ComponentNotValid: Component template is not valid: bad_component_name."
+    )

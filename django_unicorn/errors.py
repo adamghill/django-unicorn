@@ -20,3 +20,7 @@ class MissingComponentElement(Exception):
 
 class MissingComponentViewElement(Exception):
     pass
+
+
+class ComponentNotValid(Exception):
+    pass
