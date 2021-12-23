@@ -7,6 +7,7 @@ from django.template.base import FilterExpression
 import shortuuid
 
 from django_unicorn.call_method_parser import InvalidKwarg, parse_kwarg
+from django_unicorn.errors import ComponentNotValid
 
 
 register = template.Library()
@@ -99,7 +100,13 @@ class UnicornNode(template.Node):
             self.parent = resolved_kwargs.pop("parent")
 
         component_id = None
-        component_name = self.component_name.resolve(context)
+
+        try:
+            component_name = self.component_name.resolve(context)
+        except AttributeError:
+            raise ComponentNotValid(
+                f"Component template is not valid: {self.component_name}."
+            )
 
         if self.parent:
             # Child components use the parent for part of the `component_id`
