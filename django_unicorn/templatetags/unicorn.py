@@ -2,10 +2,12 @@ from typing import Dict
 
 from django import template
 from django.conf import settings
+from django.template.base import FilterExpression
 
 import shortuuid
 
 from django_unicorn.call_method_parser import InvalidKwarg, parse_kwarg
+from django_unicorn.errors import ComponentNotValid
 
 
 register = template.Library()
@@ -42,15 +44,7 @@ def unicorn(parser, token):
             "%r tag requires at least a single argument" % token.contents.split()[0]
         )
 
-    tag_name = contents[0]
-    component_name = contents[1]
-
-    if not (
-        component_name[0] == component_name[-1] and component_name[0] in ('"', "'")
-    ):
-        raise template.TemplateSyntaxError(
-            "%r tag's argument should be in quotes" % tag_name
-        )
+    component_name = parser.compile_filter(contents[1])
 
     kwargs = {}
 
@@ -61,11 +55,11 @@ def unicorn(parser, token):
         except InvalidKwarg:
             pass
 
-    return UnicornNode(component_name[1:-1], kwargs)
+    return UnicornNode(component_name, kwargs)
 
 
 class UnicornNode(template.Node):
-    def __init__(self, component_name: str, kwargs: Dict = {}):
+    def __init__(self, component_name: FilterExpression, kwargs: Dict = {}):
         self.component_name = component_name
         self.kwargs = kwargs
         self.component_key = ""
@@ -107,9 +101,16 @@ class UnicornNode(template.Node):
 
         component_id = None
 
+        try:
+            component_name = self.component_name.resolve(context)
+        except AttributeError:
+            raise ComponentNotValid(
+                f"Component template is not valid: {self.component_name}."
+            )
+
         if self.parent:
             # Child components use the parent for part of the `component_id`
-            component_id = f"{self.parent.component_id}:{self.component_name}"
+            component_id = f"{self.parent.component_id}:{component_name}"
 
             if self.component_key:
                 component_id = f"{component_id}:{self.component_key}"
@@ -140,7 +141,7 @@ class UnicornNode(template.Node):
 
         view = UnicornView.create(
             component_id=component_id,
-            component_name=self.component_name,
+            component_name=component_name,
             component_key=self.component_key,
             parent=self.parent,
             kwargs=resolved_kwargs,
