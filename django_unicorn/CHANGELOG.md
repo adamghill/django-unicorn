@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.41.0
+
+- Support using a context variable for a component name. [#314](https://github.com/adamghill/django-unicorn/pull/314) by [robwa](https://github.com/robwa)
+
+[All changes since 0.40.0](https://github.com/adamghill/django-unicorn/compare/0.40.0...0.41.0).
+
 ## v0.40.0
 
 - Add direct view so that components can be added directly to urls without being required to be included in a regular Django template.
