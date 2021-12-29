@@ -244,6 +244,23 @@ def test_unicorn_render_component_one_script_tag(settings):
     assert len(re.findall('<script type="module"', html)) == 1
 
 
+def test_unicorn_render_component_minify_html(settings):
+    settings.DEBUG = True
+    settings.UNICORN["MINIFY_HTML"] = True
+    token = Token(
+        TokenType.TEXT,
+        "unicorn 'tests.templatetags.test_unicorn_render.FakeComponentKwargs'",
+    )
+    unicorn_node = unicorn(Parser([]), token)
+    context = {}
+    html = unicorn_node.render(Context(context))
+
+    assert "<script type=module" in html
+    assert len(re.findall("<script type=module", html)) == 1
+
+    settings.UNICORN["MINIFY_HTML"] = False
+
+
 def test_unicorn_render_child_component_no_script_tag(settings):
     settings.DEBUG = True
     token = Token(

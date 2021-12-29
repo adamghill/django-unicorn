@@ -1,4 +1,8 @@
-from django_unicorn.settings import get_cache_alias, get_serial_enabled, get_settings
+from django_unicorn.settings import (
+    get_cache_alias,
+    get_minify_html_enabled,
+    get_serial_enabled,
+)
 
 
 def test_settings_cache_alias(settings):
@@ -32,3 +36,17 @@ def test_get_serial_enabled(settings):
     ] = "django.core.cache.backends.dummy.DummyCache"
     settings.UNICORN["CACHE_ALIAS"] = "unicorn_cache"
     assert get_serial_enabled() is False
+
+
+def test_settings_minify_html_false(settings):
+    settings.UNICORN["MINIFY_HTML"] = False
+
+    assert get_minify_html_enabled() is False
+
+
+def test_settings_minify_html_true(settings):
+    settings.UNICORN["MINIFY_HTML"] = True
+
+    assert get_minify_html_enabled() is True
+
+    settings.UNICORN["MINIFY_HTML"] = False

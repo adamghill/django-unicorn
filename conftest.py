@@ -32,6 +32,7 @@ def pytest_configure():
         "SERIAL": {"ENABLED": True, "TIMEOUT": 5},
         "CACHE_ALIAS": "default",
         "APPS": ("unicorn",),
+        "MINIFY_HTML": False,
     }
 
     caches = {

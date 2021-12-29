@@ -8,6 +8,7 @@ from bs4.dammit import EntitySubstitution
 from bs4.element import Tag
 from bs4.formatter import HTMLFormatter
 
+from django_unicorn.settings import get_minify_html_enabled
 from django_unicorn.utils import sanitize_html
 
 from ..decorators import timed
@@ -122,6 +123,15 @@ class UnicornTemplateResponse(TemplateResponse):
         self.component.rendered(rendered_template)
 
         response.content = rendered_template
+
+        if get_minify_html_enabled():
+            # Import here in case the minify extra was not installed
+            from htmlmin import minify
+
+            minified_html = minify(response.content.decode())
+
+            if len(minified_html) < len(rendered_template):
+                response.content = minified_html
 
         return response
 
