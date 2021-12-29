@@ -484,4 +484,4 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
     component_request = ComponentRequest(request, component_name)
     json_result = _handle_component_request(request, component_request)
 
-    return JsonResponse(json_result)
+    return JsonResponse(json_result, json_dumps_params={"separators": (",", ":")})
