@@ -61,6 +61,7 @@ class FakeValidationForm(forms.Form):
     text = forms.CharField(min_length=3, max_length=10)
     date_time = forms.DateTimeField()
     number = forms.IntegerField()
+    permanent = forms.BooleanField()
 
 
 class FakeValidationComponent(UnicornView):
@@ -70,6 +71,7 @@ class FakeValidationComponent(UnicornView):
     text = "hello"
     number = ""
     date_time = datetime(2020, 9, 13, 17, 45, 14)
+    permanent = True
 
     def set_text_no_validation(self):
         self.text = "no validation"

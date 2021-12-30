@@ -9,6 +9,7 @@ from django.conf import settings
 from django.core.cache import caches
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models import Model
+from django.forms.widgets import CheckboxInput
 from django.http import HttpRequest
 from django.utils.decorators import classonlymethod
 from django.views.generic.base import TemplateView
@@ -399,6 +400,12 @@ class UnicornView(TemplateView):
                     if key in form.cleaned_data:
                         cleaned_value = form.cleaned_data[key]
                         value = field.widget.format_value(cleaned_value)
+
+                        if isinstance(field.widget, CheckboxInput) and isinstance(
+                            cleaned_value, bool
+                        ):
+                            # Handle booleans for checkboxes explicitly because `format_value` returns `None` in this case
+                            value = cleaned_value
 
                         # Don't update the frontend variable if the only change is
                         # stripping off the whitespace from the field value

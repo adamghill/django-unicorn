@@ -5,6 +5,7 @@ import pytest
 
 from django_unicorn.components import UnicornView
 from django_unicorn.serializer import InvalidFieldNameError
+from tests.views.fake_components import FakeValidationComponent
 
 
 class ExampleComponent(UnicornView):
@@ -236,3 +237,19 @@ def test_meta_exclude():
     component = TestComponent(component_id="asdf1234", component_name="hello-world")
     assert "name" not in component.get_frontend_context_variables()
     assert "name" not in component.get_context_data()
+
+
+def test_get_frontend_context_variables_form_with_boolean_field(component):
+    """
+    Form classes with BooleanField and CheckboxInput widget set the bool values to `None`
+    without an explicit fix.
+    """
+
+    component = FakeValidationComponent(
+        component_id="asdf1234", component_name="example"
+    )
+
+    frontend_context_variables = component.get_frontend_context_variables()
+    frontend_context_variables_dict = orjson.loads(frontend_context_variables)
+
+    assert frontend_context_variables_dict.get("permanent")
