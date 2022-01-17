@@ -16,21 +16,21 @@
 
 [Unicorn](https://www.django-unicorn.com) is a reactive component framework that progressively enhances a normal Django view, makes AJAX calls in the background, and dynamically updates the DOM. It seamlessly extends Django past its server-side framework roots without giving up all of its niceties or re-building your website.
 
-## :zap: How to use
+## ⚡ How to use
 
 1. [Install](https://www.django-unicorn.com/docs/installation/) `Unicorn`
 1. [Create](https://www.django-unicorn.com/docs/components/) a component
 1. Load the `Unicorn` templatetag with `{% load unicorn %}` and add the component to your template with `{% unicorn 'component-name' %}`
-1. :tada:
+1. 🎉
 
-## :book: More details
+## 📖 More details
 
 - [Changelog](https://www.django-unicorn.com/docs/changelog/)
 - [Docs](https://www.django-unicorn.com/docs/)
 - [Screencasts](https://www.django-unicorn.com/screencasts/installation)
 - [Examples](https://www.django-unicorn.com/examples/todo)
 
-## :clap: Contributors
+## 👏 Contributors
 
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
 
