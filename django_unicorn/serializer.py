@@ -267,12 +267,13 @@ def _exclude_field_attributes(
                 if field_name not in dict_data:
                     raise InvalidFieldNameError(field_name=field_name, data=dict_data)
 
-                if field_attr not in dict_data[field_name]:
-                    raise InvalidFieldAttributeError(
-                        field_name=field_name, field_attr=field_attr, data=dict_data
-                    )
+                if dict_data[field_name] is not None:
+                    if field_attr not in dict_data[field_name]:
+                        raise InvalidFieldAttributeError(
+                            field_name=field_name, field_attr=field_attr, data=dict_data
+                        )
 
-                del dict_data[field_name][field_attr]
+                    del dict_data[field_name][field_attr]
 
 
 def dumps(
