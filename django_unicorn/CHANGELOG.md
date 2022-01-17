@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.41.2
+
+- Fix: Handle excluding a field's attribute when the field is `None`.
+
+[All changes since 0.41.1](https://github.com/adamghill/django-unicorn/compare/0.41.1...0.41.2).
+
 ## v0.41.1
 
 - Fix: Handle component classes with a `bool` class attribute and a `form_class` with a `BooleanField`. Reported by [zurtri](https://github.com/zurtri)
