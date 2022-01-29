@@ -1,4 +1,9 @@
+import logging
+
 from django.conf import settings
+
+
+logger = logging.getLogger(__name__)
 
 
 SETTINGS_KEY = "UNICORN"
@@ -53,3 +58,19 @@ def get_serial_timeout():
     Default serial timeout is 60 seconds.
     """
     return get_serial_settings().get("TIMEOUT", 60)
+
+
+def get_minify_html_enabled():
+    minify_html_enabled = get_setting("MINIFY_HTML", False)
+
+    if minify_html_enabled:
+        try:
+            import htmlmin
+        except ModuleNotFoundError:
+            logger.error(
+                "MINIFY_HTML is `True`, but minify extra could not be imported. Install with `unicorn[minify]`."
+            )
+
+            return False
+
+    return minify_html_enabled
