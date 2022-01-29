@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.42.0
+
+- Remove all blank spaces from JSON responses.
+- Optional support for minifying response HTML with [`htmlmin`](https://pypi.org/project/htmlmin/).
+- Log warning message if the component HTML doesn't appear to be well-formed (i.e. an element does not have an ending tag). [#342](https://github.com/adamghill/django-unicorn/issues/342) by [liamlawless35](https://github.com/liamlawless35)
+
+**Breaking changes**
+
+- Bump supported Python to >=3.7.
+
+[All changes since 0.42.0](https://github.com/adamghill/django-unicorn/compare/0.41.2...0.42.0).
+
 ## v0.41.2
 
 - Fix: Handle excluding a field's attribute when the field is `None`.
@@ -21,7 +33,7 @@
 ## v0.40.0
 
 - Add direct view so that components can be added directly to urls without being required to be included in a regular Django template.
-- Add capability for `startunicorn` to created components in sub-folders (#299)[https://github.com/adamghill/django-unicorn/issues/299]
+- Add capability for `startunicorn` to created components in sub-folders. (#299)[https://github.com/adamghill/django-unicorn/issues/299]
 
 [All changes since 0.39.1](https://github.com/adamghill/django-unicorn/compare/0.39.1...0.40.0).
 

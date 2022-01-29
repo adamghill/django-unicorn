@@ -20,7 +20,7 @@
 ## Bump version
 
 1. `poe t`
-1. `poe b`
+1. `poe jb`
 1. `poetry version major|minor|patch`
 1. Update django-unicorn.com's changelog.md
 1. Commit/tag/push version bump
