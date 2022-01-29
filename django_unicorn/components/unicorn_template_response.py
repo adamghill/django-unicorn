@@ -1,4 +1,6 @@
 import logging
+import re
+from collections import deque
 
 from django.template.response import TemplateResponse
 
@@ -17,6 +19,45 @@ from ..utils import generate_checksum
 
 
 logger = logging.getLogger(__name__)
+
+
+# https://developer.mozilla.org/en-US/docs/Glossary/Empty_element
+EMPTY_ELEMENTS = (
+    "<area>",
+    "<base>",
+    "<br>",
+    "<col>",
+    "<embed>",
+    "<hr>",
+    "<img>",
+    "<input>",
+    "<link>",
+    "<meta>",
+    "<param>",
+    "<source>",
+    "<track>",
+    "<wbr>",
+)
+
+
+def is_html_well_formed(html: str) -> bool:
+    """
+    Whether the passed-in HTML is missing any closing elements which can cause issues when rendering.
+    """
+
+    tag_list = re.split("(<[^>!]*>)", html)[1::2]
+    stack = deque()
+
+    for tag in tag_list:
+        if "/" not in tag:
+            cleaned_tag = re.sub(r"(<(\w+)[^>!]*>)", r"<\2>", tag)
+
+            if cleaned_tag not in EMPTY_ELEMENTS:
+                stack.append(cleaned_tag)
+        elif len(stack) > 0 and (tag.replace("/", "") == stack[len(stack) - 1]):
+            stack.pop()
+
+    return len(stack) == 0
 
 
 class UnsortedAttributes(HTMLFormatter):
@@ -67,6 +108,11 @@ class UnicornTemplateResponse(TemplateResponse):
             return response
 
         content = response.content.decode("utf-8")
+
+        if not is_html_well_formed(content):
+            logger.warning(
+                f"The HTML in '{self.component.component_name}' appears to be missing a closing tag. That can potentially cause errors in Unicorn."
+            )
 
         frontend_context_variables = self.component.get_frontend_context_variables()
         frontend_context_variables_dict = orjson.loads(frontend_context_variables)

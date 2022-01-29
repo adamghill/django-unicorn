@@ -145,5 +145,10 @@ LOGGING = {
             "level": "INFO",
             "propagate": False,
         },
+        "django_unicorn": {
+            "handlers": ["console"],
+            "level": "DEBUG",
+            "propagate": False,
+        },
     },
 }
