@@ -14,7 +14,7 @@ keywords = ["django", "python", "javascript", "fullstack"]
 "Funding" = "https://github.com/sponsors/adamghill"
 
 [tool.poetry.dependencies]
-python = "^3.6.2"
+python = ">=3.7,<4"
 django = ">=2.2"
 beautifulsoup4 = ">=4.8.0"
 orjson = "^3.6.0"
@@ -42,6 +42,8 @@ pywatchman = "^1.4.1"
 django-redis = "^4.12.1"
 nox = "^2020.12.31"
 poethepoet = "^0.10.0"
+coverage = {extras = ["toml"], version = "^6.2"}
+pytest-cov = "^3.0.0"
 
 [build-system]
 requires = ["poetry>=0.12"]
@@ -75,7 +77,13 @@ md = ["mm", "mi"]
 m = "example/manage.py"
 tp = "nox -r"
 tj = "npm run-script test"
-t = ["tp", "tj"]
+ta = ["tp", "tj"]
 is = "isort --settings pyproject.toml ."
-b = "npm run build"
-pyt = "pytest -m 'not slow'"
+jb = "npm run build"
+t = "pytest -m 'not slow'"
+tc = { cmd = "pytest --cov=django_unicorn", help = "Run tests with coverage" }
+cr = { cmd = "coverage report", help = "Show coverage report" }
+my = { cmd = "mypy .", help = "Run mypy" }
+b = { cmd = "black . --check --quiet", help = "Run black" }
+i = { cmd = "isort . --check --quiet", help = "Run isort" }
+tm = ["b", "i", "tc", "my"]
