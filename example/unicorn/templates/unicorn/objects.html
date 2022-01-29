@@ -105,6 +105,17 @@
     <br />
   </div>
 
+  <div>
+    <label>Enums</label>
+
+    <button unicorn:click="set_color({{ color.value }})">Sets color based on `self.color` enum</button>
+    <button unicorn:click="set_color(2)">Sets `self.color` to `Color.GREEN`</button>
+    <button unicorn:click="set_color({{ color.BLUE.value }})">Sets `self.color` to `Color.BLUE`</button>
+
+    <br />
+    color: {{ color }}
+  </div>
+
   <button u:click="$reset">$reset</button>
   <button u:click="$refresh">$refresh</button>
 </div>
