@@ -97,6 +97,5 @@ my = { cmd = "mypy .", help = "Run mypy" }
 b = { cmd = "black . --check --quiet", help = "Run black" }
 i = { cmd = "isort . --check --quiet", help = "Run isort" }
 tm = ["b", "i", "tc", "my"]
-cd = { shell = "cp django_unicorn/CHANGELOG.md docs/source/changelog.md" }
 sa = { cmd = "sphinx-autobuild -W docs/source docs/build", help = "Sphinx autobuild" }
 sb = { cmd = "sphinx-build -W docs/source docs/build", help = "Build documentation" }
