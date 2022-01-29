@@ -3,8 +3,8 @@
 ## v0.42.0
 
 - Remove all blank spaces from JSON responses.
-- Optional support for minifying response HTML with [`htmlmin`](https://pypi.org/project/htmlmin/).
-- Log warning message if the component HTML doesn't appear to be well-formed (i.e. an element does not have an ending tag). [#342](https://github.com/adamghill/django-unicorn/issues/342) by [liamlawless35](https://github.com/liamlawless35)
+- Optional support for [minifying response HTML](settings.md#minify_html) with [`htmlmin`](https://pypi.org/project/htmlmin/).
+- Log warning message if the component HTML does not appear to be well-formed (i.e. an element does not have an ending tag). [#342](https://github.com/adamghill/django-unicorn/issues/342) by [liamlawless35](https://github.com/liamlawless35)
 
 **Breaking changes**
 

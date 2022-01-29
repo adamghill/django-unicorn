@@ -24,8 +24,18 @@ dataclasses = {version = "^0.8.0", python = "<3.7"}
 decorator = "^4.4.2"
 htmlmin = { version = "^0.1.12", optional = true }
 
+# docs extras
+Sphinx = { version = "^4.3.2", optional = true }
+linkify-it-py = { version = "^1.0.3", optional = true }
+myst-parser = { version = "^0.16.1", optional = true }
+furo = { version = "^2021.11.23", optional = true }
+sphinx-copybutton = { version = "^0.4.0", optional = true }
+sphinx-autobuild = { version = "^2021.3.14", optional = true }
+rst2pdf = { version = "^0.98", optional = true }
+
 [tool.poetry.extras]
 minify = ["htmlmin"]
+docs = ["Sphinx", "linkify-it-py", "myst-parser", "furo", "sphinx-copybutton", "sphinx-autobuild", "rst2pdf"]
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2"
@@ -87,3 +97,6 @@ my = { cmd = "mypy .", help = "Run mypy" }
 b = { cmd = "black . --check --quiet", help = "Run black" }
 i = { cmd = "isort . --check --quiet", help = "Run isort" }
 tm = ["b", "i", "tc", "my"]
+cd = { shell = "cp django_unicorn/CHANGELOG.md docs/source/changelog.md" }
+sa = { cmd = "sphinx-autobuild -W docs/source docs/build", help = "Sphinx autobuild" }
+sb = { cmd = "sphinx-build -W docs/source docs/build", help = "Build documentation" }

@@ -1,6 +1,7 @@
 # Developing
 
 1. `git clone git@github.com:adamghill/django-unicorn.git`
+1. `cd django-unicorn`
 1. `poetry install`
 1. `poetry run python example/manage.py migrate`
 1. `poetry run python example/manage.py runserver localhost:8000`
