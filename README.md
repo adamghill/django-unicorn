@@ -1,7 +1,7 @@
 <p align="center">
   <a href="https://www.django-unicorn.com/"><img src="https://www.django-unicorn.com/static/img/unicorn.svg" alt="django-unicorn logo" height="80"/></a>
 </p>
-<h1 align="center">Unicorn</h1>
+<h1 align="center"><a href="https://www.django-unicorn.com/">Unicorn</a></h1>
 <p align="center">The magical full-stack framework for Django ✨</p>
 
 ![PyPI](https://img.shields.io/pypi/v/django-unicorn?color=blue&style=flat-square)
