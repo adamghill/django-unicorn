@@ -93,9 +93,11 @@ class Color(Enum):
   RED = 1
   GREEN = 2
   BLUE = 3
+  PURPLE = 4
 
 class EnumView(UnicornView):
     color = Color.RED
+    purple_color = Color.PURPLE
 
     def set_color(self, color_int: int):
       self.color = Color(color_int)
@@ -104,9 +106,17 @@ class EnumView(UnicornView):
 ```html
 <!-- enum.html -->
 <div>
-  <button unicorn:click="set_color({{ color.value }})">Sets `self.color` based on the existing value of the `self.color` enum</button>
-  <button unicorn:click="set_color(2)">Sets `self.color` to `Color.GREEN`</button>
-  <button unicorn:click="set_color({{ color.BLUE.value }})">Sets `self.color` to `Color.BLUE`</button>
+  <button unicorn:click="set_color({{ color.BLUE.value }})">Show BLUE (and 3) below when clicked</button>
+  <button unicorn:click="set_color(2)">Show GREEN (and 2) below when clicked</button>
+  <button unicorn:click="set_color({{ purple_color.value }})">Show PURPLE (and 4) below when clicked</button>
+
+  <br />
+  <!-- This will be RED when first rendered, and then will change based on the button clicked above -->
+  Color: {{ color }}
+
+  <br />
+  <!-- This will be 1 when first rendered, and then will change based on the button clicked above -->
+  Color int: {{ color.value }}
 </div>
 ```
 
