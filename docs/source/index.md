@@ -66,7 +66,7 @@ Sponsor <https://github.com/sponsors/adamghill>
 - [Livewire](https://laravel-livewire.com/), a full-stack framework for the PHP web framework, Laravel.
 - [LiveView](https://github.com/phoenixframework/phoenix_live_view), a library for the Elixir web framework, Phoenix, that uses websockets.
 - [StimulusReflex](https://docs.stimulusreflex.com), a library for the Ruby web framework, Ruby on Rails, that uses websockets.
-- [Hotwire](https://hotwire.dev), "is an alternative approach to building modern web applications without using much JavaScript by sending HTML instead of JSON over the wire". Uses AJAX, but can also use websockets.
+- [Hotwire](https://hotwire.dev), "is an alternative approach to building modern web applications without using much JavaScript by sending HTML instead of JSON over the wire". Uses AJAX, but can optionally use websockets.
 
 ### Full-stack framework Python packages
 
@@ -75,20 +75,20 @@ Sponsor <https://github.com/sponsors/adamghill>
 - [Sockpuppet](https://sockpuppet.argpar.se/), a port of Ruby on Rail's `StimulusReflex`. Requires Django channels and websockets.
 - [Django inertia.js adapter](https://github.com/zodman/inertia-django) allows Django to use <a href="https://inertiajs.com">inertia.js</a> to build an SPA without building an API.
 - [Hotwire for Django](https://github.com/hotwire-django) contains a few different repositiories to integrate [Hotwire](https://hotwire.dev) with Django.
+- [Django IDOM](https://github.com/idom-team/django-idom) creates highly interactive web pages purely in Python with React.
 - [Lona](https://lona-web.org/) is a web application framework, designed to write responsive web apps in full Python.
+- [IDOM](https://github.com/idom-team/idom), a port of ReactJS to Python. Fully compatible with all ReactJS components.
 
 #### Comparison
 
-| Repo                                                          | Django | Flask | AJAX | Websockets |                                                       Stars                                                        |
-| :------------------------------------------------------------ | :----: | :---: | :--: | :--------: | :----------------------------------------------------------------------------------------------------------------: |
-| [Unicorn](https://github.com/adamghill/django-unicorn)        |   ✔    |       |  ✔️  |            |   ![GitHub Repo stars](https://img.shields.io/github/stars/adamghill/django-unicorn?label=%20&style=flat-square)   |
-| [Reactor](https://github.com/edelvalle/reactor/)              |   ✔️   |       |      |     ✔️     |      ![GitHub Repo stars](https://img.shields.io/github/stars/edelvalle/reactor?label=%20&style=flat-square)       |
-| [Sockpuppet](https://github.com/jonathan-s/django-sockpuppet) |   ✔️   |       |      |     ✔️     | ![GitHub Repo stars](https://img.shields.io/github/stars/jonathan-s/django-sockpuppet?label=%20&style=flat-square) |
-| [Flask-Meld](https://github.com/mikeabrahamsen/Flask-Meld)    |        |  ✔️   |      |     ✔️     |  ![GitHub Repo stars](https://img.shields.io/github/stars/mikeabrahamsen/Flask-Meld?label=%20&style=flat-square)   |
-
-### Django packages to integrate lightweight frontend frameworks
-
-- [django-htmx](https://github.com/adamchainz/django-htmx) which has extensions for using Django with [htmx](https://htmx.org/).
+| Repo                                                           | Django | Flask | AJAX |   Websockets   |                                           Version                                            | Stars                                                                                                              |
+| :------------------------------------------------------------- | :----: | :---: | :--: | :------------: | :------------------------------------------------------------------------------------------: | ------------------------------------------------------------------------------------------------------------------ |
+| [Unicorn](https://github.com/adamghill/django-unicorn)         |   ✔    |       |  ✔️  |                |  ![PyPI version](https://img.shields.io/pypi/v/django-unicorn?label=%20&style=flat-square)   | ![GitHub Repo stars](https://img.shields.io/github/stars/adamghill/django-unicorn?label=%20&style=flat-square)     |
+| [Reactor](https://github.com/edelvalle/reactor/)               |   ✔️   |       |      |       ✔️       |  ![PyPI version](https://img.shields.io/pypi/v/django-reactor?label=%20&style=flat-square)   | ![GitHub Repo stars](https://img.shields.io/github/stars/edelvalle/reactor?label=%20&style=flat-square)            |
+| [Sockpuppet](https://github.com/jonathan-s/django-sockpuppet)  |   ✔️   |       |      |       ✔️       | ![PyPI version](https://img.shields.io/pypi/v/django-sockpuppet?label=%20&style=flat-square) | ![GitHub Repo stars](https://img.shields.io/github/stars/jonathan-s/django-sockpuppet?label=%20&style=flat-square) |
+| [Flask-Meld](https://github.com/mikeabrahamsen/Flask-Meld)     |        |  ✔️   |      |       ✔️       |    ![PyPI version](https://img.shields.io/pypi/v/flask-meld?label=%20&style=flat-square)     | ![GitHub Repo stars](https://img.shields.io/github/stars/mikeabrahamsen/Flask-Meld?label=%20&style=flat-square)    |
+| [Django IDOM](https://github.com/idom-team/django-idom)        |   ✔️   |       |      |       ✔️       |    ![PyPI version](https://img.shields.io/pypi/v/django-idom?label=%20&style=flat-square)    | ![GitHub Repo stars](https://img.shields.io/github/stars/idom-team/django-idom?label=%20&style=flat-square)        |
+| [Turbo Django](https://github.com/hotwire-django/turbo-django) |   ✔️   |       |      | ✔️ for streams |   ![PyPI version](https://img.shields.io/pypi/v/turbo-django?label=%20&style=flat-square)    | ![GitHub Repo stars](https://img.shields.io/github/stars/hotwire-django/turbo-django?label=%20&style=flat-square)  |
 
 ### Django component packages
 
@@ -96,3 +96,7 @@ Sponsor <https://github.com/sponsors/adamghill>
 - [django-component](https://gitlab.com/Mojeer/django_components), which provides declarative and composable components for Django, inspired by JavaScript frameworks.
 - [django-page-components](https://github.com/andreyfedoseev/django-page-components), a minimalistic framework for creating page components and using them in your Django views and templates.
 - [slippers](https://mitchel.me/slippers/), helps build reusable components in Django without writing a single line of Python.
+
+### Django packages to integrate lightweight frontend frameworks
+
+- [django-htmx](https://github.com/adamchainz/django-htmx) which has extensions for using Django with [htmx](https://htmx.org/).
