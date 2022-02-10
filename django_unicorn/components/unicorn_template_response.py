@@ -116,7 +116,7 @@ class UnicornTemplateResponse(TemplateResponse):
 
         frontend_context_variables = self.component.get_frontend_context_variables()
         frontend_context_variables_dict = orjson.loads(frontend_context_variables)
-        checksum = generate_checksum(orjson.dumps(frontend_context_variables_dict))
+        checksum = generate_checksum(str(frontend_context_variables_dict))
 
         soup = BeautifulSoup(content, features="html.parser")
         root_element = get_root_element(soup)

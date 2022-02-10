@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Dict
 
 from django import forms
 from django.shortcuts import redirect
@@ -82,3 +83,11 @@ class FakeValidationComponent(UnicornView):
 
     def set_number(self, number):
         self.number = number
+
+
+class FakeComponentWithDictionary(UnicornView):
+    template_name = "templates/test_component.html"
+    dictionary: Dict = None
+
+    def test_method(self):
+        pass

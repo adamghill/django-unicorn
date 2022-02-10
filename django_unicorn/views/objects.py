@@ -76,7 +76,7 @@ class ComponentRequest:
         checksum = self.body.get("checksum")
         assert checksum, "Missing checksum"
 
-        generated_checksum = generate_checksum(dumps(self.data, fix_floats=False))
+        generated_checksum = generate_checksum(str(self.data))
         assert checksum == generated_checksum, "Checksum does not match"
 
 

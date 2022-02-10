@@ -1,6 +1,5 @@
 import time
 
-import orjson
 import shortuuid
 
 from django_unicorn.utils import generate_checksum
@@ -19,7 +18,7 @@ def post_and_get_response(
     message = {
         "actionQueue": action_queue,
         "data": data,
-        "checksum": generate_checksum(orjson.dumps(data)),
+        "checksum": generate_checksum(str(data)),
         "id": component_id,
         "epoch": time.time(),
         "hash": hash,

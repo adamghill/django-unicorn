@@ -216,7 +216,7 @@ def _process_component_request(
         "data": updated_data,
         "errors": component.errors,
         "calls": component.calls,
-        "checksum": generate_checksum(orjson.dumps(component_request.data)),
+        "checksum": generate_checksum(str(component_request.data)),
     }
 
     if partial_doms:
@@ -270,7 +270,7 @@ def _process_component_request(
         parent_frontend_context_variables = loads(
             parent_component.get_frontend_context_variables()
         )
-        parent_checksum = generate_checksum(dumps(parent_frontend_context_variables))
+        parent_checksum = generate_checksum(str(parent_frontend_context_variables))
 
         parent = {
             "id": parent_component.component_id,

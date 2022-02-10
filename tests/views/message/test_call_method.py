@@ -25,6 +25,32 @@ def test_message_call_method(client):
     assert response["data"].get("method_count") == 1
 
 
+def test_message_call_method_with_dictionary_checksum(client):
+    data = {"dictionary": {"1": "test", "2": "anothertest", "3": "", "4": "moretest"}}
+    message = {
+        "actionQueue": [
+            {
+                "payload": {"name": "test_method"},
+                "type": "callMethod",
+            }
+        ],
+        "data": data,
+        "checksum": generate_checksum(str(data)),
+        "id": shortuuid.uuid()[:8],
+        "epoch": time.time(),
+    }
+
+    response = client.post(
+        "/message/tests.views.fake_components.FakeComponentWithDictionary",
+        message,
+        content_type="application/json",
+    )
+
+    body = orjson.loads(response.content)
+
+    assert not body["errors"]
+
+
 def test_message_call_method_redirect(client):
     data = {}
     message = {
@@ -35,7 +61,7 @@ def test_message_call_method_redirect(client):
             }
         ],
         "data": data,
-        "checksum": generate_checksum(orjson.dumps(data)),
+        "checksum": generate_checksum(str(data)),
         "id": shortuuid.uuid()[:8],
         "epoch": time.time(),
     }
@@ -64,7 +90,7 @@ def test_message_call_method_refresh_redirect(client):
             }
         ],
         "data": data,
-        "checksum": generate_checksum(orjson.dumps(data)),
+        "checksum": generate_checksum(str(data)),
         "id": shortuuid.uuid()[:8],
         "epoch": time.time(),
     }
@@ -94,7 +120,7 @@ def test_message_call_method_hash_update(client):
             }
         ],
         "data": data,
-        "checksum": generate_checksum(orjson.dumps(data)),
+        "checksum": generate_checksum(str(data)),
         "id": shortuuid.uuid()[:8],
         "epoch": time.time(),
     }
@@ -121,7 +147,7 @@ def test_message_call_method_return_value(client):
             }
         ],
         "data": data,
-        "checksum": generate_checksum(orjson.dumps(data)),
+        "checksum": generate_checksum(str(data)),
         "id": shortuuid.uuid()[:8],
         "epoch": time.time(),
     }
@@ -152,7 +178,7 @@ def test_message_call_method_poll_update(client):
             }
         ],
         "data": data,
-        "checksum": generate_checksum(orjson.dumps(data)),
+        "checksum": generate_checksum(str(data)),
         "id": shortuuid.uuid()[:8],
         "epoch": time.time(),
     }
@@ -182,7 +208,7 @@ def test_message_call_method_setter(client):
             }
         ],
         "data": data,
-        "checksum": generate_checksum(orjson.dumps(data)),
+        "checksum": generate_checksum(str(data)),
         "id": shortuuid.uuid()[:8],
         "epoch": time.time(),
     }
@@ -208,7 +234,7 @@ def test_message_call_method_nested_setter(client):
             }
         ],
         "data": data,
-        "checksum": generate_checksum(orjson.dumps(data)),
+        "checksum": generate_checksum(str(data)),
         "id": shortuuid.uuid()[:8],
         "epoch": time.time(),
     }
@@ -234,7 +260,7 @@ def test_message_call_method_multiple_nested_setter(client):
             }
         ],
         "data": data,
-        "checksum": generate_checksum(orjson.dumps(data)),
+        "checksum": generate_checksum(str(data)),
         "id": shortuuid.uuid()[:8],
         "epoch": time.time(),
     }
@@ -260,7 +286,7 @@ def test_message_call_method_toggle(client):
             }
         ],
         "data": data,
-        "checksum": generate_checksum(orjson.dumps(data)),
+        "checksum": generate_checksum(str(data)),
         "id": shortuuid.uuid()[:8],
         "epoch": time.time(),
     }
@@ -286,7 +312,7 @@ def test_message_call_method_nested_toggle(client):
             }
         ],
         "data": data,
-        "checksum": generate_checksum(orjson.dumps(data)),
+        "checksum": generate_checksum(str(data)),
         "id": shortuuid.uuid()[:8],
         "epoch": time.time(),
     }
@@ -312,7 +338,7 @@ def test_message_call_method_args(client):
             }
         ],
         "data": data,
-        "checksum": generate_checksum(orjson.dumps(data)),
+        "checksum": generate_checksum(str(data)),
         "id": shortuuid.uuid()[:8],
         "epoch": time.time(),
     }
@@ -338,7 +364,7 @@ def test_message_call_method_kwargs(client):
             }
         ],
         "data": data,
-        "checksum": generate_checksum(orjson.dumps(data)),
+        "checksum": generate_checksum(str(data)),
         "id": shortuuid.uuid()[:8],
         "epoch": time.time(),
     }
@@ -364,7 +390,7 @@ def test_message_call_method_no_validation(client):
             }
         ],
         "data": data,
-        "checksum": generate_checksum(orjson.dumps(data)),
+        "checksum": generate_checksum(str(data)),
         "id": shortuuid.uuid()[:8],
         "epoch": time.time(),
     }
@@ -390,7 +416,7 @@ def test_message_call_method_validation(client):
             }
         ],
         "data": data,
-        "checksum": generate_checksum(orjson.dumps(data)),
+        "checksum": generate_checksum(str(data)),
         "id": shortuuid.uuid()[:8],
         "epoch": time.time(),
     }
@@ -420,7 +446,7 @@ def test_message_call_method_reset(client):
             },
         ],
         "data": data,
-        "checksum": generate_checksum(orjson.dumps(data)),
+        "checksum": generate_checksum(str(data)),
         "id": shortuuid.uuid()[:8],
         "epoch": time.time(),
     }
@@ -449,7 +475,7 @@ def test_message_call_method_refresh(client):
             },
         ],
         "data": data,
-        "checksum": generate_checksum(orjson.dumps(data)),
+        "checksum": generate_checksum(str(data)),
         "id": shortuuid.uuid()[:8],
         "epoch": time.time(),
     }
