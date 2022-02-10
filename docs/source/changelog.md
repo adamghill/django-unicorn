@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.42.1
+
+- Fix bug where dictionaries in a component would generate incorrect checksums and trigger a `Checksum does not match` error
+- Remove some serializations that was happening unnecessarily on every render
+- Add Python 3.10 and Django 4.0 to test matrix
+
+[All changes since 0.42.0](https://github.com/adamghill/django-unicorn/compare/0.42.0...0.42.1).
+
 ## v0.42.0
 
 - Remove all blank spaces from JSON responses.
@@ -10,7 +18,7 @@
 
 - Bump supported Python to >=3.7.
 
-[All changes since 0.42.0](https://github.com/adamghill/django-unicorn/compare/0.41.2...0.42.0).
+[All changes since 0.41.2](https://github.com/adamghill/django-unicorn/compare/0.41.2...0.42.0).
 
 ## v0.41.2
 

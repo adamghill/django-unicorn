@@ -1,8 +1,5 @@
-# Configuration file for the Sphinx documentation builder.
-#
-# This file only contains a selection of the most common options. For a full
-# list see the documentation:
-# https://www.sphinx-doc.org/en/master/usage/configuration.html
+import toml
+
 
 # -- Path setup --------------------------------------------------------------
 
@@ -23,8 +20,9 @@ project = "Unicorn"
 copyright = "2021, Adam Hill"
 author = "Adam Hill"
 
-# The full version, including alpha/beta/rc tags
-release = "0.42.0"
+pyproject = toml.load("../../pyproject.toml")
+version = pyproject["tool"]["poetry"]["version"]
+release = version
 
 
 # -- General configuration ---------------------------------------------------

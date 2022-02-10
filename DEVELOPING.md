@@ -23,7 +23,7 @@
 1. `poe t`
 1. `poe jb`
 1. `poetry version major|minor|patch`
-1. Update django-unicorn.com's changelog.md
+1. Update changelog.md
 1. Commit/tag/push version bump
 1. `poetry publish --build -r test`
 1. Make sure test package can be installed as expected (https://test.pypi.org/project/django-unicorn/)
