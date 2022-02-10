@@ -80,17 +80,16 @@ markers = [
 ]
 
 [tool.poe.tasks]
-r = "example/manage.py runserver 0:8080"
-mm = "example/manage.py makemigrations"
-mi = "example/manage.py migrate"
+r = { cmd = "example/manage.py runserver 0:8080", help = "Run the dev server for the example project" }
+mm = { cmd = "example/manage.py makemigrations", help = "Make migrations for the example project" }
+mi = { cmd = "example/manage.py migrate", help = "Migrate the example project" }
 md = ["mm", "mi"]
-m = "example/manage.py"
-tp = "nox -r"
-tj = "npm run-script test"
+m = { cmd = "example/manage.py", help = "manage.py for the example project" }
+tp = { cmd = "nox -r", help = "Run the entire Python test suite with nox" }
+tj = { cmd = "npm run-script test", help = "Run the JavaScript unit tests" }
 ta = ["tp", "tj"]
-is = "isort --settings pyproject.toml ."
-jb = "npm run build"
-t = "pytest -m 'not slow'"
+jb = { cmd = "npm run build", help = "Build the JavaScript library" }
+t = { cmd = "pytest -m 'not slow'", help = "Run Python unit tests" }
 tc = { cmd = "pytest --cov=django_unicorn", help = "Run tests with coverage" }
 cr = { cmd = "coverage report", help = "Show coverage report" }
 my = { cmd = "mypy .", help = "Run mypy" }
