@@ -30,6 +30,20 @@
 - [Screencasts](https://www.django-unicorn.com/screencasts/installation)
 - [Examples](https://www.django-unicorn.com/examples/todo)
 
+## 🔧 To hack on the code
+
+### Python
+
+1. `poetry install -E minify -E docs`
+1. `poetry run pytest`
+
+### JavaScript
+
+1. `npm install`
+1. `npm run test`
+
+Check out [DEVELOPING.md](DEVELOPING.md) for more details.
+
 ## 👏 Contributors
 
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
