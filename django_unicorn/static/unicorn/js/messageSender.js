@@ -109,6 +109,9 @@ export function send(component, callback) {
             );
           } else {
             component.window.location.href = responseJson.redirect.url;
+
+            // Prevent anything else from happening if there is a url redirect
+            return;
           }
         } else if (responseJson.redirect.hash) {
           component.window.location.hash = responseJson.redirect.hash;
