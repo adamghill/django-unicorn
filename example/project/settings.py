@@ -14,6 +14,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    # Include `django-crispy-forms` for testing
+    "crispy_forms",
     # Internal apps
     "books",
     "coffee",
