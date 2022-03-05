@@ -77,7 +77,76 @@ def test_message_call_method_redirect(client):
     assert "redirect" in body
     redirect = body["redirect"]
     assert redirect.get("url") == "/something-here"
-    assert redirect.get("refresh", False) == False
+    assert redirect.get("refresh", False) is False
+
+
+def test_message_call_method_with_message(client):
+    data = {}
+    message = {
+        "actionQueue": [
+            {
+                "payload": {"name": "test_message"},
+                "type": "callMethod",
+            }
+        ],
+        "data": data,
+        "checksum": generate_checksum(str(data)),
+        "id": shortuuid.uuid()[:8],
+        "epoch": time.time(),
+    }
+
+    response = client.post(
+        "/message/tests.views.fake_components.FakeComponentWithMessage",
+        message,
+        content_type="application/json",
+    )
+
+    body = orjson.loads(response.content)
+
+    assert not body["errors"]
+
+    assert "dom" in body
+    dom = body["dom"]
+
+    assert "test success" in dom
+
+
+def test_message_call_method_redirect_with_message(client):
+    data = {}
+    message = {
+        "actionQueue": [
+            {
+                "payload": {"name": "test_redirect_with_message"},
+                "type": "callMethod",
+            }
+        ],
+        "data": data,
+        "checksum": generate_checksum(str(data)),
+        "id": shortuuid.uuid()[:8],
+        "epoch": time.time(),
+    }
+
+    response = client.post(
+        "/message/tests.views.fake_components.FakeComponentWithMessage",
+        message,
+        content_type="application/json",
+    )
+
+    body = orjson.loads(response.content)
+
+    assert "redirect" in body
+    redirect = body["redirect"]
+    assert redirect.get("url") == "/something-here"
+    assert redirect.get("refresh", False) is False
+
+    assert "dom" in body
+    dom = body["dom"]
+
+    # Check that the message wasn't rendered out because redirects should defer messages until the next render
+    assert "test success" not in dom
+
+    # Check the private variable to ensure that there is a queue message for next render
+    assert len(response.wsgi_request._messages._queued_messages) == 1
 
 
 def test_message_call_method_refresh_redirect(client):

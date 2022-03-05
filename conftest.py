@@ -11,6 +11,7 @@ def pytest_configure():
             "OPTIONS": {
                 "context_processors": [
                     "django.template.context_processors.request",
+                    "django.contrib.messages.context_processors.messages",
                 ],
             },
         }
@@ -23,6 +24,8 @@ def pytest_configure():
     }
 
     installed_apps = [
+        "django.contrib.sessions",
+        "django.contrib.messages",
         "django_unicorn",
         "example.coffee.apps.Config",
         "example.books.apps.Config",
@@ -45,12 +48,18 @@ def pytest_configure():
     settings.configure(
         SECRET_KEY="this-is-a-secret",
         TEMPLATES=templates,
+        MIDDLEWARE=[
+            "django.contrib.sessions.middleware.SessionMiddleware",
+            "django.contrib.messages.middleware.MessageMiddleware",
+        ],
         ROOT_URLCONF="tests.urls",
         DATABASES=databases,
         INSTALLED_APPS=installed_apps,
         UNIT_TEST=True,
         UNICORN=unicorn_settings,
         CACHES=caches,
+        MESSAGE_STORAGE="django.contrib.messages.storage.session.SessionStorage",
+        SESSION_ENGINE="django.contrib.sessions.backends.file",
     )
 
 

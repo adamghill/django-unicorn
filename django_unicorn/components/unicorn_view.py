@@ -829,6 +829,9 @@ class UnicornView(TemplateView):
                         cacheable_component.component_cache_key, cacheable_component
                     )
 
+                # Re-setup the `request` that got removed to make the component cacheable
+                component.setup(request)
+
                 return component
             except ModuleNotFoundError as e:
                 last_exception = e

@@ -17,7 +17,7 @@ from django_unicorn.components import UnicornView
 from django_unicorn.components.unicorn_template_response import get_root_element
 from django_unicorn.decorators import timed
 from django_unicorn.errors import RenderNotModified, UnicornCacheError, UnicornViewError
-from django_unicorn.serializer import dumps, loads
+from django_unicorn.serializer import loads
 from django_unicorn.settings import (
     get_cache_alias,
     get_serial_enabled,
@@ -84,6 +84,10 @@ def _process_component_request(
         component_name=component_request.name,
         request=request,
     )
+
+    # This shouldn't happen, but is a fail-safe to make sure that there is always a request on the component
+    if component.request is None:
+        component.request = request
 
     # Get a deepcopy of the data passed in to determine what fields are updated later
     original_data = copy.deepcopy(component_request.data)
@@ -157,9 +161,29 @@ def _process_component_request(
         else:
             component.validate(model_names=list(updated_data.keys()))
 
+    request_queued_messages = []
+
+    if return_data and return_data.redirect and "url" in return_data.redirect:
+        # If we know the user wants to redirect, get a copy of the private queued messages
+        # and make sure they get stored for the next page load instead of getting rendered
+        # by the component
+        try:
+            request_queued_messages = copy.deepcopy(
+                component.request._messages._queued_messages
+            )
+            component.request._messages._queued_messages = []
+        except AttributeError as e:
+            logger.warning(e)
+
     # Pass the current request so that it can be used inside the component template
     rendered_component = component.render(request=request)
     component.rendered(rendered_component)
+
+    if request_queued_messages:
+        try:
+            component.request._messages._queued_messages = request_queued_messages
+        except AttributeError as e:
+            logger.warning(e)
 
     cache = caches[get_cache_alias()]
 

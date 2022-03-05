@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Dict
 
 from django import forms
+from django.contrib import messages
 from django.shortcuts import redirect
 
 from django_unicorn.components import (
@@ -91,3 +92,16 @@ class FakeComponentWithDictionary(UnicornView):
 
     def test_method(self):
         pass
+
+
+class FakeComponentWithMessage(UnicornView):
+    template_name = "templates/test_component_with_message.html"
+
+    def test_message(self):
+        assert self.request, "Expect a request in action methods"
+        messages.success(self.request, "test success")
+
+    def test_redirect_with_message(self):
+        assert self.request, "Expect a request in action methods"
+        messages.success(self.request, "test success")
+        return redirect("/something-here")
