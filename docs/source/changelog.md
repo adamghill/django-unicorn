@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.43.0
+
+- Defer displaying `messages` when an action method returns a [redirect](messages.md#redirecting)
+- Prevent morphing or other changes when redirecting
+
+[All changes since 0.42.1](https://github.com/adamghill/django-unicorn/compare/0.42.1...0.43.0).
+
 ## v0.42.1
 
 - Fix bug where dictionaries in a component would generate incorrect checksums and trigger a `Checksum does not match` error
