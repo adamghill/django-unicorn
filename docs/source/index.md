@@ -95,6 +95,7 @@ Sponsor <https://github.com/sponsors/adamghill>
 - [django-component](https://gitlab.com/Mojeer/django_components), which provides declarative and composable components for Django, inspired by JavaScript frameworks.
 - [django-page-components](https://github.com/andreyfedoseev/django-page-components), a minimalistic framework for creating page components and using them in your Django views and templates.
 - [slippers](https://mitchel.me/slippers/), helps build reusable components in Django without writing a single line of Python.
+- [django_slots](https://github.com/nwjlyons/django_slots) allows multiline strings to be captured and passed to template tags.
 
 ### Django packages to integrate lightweight frontend frameworks
 
