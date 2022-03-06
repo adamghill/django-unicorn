@@ -353,11 +353,43 @@ class UnicornView(TemplateView):
         self.mount()
         self.hydrate()
 
+        self._cache_component(request, **kwargs)
+
         return self.render_to_response(
             context=self.get_context_data(),
             component=self,
             init_js=True,
         )
+
+    def _cache_component(self, request: HttpRequest, parent=None, **kwargs):
+        """
+        Cache the component in the module and the Django cache. Re-set the `request` that got
+        removed to make the component cacheable.
+        """
+
+        # Put the location for the component name in a module cache
+        location_cache[self.component_name] = (self.__class__.__name__, self.__module__)
+
+        # Put the component's class in a module cache
+        views_cache[self.component_id] = (self.__class__, parent, kwargs)
+
+        cacheable_component = None
+
+        # Put the instantiated component into a module cache and the Django cache
+        try:
+            cacheable_component = get_cacheable_component(self)
+        except UnicornCacheError as e:
+            logger.warning(e)
+
+        if cacheable_component:
+            if COMPONENTS_MODULE_CACHE_ENABLED:
+                constructed_views_cache[self.component_id] = cacheable_component
+
+            cache = caches[get_cache_alias()]
+            cache.set(cacheable_component.component_cache_key, cacheable_component)
+
+        # Re-set `request` on the component that got removed when making it cacheable
+        self.request = request
 
     @timed
     def get_frontend_context_variables(self) -> str:
@@ -807,30 +839,7 @@ class UnicornView(TemplateView):
                     **kwargs,
                 )
 
-                # Put the location for the component name in a module cache
-                location_cache[component_name] = (class_name, module_name)
-
-                # Put the component's class in a module cache
-                views_cache[component_id] = (component_class, parent, kwargs)
-
-                # Put the instantiated component into a module cache and the Django cache
-                cacheable_component = None
-
-                try:
-                    cacheable_component = get_cacheable_component(component)
-                except UnicornCacheError as e:
-                    logger.warning(e)
-
-                if cacheable_component:
-                    if COMPONENTS_MODULE_CACHE_ENABLED:
-                        constructed_views_cache[component_id] = cacheable_component
-
-                    cache.set(
-                        cacheable_component.component_cache_key, cacheable_component
-                    )
-
-                # Re-setup the `request` that got removed to make the component cacheable
-                component.setup(request)
+                component._cache_component(request, parent, **kwargs)
 
                 return component
             except ModuleNotFoundError as e:
