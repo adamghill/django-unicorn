@@ -93,7 +93,7 @@ t = { cmd = "pytest -m 'not slow'", help = "Run Python unit tests" }
 tc = { cmd = "pytest --cov=django_unicorn", help = "Run tests with coverage" }
 cr = { cmd = "coverage report", help = "Show coverage report" }
 my = { cmd = "mypy .", help = "Run mypy" }
-b = { cmd = "black . --check --quiet", help = "Run black" }
+b = { cmd = "black . --check --quiet --extend-exclude migrations", help = "Run black" }
 i = { cmd = "isort . --check --quiet", help = "Run isort" }
 tm = ["b", "i", "tc", "my"]
 sa = { cmd = "sphinx-autobuild -W docs/source docs/build", help = "Sphinx autobuild" }
