@@ -4,21 +4,21 @@ from django_unicorn.components.unicorn_view import get_locations
 
 
 def test_get_locations_kebab_case():
-    expected = [("HelloWorldView", "unicorn.components.hello_world")]
+    expected = [("unicorn.components.hello_world", "HelloWorldView")]
     actual = get_locations("hello-world")
 
     assert expected == actual
 
 
 def test_get_locations_with_slashes():
-    expected = [("TableView", "unicorn.components.nested.table")]
+    expected = [("unicorn.components.nested.table", "TableView")]
     actual = get_locations("nested/table")
 
     assert expected == actual
 
 
 def test_get_locations_with_dots():
-    expected = [("table", "nested"), ("TableView", "unicorn.components.nested.table")]
+    expected = [("nested", "table"), ("unicorn.components.nested.table", "TableView")]
     actual = get_locations("nested.table")
 
     assert expected == actual
@@ -26,7 +26,7 @@ def test_get_locations_with_dots():
 
 def test_get_locations_fully_qualified_with_dots():
     expected = [
-        ("HelloWorldView", "project.components.hello_world"),
+        ("project.components.hello_world", "HelloWorldView"),
     ]
     actual = get_locations("project.components.hello_world.HelloWorldView")
 
@@ -35,7 +35,7 @@ def test_get_locations_fully_qualified_with_dots():
 
 def test_get_locations_fully_qualified_with_slashes():
     expected = [
-        ("HelloWorldView", "project.components.hello_world"),
+        ("project.components.hello_world", "HelloWorldView"),
     ]
     actual = get_locations("project/components/hello_world.HelloWorldView")
 
@@ -44,7 +44,7 @@ def test_get_locations_fully_qualified_with_slashes():
 
 def test_get_locations_fully_qualified_with_dots_ends_in_component():
     expected = [
-        ("HelloWorldComponent", "project.components.hello_world"),
+        ("project.components.hello_world", "HelloWorldComponent"),
     ]
     actual = get_locations("project.components.hello_world.HelloWorldComponent")
 
@@ -56,10 +56,10 @@ def test_get_locations_fully_qualified_with_dots_does_not_end_in_view():
     The second entry in here is a mess.
     """
     expected = [
-        ("HelloWorldThing", "project.components.hello_world"),
+        ("project.components.hello_world", "HelloWorldThing"),
         (
-            "HelloworldthingView",
             "unicorn.components.project.components.hello_world.HelloWorldThing",
+            "HelloworldthingView",
         ),
     ]
     actual = get_locations("project.components.hello_world.HelloWorldThing")
@@ -71,7 +71,7 @@ def test_get_locations_apps_setting_tuple(settings):
     settings.UNICORN["APPS"] = ("project",)
 
     expected = [
-        ("HelloWorldView", "project.components.hello_world"),
+        ("project.components.hello_world", "HelloWorldView"),
     ]
     actual = get_locations("hello-world")
 
@@ -84,7 +84,7 @@ def test_get_locations_apps_setting_list(settings):
     ]
 
     expected = [
-        ("HelloWorldView", "project.components.hello_world"),
+        ("project.components.hello_world", "HelloWorldView"),
     ]
     actual = get_locations("hello-world")
 
@@ -97,7 +97,7 @@ def test_get_locations_apps_setting_set(settings):
     }
 
     expected = [
-        ("HelloWorldView", "project.components.hello_world"),
+        ("project.components.hello_world", "HelloWorldView"),
     ]
     actual = get_locations("hello-world")
 
@@ -121,19 +121,14 @@ def test_get_locations_installed_app_with_app_config(settings):
         "example.coffee.apps.Config",
     ]
 
-    expected = [
-        (
-            "HelloWorldView",
-            "example.coffee.components.hello_world",
-        )
-    ]
+    expected = [("example.coffee.components.hello_world", "HelloWorldView")]
     actual = get_locations("hello-world")
 
     assert expected == actual
 
     # test when the app is in a subdirectory "apps"
     settings.INSTALLED_APPS[0] = "foo_project.apps.bar_app.apps.Config"
-    expected_location = [("FooBarView", "foo_project.apps.bar_app.components.foo_bar")]
+    expected_location = [("foo_project.apps.bar_app.components.foo_bar", "FooBarView")]
     actual_location = get_locations("foo-bar")
     assert expected_location == actual_location
 

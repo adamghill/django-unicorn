@@ -21,7 +21,11 @@ from django_unicorn.settings import get_cache_alias
 
 from .. import serializer
 from ..decorators import timed
-from ..errors import ComponentLoadError, UnicornCacheError
+from ..errors import (
+    ComponentClassLoadError,
+    ComponentModuleLoadError,
+    UnicornCacheError,
+)
 from ..settings import get_setting
 from ..utils import get_cacheable_component, is_non_string_sequence
 from .fields import UnicornField
@@ -68,8 +72,8 @@ def get_locations(component_name):
 
         # Handle fully-qualified component names (e.g. `project.unicorn.HelloWorldView`)
         class_name = component_name.split(".")[-1:][0]
-        module_name = component_name.replace("." + class_name, "")
-        locations.append((class_name, module_name))
+        module_name = component_name.replace(f".{class_name}", "")
+        locations.append((module_name, class_name))
 
         # Assume if it ends with "View", then we don't need to add other
         if component_name.endswith("View") or component_name.endswith("Component"):
@@ -101,7 +105,7 @@ def get_locations(component_name):
             app = app[:app_config_idx]
 
         app_module_name = f"{app}.components.{module_name}"
-        locations.append((class_name, app_module_name))
+        locations.append((app_module_name, class_name))
 
     return locations
 
@@ -368,7 +372,7 @@ class UnicornView(TemplateView):
         """
 
         # Put the location for the component name in a module cache
-        location_cache[self.component_name] = (self.__class__.__name__, self.__module__)
+        location_cache[self.component_name] = (self.__module__, self.__class__.__name__)
 
         # Put the component's class in a module cache
         views_cache[self.component_id] = (self.__class__, parent, kwargs)
@@ -751,7 +755,7 @@ class UnicornView(TemplateView):
 
         Returns:
             Instantiated `UnicornView` component.
-            Raises `ComponentLoadError` if the component could not be loaded.
+            Raises `ComponentModuleLoadError` or `ComponentClassLoadError` if the component could not be loaded.
         """
         assert component_id, "Component id is required"
         assert component_name, "Component name is required"
@@ -821,12 +825,9 @@ class UnicornView(TemplateView):
         else:
             locations = get_locations(component_name)
 
-        # Store the last exception that got raised while looking for a component in case it is useful context
-        last_exception: Union[
-            Optional[ModuleNotFoundError], Optional[AttributeError]
-        ] = None
+        class_name_not_found = None
 
-        for (class_name, module_name) in locations:
+        for (module_name, class_name) in locations:
             try:
                 component_class = _get_component_class(module_name, class_name)
                 component = construct_component(
@@ -842,14 +843,20 @@ class UnicornView(TemplateView):
                 component._cache_component(request, parent, **kwargs)
 
                 return component
-            except ModuleNotFoundError as e:
-                last_exception = e
-            except AttributeError as e:
-                last_exception = e
+            except ModuleNotFoundError:
+                pass
+            except AttributeError:
+                class_name_not_found = f"{module_name}.{class_name}"
 
-        raise ComponentLoadError(
-            f"'{component_name}' component could not be loaded: {last_exception}"
-        ) from last_exception
+        if class_name_not_found is not None:
+            message = (
+                f"The component class '{class_name_not_found}' could not be loaded."
+            )
+            raise ComponentClassLoadError(message, locations=locations)
+
+        module_name_not_found = component_name.replace("-", "_")
+        message = f"The component module '{module_name_not_found}' could not be loaded."
+        raise ComponentModuleLoadError(message, locations=locations)
 
     @classonlymethod
     def as_view(cls, **initkwargs):

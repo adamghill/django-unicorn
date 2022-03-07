@@ -6,8 +6,16 @@ class UnicornViewError(Exception):
     pass
 
 
-class ComponentLoadError(Exception):
-    pass
+class ComponentModuleLoadError(Exception):
+    def __init__(self, *args, locations=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.locations = locations
+
+
+class ComponentClassLoadError(Exception):
+    def __init__(self, *args, locations=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.locations = locations
 
 
 class RenderNotModified(Exception):
