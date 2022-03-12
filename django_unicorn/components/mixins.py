@@ -1,4 +1,5 @@
 from django import forms
+from django.forms import Field
 from django.views.generic.edit import FormMixin
 
 from django_unicorn.serializer import model_value
@@ -29,7 +30,10 @@ class UnicornFormMixin(FormMixin):
             )
 
         # set the classes Unicorn attrs dynamically,
-        for field_name, field in self.form_class.base_fields.items():  # type: str,Field
+        for (
+            field_name,
+            field,
+        ) in self.form_class.base_fields.items():  # type: (str, Field)
             # don't override existing "initial" attrs
             if not hasattr(self, field_name):
                 setattr(self.__class__, field_name, "")
