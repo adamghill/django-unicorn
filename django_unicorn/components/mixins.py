@@ -1,4 +1,6 @@
 from django import forms
+from django.views.generic.edit import FormMixin
+
 from django_unicorn.serializer import model_value
 
 
@@ -12,7 +14,7 @@ class ModelValueMixin:
         return model_value(self, *fields)
 
 
-class UnicornFormMixin(forms.FormMixin):
+class UnicornFormMixin(FormMixin):
     """Mixin for UnicornView to add Forms functionality."""
 
     def __init__(self, **kwargs):
