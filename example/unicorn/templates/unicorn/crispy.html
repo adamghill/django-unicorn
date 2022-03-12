@@ -1,0 +1,12 @@
+{% extends "www/base.html" %}
+{% load crispy_forms_tags unicorn %}
+
+{% block content %}
+
+<div unicorn:view>
+  <h2>Crispy</h2>
+
+  {% crispy view.form_class view.form_class.helper %}
+</div>
+
+{% endblock content %}

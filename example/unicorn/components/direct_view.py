@@ -1,5 +1,3 @@
-from django.utils.timezone import now
-
 from django_unicorn.components import UnicornView
 
 
