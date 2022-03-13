@@ -38,12 +38,34 @@ class UnicornFormMixin(FormMixin):
             if not hasattr(self, field_name):
                 setattr(self.__class__, field_name, "")
 
-            # FIXME: Unicorn attr should be made configurable by the user, and maybe per field?
-            if isinstance(field, forms.BooleanField):
-                unicorn_attr = "unicorn:model"
-            else:
-                unicorn_attr = "unicorn:model.lazy"
-            field.widget.attrs.update({unicorn_attr: field_name})
+            field.widget.attrs.update(self.get_widget_attr(field_name, field))
+
+        super().__init__(**kwargs)
+        
+    def get_widget_attr(self, field_name: str, field: Field) -> Dict[str, Any]:
+        """Returns an html attribute for the given field.
+
+        This method can be overridden for setting special attributes to some fields. As default, it returns
+        "unicorn:model"""
+
+        if isinstance(
+            field,
+            (
+                forms.BooleanField,
+                forms.NullBooleanField,
+                forms.RadioSelect,
+                forms.NullBooleanSelect,
+                forms.ChoiceField,
+                forms.ModelChoiceField,
+                forms.MultipleChoiceField,
+                forms.ModelMultipleChoiceField,
+                forms.TypedChoiceField,
+                forms.TypedMultipleChoiceField,
+            ),
+        ):
+            return {"unicorn:model": field_name}
+        else:
+            return {"unicorn:model.lazy": field_name}
 
         super().__init__(**kwargs)
 
