@@ -1,15 +1,45 @@
 # Validation
 
-`Unicorn` uses Django `forms` infrastructure for all validation. This means that a form could be re-used between any other Django views and a `Unicorn`.
+`Unicorn` has two options for validation. It can either use the standard Django `forms` infrastructure for re-usability or `ValidationError` can be raised for simpler use-cases.
 
-Using the Django `forms` system provides a way to serialize/deserialize certain classes (for example, `datetime` and `uuid`) and a way to validate properties of a class.
+## ValidationError
+
+If you do not want to create a form class or you want to specifically target a nested field you can raise a `ValidationError` inside of an action method. The `ValidationError` must be instantiated with a `dict` with the model name as the key and error message as the value. A `code` keyword argument must also be passed in. The typical error codes used are `required` or `invalid`.
+
+```python
+# book_validation_error.py
+from django.utils.timezone import now
+from django_unicorn.components import UnicornView
+
+class BookView(UnicornView):
+    book: Book
+
+    def publish(self):
+        if not self.book.title:
+            raise ValidationError({"book.title": "Books must have a title"}, code="required")
+        
+        self.publish_date = now()
+        self.book.save()
+```
+
+```html
+<!-- book-validation-error.html -->
+<div>
+  <input unicorn:model="book.title" type="text" id="title" /><br />
+  <button unicorn:click="publish">Publish Book</button>
+</div>
+```
+
+## Django Form
+
+`Unicorn` can use the Django `forms` infrastructure for validation. This means that a form could be re-used between any other Django views and a `Unicorn` component.
 
 ```{note}
 There are many [built-in fields available for Django form fields](https://docs.djangoproject.com/en/stable/ref/forms/fields/#built-in-field-classes) which can be used to validate text inputs.
 ```
 
 ```python
-# book.py
+# book_form.py
 from django_unicorn.components import UnicornView
 from django import forms
 
@@ -25,7 +55,7 @@ class BookView(UnicornView):
 ```
 
 ```html
-<!-- book.html -->
+<!-- book-form.html -->
 <div>
   <input unicorn:model="title" type="text" id="title" /><br />
   <input unicorn:model="publish_date" type="text" id="publish-date" /><br />
@@ -35,9 +65,61 @@ class BookView(UnicornView):
 
 Because of the `form_class = BookForm` defined on the `UnicornView` above, `Unicorn` will automatically validate that the title has a value and is less than 100 characters. The `publish_date` will also be converted into a `datetime` from the string representation in the text input.
 
+### Validate the entire component
+
+The magic action method `$validate` can be used to validate the whole component using the specified form.
+
+```html
+<!-- validate.html -->
+<div>
+  <input unicorn:model="publish_date" type="text" id="publish-date" /><br />
+  <button unicorn:click="$validate">Validate</button>
+</div>
+```
+
+The `validate` method can also be used inside of the component.
+
+```python
+# validate.py
+from django_unicorn.components import UnicornView
+from django import forms
+
+class BookForm(forms.Form):
+    title = forms.CharField(max_length=6, required=True)
+
+class BookView(UnicornView):
+    form_class = BookForm
+
+    text = "hello"
+
+    def set_text(self):
+        self.text = "hello world"
+        self.validate()
+```
+
+The `is_valid` method can also be used inside of the component to check if a component is valid.
+
+```python
+# validate.py
+from django_unicorn.components import UnicornView
+from django import forms
+
+class BookForm(forms.Form):
+    title = forms.CharField(max_length=6, required=True)
+
+class BookView(UnicornView):
+    form_class = BookForm
+
+    text = "hello"
+
+    def set_text(self):
+        if self.is_valid():
+            self.text = "hello world"
+```
+
 ## Showing validation errors
 
-As the form is filled out the appropriate inputs will be validated. There are a few ways to show the validation messages.
+There are a few ways to show the validation messages.
 
 ### Highlighting the invalid form
 
@@ -79,7 +161,7 @@ When a model form is invalid, a special `unicorn:error` attribute is added to th
 
 ### Showing all the error messages
 
-There is a `unicorn_errors` template tag that shows all errors for the component. It should provide an example of how to display component errors in a more specific way if needed.
+There is a `unicorn_errors` template tag that shows all errors for the component. It provides an example of how to display component errors in a more specific way if needed.
 
 ```html
 <!-- show-all-error-messages.html -->
@@ -90,56 +172,4 @@ There is a `unicorn_errors` template tag that shows all errors for the component
 
   <input unicorn:model="publish_date" type="text" id="publish-date" /><br />
 </div>
-```
-
-## Validate the entire component
-
-The magic action method `$validate` can be used to validate the whole component by the front-end.
-
-```html
-<!-- validate.html -->
-<div>
-  <input unicorn:model="publish_date" type="text" id="publish-date" /><br />
-  <button unicorn:click="$validate">Validate</button>
-</div>
-```
-
-The `validate` method can also be used inside of the component.
-
-```python
-# validate.py
-from django_unicorn.components import UnicornView
-from django import forms
-
-class BookForm(forms.Form):
-    title = forms.CharField(max_length=6, required=True)
-
-class BookView(UnicornView):
-    form_class = BookForm
-
-    text = "hello"
-
-    def set_text(self):
-        self.text = "hello world"
-        self.validate()
-```
-
-The `is_valid` can also be used inside of the component to check if a component is valid.
-
-```python
-# validate.py
-from django_unicorn.components import UnicornView
-from django import forms
-
-class BookForm(forms.Form):
-    title = forms.CharField(max_length=6, required=True)
-
-class BookView(UnicornView):
-    form_class = BookForm
-
-    text = "hello"
-
-    def set_text(self):
-        if self.is_valid():
-            self.text = "hello world"
 ```
