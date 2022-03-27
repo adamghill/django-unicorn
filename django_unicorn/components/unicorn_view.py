@@ -21,7 +21,7 @@ from django_unicorn.settings import get_cache_alias
 
 from .. import serializer
 from ..decorators import timed
-from ..errors import ComponentLoadError, UnicornCacheError
+from ..errors import ComponentLoadError, MissingFormError, UnicornCacheError
 from ..settings import get_setting
 from ..utils import get_cacheable_component, is_non_string_sequence
 from .fields import UnicornField
@@ -138,9 +138,6 @@ def construct_component(
     component._validate_called = False
 
     return component
-
-
-from django.utils.decorators import classonlymethod
 
 
 class UnicornView(TemplateView):
@@ -391,8 +388,6 @@ class UnicornView(TemplateView):
         form = self._get_form(attributes)
 
         if form:
-            form.is_valid()
-
             for key in attributes.keys():
                 if key in form.fields:
                     field = form.fields[key]
@@ -433,6 +428,16 @@ class UnicornView(TemplateView):
                 return form
             except Exception as e:
                 logger.exception(e)
+
+    def get_form(self, **kwargs):
+        if hasattr(self, "form_class"):
+            # TODO: what to do with kwargs and attributes?
+            if kwargs:
+                return self._get_form(**kwargs)
+            else:
+                return self._get_form(self._attributes())
+
+        raise MissingFormError(f"{self.component_name} is missing a `form_class` field")
 
     @timed
     def get_context_data(self, **kwargs):
@@ -671,6 +676,7 @@ class UnicornView(TemplateView):
             "call",
             "calls",
             "component_cache_key",
+            "get_form",
         )
         excludes = []
 

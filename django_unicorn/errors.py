@@ -24,3 +24,7 @@ class MissingComponentViewElement(Exception):
 
 class ComponentNotValid(Exception):
     pass
+
+
+class MissingFormError(Exception):
+    pass

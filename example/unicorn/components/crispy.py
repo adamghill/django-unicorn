@@ -49,7 +49,28 @@ class ExampleForm(forms.Form):
         self.helper.add_input(Submit("submit", "Submit"))
 
 
-class CrispyView(UnicornView):
-    name = "test crispy"
+class UnicornFormMixin:
+    # form_class: forms.Form = None
+
+    class Meta:
+        javascript_exclude = ("form",)
+
+    def __init__(self, **kwargs):
+        # print("l", self.form)
+        # print("m", self.get_form())
+
+        self.form = self.get_form()
+
+        for field_name, field in self.form.fields.items():
+            # set the classes Unicorn attrs dynamically
+            setattr(self.__class__, field_name, "")
+            field.widget.attrs["unicorn:model.lazy"] = field_name
+
+        super().__init__(**kwargs)
+
+
+class CrispyView(UnicornFormMixin, UnicornView):
+    like_website = False
+    favorite_food = "Blueberries"
 
     form_class = ExampleForm

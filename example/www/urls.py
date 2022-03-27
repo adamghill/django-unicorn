@@ -16,8 +16,8 @@ urlpatterns = [
         name="direct-view",
     ),
     path(
-        "crispy",
-        CrispyView.as_view(),
+        "crispy-direct-view",
+        CrispyView.as_view(template_name="unicorn/crispy-direct-view.html"),
         name="crispy",
     ),
     path("<str:name>", views.template, name="template"),
