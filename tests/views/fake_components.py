@@ -3,6 +3,7 @@ from typing import Dict
 
 from django import forms
 from django.contrib import messages
+from django.forms import ValidationError
 from django.shortcuts import redirect
 
 from django_unicorn.components import (
@@ -49,6 +50,20 @@ class FakeComponent(UnicornView):
 
     def test_poll_update(self):
         return PollUpdate(timing=1000, disable=True, method="new_method")
+
+    def test_validation_error(self):
+        raise ValidationError({"check": "Check is required"}, code="required")
+
+    def test_validation_error_no_code(self):
+        raise ValidationError({"check": "Check is required"})
+
+    def test_validation_error_string(self):
+        raise ValidationError("Check is required", code="required")
+
+    def test_validation_error_list(self):
+        raise ValidationError(
+            [ValidationError({"check": "Check is required"}, code="required")]
+        )
 
 
 class FakeModelComponent(UnicornView):

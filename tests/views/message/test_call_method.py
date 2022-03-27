@@ -1,4 +1,5 @@
 import time
+from typing import Dict
 
 import orjson
 import shortuuid
@@ -8,71 +9,43 @@ from django_unicorn.utils import generate_checksum
 from tests.views.message.utils import post_and_get_response
 
 
-def test_message_call_method(client):
-    data = {"method_count": 0}
+def _post_to_component(
+    client, method_name: str, component_name: str = "FakeComponent", data: Dict = None
+) -> str:
+    if data is None:
+        data = {}
+
     response = post_and_get_response(
         client,
-        url="/message/tests.views.fake_components.FakeComponent",
+        url=f"/message/tests.views.fake_components.{component_name}",
         data=data,
         action_queue=[
             {
-                "payload": {"name": "test_method"},
+                "payload": {"name": method_name},
                 "type": "callMethod",
             }
         ],
     )
 
-    assert response["data"].get("method_count") == 1
+    return response
+
+
+def test_message_call_method(client):
+    data = {"method_count": 0}
+    body = _post_to_component(client, "test_method", data=data)
+
+    assert body["data"].get("method_count") == 1
 
 
 def test_message_call_method_with_dictionary_checksum(client):
     data = {"dictionary": {"1": "test", "2": "anothertest", "3": "", "4": "moretest"}}
-    message = {
-        "actionQueue": [
-            {
-                "payload": {"name": "test_method"},
-                "type": "callMethod",
-            }
-        ],
-        "data": data,
-        "checksum": generate_checksum(str(data)),
-        "id": shortuuid.uuid()[:8],
-        "epoch": time.time(),
-    }
-
-    response = client.post(
-        "/message/tests.views.fake_components.FakeComponentWithDictionary",
-        message,
-        content_type="application/json",
-    )
-
-    body = orjson.loads(response.content)
+    body = _post_to_component(client, "test_method", data=data)
 
     assert not body["errors"]
 
 
 def test_message_call_method_redirect(client):
-    data = {}
-    message = {
-        "actionQueue": [
-            {
-                "payload": {"name": "test_redirect"},
-                "type": "callMethod",
-            }
-        ],
-        "data": data,
-        "checksum": generate_checksum(str(data)),
-        "id": shortuuid.uuid()[:8],
-        "epoch": time.time(),
-    }
-
-    response = client.post(
-        "/message/tests.views.fake_components.FakeComponent",
-        message,
-        content_type="application/json",
-    )
-
-    body = orjson.loads(response.content)
+    body = _post_to_component(client, "test_redirect")
 
     assert "redirect" in body
     redirect = body["redirect"]
@@ -81,27 +54,9 @@ def test_message_call_method_redirect(client):
 
 
 def test_message_call_method_with_message(client):
-    data = {}
-    message = {
-        "actionQueue": [
-            {
-                "payload": {"name": "test_message"},
-                "type": "callMethod",
-            }
-        ],
-        "data": data,
-        "checksum": generate_checksum(str(data)),
-        "id": shortuuid.uuid()[:8],
-        "epoch": time.time(),
-    }
-
-    response = client.post(
-        "/message/tests.views.fake_components.FakeComponentWithMessage",
-        message,
-        content_type="application/json",
+    body = _post_to_component(
+        client, method_name="test_message", component_name="FakeComponentWithMessage"
     )
-
-    body = orjson.loads(response.content)
 
     assert not body["errors"]
 
@@ -150,27 +105,7 @@ def test_message_call_method_redirect_with_message(client):
 
 
 def test_message_call_method_refresh_redirect(client):
-    data = {}
-    message = {
-        "actionQueue": [
-            {
-                "payload": {"name": "test_refresh_redirect"},
-                "type": "callMethod",
-            }
-        ],
-        "data": data,
-        "checksum": generate_checksum(str(data)),
-        "id": shortuuid.uuid()[:8],
-        "epoch": time.time(),
-    }
-
-    response = client.post(
-        "/message/tests.views.fake_components.FakeComponent",
-        message,
-        content_type="application/json",
-    )
-
-    body = orjson.loads(response.content)
+    body = _post_to_component(client, method_name="test_refresh_redirect")
 
     assert "redirect" in body
     redirect = body["redirect"]
@@ -180,54 +115,14 @@ def test_message_call_method_refresh_redirect(client):
 
 
 def test_message_call_method_hash_update(client):
-    data = {}
-    message = {
-        "actionQueue": [
-            {
-                "payload": {"name": "test_hash_update"},
-                "type": "callMethod",
-            }
-        ],
-        "data": data,
-        "checksum": generate_checksum(str(data)),
-        "id": shortuuid.uuid()[:8],
-        "epoch": time.time(),
-    }
-
-    response = client.post(
-        "/message/tests.views.fake_components.FakeComponent",
-        message,
-        content_type="application/json",
-    )
-
-    body = orjson.loads(response.content)
+    body = _post_to_component(client, method_name="test_hash_update")
 
     assert "redirect" in body
     assert body["redirect"].get("hash") == "#test=1"
 
 
 def test_message_call_method_return_value(client):
-    data = {}
-    message = {
-        "actionQueue": [
-            {
-                "payload": {"name": "test_return_value"},
-                "type": "callMethod",
-            }
-        ],
-        "data": data,
-        "checksum": generate_checksum(str(data)),
-        "id": shortuuid.uuid()[:8],
-        "epoch": time.time(),
-    }
-
-    response = client.post(
-        "/message/tests.views.fake_components.FakeComponent",
-        message,
-        content_type="application/json",
-    )
-
-    body = orjson.loads(response.content)
+    body = _post_to_component(client, method_name="test_return_value")
 
     assert "return" in body
     return_data = body["return"]
@@ -238,265 +133,84 @@ def test_message_call_method_return_value(client):
 
 
 def test_message_call_method_poll_update(client):
-    data = {}
-    message = {
-        "actionQueue": [
-            {
-                "payload": {"name": "test_poll_update"},
-                "type": "callMethod",
-            }
-        ],
-        "data": data,
-        "checksum": generate_checksum(str(data)),
-        "id": shortuuid.uuid()[:8],
-        "epoch": time.time(),
-    }
-
-    response = client.post(
-        "/message/tests.views.fake_components.FakeComponent",
-        message,
-        content_type="application/json",
-    )
-
-    body = orjson.loads(response.content)
+    body = _post_to_component(client, method_name="test_poll_update")
 
     assert "poll" in body
     poll = body["poll"]
     assert poll.get("timing") == 1000
-    assert poll.get("disable") == True
+    assert poll.get("disable") is True
     assert poll.get("method") == "new_method"
 
 
 def test_message_call_method_setter(client):
     data = {"method_count": 0}
-    message = {
-        "actionQueue": [
-            {
-                "payload": {"name": "method_count=2"},
-                "type": "callMethod",
-            }
-        ],
-        "data": data,
-        "checksum": generate_checksum(str(data)),
-        "id": shortuuid.uuid()[:8],
-        "epoch": time.time(),
-    }
-
-    response = client.post(
-        "/message/tests.views.fake_components.FakeComponent",
-        message,
-        content_type="application/json",
-    )
-
-    body = orjson.loads(response.content)
+    body = _post_to_component(client, method_name="method_count=2", data=data)
 
     assert body["data"].get("method_count") == 2
 
 
 def test_message_call_method_nested_setter(client):
     data = {"nested": {"check": True}}
-    message = {
-        "actionQueue": [
-            {
-                "payload": {"name": "nested.check=False"},
-                "type": "callMethod",
-            }
-        ],
-        "data": data,
-        "checksum": generate_checksum(str(data)),
-        "id": shortuuid.uuid()[:8],
-        "epoch": time.time(),
-    }
+    body = _post_to_component(client, method_name="nested.check=False", data=data)
 
-    response = client.post(
-        "/message/tests.views.fake_components.FakeComponent",
-        message,
-        content_type="application/json",
-    )
-
-    body = orjson.loads(response.content)
-
-    assert body["data"].get("nested").get("check") == False
+    assert body["data"].get("nested").get("check") is False
 
 
 def test_message_call_method_multiple_nested_setter(client):
     data = {"nested": {"another": {"bool": True}}}
-    message = {
-        "actionQueue": [
-            {
-                "payload": {"name": "nested.another.bool=False"},
-                "type": "callMethod",
-            }
-        ],
-        "data": data,
-        "checksum": generate_checksum(str(data)),
-        "id": shortuuid.uuid()[:8],
-        "epoch": time.time(),
-    }
-
-    response = client.post(
-        "/message/tests.views.fake_components.FakeComponent",
-        message,
-        content_type="application/json",
+    body = _post_to_component(
+        client, method_name="nested.another.bool=False", data=data
     )
 
-    body = orjson.loads(response.content)
-
-    assert body["data"].get("nested").get("another").get("bool") == False
+    assert body["data"].get("nested").get("another").get("bool") is False
 
 
 def test_message_call_method_toggle(client):
     data = {"check": False}
-    message = {
-        "actionQueue": [
-            {
-                "payload": {"name": "$toggle('check')"},
-                "type": "callMethod",
-            }
-        ],
-        "data": data,
-        "checksum": generate_checksum(str(data)),
-        "id": shortuuid.uuid()[:8],
-        "epoch": time.time(),
-    }
+    body = _post_to_component(client, method_name="$toggle('check')", data=data)
 
-    response = client.post(
-        "/message/tests.views.fake_components.FakeComponent",
-        message,
-        content_type="application/json",
-    )
-
-    body = orjson.loads(response.content)
-
-    assert body["data"].get("check") == True
+    assert body["data"].get("check") is True
 
 
 def test_message_call_method_nested_toggle(client):
     data = {"nested": {"check": False}}
-    message = {
-        "actionQueue": [
-            {
-                "payload": {"name": "$toggle('nested.check')"},
-                "type": "callMethod",
-            }
-        ],
-        "data": data,
-        "checksum": generate_checksum(str(data)),
-        "id": shortuuid.uuid()[:8],
-        "epoch": time.time(),
-    }
+    body = _post_to_component(client, method_name="$toggle('nested.check')", data=data)
 
-    response = client.post(
-        "/message/tests.views.fake_components.FakeComponent",
-        message,
-        content_type="application/json",
-    )
-
-    body = orjson.loads(response.content)
-
-    assert body["data"].get("nested").get("check") == True
+    assert body["data"].get("nested").get("check") is True
 
 
 def test_message_call_method_args(client):
     data = {"method_count": 0}
-    message = {
-        "actionQueue": [
-            {
-                "payload": {"name": "test_method_args(3)"},
-                "type": "callMethod",
-            }
-        ],
-        "data": data,
-        "checksum": generate_checksum(str(data)),
-        "id": shortuuid.uuid()[:8],
-        "epoch": time.time(),
-    }
-
-    response = client.post(
-        "/message/tests.views.fake_components.FakeComponent",
-        message,
-        content_type="application/json",
-    )
-
-    body = orjson.loads(response.content)
+    body = _post_to_component(client, method_name="test_method_args(3)", data=data)
 
     assert body["data"].get("method_count") == 3
 
 
 def test_message_call_method_kwargs(client):
     data = {"method_count": 0}
-    message = {
-        "actionQueue": [
-            {
-                "payload": {"name": "test_method_kwargs(count=99)"},
-                "type": "callMethod",
-            }
-        ],
-        "data": data,
-        "checksum": generate_checksum(str(data)),
-        "id": shortuuid.uuid()[:8],
-        "epoch": time.time(),
-    }
-
-    response = client.post(
-        "/message/tests.views.fake_components.FakeComponent",
-        message,
-        content_type="application/json",
+    body = _post_to_component(
+        client, method_name="test_method_kwargs(count=99)", data=data
     )
-
-    body = orjson.loads(response.content)
 
     assert body["data"].get("method_count") == 99
 
 
 def test_message_call_method_no_validation(client):
-    data = {}
-    message = {
-        "actionQueue": [
-            {
-                "payload": {"name": "set_text_no_validation"},
-                "type": "callMethod",
-            }
-        ],
-        "data": data,
-        "checksum": generate_checksum(str(data)),
-        "id": shortuuid.uuid()[:8],
-        "epoch": time.time(),
-    }
-
-    response = client.post(
-        "/message/tests.views.fake_components.FakeValidationComponent",
-        message,
-        content_type="application/json",
+    body = _post_to_component(
+        client,
+        method_name="set_text_no_validation",
+        component_name="FakeValidationComponent",
     )
-
-    body = orjson.loads(response.content)
 
     assert not body["errors"]
 
 
 def test_message_call_method_validation(client):
-    data = {}
-    message = {
-        "actionQueue": [
-            {
-                "payload": {"name": "set_text_with_validation"},
-                "type": "callMethod",
-            }
-        ],
-        "data": data,
-        "checksum": generate_checksum(str(data)),
-        "id": shortuuid.uuid()[:8],
-        "epoch": time.time(),
-    }
-
-    response = client.post(
-        "/message/tests.views.fake_components.FakeValidationComponent",
-        message,
-        content_type="application/json",
+    body = _post_to_component(
+        client,
+        method_name="set_text_with_validation",
+        component_name="FakeValidationComponent",
     )
-
-    body = orjson.loads(response.content)
 
     assert body["errors"]
     assert body["errors"]["number"]
@@ -506,27 +220,19 @@ def test_message_call_method_validation(client):
 
 def test_message_call_method_reset(client):
     data = {"method_count": 1}
-    message = {
-        "actionQueue": [
+
+    body = post_and_get_response(
+        client,
+        url="/message/tests.views.fake_components.FakeComponent",
+        data=data,
+        action_queue=[
             {"payload": {"name": "method_count=2"}, "type": "callMethod"},
             {
                 "payload": {"name": "$reset"},
                 "type": "callMethod",
             },
         ],
-        "data": data,
-        "checksum": generate_checksum(str(data)),
-        "id": shortuuid.uuid()[:8],
-        "epoch": time.time(),
-    }
-
-    response = client.post(
-        "/message/tests.views.fake_components.FakeComponent",
-        message,
-        content_type="application/json",
     )
-
-    body = orjson.loads(response.content)
 
     assert body["data"]["method_count"] == 0
     # `data` should contain all data (not just the diffs) for resets
@@ -536,26 +242,7 @@ def test_message_call_method_reset(client):
 
 def test_message_call_method_refresh(client):
     data = {"method_count": 1}
-    message = {
-        "actionQueue": [
-            {
-                "payload": {"name": "$refresh"},
-                "type": "callMethod",
-            },
-        ],
-        "data": data,
-        "checksum": generate_checksum(str(data)),
-        "id": shortuuid.uuid()[:8],
-        "epoch": time.time(),
-    }
-
-    response = client.post(
-        "/message/tests.views.fake_components.FakeComponent",
-        message,
-        content_type="application/json",
-    )
-
-    body = orjson.loads(response.content)
+    body = _post_to_component(client, method_name="$refresh", data=data)
 
     assert body["data"]["method_count"] == 1
     # `data` should contain all data (not just the diffs) for refreshes
@@ -667,3 +354,34 @@ def test_message_call_method_cache_backend_dummy(client, monkeypatch, settings):
 
     # Component is retrieved from the module cache
     assert view.method_count == method_count
+
+
+def test_message_call_method_validation_error(client):
+    body = _post_to_component(client, "test_validation_error")
+
+    assert body["errors"]
+    assert body["errors"]["check"]
+    assert body["errors"]["check"][0]["code"] == "required"
+    assert body["errors"]["check"][0]["message"]
+    assert body["errors"]["check"][0]["message"] == ["Check is required"]
+
+
+def test_message_call_method_validation_error_list(client):
+    body = _post_to_component(client, "test_validation_error_list")
+
+    assert body["error"]
+    assert body["error"] == "ValidationError must be instantiated with a dictionary"
+
+
+def test_message_call_method_validation_error_no_code(client):
+    body = _post_to_component(client, "test_validation_error_no_code")
+
+    assert body["error"]
+    assert body["error"] == "Error code must be specified"
+
+
+def test_message_call_method_validation_error_string(client):
+    body = _post_to_component(client, "test_validation_error_string")
+
+    assert body["error"]
+    assert body["error"] == "ValidationError must be instantiated with a dictionary"

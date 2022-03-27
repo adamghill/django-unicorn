@@ -4,6 +4,7 @@ from functools import wraps
 from typing import Dict, Sequence
 
 from django.core.cache import caches
+from django.forms import ValidationError
 from django.http import HttpRequest, JsonResponse
 from django.http.response import HttpResponseNotModified
 from django.utils.safestring import mark_safe
@@ -112,17 +113,35 @@ def _process_component_request(
         if action.action_type == "syncInput":
             sync_input.handle(component_request, component, action.payload)
         elif action.action_type == "callMethod":
-            (
-                component,
-                _is_refresh_called,
-                _is_reset_called,
-                _validate_all_fields,
-                return_data,
-            ) = call_method.handle(component_request, component, action.payload)
+            try:
+                (
+                    component,
+                    _is_refresh_called,
+                    _is_reset_called,
+                    _validate_all_fields,
+                    return_data,
+                ) = call_method.handle(component_request, component, action.payload)
 
-            is_refresh_called = is_refresh_called | _is_refresh_called
-            is_reset_called = is_reset_called | _is_reset_called
-            validate_all_fields = validate_all_fields | _validate_all_fields
+                is_refresh_called = is_refresh_called | _is_refresh_called
+                is_reset_called = is_reset_called | _is_reset_called
+                validate_all_fields = validate_all_fields | _validate_all_fields
+            except ValidationError as e:
+                assert not hasattr(
+                    e, "error_list"
+                ), "ValidationError must be instantiated with a dictionary"
+
+                for field, message in e.message_dict.items():
+                    assert e.args[1], "Error code must be specified"
+                    error_code = e.args[1]
+
+                    if field in component.errors:
+                        component.errors[field].append(
+                            {"code": error_code, "message": message}
+                        )
+                    else:
+                        component.errors[field] = [
+                            {"code": error_code, "message": message}
+                        ]
         else:
             raise UnicornViewError(f"Unknown action_type '{action.action_type}'")
 
