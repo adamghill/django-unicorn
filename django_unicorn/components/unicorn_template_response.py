@@ -10,7 +10,7 @@ from bs4.dammit import EntitySubstitution
 from bs4.element import Tag
 from bs4.formatter import HTMLFormatter
 
-from django_unicorn.settings import get_minify_html_enabled
+from django_unicorn.settings import get_minify_html_enabled, get_script_location
 from django_unicorn.utils import sanitize_html
 
 from ..decorators import timed
@@ -160,10 +160,17 @@ class UnicornTemplateResponse(TemplateResponse):
                 script_tag = soup.new_tag("script")
                 script_tag["type"] = "module"
                 script_tag.string = f"if (typeof Unicorn === 'undefined') {{ console.error('Unicorn is missing. Do you need {{% load unicorn %}} or {{% unicorn_scripts %}}?') }} else {{ {init_script} }}"
-                root_element.insert_after(script_tag)
+
+                if get_script_location() == "append":
+                    root_element.append(script_tag)
+                else:
+                    root_element.insert_after(script_tag)
 
                 for t in json_tags:
-                    root_element.insert_after(t)
+                    if get_script_location() == "append":
+                        root_element.append(t)
+                    else:
+                        root_element.insert_after(t)
 
         rendered_template = UnicornTemplateResponse._desoupify(soup)
         self.component.rendered(rendered_template)

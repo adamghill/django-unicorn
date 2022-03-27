@@ -36,6 +36,14 @@ def get_cache_alias():
     return get_setting("CACHE_ALIAS", "default")
 
 
+def get_script_location():
+    """
+    Valid choices: "append", "after". Default is "after".
+    """
+
+    return get_setting("SCRIPT_LOCATION", "after")
+
+
 def get_serial_enabled():
     """
     Default serial enabled is `False`.

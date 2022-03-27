@@ -36,6 +36,7 @@ def pytest_configure():
         "CACHE_ALIAS": "default",
         "APPS": ("unicorn",),
         "MINIFY_HTML": False,
+        "SCRIPT_LOCATION": "after",
     }
 
     caches = {

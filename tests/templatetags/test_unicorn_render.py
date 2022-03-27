@@ -336,6 +336,8 @@ def test_unicorn_render_calls_no_mount_call(settings):
 
 def test_unicorn_render_hash(settings):
     settings.DEBUG = True
+    settings.UNICORN["SCRIPT_LOCATION"] = "after"
+
     token = Token(
         TokenType.TEXT,
         "unicorn 'tests.templatetags.test_unicorn_render.FakeComponentParent'",
@@ -350,8 +352,31 @@ def test_unicorn_render_hash(settings):
 
     # Assert that the content hash is correct
     script_idx = html.index("<script")
-    rendered_content = html[:script_idx]
-    expected_hash = generate_checksum(rendered_content)
+    rendered_content_without_inserted_after_script = html[:script_idx]
+    expected_hash = generate_checksum(rendered_content_without_inserted_after_script)
+    assert f'"hash":"{expected_hash}"' in html
+
+
+def test_unicorn_render_hash_append(settings):
+    settings.DEBUG = True
+    settings.UNICORN["SCRIPT_LOCATION"] = "append"
+
+    token = Token(
+        TokenType.TEXT,
+        "unicorn 'tests.templatetags.test_unicorn_render.FakeComponentParent'",
+    )
+    unicorn_node = unicorn(Parser([]), token)
+    context = {}
+    html = unicorn_node.render(Context(context))
+
+    assert '<script type="module"' in html
+    assert len(re.findall('<script type="module"', html)) == 1
+    assert '"hash":"' in html
+
+    # Assert that the content hash is correct
+    script_idx = html.index("<script")
+    rendered_content_without_appended_script = html[:script_idx] + "</div>"
+    expected_hash = generate_checksum(rendered_content_without_appended_script)
     assert f'"hash":"{expected_hash}"' in html
 
 

@@ -1,6 +1,7 @@
 from django_unicorn.settings import (
     get_cache_alias,
     get_minify_html_enabled,
+    get_script_location,
     get_serial_enabled,
 )
 
@@ -50,3 +51,15 @@ def test_settings_minify_html_true(settings):
     assert get_minify_html_enabled() is True
 
     settings.UNICORN["MINIFY_HTML"] = False
+
+
+def test_get_script_location(settings):
+    assert get_script_location() == "after"
+
+    settings.UNICORN["SCRIPT_LOCATION"] = "append"
+
+    assert get_script_location() == "append"
+
+    del settings.UNICORN["SCRIPT_LOCATION"]
+
+    assert get_script_location() == "after"
