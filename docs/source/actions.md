@@ -288,10 +288,10 @@ Validates the component.
 
 ## Calling methods
 
-Sometimes you need to trigger a method on a component from regular JavaScript. That is possible with `Unicorn.call()`. It can be called from anywhere on the page.
+Sometimes you need to trigger a method on a component from regular JavaScript. That is possible with `Unicorn.call()`. The first argument is the name (or key) of the component and the second argument is the name of the method to call.
 
 ```html
-<!-- index.html -->
+<!-- call-with-component-name.html -->
 {% unicorn 'hello-world' %}
 
 <button onclick="Unicorn.call('hello-world', 'set_name');">
@@ -299,7 +299,16 @@ Sometimes you need to trigger a method on a component from regular JavaScript. T
 </button>
 ```
 
-Passing arguments is also supported.
+```html
+<!-- call-with-component-key.html -->
+{% unicorn 'hello-world' key='hello-universe' %}
+
+<button onclick="Unicorn.call('hello-universe', 'set_name');">
+  Set the name from outside the component
+</button>
+```
+
+Passing arguments the method call is also supported.
 
 ```html
 <!-- index.html -->
