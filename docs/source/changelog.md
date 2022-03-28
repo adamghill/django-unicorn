@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.44.0
+
+- Add support for raising a `ValidationError` from component methods
+
+[All changes since 0.43.1](https://github.com/adamghill/django-unicorn/compare/0.43.1...0.44.0).
+
 ## v0.43.1
 
 - Fix bug where direct views were not caching the component correctly
