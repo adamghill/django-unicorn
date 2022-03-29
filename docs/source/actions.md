@@ -59,13 +59,14 @@ class PassingArgsView(UnicornView):
 
 ### Argument types
 
-Arguments can be most basic Python types, including `string`, `int`, `float`, `list`, `tuple`, `dictionary`, `set`, `datetime`, and `UUID4`.
+Arguments can be most basic Python types, including `string`, `int`, `float`, `bool`, `list`, `tuple`, `dictionary`, `set`, `datetime`, and `UUID4`.
 
 ```html
 <!-- argument-types.html -->
 <div>
   <button unicorn:click="update(99)">Pass int</button>
   <button unicorn:click="update(1.234)">Pass float</button>
+  <button unicorn:click="update(True)">Pass bool</button>
   <button unicorn:click="update({'key': 'value'})">Pass dictionary</button>
   <button unicorn:click="update([1, 2, 3])">Pass list</button>
   <button unicorn:click="update((1, 2, 3))">Pass tuple</button>
