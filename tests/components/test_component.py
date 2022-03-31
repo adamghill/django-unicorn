@@ -161,6 +161,43 @@ def test_get_context_data(component):
     assert isinstance(context_data.get("get_name"), types.MethodType)
 
 
+def test_get_context_data_component_id():
+    class TestComponent(UnicornView):
+        pass
+
+    component = TestComponent(component_id="asdf1234", component_name="hello-world")
+    actual = component.get_context_data()
+
+    assert actual["unicorn"]
+    assert actual["unicorn"]["component_id"] == "asdf1234"
+
+
+def test_get_context_data_component_name():
+    class TestComponent(UnicornView):
+        pass
+
+    component = TestComponent(component_id="asdf1234", component_name="hello-world")
+    actual = component.get_context_data()
+
+    assert actual["unicorn"]
+    assert actual["unicorn"]["component_name"] == "hello-world"
+
+
+def test_get_context_data_component_key():
+    class TestComponent(UnicornView):
+        pass
+
+    component = TestComponent(
+        component_id="asdf1234",
+        component_name="hello-world",
+        component_key="key-key-key",
+    )
+    actual = component.get_context_data()
+
+    assert actual["unicorn"]
+    assert actual["unicorn"]["component_key"] == "key-key-key"
+
+
 def test_is_public(component):
     assert component._is_public("test_name")
 

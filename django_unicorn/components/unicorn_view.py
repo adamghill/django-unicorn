@@ -482,7 +482,16 @@ class UnicornView(TemplateView):
         attributes = self._attributes()
         context.update(attributes)
         context.update(self._methods())
-        context.update({"unicorn": {"errors": self.errors}})
+        context.update(
+            {
+                "unicorn": {
+                    "component_id": self.component_id,
+                    "component_name": self.component_name,
+                    "component_key": self.component_key,
+                    "errors": self.errors,
+                }
+            }
+        )
 
         return context
 
