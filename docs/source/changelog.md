@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.44.1
+
+- Fix: Some types of type annotations on a component method would cause an error when it was called [#392](https://github.com/adamghill/django-unicorn/issues/392) by [nerdoc](https://github.com/nerdoc)
+- Add `component_id`, `component_name`, `component_key` to the `unicorn` dictionary in the template context [#389](https://github.com/adamghill/django-unicorn/issues/389) by [nerdoc](https://github.com/nerdoc)
+
+[All changes since 0.44.0](https://github.com/adamghill/django-unicorn/compare/0.44.0...0.44.1).
+
 ## v0.44.0
 
 - Add support for raising a `ValidationError` from component methods
@@ -8,7 +15,7 @@
 
 ## v0.43.1
 
-- Fix bug where direct views were not caching the component correctly
+- Fix: direct views were not caching the component correctly
 
 [All changes since 0.43.0](https://github.com/adamghill/django-unicorn/compare/0.43.0...0.43.1).
 
@@ -21,7 +28,7 @@
 
 ## v0.42.1
 
-- Fix bug where dictionaries in a component would generate incorrect checksums and trigger a `Checksum does not match` error
+- Fix: dictionaries in a component would generate incorrect checksums and trigger a `Checksum does not match` error
 - Remove some serializations that was happening unnecessarily on every render
 - Add Python 3.10 and Django 4.0 to test matrix
 
