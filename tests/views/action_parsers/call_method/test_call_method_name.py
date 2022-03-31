@@ -1,3 +1,5 @@
+from typing import Union
+
 import pytest
 
 from django_unicorn.components import UnicornView
@@ -18,6 +20,11 @@ class FakeComponent(UnicornView):
     def save_with_model(self, model: Flavor):
         assert issubclass(type(model), Flavor), "model arg should be a `Flavor` model"
         return model.pk
+
+    def save_with_union(self, id: Union[int, str]):
+        # Unicorn doesn't actually do anything with the Union above (unlike something like Pydantic)
+        assert isinstance(id, int) or isinstance(id, str)
+        return id
 
 
 def test_call_method_name_missing():
@@ -78,3 +85,19 @@ def test_call_method_name_kwarg_with_model_type_annotation():
     )
 
     assert actual == flavor.pk
+
+
+def test_call_method_name_with_kwarg_with_union_and_int():
+    component = FakeComponent(component_name="test", component_id="asdf")
+    actual = _call_method_name(component, "save_with_union", args=[], kwargs={"id": 2})
+
+    assert isinstance(actual, int)
+
+
+def test_call_method_name_with_kwarg_with_union_and_str():
+    component = FakeComponent(component_name="test", component_id="asdf")
+    actual = _call_method_name(
+        component, "save_with_union", args=[], kwargs={"id": "2"}
+    )
+
+    assert isinstance(actual, str)

@@ -115,20 +115,27 @@ def _call_method_name(
 
             for argument in arguments:
                 if argument in type_hints:
-                    if issubclass(type_hints[argument], Model):
-                        DbModel = type_hints[argument]
-                        key = "pk"
-                        value = None
+                    type_hint = type_hints[argument]
 
-                        if args:
-                            value = args.pop()
-                        elif kwargs:
-                            (key, value) = list(kwargs.items())[0]
-                            del kwargs[key]
+                    try:
+                        if issubclass(type_hint, Model):
+                            DbModel = type_hint
+                            key = "pk"
+                            value = None
 
-                        model = DbModel.objects.get(**{key: value})
+                            if args:
+                                value = args.pop()
+                            elif kwargs:
+                                (key, value) = list(kwargs.items())[0]
+                                del kwargs[key]
 
-                        args.append(model)
+                            model = DbModel.objects.get(**{key: value})
+
+                            args.append(model)
+                    except TypeError:
+                        # Using `issubclass` throws a `TypeError` when the type hint is not a class (e.g. `Union`)
+                        # but skip that error if it happens so the call can happen as expected
+                        pass
 
         if args and kwargs:
             return func(*args, **kwargs)
