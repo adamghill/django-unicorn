@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.45.0
+
+- Add ability to render initial data JavaScript inside the rendered component with [`SCRIPT_LOCATION`](settings.md#scriptlocation) setting
+
+[All changes since 0.45.0](https://github.com/adamghill/django-unicorn/compare/0.44.1...0.45.0).
+
 ## v0.44.1
 
 - Fix: Some types of type annotations on a component method would cause an error when it was called [#392](https://github.com/adamghill/django-unicorn/issues/392) by [nerdoc](https://github.com/nerdoc)
