@@ -11,10 +11,15 @@ from django.utils.html import _json_script_escapes
 from django.utils.safestring import mark_safe
 
 import shortuuid
-from cachetools.lru import LRUCache
 
 import django_unicorn
 from django_unicorn.errors import UnicornCacheError
+
+
+try:
+    from cachetools.lru import LRUCache
+except ImportError:
+    from cachetools import LRUCache
 
 
 logger = logging.getLogger(__name__)

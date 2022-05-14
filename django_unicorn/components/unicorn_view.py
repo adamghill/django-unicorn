@@ -15,7 +15,6 @@ from django.utils.decorators import classonlymethod
 from django.views.generic.base import TemplateView
 
 import shortuuid
-from cachetools.lru import LRUCache
 
 from django_unicorn.settings import get_cache_alias
 
@@ -30,6 +29,12 @@ from ..settings import get_setting
 from ..utils import get_cacheable_component, is_non_string_sequence
 from .fields import UnicornField
 from .unicorn_template_response import UnicornTemplateResponse
+
+
+try:
+    from cachetools.lru import LRUCache
+except ImportError:
+    from cachetools import LRUCache
 
 
 logger = logging.getLogger(__name__)
