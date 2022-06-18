@@ -3,8 +3,10 @@ import inspect
 import logging
 import pickle
 import sys
-from typing import Any, Callable, Dict, List, Optional, Sequence, Type, Union
+from functools import lru_cache
+from typing import Any, Callable, Dict, List, Sequence, Tuple, Type
 
+from django.apps import AppConfig
 from django.conf import settings
 from django.core.cache import caches
 from django.core.exceptions import ImproperlyConfigured
@@ -68,7 +70,8 @@ def convert_to_pascal_case(s: str) -> str:
     return "".join(word.title() for word in s.split("_"))
 
 
-def get_locations(component_name):
+@lru_cache(maxsize=128, typed=True)
+def get_locations(component_name: str) -> List[Tuple[str, str]]:
     locations = []
 
     if "." in component_name:
@@ -106,8 +109,19 @@ def get_locations(component_name):
     for app in unicorn_apps:
         # Handle an installed app that actually points to an app config
         if ".apps." in app:
+            is_app_config = True  # default to True for backwards compatibility
             app_config_idx = app.rindex(".apps.")
-            app = app[:app_config_idx]
+            
+            try:
+                app_config_module_name = app[:app_config_idx + 5]
+                app_config_class_name = app[app_config_idx + 6:]
+                app_config_module = importlib.import_module(app_config_module_name)
+                is_app_config = type(getattr(app_config_module, app_config_class_name)) == type(AppConfig)
+            except ModuleNotFoundError:
+                pass
+
+            if is_app_config:
+                app = app[:app_config_idx]
 
         app_module_name = f"{app}.components.{module_name}"
         locations.append((app_module_name, class_name))
