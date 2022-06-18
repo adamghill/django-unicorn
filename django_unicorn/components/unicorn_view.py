@@ -111,12 +111,14 @@ def get_locations(component_name: str) -> List[Tuple[str, str]]:
         if ".apps." in app:
             is_app_config = True  # default to True for backwards compatibility
             app_config_idx = app.rindex(".apps.")
-            
+
             try:
-                app_config_module_name = app[:app_config_idx + 5]
-                app_config_class_name = app[app_config_idx + 6:]
+                app_config_module_name = app[: app_config_idx + 5]
+                app_config_class_name = app[app_config_idx + 6 :]
                 app_config_module = importlib.import_module(app_config_module_name)
-                is_app_config = type(getattr(app_config_module, app_config_class_name)) == type(AppConfig)
+                is_app_config = type(
+                    getattr(app_config_module, app_config_class_name)
+                ) == type(AppConfig)
             except ModuleNotFoundError:
                 pass
 

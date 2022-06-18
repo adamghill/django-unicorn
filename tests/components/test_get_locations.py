@@ -149,7 +149,11 @@ def test_get_locations_installed_app_with_app_config(settings, clear_apps, cache
 
 def test_get_locations_installed_app_with_apps(settings, clear_apps, cache_clear):
     # test when the app is in a subdirectory "apps"
-    settings.INSTALLED_APPS = ["example.apps.main",]
-    expected_location = [("example.apps.main.components.sidebar_menu", "SidebarMenuView")]
+    settings.INSTALLED_APPS = [
+        "example.apps.main",
+    ]
+    expected_location = [
+        ("example.apps.main.components.sidebar_menu", "SidebarMenuView")
+    ]
     actual_location = get_locations("sidebar-menu")
     assert expected_location == actual_location
