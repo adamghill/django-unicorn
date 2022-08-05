@@ -104,7 +104,8 @@ export function addActionEventListener(component, eventType) {
     if (
       targetElement &&
       targetElement.isUnicorn &&
-      targetElement.actions.length > 0
+      targetElement.actions.length > 0 &&
+      eventType in component.actionEvents
     ) {
       component.actionEvents[eventType].forEach((actionEvent) => {
         const { action } = actionEvent;
