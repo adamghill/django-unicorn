@@ -1,0 +1,27 @@
+{% extends "www/base.html" %}
+{% load unicorn %}
+
+{% block content %}
+
+<div unicorn:view>
+  <div>
+    counter: {{ counter }}
+  </div>
+  <div>
+    counter2.more: {{ counter2.more }}
+  </div>
+
+  <div>
+    <button unicorn:click="inc">inc</button>
+  </div>
+
+  <div>
+    <button unicorn:click="counter=4">counter=4</button>
+  </div>
+
+  <div>
+    <button unicorn:click="counter2.more=4">counter2.more=4</button>
+  </div>
+</div>
+
+{% endblock content %}
