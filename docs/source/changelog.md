@@ -2,13 +2,13 @@
 
 ## v0.45.1
 
-- Fix JavaScript error that sometimes happens with nested components. [237](https://github.com/adamghill/django-unicorn/issues/237) by [clangley](https://github.com/clangley).
+- Fix JavaScript error that sometimes happens with nested components. [237](https://github.com/adamghill/django-unicorn/issues/237) by [clangley](https://github.com/clangley)
 
 [All changes since 0.45.0](https://github.com/adamghill/django-unicorn/compare/0.45.0...0.45.1).
 
 ## v0.45.0
 
-- Add ability to render initial data JavaScript inside the rendered component with [`SCRIPT_LOCATION`](settings.md#scriptlocation) setting
+- Add ability to render initial data JavaScript inside the rendered component with [`SCRIPT_LOCATION`](settings.md#script_location) setting
 
 [All changes since 0.44.1](https://github.com/adamghill/django-unicorn/compare/0.44.1...0.45.0).
 
