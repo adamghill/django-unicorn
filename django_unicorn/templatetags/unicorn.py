@@ -148,11 +148,7 @@ class UnicornNode(template.Node):
             request=request,
         )
 
-        extra_context = {}
-        for c in context:
-            extra_context.update(c)
-
-        rendered_component = view.render(init_js=True, extra_context=extra_context)
+        rendered_component = view.render(init_js=True)
 
         return rendered_component
 
