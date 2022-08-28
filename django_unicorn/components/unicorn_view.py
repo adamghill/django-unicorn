@@ -165,9 +165,6 @@ def construct_component(
     return component
 
 
-from django.utils.decorators import classonlymethod
-
-
 class UnicornView(TemplateView):
     response_class = UnicornTemplateResponse
     component_name: str = ""
@@ -873,9 +870,11 @@ class UnicornView(TemplateView):
                 component._cache_component(request, parent, **kwargs)
 
                 return component
-            except ModuleNotFoundError:
+            except ModuleNotFoundError as e:
+                logger.debug(e)
                 pass
-            except AttributeError:
+            except AttributeError as e:
+                logger.debug(e)
                 class_name_not_found = f"{module_name}.{class_name}"
 
         if class_name_not_found is not None:
