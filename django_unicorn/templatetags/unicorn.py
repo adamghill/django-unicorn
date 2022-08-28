@@ -73,25 +73,46 @@ class UnicornNode(template.Node):
 
         resolved_kwargs = {}
 
-        for key, val in self.kwargs.items():
-            try:
-                resolved_kwargs.update({key: template.Variable(val).resolve(context)})
-            except TypeError:
-                resolved_kwargs.update({key: val})
-            except template.VariableDoesNotExist:
-                resolved_kwargs.update({key: val})
+        from ..components import UnicornView
 
-                if val.endswith(".id"):
-                    pk_val = val.replace(".id", ".pk")
+        for key, value in self.kwargs.items():
+            try:
+                resolved_value = template.Variable(value).resolve(context)
+
+                if (
+                    key == "parent"
+                    and value == "view"
+                    and not isinstance(resolved_value, UnicornView)
+                ):
+                    # Handle rendering a parent component from a template that is called from
+                    # a `TemplateView`; for some reason `view` is clobbered in this instance, but
+                    # the `unicorn` dictionary has enough data to instantiate a `UnicornView`
+                    parent_component_data = template.Variable("unicorn").resolve(
+                        context
+                    )
+
+                    resolved_value = UnicornView(
+                        component_name=parent_component_data.get("component_name"),
+                        component_id=parent_component_data.get("component_id"),
+                    )
+
+                resolved_kwargs.update({key: resolved_value})
+            except TypeError:
+                resolved_kwargs.update({key: value})
+            except template.VariableDoesNotExist:
+                resolved_kwargs.update({key: value})
+
+                if value.endswith(".id"):
+                    pk_val = value.replace(".id", ".pk")
 
                     try:
                         resolved_kwargs.update(
                             {key: template.Variable(pk_val).resolve(context)}
                         )
                     except TypeError:
-                        resolved_kwargs.update({key: val})
+                        resolved_kwargs.update({key: value})
                     except template.VariableDoesNotExist:
-                        resolved_kwargs.update({key: val})
+                        resolved_kwargs.update({key: value})
 
         if "key" in resolved_kwargs:
             self.component_key = resolved_kwargs.pop("key")
@@ -137,9 +158,7 @@ class UnicornNode(template.Node):
         # Useful for unit test
         self.component_id = component_id
 
-        from ..components import UnicornView
-
-        view = UnicornView.create(
+        self.view = UnicornView.create(
             component_id=component_id,
             component_name=component_name,
             component_key=self.component_key,
@@ -152,7 +171,7 @@ class UnicornNode(template.Node):
         for c in context:
             extra_context.update(c)
 
-        rendered_component = view.render(init_js=True, extra_context=extra_context)
+        rendered_component = self.view.render(init_js=True, extra_context=extra_context)
 
         return rendered_component
 

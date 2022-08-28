@@ -12,12 +12,26 @@ from django_unicorn.utils import generate_checksum
 from example.coffee.models import Flavor
 
 
+class FakeModel:
+    # Fake a model that only has an id
+
+    def __init__(self):
+        self.id = 178
+
+    def to_json(self):
+        return {"id": self.id}
+
+
 class FakeComponent(UnicornView):
     template_name = "templates/test_component.html"
 
 
 class FakeComponentParent(UnicornView):
     template_name = "templates/test_component_parent.html"
+
+
+class FakeComponentChild(UnicornView):
+    template_name = "templates/test_component_child.html"
 
 
 class FakeComponentKwargs(UnicornView):
@@ -48,22 +62,69 @@ class FakeComponentModel(UnicornView):
 
 
 class FakeComponentCalls(UnicornView):
-    template_name = "templates/test_component_parent.html"
+    template_name = "templates/test_component.html"
 
     def mount(self):
         self.call("testCall")
 
 
 class FakeComponentCalls2(UnicornView):
-    template_name = "templates/test_component_parent.html"
+    template_name = "templates/test_component.html"
 
     def mount(self):
         self.call("testCall2", "hello")
 
 
-def test_unicorn_has_context_processors_in_context(client):
+def test_unicorn_template_renders(client):
     response = client.get("/test")
-    assert "WSGIRequest" in response.content.decode()
+    content = response.rendered_content.strip()
+
+    assert response.wsgi_request.path == "/test"
+    assert "WSGIRequest" in content
+    assert content.startswith("<div unicorn:id")
+    assert (
+        'unicorn:name="tests.templatetags.test_unicorn_render.FakeComponentKwargs"'
+        in content
+    )
+    assert '<script type="application/json" id="unicorn:data:' in content
+
+
+def test_unicorn_template_renders_with_parent_and_child(client):
+    response = client.get("/test-parent")
+    content = response.content.decode().strip()
+
+    assert response.wsgi_request.path == "/test-parent"
+    assert content.startswith("<div unicorn:id")
+    assert (
+        'unicorn:name="tests.templatetags.test_unicorn_render.FakeComponentParent"'
+        in content
+    )
+    assert (
+        'unicorn:name="tests.templatetags.test_unicorn_render.FakeComponentChild"'
+        in content
+    )
+    assert "--parent--" in content
+    assert "==child==" in content
+    assert '<script type="application/json" id="unicorn:data:' in content
+
+
+def test_unicorn_template_renders_with_parent_and_child_with_templateview(client):
+    response = client.get("/test-parent-template")
+    content = response.content.decode().strip()
+
+    assert response.wsgi_request.path == "/test-parent-template"
+    assert content.startswith("<div unicorn:id")
+    assert (
+        'unicorn:name="tests.templatetags.test_unicorn_render.FakeComponentParent"'
+        in content
+    )
+    assert (
+        'unicorn:name="tests.templatetags.test_unicorn_render.FakeComponentChild"'
+        in content
+    )
+    assert "--parent--" in content
+    assert "==child==" in content
+    assert '<script type="application/json" id="unicorn:data:' in content
 
 
 def test_unicorn_render_kwarg():
@@ -180,15 +241,7 @@ def test_unicorn_render_parent_with_model_id(settings):
     unicorn_node = unicorn(Parser([]), token)
     view = FakeComponentParent(component_name="test", component_id="asdf")
 
-    # Fake a model that only has an id
-    class Model:
-        def __init__(self):
-            self.id = 178
-
-        def to_json(self):
-            return {"id": self.id}
-
-    context = {"view": view, "model": Model()}
+    context = {"view": view, "model": FakeModel()}
     unicorn_node.render(Context(context))
 
     assert (
