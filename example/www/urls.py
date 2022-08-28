@@ -20,5 +20,10 @@ urlpatterns = [
         RedirectsView.as_view(),
         name="redirects",
     ),
+    path(
+        "class-view",
+        views.ClassViewView.as_view(),
+        name="class-view",
+    ),
     path("<str:name>", views.template, name="template"),
 ]
