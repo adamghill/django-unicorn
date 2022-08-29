@@ -111,29 +111,25 @@ lxml = ["lxml"]
 
 [[package]]
 name = "black"
-version = "21.12b0"
+version = "22.6.0"
 description = "The uncompromising code formatter."
 category = "dev"
 optional = false
 python-versions = ">=3.6.2"
 
 [package.dependencies]
-click = ">=7.1.2"
+click = ">=8.0.0"
 mypy-extensions = ">=0.4.3"
-pathspec = ">=0.9.0,<1"
+pathspec = ">=0.9.0"
 platformdirs = ">=2"
-tomli = ">=0.2.6,<2.0.0"
+tomli = {version = ">=1.1.0", markers = "python_full_version < \"3.11.0a7\""}
 typed-ast = {version = ">=1.4.2", markers = "python_version < \"3.8\" and implementation_name == \"cpython\""}
-typing-extensions = [
-    {version = ">=3.10.0.0", markers = "python_version < \"3.10\""},
-    {version = "!=3.10.0.1", markers = "python_version >= \"3.10\""},
-]
+typing-extensions = {version = ">=3.10.0.0", markers = "python_version < \"3.10\""}
 
 [package.extras]
 colorama = ["colorama (>=0.4.3)"]
 d = ["aiohttp (>=3.7.4)"]
 jupyter = ["ipython (>=7.8.0)", "tokenize-rt (>=3.2.0)"]
-python2 = ["typed-ast (>=1.4.3)"]
 uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
@@ -151,21 +147,25 @@ wcwidth = ">=0.1.4"
 
 [[package]]
 name = "bpython"
-version = "0.19"
-description = "Fancy Interface to the Python Interpreter"
+version = "0.22.1"
+description = ""
 category = "dev"
 optional = false
-python-versions = "*"
+python-versions = ">=3.6"
 
 [package.dependencies]
-curtsies = ">=0.1.18"
+"backports.cached-property" = {version = "*", markers = "python_version < \"3.8\""}
+curtsies = ">=0.3.5"
+cwcwidth = "*"
 greenlet = "*"
 pygments = "*"
+pyxdg = "*"
 requests = "*"
-six = ">=1.5"
+typing-extensions = "*"
 
 [package.extras]
-jedi = ["jedi"]
+clipboard = ["pyperclip"]
+jedi = ["jedi (>=0.16)"]
 urwid = ["urwid"]
 watch = ["watchdog"]
 
@@ -337,15 +337,34 @@ redis = ">=3.0.0"
 
 [[package]]
 name = "django-stubs"
-version = "1.5.0"
+version = "1.12.0"
 description = "Mypy stubs for Django"
+category = "dev"
+optional = false
+python-versions = ">=3.7"
+
+[package.dependencies]
+django = "*"
+django-stubs-ext = ">=0.4.0"
+mypy = ">=0.930"
+tomli = "*"
+types-pytz = "*"
+types-PyYAML = "*"
+typing-extensions = "*"
+
+[package.extras]
+compatible-mypy = ["mypy (>=0.930,<0.970)"]
+
+[[package]]
+name = "django-stubs-ext"
+version = "0.5.0"
+description = "Monkey-patching and extensions for django-stubs"
 category = "dev"
 optional = false
 python-versions = ">=3.6"
 
 [package.dependencies]
 django = "*"
-mypy = ">=0.770,<0.780"
 typing-extensions = "*"
 
 [[package]]
@@ -627,18 +646,21 @@ django = ">=3.2"
 
 [[package]]
 name = "mypy"
-version = "0.770"
+version = "0.971"
 description = "Optional static typing for Python"
 category = "dev"
 optional = false
-python-versions = ">=3.5"
+python-versions = ">=3.6"
 
 [package.dependencies]
-mypy-extensions = ">=0.4.3,<0.5.0"
-typed-ast = ">=1.4.0,<1.5.0"
-typing-extensions = ">=3.7.4"
+mypy-extensions = ">=0.4.3"
+tomli = {version = ">=1.1.0", markers = "python_version < \"3.11\""}
+typed-ast = {version = ">=1.4.0,<2", markers = "python_version < \"3.8\""}
+typing-extensions = ">=3.10"
 
 [package.extras]
+reports = ["lxml"]
+python2 = ["typed-ast (>=1.4.0,<2)"]
 dmypy = ["psutil (>=4.0)"]
 
 [[package]]
@@ -765,15 +787,18 @@ dev = ["tox", "pre-commit"]
 
 [[package]]
 name = "poethepoet"
-version = "0.10.0"
+version = "0.16.0"
 description = "A task runner that works well with poetry."
 category = "dev"
 optional = false
-python-versions = ">=3.6,<4.0"
+python-versions = ">=3.7"
 
 [package.dependencies]
-pastel = ">=0.2.0,<0.3.0"
-tomlkit = ">=0.6.0,<1.0.0"
+pastel = ">=0.2.1,<0.3.0"
+tomli = ">=1.2.2"
+
+[package.extras]
+poetry_plugin = ["poetry (>=1.0,<2.0)"]
 
 [[package]]
 name = "py"
@@ -900,6 +925,14 @@ python-versions = "*"
 name = "pywatchman"
 version = "1.4.1"
 description = "Watchman client for python"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[[package]]
+name = "pyxdg"
+version = "0.28"
+description = "PyXDG contains implementations of freedesktop.org standards in python."
 category = "dev"
 optional = false
 python-versions = "*"
@@ -1181,19 +1214,11 @@ python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
 
 [[package]]
 name = "tomli"
-version = "1.2.3"
+version = "2.0.1"
 description = "A lil' TOML parser"
 category = "dev"
 optional = false
-python-versions = ">=3.6"
-
-[[package]]
-name = "tomlkit"
-version = "0.11.4"
-description = "Style preserving TOML library"
-category = "dev"
-optional = false
-python-versions = ">=3.6,<4.0"
+python-versions = ">=3.7"
 
 [[package]]
 name = "tornado"
@@ -1205,8 +1230,24 @@ python-versions = ">= 3.7"
 
 [[package]]
 name = "typed-ast"
-version = "1.4.3"
+version = "1.5.4"
 description = "a fork of Python 2 and 3 ast modules with type comment support"
+category = "dev"
+optional = false
+python-versions = ">=3.6"
+
+[[package]]
+name = "types-pytz"
+version = "2022.2.1.0"
+description = "Typing stubs for pytz"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[[package]]
+name = "types-pyyaml"
+version = "6.0.11"
+description = "Typing stubs for PyYAML"
 category = "dev"
 optional = false
 python-versions = "*"
@@ -1296,7 +1337,7 @@ minify = ["htmlmin"]
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.7,<4"
-content-hash = "1a7040b776910c891b67dc2336cfec34b1b30cef0097b657a64b4b9d2dedcfa7"
+content-hash = "6546bb9bada4fe3f63062de96b446cfb61cf5d00c9453d26de6f8f14b8b08cc9"
 
 [metadata.files]
 alabaster = []
@@ -1328,6 +1369,7 @@ django = []
 django-mock-queries = []
 django-redis = []
 django-stubs = []
+django-stubs-ext = []
 djangorestframework = []
 docutils = []
 filelock = []
@@ -1374,6 +1416,7 @@ pytest-cov = []
 pytest-django = []
 pytz = []
 pywatchman = []
+pyxdg = []
 pyyaml = []
 redis = []
 reportlab = []
@@ -1396,9 +1439,10 @@ sphinxcontrib-serializinghtml = []
 sqlparse = []
 toml = []
 tomli = []
-tomlkit = []
 tornado = []
 typed-ast = []
+types-pytz = []
+types-pyyaml = []
 typing-extensions = []
 uc-micro-py = []
 urllib3 = []

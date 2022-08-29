@@ -38,22 +38,22 @@ minify = ["htmlmin"]
 docs = ["Sphinx", "linkify-it-py", "myst-parser", "furo", "sphinx-copybutton", "sphinx-autobuild", "rst2pdf"]
 
 [tool.poetry.dev-dependencies]
-pytest = "^6.2"
-black = "^21.11b1"
-flake8 = "^3.8.3"
-isort = "^5.0.9"
-mypy = "<0.780"
+pytest = "^6"
+black = "*"
+flake8 = "^3"
+isort = "^5"
+mypy = "<1"
 django-stubs = "^1.5.0"
-pytest-django = "^3.9.0"
-bpython = "^0.19"
+pytest-django = "^3"
+bpython = "<1"
 django-mock-queries = "^2.1.5"
 pydantic = "^1.7.3"
 pywatchman = "^1.4.1"
 django-redis = "^4.12.1"
 nox = "^2020.12.31"
-poethepoet = "^0.10.0"
-coverage = {extras = ["toml"], version = "^6.2"}
-pytest-cov = "^3.0.0"
+poethepoet = "^0"
+coverage = {extras = ["toml"], version = "^6"}
+pytest-cov = "^3"
 
 [build-system]
 requires = ["poetry>=0.12"]
