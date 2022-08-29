@@ -413,6 +413,9 @@ class UnicornView(TemplateView):
         # Re-set `request` on the component that got removed when making it cacheable
         self.request = request
 
+        for child in self.children:
+            child.request = request
+
     @timed
     def get_frontend_context_variables(self) -> str:
         """

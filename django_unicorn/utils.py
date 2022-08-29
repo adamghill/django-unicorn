@@ -77,6 +77,10 @@ def get_cacheable_component(
     if component.parent:
         component.parent = get_cacheable_component(component.parent)
 
+    for child in component.children:
+        if child.request is not None:
+            child = get_cacheable_component(child)
+
     try:
         pickle.dumps(component)
     except (TypeError, AttributeError, NotImplementedError, pickle.PicklingError) as e:
