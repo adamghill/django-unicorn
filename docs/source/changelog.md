@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.46.0
+
+- Support for loading nested components from a route that uses a class-based view.
+- Better support for children components.
+
+[All changes since 0.45.1](https://github.com/adamghill/django-unicorn/compare/0.45.1...0.46.0).
+
 ## v0.45.1
 
 - Fix JavaScript error that sometimes happens with nested components. [237](https://github.com/adamghill/django-unicorn/issues/237) by [clangley](https://github.com/clangley)
@@ -14,35 +21,35 @@
 
 ## v0.44.1
 
-- Fix: Some types of type annotations on a component method would cause an error when it was called [#392](https://github.com/adamghill/django-unicorn/issues/392) by [nerdoc](https://github.com/nerdoc)
-- Add `component_id`, `component_name`, `component_key` to the `unicorn` dictionary in the template context [#389](https://github.com/adamghill/django-unicorn/issues/389) by [nerdoc](https://github.com/nerdoc)
+- Fix: Some types of type annotations on a component method would cause an error when it was called [#392](https://github.com/adamghill/django-unicorn/issues/392) by [nerdoc](https://github.com/nerdoc).
+- Add `component_id`, `component_name`, `component_key` to the `unicorn` dictionary in the template context [#389](https://github.com/adamghill/django-unicorn/issues/389) by [nerdoc](https://github.com/nerdoc).
 
 [All changes since 0.44.0](https://github.com/adamghill/django-unicorn/compare/0.44.0...0.44.1).
 
 ## v0.44.0
 
-- Add support for raising a `ValidationError` from component methods
+- Add support for raising a `ValidationError` from component methods.
 
 [All changes since 0.43.1](https://github.com/adamghill/django-unicorn/compare/0.43.1...0.44.0).
 
 ## v0.43.1
 
-- Fix: direct views were not caching the component correctly
+- Fix: direct views were not caching the component correctly.
 
 [All changes since 0.43.0](https://github.com/adamghill/django-unicorn/compare/0.43.0...0.43.1).
 
 ## v0.43.0
 
-- Defer displaying `messages` when an action method returns a [redirect](messages.md#redirecting)
-- Prevent morphing or other changes when redirecting
+- Defer displaying `messages` when an action method returns a [redirect](messages.md#redirecting).
+- Prevent morphing or other changes when redirecting.
 
 [All changes since 0.42.1](https://github.com/adamghill/django-unicorn/compare/0.42.1...0.43.0).
 
 ## v0.42.1
 
 - Fix: dictionaries in a component would generate incorrect checksums and trigger a `Checksum does not match` error
-- Remove some serializations that was happening unnecessarily on every render
-- Add Python 3.10 and Django 4.0 to test matrix
+- Remove some serializations that was happening unnecessarily on every render.
+- Add Python 3.10 and Django 4.0 to test matrix.
 
 [All changes since 0.42.0](https://github.com/adamghill/django-unicorn/compare/0.42.0...0.42.1).
 
