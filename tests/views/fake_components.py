@@ -120,3 +120,10 @@ class FakeComponentWithMessage(UnicornView):
         assert self.request, "Expect a request in action methods"
         messages.success(self.request, "test success")
         return redirect("/something-here")
+
+
+class FakeComponentWithError(UnicornView):
+    template_name = "templates/test_component.html"
+
+    def mount(self):
+        print(self.not_a_valid_attribute)

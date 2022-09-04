@@ -856,6 +856,7 @@ class UnicornView(TemplateView):
             locations = get_locations(component_name)
 
         class_name_not_found = None
+        attribute_exception = None
 
         for (module_name, class_name) in locations:
             try:
@@ -878,16 +879,20 @@ class UnicornView(TemplateView):
                 pass
             except AttributeError as e:
                 logger.debug(e)
+                attribute_exception = e
                 class_name_not_found = f"{module_name}.{class_name}"
 
-        if class_name_not_found is not None:
+        if class_name_not_found is not None and attribute_exception is not None:
             message = (
                 f"The component class '{class_name_not_found}' could not be loaded."
             )
-            raise ComponentClassLoadError(message, locations=locations)
+            raise ComponentClassLoadError(
+                message, locations=locations
+            ) from attribute_exception
 
         module_name_not_found = component_name.replace("-", "_")
         message = f"The component module '{module_name_not_found}' could not be loaded."
+
         raise ComponentModuleLoadError(message, locations=locations)
 
     @classonlymethod

@@ -131,6 +131,24 @@ def test_message_component_class_not_loaded(client):
     ]
 
 
+def test_message_component_class_with_attribute_error(client):
+    data = {
+        "data": {},
+        "checksum": "DVVk97cx",
+        "id": "asdf",
+        "epoch": time.time(),
+    }
+
+    with pytest.raises(ComponentClassLoadError) as e:
+        post_json(
+            client,
+            data,
+            url="/message/tests.views.fake_components.FakeComponentWithError",
+        )
+
+    assert e.value.__cause__
+
+
 def test_message_component_with_dash(client):
     data = {
         "data": {},
