@@ -85,7 +85,9 @@ def set_property_from_data(
 
         if hasattr(component_or_field, "_set_property"):
             # Can assume that `component_or_field` is a component
-            component_or_field._set_property(name, value)
+            component_or_field._set_property(
+                name, value, call_updating_method=True, call_updated_method=False
+            )
         else:
             setattr(component_or_field, name, value)
 

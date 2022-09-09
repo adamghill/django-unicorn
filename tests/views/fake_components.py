@@ -127,3 +127,30 @@ class FakeComponentWithError(UnicornView):
 
     def mount(self):
         print(self.not_a_valid_attribute)
+
+
+global count_updating
+count_updating = 0
+
+global count_updated
+count_updated = 0
+
+
+class FakeComponentWithUpdateMethods(UnicornView):
+    template_name = "templates/test_component.html"
+
+    count = 0
+
+    def updating_count(self, c):
+        global count_updating
+        count_updating += 1
+
+        if count_updating >= 2:
+            raise Exception("updating_count called more than once")
+
+    def updated_count(self, c):
+        global count_updated
+        count_updated += 1
+
+        if count_updated >= 2:
+            raise Exception("count_updated called more than once")

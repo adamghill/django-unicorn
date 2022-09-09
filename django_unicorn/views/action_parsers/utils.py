@@ -51,7 +51,12 @@ def set_property_value(
             if idx == len(property_name_parts) - 1:
                 if hasattr(component_or_field, "_set_property"):
                     # Can assume that `component_or_field` is a component
-                    component_or_field._set_property(property_name_part, property_value)
+                    component_or_field._set_property(
+                        property_name_part,
+                        property_value,
+                        call_updating_method=False,
+                        call_updated_method=True,
+                    )
                 else:
                     # Handle calling the updating/updated method for nested properties
                     property_name_snake_case = property_name.replace(".", "_")

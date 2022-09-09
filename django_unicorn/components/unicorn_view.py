@@ -594,7 +594,13 @@ class UnicornView(TemplateView):
         return attributes
 
     @timed
-    def _set_property(self, name, value):
+    def _set_property(
+        self,
+        name: str,
+        value: Any,
+        call_updating_method: bool = False,
+        call_updated_method: bool = False,
+    ) -> None:
         # Get the correct value type by using the form if it is available
         data = self._attributes()
         data[name] = value
@@ -608,18 +614,21 @@ class UnicornView(TemplateView):
             if not hasattr(value, "strip") or form.cleaned_data[name] != value.strip():
                 value = form.cleaned_data[name]
 
-        updating_function_name = f"updating_{name}"
-        if hasattr(self, updating_function_name):
-            getattr(self, updating_function_name)(value)
+        if call_updating_method:
+            updating_function_name = f"updating_{name}"
+
+            if hasattr(self, updating_function_name):
+                getattr(self, updating_function_name)(value)
 
         try:
             setattr(self, name, value)
 
-            updated_function_name = f"updated_{name}"
+            if call_updated_method:
+                updated_function_name = f"updated_{name}"
 
-            if hasattr(self, updated_function_name):
-                getattr(self, updated_function_name)(value)
-        except AttributeError as e:
+                if hasattr(self, updated_function_name):
+                    getattr(self, updated_function_name)(value)
+        except AttributeError:
             raise
 
     @timed
