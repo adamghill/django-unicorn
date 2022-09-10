@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.47.0
+
+- Fix: Include stacktrace for `AttributeError` errors.
+- Fix: Only call `updated_` and `updating_` component functions once.
+
+[All changes since 0.46.0](https://github.com/adamghill/django-unicorn/compare/0.46.0...0.47.0).
+
 ## v0.46.0
 
 - Support for loading nested components from a route that uses a class-based view.
