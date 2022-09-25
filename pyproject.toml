@@ -55,10 +55,6 @@ poethepoet = "^0"
 coverage = {extras = ["toml"], version = "^6"}
 pytest-cov = "^3"
 
-[build-system]
-requires = ["poetry>=0.12"]
-build-backend = "poetry.masonry.api"
-
 [tool.isort]
 default_section = "THIRDPARTY"
 known_first_party = ["django_unicorn", "example"]
@@ -99,3 +95,7 @@ tm = ["b", "i", "tc", "my"]
 sa = { cmd = "sphinx-autobuild -W docs/source docs/build", help = "Sphinx autobuild" }
 sb = { cmd = "sphinx-build -W docs/source docs/build", help = "Build documentation" }
 publish = { shell = "poetry publish --build -r test && poetry publish" }
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
