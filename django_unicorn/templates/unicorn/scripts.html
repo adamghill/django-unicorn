@@ -5,7 +5,13 @@
 
 <script>
   var url = "{% url 'django_unicorn:message' %}";
-  Unicorn.init(url, "{{ CSRF_HEADER_NAME }}");
+  var reloadScriptElements = false;
+
+  if ("{{ RELOAD_SCRIPT_ELEMENTS }}" == "True") {
+    reloadScriptElements = true;
+  }
+
+  Unicorn.init(url, "{{ CSRF_HEADER_NAME }}", reloadScriptElements);
 </script>
 {% else %}
 <script type="module">
@@ -15,6 +21,12 @@
     window.Unicorn = Unicorn;
 
     var url = "{% url 'django_unicorn:message' %}";
-    Unicorn.init(url, "{{ CSRF_HEADER_NAME }}");
+    var reloadScriptElements = false;
+
+    if ("{{ RELOAD_SCRIPT_ELEMENTS }}" == "True") {
+      reloadScriptElements = true;
+    }
+
+    Unicorn.init(url, "{{ CSRF_HEADER_NAME }}", reloadScriptElements);
 </script>
 {% endif %}

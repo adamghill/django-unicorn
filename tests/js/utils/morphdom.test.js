@@ -1,5 +1,5 @@
 import test from "ava";
-import { MORPHDOM_OPTIONS } from "../../../django_unicorn/static/unicorn/js/morphdom/2.6.1/options.js";
+import { getMorphdomOptions } from "../../../django_unicorn/static/unicorn/js/morphdom/2.6.1/options.js";
 import morphdom from "../../../django_unicorn/static/unicorn/js/morphdom/2.6.1/morphdom.js";
 import { getEl } from "../utils.js";
 
@@ -21,7 +21,7 @@ test("contains", (t) => {
   const rerenderedComponent = getEl(rerenderedComponentHtml);
 
   t.true(componentRoot.outerHTML.indexOf("Name: Test") === -1);
-  morphdom(componentRoot, rerenderedComponent, MORPHDOM_OPTIONS);
+  morphdom(componentRoot, rerenderedComponent, getMorphdomOptions(false));
   t.true(componentRoot.outerHTML.indexOf("Name: Test") > -1);
 });
 
@@ -53,7 +53,7 @@ test("ignore element", (t) => {
   t.true(componentRoot.outerHTML.indexOf("Name: Test") === -1);
   t.true(componentRoot.outerHTML.indexOf("Something here") > -1);
 
-  morphdom(componentRoot, rerenderedComponent, MORPHDOM_OPTIONS);
+  morphdom(componentRoot, rerenderedComponent, getMorphdomOptions(false));
 
   t.true(componentRoot.outerHTML.indexOf("Name: Test") > -1);
   t.true(componentRoot.outerHTML.indexOf("Something here") > -1);
@@ -98,7 +98,7 @@ test("ignore all children elements", (t) => {
   t.true(componentRoot.outerHTML.indexOf("Something here") > -1);
   t.true(componentRoot.outerHTML.indexOf("More here") > -1);
 
-  morphdom(componentRoot, rerenderedComponent, MORPHDOM_OPTIONS);
+  morphdom(componentRoot, rerenderedComponent, getMorphdomOptions(false));
 
   t.true(componentRoot.outerHTML.indexOf("Name: Test") > -1);
   t.true(componentRoot.outerHTML.indexOf("Something here") > -1);

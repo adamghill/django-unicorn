@@ -111,6 +111,7 @@ UNICORN = {
         "TIMEOUT": 5,
     },
     "CACHE_ALIAS": "default",
+    "RELOAD_SCRIPT_ELEMENTS": True,
 }
 
 

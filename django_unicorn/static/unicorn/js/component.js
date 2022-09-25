@@ -26,6 +26,7 @@ export class Component {
     this.key = args.key;
     this.messageUrl = args.messageUrl;
     this.csrfTokenHeaderName = args.csrfTokenHeaderName;
+    this.reloadScriptElements = args.reloadScriptElements;
     this.hash = args.hash;
     this.data = args.data || {};
     this.syncUrl = `${this.messageUrl}/${this.name}`;

@@ -3,13 +3,15 @@ import { isEmpty, hasValue } from "./utils.js";
 import { components, lifecycleEvents } from "./store.js";
 
 let messageUrl = "";
+let reloadScriptElements = false;
 let csrfTokenHeaderName = "X-CSRFToken";
 
 /**
  * Initializes the Unicorn object.
  */
-export function init(_messageUrl, _csrfTokenHeaderName) {
+export function init(_messageUrl, _csrfTokenHeaderName, _reloadScriptElements) {
   messageUrl = _messageUrl;
+  reloadScriptElements = _reloadScriptElements || false;
 
   if (hasValue(_csrfTokenHeaderName)) {
     csrfTokenHeaderName = _csrfTokenHeaderName;
@@ -18,6 +20,7 @@ export function init(_messageUrl, _csrfTokenHeaderName) {
   return {
     messageUrl,
     csrfTokenHeaderName,
+    reloadScriptElements,
   };
 }
 
@@ -27,6 +30,7 @@ export function init(_messageUrl, _csrfTokenHeaderName) {
 export function componentInit(args) {
   args.messageUrl = messageUrl;
   args.csrfTokenHeaderName = csrfTokenHeaderName;
+  args.reloadScriptElements = reloadScriptElements;
 
   const component = new Component(args);
   components[component.id] = component;

@@ -1,3 +1,5 @@
+{% load static %}
+
 <div>
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
   <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
@@ -71,5 +73,15 @@
     <div>
       select2_datetime: {{ select2_datetime }}
     </div>
+  </div>
+
+  <div>
+    <button u:click="$toggle('load_js')">Toggle {{ load_js }}</button>
+    <p>load_js: {{ load_js }}
+    </p>
+    {% if load_js %}
+    <script src="{% static "js/alert.js" %}"></script>
+    <script src="{% static "js/console.js" %}"></script>
+    {% endif %}
   </div>
 </div>
