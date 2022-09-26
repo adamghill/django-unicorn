@@ -28,11 +28,8 @@
 
 # Bump version
 
-1. Run Python tests: `poe t`
-1. Run JavaScript tests: `poe tj`
-1. Build the JavaScript library: `poe jb`
 1. Update changelog.md
-1. Build documentation with `poe sb`
+1. Run all build processes: `poe build`
 1. `poetry version major|minor|patch`
 1. Commit/tag/push version bump
 1. `poe publish`

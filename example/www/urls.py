@@ -2,8 +2,7 @@ from django.urls import path
 
 from example.unicorn.components.direct_view import DirectViewView
 from example.unicorn.components.redirects import RedirectsView
-
-from . import views
+from example.www import views
 
 
 app_name = "www"
