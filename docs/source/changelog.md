@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.48.0
+
+- Reload JavaScript script elements when a template is re-rendered. Currently only enabled with the [`RELOAD_SCRIPT_ELEMENTS` setting](settings.md/#reload_script_elements).
+
+[All changes since 0.47.0](https://github.com/adamghill/django-unicorn/compare/0.47.0...0.48.0).
+
 ## v0.47.0
 
 - Fix: Include stacktrace for `AttributeError` errors.
