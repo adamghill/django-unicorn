@@ -9,6 +9,7 @@ UNICORN = {
     "CACHE_ALIAS": "default",
     "MINIFY_HTML": False,
     "MINIFIED": True,
+    "RELOAD_SCRIPT_ELEMENTS": False,
     "SERIAL": {
         "ENABLED": False,
         "TIMEOUT": 60,
