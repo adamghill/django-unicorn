@@ -164,7 +164,7 @@ from book.models import Book
 
 class HelloWorldView(UnicornView):
     book = Book.objects.get(title='American Gods')
-    book_ratings = {'excellent': {'title: 'American Gods'}}
+    book_ratings = {'excellent': {'title': 'American Gods'}}
 ```
 
 ```html
