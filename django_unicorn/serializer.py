@@ -132,7 +132,7 @@ def _get_model_dict(model: Model) -> dict:
             # Using `values_list("pk", flat=True)` or `only()` won't use the cached prefetched values
             pks = [m.pk for m in related_descriptor.all()]
         except ValueError:
-            # ValueError is throuwn when the model doesn't have an id already set
+            # ValueError is thrown when the model doesn't have an id already set
             pass
 
         model_json[related_name] = pks
