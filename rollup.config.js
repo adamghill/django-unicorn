@@ -3,6 +3,7 @@ import { terser } from "rollup-plugin-terser";
 import commonjs from "@rollup/plugin-commonjs";
 import resolve from "@rollup/plugin-node-resolve";
 import babel from "@rollup/plugin-babel";
+import versionInjector from "rollup-plugin-version-injector";
 
 export default {
   input: "django_unicorn/static/unicorn/js/unicorn.js",
@@ -13,11 +14,12 @@ export default {
   },
   plugins: [
     resolve(),
-    filesize(),
     terser({
       mangle: true,
     }),
+    versionInjector(),
     commonjs({}),
     babel({ babelHelpers: "bundled" }),
+    filesize(),
   ],
 };
