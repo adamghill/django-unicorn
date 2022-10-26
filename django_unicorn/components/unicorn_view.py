@@ -893,7 +893,7 @@ class UnicornView(TemplateView):
 
         if class_name_not_found is not None and attribute_exception is not None:
             message = (
-                f"The component class '{class_name_not_found}' could not be loaded."
+                f"The component class '{class_name_not_found}' could not be loaded:\n  {attribute_exception}"
             )
             raise ComponentClassLoadError(
                 message, locations=locations
