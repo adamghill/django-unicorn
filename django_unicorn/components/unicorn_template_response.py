@@ -209,7 +209,9 @@ def get_root_element(soup: BeautifulSoup) -> Tag:
     for element in soup.contents:
         if isinstance(element, Tag) and element.name:
             if element.name == "html":
-                view_element = element.find_next(attrs={"unicorn:view": True})
+                view_element = element.find_next(
+                    attrs={"unicorn:view": True}
+                ) or element.find_next(attrs={"u:view": True})
 
                 if not view_element:
                     raise MissingComponentViewElement(
