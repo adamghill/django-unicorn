@@ -118,6 +118,8 @@ class UnicornTemplateResponse(TemplateResponse):
         frontend_context_variables_dict = orjson.loads(frontend_context_variables)
         checksum = generate_checksum(str(frontend_context_variables_dict))
 
+        # Use `html.parser` and not `lxml` because in testing it was no faster even with `cchardet`
+        # despite https://thehftguy.com/2020/07/28/making-beautifulsoup-parsing-10-times-faster/
         soup = BeautifulSoup(content, features="html.parser")
         root_element = get_root_element(soup)
         root_element["unicorn:id"] = self.component.component_id
