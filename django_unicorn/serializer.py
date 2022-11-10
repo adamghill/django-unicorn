@@ -1,9 +1,11 @@
 import logging
+from datetime import datetime, timedelta
 from decimal import Decimal
 from functools import lru_cache
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Tuple
 
 from django.core.serializers import serialize
+from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import (
     DateField,
     DateTimeField,
@@ -18,6 +20,7 @@ from django.utils.dateparse import (
     parse_duration,
     parse_time,
 )
+from django.utils.duration import duration_string
 
 import orjson
 
@@ -31,6 +34,8 @@ except ImportError:
 
 
 logger = logging.getLogger(__name__)
+
+django_json_encoder = DjangoJSONEncoder()
 
 
 class JSONDecodeError(Exception):
@@ -107,6 +112,69 @@ def _get_many_to_many_field_related_names(model: Model) -> List[str]:
     return _get_many_to_many_field_related_names_from_meta(model._meta)
 
 
+def _get_m2m_field_serialized(model: Model, field_name) -> List:
+    pks = []
+
+    try:
+        related_descriptor = getattr(model, field_name)
+
+        # Get `pk` from `all` because it will re-use the cached data if the m-2-m field is prefetched
+        # Using `values_list("pk", flat=True)` or `only()` won't use the cached prefetched values
+        pks = [m.pk for m in related_descriptor.all()]
+    except ValueError:
+        # ValueError is thrown when the model doesn't have an id already set
+        pass
+
+    return pks
+
+
+def _handle_inherited_models(model: Model, model_json: Dict):
+    """
+    Handle if the model has a parent (i.e. the model is a subclass of another model).
+
+    Subclassed model's fields don't get serialized
+    (https://docs.djangoproject.com/en/stable/topics/serialization/#inherited-models)
+    so those fields need to be retrieved manually.
+    """
+
+    if model._meta.get_parent_list():
+        for field in model._meta.get_fields():
+            if (
+                field.name not in model_json
+                and hasattr(field, "primary_key")
+                and not field.primary_key
+            ):
+                if field.is_relation:
+                    # We already serialized the m2m fields above, so we can skip them, but need to handle FKs
+                    if not field.many_to_many:
+                        foreign_key_field = getattr(model, field.name)
+                        foreign_key_field_pk = getattr(
+                            foreign_key_field,
+                            "pk",
+                            getattr(foreign_key_field, "id", None),
+                        )
+                        model_json[field.name] = foreign_key_field_pk
+                else:
+                    value = getattr(model, field.name)
+
+                    # Explicitly handle `timedelta`, but use the DjangoJSONEncoder for everything else
+                    if isinstance(value, timedelta):
+                        value = duration_string(value)
+                    else:
+                        # Make sure the value is properly serialized
+                        value = django_json_encoder.encode(value)
+
+                        # The DjangoJSONEncoder has extra double-quotes for strings so remove them
+                        if (
+                            isinstance(value, str)
+                            and value.startswith('"')
+                            and value.endswith('"')
+                        ):
+                            value = value[1:-1]
+
+                    model_json[field.name] = value
+
+
 def _get_model_dict(model: Model) -> dict:
     """
     Serializes Django models. Uses the built-in Django JSON serializer, but moves the data around to
@@ -115,27 +183,29 @@ def _get_model_dict(model: Model) -> dict:
 
     _parse_field_values_from_string(model)
 
-    # Django's `serialize` method always returns an array, so remove the brackets from the resulting string
+    # Django's `serialize` method always returns a string of an array,
+    # so remove the brackets from the resulting string
     serialized_model = serialize("json", [model])[1:-1]
+
+    # Convert the string into a dictionary and grab the `pk`
     model_json = orjson.loads(serialized_model)
     model_pk = model_json.get("pk")
+
+    # Shuffle around the serialized pieces to condense the size of the payload
     model_json = model_json.get("fields")
     model_json["pk"] = model_pk
 
-    for related_name in _get_many_to_many_field_related_names(model):
-        pks = []
+    # Set `pk` for models that subclass another model which only have `id` set
+    if not model_pk:
+        model_json["pk"] = model.pk or model.id
 
-        try:
-            related_descriptor = getattr(model, related_name)
+    # Add in m2m fields
+    m2m_field_names = _get_many_to_many_field_related_names(model)
 
-            # Get `pk` from `all` because it will re-use the cached data if the m-2-m field is prefetched
-            # Using `values_list("pk", flat=True)` or `only()` won't use the cached prefetched values
-            pks = [m.pk for m in related_descriptor.all()]
-        except ValueError:
-            # ValueError is thrown when the model doesn't have an id already set
-            pass
+    for m2m_field_name in m2m_field_names:
+        model_json[m2m_field_name] = _get_m2m_field_serialized(model, m2m_field_name)
 
-        model_json[related_name] = pks
+    _handle_inherited_models(model, model_json)
 
     return model_json
 

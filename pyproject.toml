@@ -54,6 +54,7 @@ nox = "^2020.12.31"
 poethepoet = "^0"
 coverage = {extras = ["toml"], version = "^6"}
 pytest-cov = "^3"
+pytest-benchmark = "^4.0.0"
 
 [tool.isort]
 default_section = "THIRDPARTY"
@@ -67,7 +68,7 @@ skip_glob = "*/migrations/*.py"
 profile = "black"
 
 [tool.pytest.ini_options]
-addopts = "--quiet --failed-first --reuse-db --nomigrations -p no:warnings -m 'not slow'"
+addopts = "--quiet --failed-first --reuse-db --nomigrations -p no:warnings -m 'not slow' --benchmark-skip"
 testpaths = [
     "tests"
 ]
@@ -86,6 +87,8 @@ tj = { cmd = "npm run-script test", help = "Run the JavaScript unit tests" }
 ta = ["tp", "tj"]
 jb = { cmd = "npm run build", help = "Build the JavaScript library" }
 t = { cmd = "pytest -m 'not slow'", help = "Run Python unit tests" }
+tb = { cmd = "pytest tests/benchmarks/ --benchmark-autosave --benchmark-only", help = "Run Python unit tests with benchmarks" }
+tbc = { cmd = "pytest tests/benchmarks/ --benchmark-only --benchmark-compare", help = "Run Python unit tests with compared benchmarks" }
 tc = { cmd = "pytest --cov=django_unicorn", help = "Run tests with coverage" }
 cr = { cmd = "coverage report", help = "Show coverage report" }
 my = { cmd = "mypy .", help = "Run mypy" }

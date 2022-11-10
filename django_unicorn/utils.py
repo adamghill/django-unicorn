@@ -3,6 +3,7 @@ import hmac
 import logging
 import pickle
 from inspect import signature
+from pprint import pp
 from typing import Dict, List, Union
 from typing import get_type_hints as typing_get_type_hints
 
@@ -53,13 +54,22 @@ def dicts_equal(dictionary_one: Dict, dictionary_two: Dict) -> bool:
     Return True if all keys and values are the same between two dictionaries.
     """
 
-    return all(
+    is_valid = all(
         k in dictionary_two and dictionary_one[k] == dictionary_two[k]
         for k in dictionary_one
     ) and all(
         k in dictionary_one and dictionary_one[k] == dictionary_two[k]
         for k in dictionary_two
     )
+
+    if not is_valid:
+        print("dictionary_one:")
+        pp(dictionary_one)
+        print()
+        print("dictionary_two:")
+        pp(dictionary_two)
+
+    return is_valid
 
 
 def get_cacheable_component(

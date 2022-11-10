@@ -29,3 +29,7 @@ class Taste(models.Model):
 class Origin(models.Model):
     name = models.CharField(max_length=255)
     flavor = models.ManyToManyField(Flavor, related_name="origins")
+
+
+class NewFlavor(Flavor):
+    new_name = models.CharField(max_length=255)
