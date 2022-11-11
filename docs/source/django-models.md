@@ -65,21 +65,21 @@ A Django `QuerySet` can be set to a property on a component just like a regular 
 
 <!-- queryset.html -->
 <div>
-    {% for book in books %}
+  {% for book in books %}
+  <div>
     <div>
-      <div>
-        <input unicorn:model.defer="books.{{ forloop.counter0 }}.title" type="text" id="title" />
-        {{ book.title }}
-      </div>
-      <div>
-        <input unicorn:model.defer="books.{{ forloop.counter0 }}.description" type="text" id="description" />
-        {{ book.description }}
-      </div>
+      <input unicorn:model.defer="books.{{ forloop.counter0 }}.title" type="text" id="title" />
+      {{ book.title }}
     </div>
-    {% endfor %}
-
+    <div>
+      <input unicorn:model.defer="books.{{ forloop.counter0 }}.description" type="text" id="description" />
+      {{ book.description }}
+    </div>
+    <div>
+      <button unicorn:click="save({{ forloop.counter0 }})">Save</button>
+    </div>
   </div>
-  <button unicorn:click="save({{ forloop.counter0 }})">Save</button>
+  {% endfor %}
 </div>
 :::
 
