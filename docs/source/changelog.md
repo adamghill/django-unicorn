@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.49.0
+
+- Fix: Handle inherited (i.e. subclassed) models [#459](https://github.com/adamghill/django-unicorn/issues/459).
+- Fix: Support abbreviated `u:view` ([#464](https://github.com/adamghill/django-unicorn/pull/464) by [nerdoc](https://github.com/nerdoc)).
+- Add version and build date to minified JavaScript for easier debugging.
+
+[All changes since 0.48.0](https://github.com/adamghill/django-unicorn/compare/0.48.0...0.49.0).
+
 ## v0.48.0
 
 - Reload JavaScript script elements when a template is re-rendered. Currently only enabled with the [`RELOAD_SCRIPT_ELEMENTS` setting](settings.md/#reload_script_elements).
@@ -22,7 +30,7 @@
 
 ## v0.45.1
 
-- Fix JavaScript error that sometimes happens with nested components. [237](https://github.com/adamghill/django-unicorn/issues/237) by [clangley](https://github.com/clangley)
+- Fix: Handle JavaScript error that sometimes happens with nested components. [237](https://github.com/adamghill/django-unicorn/issues/237) by [clangley](https://github.com/clangley)
 
 [All changes since 0.45.0](https://github.com/adamghill/django-unicorn/compare/0.45.0...0.45.1).
 
@@ -173,14 +181,14 @@
 ## v0.35.2
 
 - Fix: Make sure `visible:elements` trigger as expected in more cases.
-- Prevent the visibile element from continuing to trigger if the visbility element method returns `False`.
+- Prevent the visible element from continuing to trigger if the visibility element method returns `False`.
 
 [All changes since 0.35.0](https://github.com/adamghill/django-unicorn/compare/0.35.0...0.35.2).
 
 ## v0.35.0
 
-- [Trigger](advanced.md#trigger-model-update) an `input` or `blur` event for a model element from JavaScript
-- [Visibility](visibility.md) event with `unicorn:visible` attribute
+- [Trigger](advanced.md#trigger-model-update) an `input` or `blur` event for a model element from JavaScript.
+- [Visibility](visibility.md) event with `unicorn:visible` attribute.
 
 **Breaking changes**
 
@@ -191,7 +199,7 @@
 ## v0.34.0
 
 - Initial prototype for component template [lifecycle events](templates.md#lifecycle-events).
-- Fix: elements after a child component would not get initialized [262](https://github.com/adamghill/django-unicorn/pull/262) by [joshiggins](https://github.com/joshiggins).
+- Fix: elements after a child component would not get initialized [#262](https://github.com/adamghill/django-unicorn/pull/262) by [joshiggins](https://github.com/joshiggins).
 - Fix: cache would fail in some instances [258](https://github.com/adamghill/django-unicorn/issues/258).
 
 [All changes since 0.33.0](https://github.com/adamghill/django-unicorn/compare/0.33.0...0.34.0).
