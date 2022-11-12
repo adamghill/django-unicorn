@@ -145,6 +145,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "stat1c-void",
+      "name": "Sergei",
+      "avatar_url": "https://avatars.githubusercontent.com/u/9142081?v=4",
+      "profile": "https://github.com/stat1c-void",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
@@ -152,5 +161,6 @@
   "projectOwner": "adamghill",
   "repoType": "github",
   "repoHost": "https://github.com",
-  "skipCi": true
+  "skipCi": true,
+  "commitConvention": "angular"
 }
