@@ -9,7 +9,7 @@
 ![GitHub Sponsors](https://img.shields.io/github/sponsors/adamghill?color=blue&style=flat-square)
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-15-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-16-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 [Unicorn](https://www.django-unicorn.com) is a reactive component framework that progressively enhances a normal Django view, makes AJAX calls in the background, and dynamically updates the DOM. It seamlessly extends Django past its server-side framework roots without giving up all of its niceties or re-building your website.
@@ -71,11 +71,9 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     </tr>
     <tr>
       <td align="center"><a href="https://medium.com/@pbadeer"><img src="https://avatars.githubusercontent.com/u/467756?v=4?s=100" width="100px;" alt="Preston Badeer"/><br /><sub><b>Preston Badeer</b></sub></a><br /><a href="https://github.com/adamghill/django-unicorn/commits?author=pbadeer" title="Documentation">📖</a></td>
+      <td align="center"><a href="https://github.com/stat1c-void"><img src="https://avatars.githubusercontent.com/u/9142081?v=4?s=100" width="100px;" alt="Sergei"/><br /><sub><b>Sergei</b></sub></a><br /><a href="https://github.com/adamghill/django-unicorn/commits?author=stat1c-void" title="Documentation">📖</a></td>
     </tr>
   </tbody>
-  <tfoot>
-    
-  </tfoot>
 </table>
 
 <!-- markdownlint-restore -->
