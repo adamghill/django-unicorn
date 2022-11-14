@@ -1,7 +1,8 @@
 import ast
 import logging
 from functools import lru_cache
-from typing import Any, Dict, List, Tuple
+from types import MappingProxyType
+from typing import Any, Dict, List, Tuple, Mapping
 from uuid import UUID
 
 from django.utils.dateparse import (
@@ -130,15 +131,16 @@ def parse_kwarg(kwarg: str, raise_if_unparseable=False) -> Dict[str, Any]:
 
 
 @lru_cache(maxsize=128, typed=True)
-def parse_call_method_name(call_method_name: str) -> Tuple[str, List[Any]]:
+def parse_call_method_name(call_method_name: str) -> Tuple[str, Tuple[Any], Mapping[str, Any]]:
     """
     Parses the method name from the request payload into a set of parameters to pass to a method.
 
     Args:
-        param call_method_name: String representation of a method name with parameters, e.g. "set_name('Bob')"
+        param call_method_name: String representation of a method name with parameters,
+            e.g. "set_name('Bob')"
 
     Returns:
-        Tuple of method_name and a list of arguments.
+        Tuple of method_name, a list of arguments and a dict of keyword arguments
     """
 
     is_special_method = False
@@ -164,4 +166,5 @@ def parse_call_method_name(call_method_name: str) -> Tuple[str, List[Any]]:
     if is_special_method:
         method_name = f"${method_name}"
 
-    return (method_name, args, kwargs)
+    # conversion to immutable types - tuple and MappingProxyType
+    return method_name, tuple(args), MappingProxyType(kwargs)

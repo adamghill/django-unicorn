@@ -1,3 +1,4 @@
+from types import MappingProxyType
 from typing import Union
 
 import pytest
@@ -29,7 +30,7 @@ class FakeComponent(UnicornView):
 
 def test_call_method_name_missing():
     component = FakeComponent(component_name="test", component_id="asdf")
-    actual = _call_method_name(component, "save_missing", args=[], kwargs={})
+    actual = _call_method_name(component, "save_missing", args=tuple(), kwargs={})
 
     assert actual is None
 
@@ -38,7 +39,7 @@ def test_call_method_name_no_params():
     expected = 1
 
     component = FakeComponent(component_name="test", component_id="asdf")
-    actual = _call_method_name(component, "save", args=[], kwargs={})
+    actual = _call_method_name(component, "save", args=tuple(), kwargs={})
 
     assert actual == expected
 
@@ -47,7 +48,7 @@ def test_call_method_name_with_arg():
     expected = 2
 
     component = FakeComponent(component_name="test", component_id="asdf")
-    actual = _call_method_name(component, "save_with_arg", args=[1], kwargs={})
+    actual = _call_method_name(component, "save_with_arg", args=(1,), kwargs={})
 
     assert actual == expected
 
@@ -56,7 +57,8 @@ def test_call_method_name_with_kwarg():
     expected = 3
 
     component = FakeComponent(component_name="test", component_id="asdf")
-    actual = _call_method_name(component, "save_with_kwarg", args=[], kwargs={"id": 2})
+    actual = _call_method_name(component, "save_with_kwarg", args=tuple(),
+                               kwargs=MappingProxyType({"id": 2}))
 
     assert actual == expected
 
@@ -68,7 +70,7 @@ def test_call_method_name_arg_with_model_type_annotation():
 
     component = FakeComponent(component_name="test", component_id="asdf")
     actual = _call_method_name(
-        component, "save_with_model", args=[flavor.pk], kwargs={}
+        component, "save_with_model", args=(flavor.pk,), kwargs={}
     )
 
     assert actual == flavor.pk
@@ -81,7 +83,7 @@ def test_call_method_name_kwarg_with_model_type_annotation():
 
     component = FakeComponent(component_name="test", component_id="asdf")
     actual = _call_method_name(
-        component, "save_with_model", args=[], kwargs={"pk": flavor.pk}
+        component, "save_with_model", args=tuple(), kwargs=MappingProxyType({"pk": flavor.pk})
     )
 
     assert actual == flavor.pk
@@ -89,7 +91,8 @@ def test_call_method_name_kwarg_with_model_type_annotation():
 
 def test_call_method_name_with_kwarg_with_union_and_int():
     component = FakeComponent(component_name="test", component_id="asdf")
-    actual = _call_method_name(component, "save_with_union", args=[], kwargs={"id": 2})
+    actual = _call_method_name(component, "save_with_union", args=tuple(),
+                               kwargs=MappingProxyType({"id": 2}))
 
     assert isinstance(actual, int)
 
@@ -97,7 +100,7 @@ def test_call_method_name_with_kwarg_with_union_and_int():
 def test_call_method_name_with_kwarg_with_union_and_str():
     component = FakeComponent(component_name="test", component_id="asdf")
     actual = _call_method_name(
-        component, "save_with_union", args=[], kwargs={"id": "2"}
+        component, "save_with_union", args=tuple(), kwargs=MappingProxyType({"id": "2"})
     )
 
     assert isinstance(actual, str)
