@@ -1,13 +1,17 @@
 root = true
 
 [*]
-end_of_line = lf // Helps keep Windows, Mac, Linux on the same page since they handle end of line differently
+# Helps keep Windows, Mac, Linux on the same page since they handle end of line differently
+end_of_line = lf
 charset = utf-8
-trim_trailing_whitespace = true // Auto-trims trailing whitespace
-insert_final_newline = true // Auto-adds a blank newline to the end of a file
+# Auto-trims trailing whitespace
+trim_trailing_whitespace = true
+# Auto-adds a blank newline to the end of a file
+insert_final_newline = true
 
 [*.scss]
-indent_size = 2 // More common to see 2 spaces in SCSS, HTML, and JS 
+# More common to see 2 spaces in SCSS, HTML, and JS
+indent_size = 2
 
 [*.html]
 indent_size = 2
