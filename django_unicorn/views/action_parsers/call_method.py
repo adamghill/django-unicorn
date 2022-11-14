@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, Tuple
 
 from django.db.models import Model
 
@@ -94,7 +94,7 @@ def handle(component_request: ComponentRequest, component: UnicornView, payload:
 
 @timed
 def _call_method_name(
-    component: UnicornView, method_name: str, args: List[Any], kwargs: Dict[str, Any]
+    component: UnicornView, method_name: str, args: Tuple[Any], kwargs: Dict[str, Any]
 ) -> Any:
     """
     Calls the method name with parameters.
@@ -102,14 +102,14 @@ def _call_method_name(
     Args:
         param component: Component to call method on.
         param method_name: Method name to call.
-        param args: List of arguments for the method.
+        param args: Tuple of arguments for the method.
         param kwargs: Dictionary of kwargs for the method.
     """
 
     if method_name is not None and hasattr(component, method_name):
         func = getattr(component, method_name)
 
-        if len(args) == 1 or len(kwargs.keys()) == 1:
+        if len(args) == 1 or len(kwargs) == 1:
             arguments = get_method_arguments(func)
             type_hints = get_type_hints(func)
 
@@ -117,25 +117,20 @@ def _call_method_name(
                 if argument in type_hints:
                     type_hint = type_hints[argument]
 
-                    try:
-                        if issubclass(type_hint, Model):
-                            DbModel = type_hint
-                            key = "pk"
-                            value = None
+                    if isinstance(type_hint, type) and issubclass(type_hint, Model):
+                        DbModel = type_hint
+                        key = "pk"
+                        value = None
 
-                            if args:
-                                value = args.pop()
-                            elif kwargs:
-                                (key, value) = list(kwargs.items())[0]
-                                del kwargs[key]
+                        if args:
+                            value = args[0]
+                        elif kwargs:
+                            kwargs = kwargs.copy()  # no mutation of original
+                            (key, value) = list(kwargs.items())[0]
+                            del kwargs[key]
 
-                            model = DbModel.objects.get(**{key: value})
-
-                            args.append(model)
-                    except TypeError:
-                        # Using `issubclass` throws a `TypeError` when the type hint is not a class (e.g. `Union`)
-                        # but skip that error if it happens so the call can happen as expected
-                        pass
+                        model = DbModel.objects.get(**{key: value})
+                        args = [model]
 
         if args and kwargs:
             return func(*args, **kwargs)
