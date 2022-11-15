@@ -3,7 +3,7 @@ import hmac
 import logging
 import pickle
 from inspect import signature
-from pprint import pp
+from pprint import pprint
 from typing import Dict, List, Union
 from typing import get_type_hints as typing_get_type_hints
 
@@ -64,10 +64,10 @@ def dicts_equal(dictionary_one: Dict, dictionary_two: Dict) -> bool:
 
     if not is_valid:
         print("dictionary_one:")
-        pp(dictionary_one)
+        pprint(dictionary_one)
         print()
         print("dictionary_two:")
-        pp(dictionary_two)
+        pprint(dictionary_two)
 
     return is_valid
 
