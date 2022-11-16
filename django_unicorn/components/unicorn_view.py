@@ -722,6 +722,7 @@ class UnicornView(TemplateView):
             "options",
             "setup",
             "fill",
+            "view_is_async",
             # Component methods
             "component_id",
             "component_name",
