@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.49.1
+
+- Fix: Missing `pp` import in Python 3.7.
+
+[All changes since 0.49.0](https://github.com/adamghill/django-unicorn/compare/0.49.0...0.49.1).
+
 ## v0.49.0
 
 - Fix: Handle inherited (i.e. subclassed) models [#459](https://github.com/adamghill/django-unicorn/issues/459).
