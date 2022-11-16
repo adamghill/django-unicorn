@@ -92,6 +92,10 @@ class HelloWorldView(UnicornView):
 </div>
 ```
 
+```{warning}
+`Unicorn` requires there to be one root element surrounding the component template.
+```
+
 `unicorn:model` is the magic that ties the input to the backend component. The Django template variable can use any property or method on the component as if they were context variables passed in from a view. The attribute passed into `unicorn:model` refers to the property in the component class and binds them together.
 
 ```{note}
