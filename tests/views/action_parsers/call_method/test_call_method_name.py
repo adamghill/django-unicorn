@@ -57,8 +57,9 @@ def test_call_method_name_with_kwarg():
     expected = 3
 
     component = FakeComponent(component_name="test", component_id="asdf")
-    actual = _call_method_name(component, "save_with_kwarg", args=tuple(),
-                               kwargs=MappingProxyType({"id": 2}))
+    actual = _call_method_name(
+        component, "save_with_kwarg", args=tuple(), kwargs=MappingProxyType({"id": 2})
+    )
 
     assert actual == expected
 
@@ -77,13 +78,51 @@ def test_call_method_name_arg_with_model_type_annotation():
 
 
 @pytest.mark.django_db
+def test_call_method_name_arg_with_model_type_annotation_multiple():
+    flavor_one = Flavor()
+    flavor_one.save()
+
+    flavor_two = Flavor()
+    flavor_two.save()
+
+    assert flavor_one.pk != flavor_two.pk
+
+    component = FakeComponent(component_name="test", component_id="asdf")
+    actual = _call_method_name(
+        component, "save_with_model", args=(flavor_one.pk,), kwargs={}
+    )
+    assert actual == flavor_one.pk
+
+    # second call
+    actual = _call_method_name(
+        component, "save_with_model", args=(flavor_two.pk,), kwargs={}
+    )
+    assert actual == flavor_two.pk
+
+    # third call
+    actual = _call_method_name(
+        component, "save_with_model", args=(flavor_one.pk,), kwargs={}
+    )
+    assert actual == flavor_one.pk
+
+    # fourth call
+    actual = _call_method_name(
+        component, "save_with_model", args=(flavor_one.pk,), kwargs={}
+    )
+    assert actual == flavor_one.pk
+
+
+@pytest.mark.django_db
 def test_call_method_name_kwarg_with_model_type_annotation():
     flavor = Flavor()
     flavor.save()
 
     component = FakeComponent(component_name="test", component_id="asdf")
     actual = _call_method_name(
-        component, "save_with_model", args=tuple(), kwargs=MappingProxyType({"pk": flavor.pk})
+        component,
+        "save_with_model",
+        args=tuple(),
+        kwargs=MappingProxyType({"pk": flavor.pk}),
     )
 
     assert actual == flavor.pk
@@ -91,8 +130,9 @@ def test_call_method_name_kwarg_with_model_type_annotation():
 
 def test_call_method_name_with_kwarg_with_union_and_int():
     component = FakeComponent(component_name="test", component_id="asdf")
-    actual = _call_method_name(component, "save_with_union", args=tuple(),
-                               kwargs=MappingProxyType({"id": 2}))
+    actual = _call_method_name(
+        component, "save_with_union", args=tuple(), kwargs=MappingProxyType({"id": 2})
+    )
 
     assert isinstance(actual, int)
 
