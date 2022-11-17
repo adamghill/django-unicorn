@@ -2,7 +2,7 @@ import ast
 import logging
 from functools import lru_cache
 from types import MappingProxyType
-from typing import Any, Dict, List, Tuple, Mapping
+from typing import Any, Dict, List, Mapping, Tuple
 from uuid import UUID
 
 from django.utils.dateparse import (
