@@ -23,8 +23,10 @@ class Action:
         self.partials = data.get("partials", [])
 
     def __repr__(self):
-        return (f"Action(action_type='{self.action_type}' payload={self.payload}"
-                f" partials={self.partials})")
+        return (
+            f"Action(action_type='{self.action_type}' payload={self.payload}"
+            f" partials={self.partials})"
+        )
 
 
 class ComponentRequest:
@@ -65,8 +67,10 @@ class ComponentRequest:
             self.action_queue.append(Action(action_data))
 
     def __repr__(self):
-        return (f"ComponentRequest(name='{self.name}' id='{self.id}' key='{self.key}'"
-                f" epoch={self.epoch} data={self.data} action_queue={self.action_queue})")
+        return (
+            f"ComponentRequest(name='{self.name}' id='{self.id}' key='{self.key}'"
+            f" epoch={self.epoch} data={self.data} action_queue={self.action_queue})"
+        )
 
     def validate_checksum(self):
         """
