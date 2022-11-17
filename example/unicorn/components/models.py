@@ -31,5 +31,8 @@ class ModelsView(UnicornView):
     def available_tastes(self):
         return Taste.objects.all()
 
+    def model_typehint(self, flavor: Flavor):
+        print(flavor)
+
     class Meta:
         javascript_exclude = ("flavor.taste_set",)
