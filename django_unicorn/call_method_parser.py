@@ -131,7 +131,9 @@ def parse_kwarg(kwarg: str, raise_if_unparseable=False) -> Dict[str, Any]:
 
 
 @lru_cache(maxsize=128, typed=True)
-def parse_call_method_name(call_method_name: str) -> Tuple[str, Tuple[Any], Mapping[str, Any]]:
+def parse_call_method_name(
+    call_method_name: str,
+) -> Tuple[str, Tuple[Any], Mapping[str, Any]]:
     """
     Parses the method name from the request payload into a set of parameters to pass to a method.
 
