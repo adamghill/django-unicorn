@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.49.2
+
+- Fix: Calling methods with a model typehint would fail after being called multiple times ([#476](https://github.com/adamghill/django-unicorn/pull/476) by [stat1c-void](https://github.com/stat1c-void)).
+
+[All changes since 0.49.1](https://github.com/adamghill/django-unicorn/compare/0.49.1...0.49.2).
+
 ## v0.49.1
 
 - Fix: Missing `pp` import in Python 3.7.
