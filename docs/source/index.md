@@ -53,9 +53,14 @@ code-of-conduct
 PDF <https://www.django-unicorn.com/docs/unicorn-latest.pdf>
 GitHub <https://github.com/adamghill/django-unicorn>
 Sponsor <https://github.com/sponsors/adamghill>
+devmarks.io <https://devmarks.io>
 ```
 
 `Unicorn` is a reactive component framework that progressively enhances a normal Django view, makes AJAX calls in the background, and dynamically updates the DOM. It seamlessly extends Django past its server-side framework roots without giving up all of its niceties or re-building your website.
+
+```{admonition} Bookmarking for Developers
+[devmarks.io](https://devmarks.io) is _Bookmarking for Developers_ -- designed by the creator of Unicorn and [free to try out](https://devmarks.io).
+```
 
 ## Related projects
 
