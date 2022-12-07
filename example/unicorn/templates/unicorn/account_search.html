@@ -1,0 +1,43 @@
+<div>
+  <div class="card">
+    <div class="card-body" style="padding: 0">
+      <p>
+        Last page: {{ last_page }}
+      </p>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>User ID</th>
+            <th>Name</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <th>
+              <input class="form-control form-control-sm" type="text" unicorn:model="id_search_term"
+                placeholder="Search" id="id_search_term"></input>
+            </th>
+            <th>
+              <input class="form-control form-control-sm" type="text" unicorn:model="name_search_term"
+                placeholder="Search" id="name_search_term"></input>
+            </th>
+            <th>
+              <input class="form-control form-control-sm" type="text" unicorn:model="description_search_term"
+                placeholder="Search" id="description_search_terms"></input>
+            </th>
+          </tr>
+        </thead>
+        <tbody id="account_table_body">
+          {% for account in accounts %}
+          <tr>
+            {% comment %} <td><a href="{% url 'account_details' account.id %}">{{ account.id }}</a></td>
+            {% endcomment %}
+            <td>{{ account.name }}</td>
+            <td>{{ account.description|default:'-'}}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
