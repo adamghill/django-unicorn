@@ -186,6 +186,16 @@ class UnicornView(TemplateView):
     calls = []
 
     def __init__(self, **kwargs):
+        # set all these as instance variables instead of just class variables. Otherwise, calling UnicornView()
+        # outside the Django view/template logic results in odd shared class variables for these. For example in unit tests.
+        self.component_name = ""
+        self.component_key = ""
+        self.component_id = ""
+        self.request = None
+        self.parent = None
+        self.children = []
+        self.calls = []
+
         super().__init__(**kwargs)
 
         assert self.component_name, "Component name is required"
@@ -509,6 +519,7 @@ class UnicornView(TemplateView):
                     "component_id": self.component_id,
                     "component_name": self.component_name,
                     "component_key": self.component_key,
+                    "component": self,
                     "errors": self.errors,
                 }
             }

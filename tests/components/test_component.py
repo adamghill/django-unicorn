@@ -161,6 +161,17 @@ def test_get_context_data(component):
     assert isinstance(context_data.get("get_name"), types.MethodType)
 
 
+def test_get_context_data_component():
+    class TestComponent(UnicornView):
+        pass
+
+    component = TestComponent(component_id="asdf1234", component_name="hello-world")
+    actual = component.get_context_data()
+
+    assert actual["unicorn"]
+    assert actual["unicorn"]["component"] == component
+
+
 def test_get_context_data_component_id():
     class TestComponent(UnicornView):
         pass

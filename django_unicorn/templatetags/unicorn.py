@@ -120,6 +120,15 @@ class UnicornNode(template.Node):
 
         if "parent" in resolved_kwargs:
             self.parent = resolved_kwargs.pop("parent")
+        else:
+            # if there is no explicit parent, but this node is rendering under an existing
+            # unicorn template, set that as the parent
+            try:
+                implicit_parent = template.Variable("unicorn.parent").resolve(context)
+                if implicit_parent:
+                    self.parent = implicit_parent
+            except template.VariableDoesNotExist:
+                pass  # no implicit parent present
 
         component_id = None
 

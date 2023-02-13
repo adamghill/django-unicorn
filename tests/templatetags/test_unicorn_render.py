@@ -127,6 +127,25 @@ def test_unicorn_template_renders_with_parent_and_child_with_templateview(client
     assert '<script type="application/json" id="unicorn:data:' in content
 
 
+def test_unicorn_template_renders_with_implicit_parent_and_child(client):
+    response = client.get("/test-parent-implicit")
+    content = response.content.decode().strip()
+
+    assert response.wsgi_request.path == "/test-parent-implicit"
+    assert content.startswith("<div unicorn:id")
+    assert (
+        'unicorn:name="tests.templatetags.test_unicorn_render.FakeComponentParent"'
+        in content
+    )
+    assert (
+        'unicorn:name="tests.templatetags.test_unicorn_render.FakeComponentChild"'
+        in content
+    )
+    assert "--parent--" in content
+    assert "==child==" in content
+    assert '<script type="application/json" id="unicorn:data:' in content
+
+
 def test_unicorn_render_kwarg():
     token = Token(
         TokenType.TEXT,
