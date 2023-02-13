@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.49.3
+
+- Fix: Support nested children past the first level ([#476](https://github.com/adamghill/django-unicorn/pull/507).
+
+[All changes since 0.49.2](https://github.com/adamghill/django-unicorn/compare/0.49.2...0.49.3).
+
 ## v0.49.2
 
 - Fix: Calling methods with a model typehint would fail after being called multiple times ([#476](https://github.com/adamghill/django-unicorn/pull/476) by [stat1c-void](https://github.com/stat1c-void)).
