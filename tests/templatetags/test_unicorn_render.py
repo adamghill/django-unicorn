@@ -30,8 +30,19 @@ class FakeComponentParent(UnicornView):
     template_name = "templates/test_component_parent.html"
 
 
+class FakeComponentParentImplicit(UnicornView):
+    template_name = "templates/test_component_parent_implicit.html"
+
+
 class FakeComponentChild(UnicornView):
     template_name = "templates/test_component_child.html"
+
+
+class FakeComponentChildImplicit(UnicornView):
+    template_name = "templates/test_component_child_implicit.html"
+
+    def has_parent(self):
+        return self.parent is not None
 
 
 class FakeComponentKwargs(UnicornView):
@@ -134,15 +145,16 @@ def test_unicorn_template_renders_with_implicit_parent_and_child(client):
     assert response.wsgi_request.path == "/test-parent-implicit"
     assert content.startswith("<div unicorn:id")
     assert (
-        'unicorn:name="tests.templatetags.test_unicorn_render.FakeComponentParent"'
+        'unicorn:name="tests.templatetags.test_unicorn_render.FakeComponentParentImplicit"'
         in content
     )
     assert (
-        'unicorn:name="tests.templatetags.test_unicorn_render.FakeComponentChild"'
+        'unicorn:name="tests.templatetags.test_unicorn_render.FakeComponentChildImplicit"'
         in content
     )
     assert "--parent--" in content
     assert "==child==" in content
+    assert "has_parent:True" in content
     assert '<script type="application/json" id="unicorn:data:' in content
 
 

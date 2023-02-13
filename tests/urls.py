@@ -8,7 +8,7 @@ def parent_view(request):
 
 
 def parent_implicit_view(request):
-    return render(request, "templates/test_parent_template.html")
+    return render(request, "templates/test_parent_implicit_template.html")
 
 
 urlpatterns = (
