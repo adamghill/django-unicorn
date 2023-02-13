@@ -72,33 +72,46 @@ def dicts_equal(dictionary_one: Dict, dictionary_two: Dict) -> bool:
     return is_valid
 
 
-def get_cacheable_component(
-    component: "django_unicorn.views.UnicornView",
-) -> "django_unicorn.views.UnicornView":
+class CacheableComponent:
     """
-    Converts a component into something that is cacheable/pickleable.
+    Updates a component into something that is cacheable/pickleable. Use in a `with` statement
+    or explicitly call `__enter__` `__exit__` to use. It will restore the original component
+    on exit.
     """
+    def __init__(self, component: "django_unicorn.views.UnicornView"):
+        self._state = {}
+        self.cacheable_component = component
 
-    component.request = None
+    def __enter__(self):
+        self._traverse_components(self.cacheable_component)
+        for component, _, _ in self._state.values():
+            try:
+                pickle.dumps(component)
+            except (TypeError, AttributeError, NotImplementedError, pickle.PicklingError) as e:
+                raise UnicornCacheError(
+                    f"Cannot cache component '{type(component)}' because it is not picklable: {type(e)}: {e}"
+                ) from e
 
-    if component.extra_context:
-        component.extra_context = None
+    def __exit__(self, *args):
+        for component, request, extra_context in self._state.values():
+            component.request = request
+            if extra_context:
+                component.extra_context = extra_context
 
-    if component.parent:
-        component.parent = get_cacheable_component(component.parent)
-
-    for child in component.children:
-        if child.request is not None:
-            child = get_cacheable_component(child)
-
-    try:
-        pickle.dumps(component)
-    except (TypeError, AttributeError, NotImplementedError, pickle.PicklingError) as e:
-        raise UnicornCacheError(
-            f"Cannot cache component '{type(component)}' because it is not picklable: {type(e)}: {e}"
-        ) from e
-
-    return component
+    def _traverse_components(self, c):
+        if not c or c.component_id in self._state:
+            return
+        if hasattr(c, 'extra_context'):
+            extra_context = c.extra_context
+            c.extra_context = None
+        else:
+            extra_context = None
+        request = c.request
+        c.request = None
+        self._state[c.component_id] = (c, request, extra_context)
+        self._traverse_components(c.parent)
+        for cc in c.children:
+            self._traverse_components(cc)
 
 
 def get_type_hints(obj) -> Dict:

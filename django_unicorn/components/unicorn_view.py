@@ -28,7 +28,7 @@ from ..errors import (
     UnicornCacheError,
 )
 from ..settings import get_setting
-from ..utils import get_cacheable_component, is_non_string_sequence
+from ..utils import CacheableComponent, is_non_string_sequence
 from .fields import UnicornField
 from .unicorn_template_response import UnicornTemplateResponse
 
@@ -405,26 +405,16 @@ class UnicornView(TemplateView):
         # Put the component's class in a module cache
         views_cache[self.component_id] = (self.__class__, parent, kwargs)
 
-        cacheable_component = None
-
         # Put the instantiated component into a module cache and the Django cache
         try:
-            cacheable_component = get_cacheable_component(self)
+            with CacheableComponent(self):
+                if COMPONENTS_MODULE_CACHE_ENABLED:
+                    constructed_views_cache[self.component_id] = self
+
+                cache = caches[get_cache_alias()]
+                cache.set(self.component_cache_key, self)
         except UnicornCacheError as e:
             logger.warning(e)
-
-        if cacheable_component:
-            if COMPONENTS_MODULE_CACHE_ENABLED:
-                constructed_views_cache[self.component_id] = cacheable_component
-
-            cache = caches[get_cache_alias()]
-            cache.set(cacheable_component.component_cache_key, cacheable_component)
-
-        # Re-set `request` on the component that got removed when making it cacheable
-        self.request = request
-
-        for child in self.children:
-            child.request = request
 
     @timed
     def get_frontend_context_variables(self) -> str:
