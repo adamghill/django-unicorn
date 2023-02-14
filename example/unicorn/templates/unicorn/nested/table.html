@@ -16,6 +16,8 @@
 
     <button unicorn:click="load_table">Load table</button>
 
+    <div>Favorite count: {{ favorite_count }}</div>
+
     {% unicorn 'nested.filter' parent=view %}
 
     <table>
@@ -24,6 +26,7 @@
                 <td>Name</td>
                 <td>Label</td>
                 <td>Datetime</td>
+                <td>Favorite</td>
                 <td>Action</td>
             </tr>
         </thead>

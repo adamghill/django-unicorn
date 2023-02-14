@@ -152,12 +152,16 @@ class UnicornTemplateResponse(TemplateResponse):
                 self.component._init_script = init_script
                 self.component._json_tag = json_tag
             else:
-                json_tags = []
-                json_tags.append(json_tag)
+                json_tags = [json_tag]
 
-                for child in self.component.children:
-                    init_script = f"{init_script} {child._init_script}"
-                    json_tags.append(child._json_tag)
+                descendants = []
+                descendants.append(self.component)
+                while descendants:
+                    descendant = descendants.pop()
+                    for child in descendant.children:
+                        init_script = f"{init_script} {child._init_script}"
+                        json_tags.append(child._json_tag)
+                        descendants.append(child)
 
                 script_tag = soup.new_tag("script")
                 script_tag["type"] = "module"

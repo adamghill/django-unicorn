@@ -83,7 +83,25 @@ class CacheableComponent:
         self.cacheable_component = component
 
     def __enter__(self):
-        self._traverse_components(self.cacheable_component)
+        components = []
+        components.append(self.cacheable_component)
+        while components:
+            component = components.pop()
+            if component.component_id in self._state:
+                continue
+            if hasattr(component, 'extra_context'):
+                extra_context = component.extra_context
+                component.extra_context = None
+            else:
+                extra_context = None
+            request = component.request
+            component.request = None
+            self._state[component.component_id] = (component, request, extra_context)
+            if component.parent:
+                components.append(component.parent)
+            for child in component.children:
+                components.append(child)
+
         for component, _, _ in self._state.values():
             try:
                 pickle.dumps(component)
@@ -97,21 +115,6 @@ class CacheableComponent:
             component.request = request
             if extra_context:
                 component.extra_context = extra_context
-
-    def _traverse_components(self, c):
-        if not c or c.component_id in self._state:
-            return
-        if hasattr(c, 'extra_context'):
-            extra_context = c.extra_context
-            c.extra_context = None
-        else:
-            extra_context = None
-        request = c.request
-        c.request = None
-        self._state[c.component_id] = (c, request, extra_context)
-        self._traverse_components(c.parent)
-        for cc in c.children:
-            self._traverse_components(cc)
 
 
 def get_type_hints(obj) -> Dict:

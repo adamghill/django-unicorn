@@ -1,3 +1,4 @@
+{% load unicorn %}
 <tr>
     <td>
         {% if is_editing %}
@@ -21,6 +22,9 @@
         {% else %}
         n/a
         {% endif %}
+    </td>
+    <td{% if is_updated_by_child %} style="background-color: #2b8cee;" {% endif %}>
+      {% unicorn 'nested.favorite' key=model.favorite.id model=model.favorite %}
     </td>
     <td>
         {% if is_editing %}

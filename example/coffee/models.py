@@ -21,6 +21,11 @@ class Flavor(models.Model):
         return self.name
 
 
+class Favorite(models.Model):
+    is_favorite = models.BooleanField(default=False)
+    flavor = models.OneToOneField(Flavor, on_delete=models.CASCADE)
+
+
 class Taste(models.Model):
     name = models.CharField(max_length=255)
     flavor = models.ManyToManyField(Flavor)

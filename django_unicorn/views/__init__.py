@@ -310,6 +310,7 @@ def _process_component_request(
     parent_component = component.parent
 
     if parent_component:
+        # TODO: grandparents, etc? Multi-layer nesting needs to be handled.
         # TODO: Should parent_component.hydrate() be called?
         parent_frontend_context_variables = loads(
             parent_component.get_frontend_context_variables()
