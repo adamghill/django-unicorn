@@ -135,7 +135,7 @@ export function send(component, callback) {
       component.return = responseJson.return || {};
       component.hash = responseJson.hash;
 
-      const parent = responseJson.parent || {};
+      let parent = responseJson.parent || {};
       const rerenderedComponent = responseJson.dom || {};
       const partials = responseJson.partials || [];
       const { checksum } = responseJson;
@@ -160,7 +160,7 @@ export function send(component, callback) {
       }
 
       // Refresh the parent component if there is one
-      if (hasValue(parent) && hasValue(parent.id)) {
+      while (hasValue(parent) && hasValue(parent.id)) {
         const parentComponent = component.getParentComponent(parent.id);
 
         if (parentComponent && parentComponent.id === parent.id) {
@@ -193,6 +193,7 @@ export function send(component, callback) {
             child.refreshEventListeners();
           });
         }
+        parent = parent.parent || {};
       }
 
       if (partials.length > 0) {

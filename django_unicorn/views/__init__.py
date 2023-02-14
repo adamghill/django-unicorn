@@ -308,9 +308,9 @@ def _process_component_request(
             )
 
     parent_component = component.parent
+    parent_res = res
 
-    if parent_component:
-        # TODO: grandparents, etc? Multi-layer nesting needs to be handled.
+    while parent_component:
         # TODO: Should parent_component.hydrate() be called?
         parent_frontend_context_variables = loads(
             parent_component.get_frontend_context_variables()
@@ -344,7 +344,10 @@ def _process_component_request(
                 }
             )
 
-        res.update({"parent": parent})
+        parent_res.update({"parent": parent})
+        component = parent_component
+        parent_component = parent_component.parent
+        parent_res = parent
 
     return res
 
