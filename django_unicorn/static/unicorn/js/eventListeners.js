@@ -287,7 +287,7 @@ export function addModelEventListener(component, element, eventType) {
             triggeringElements.push(element);
           }
 
-          component.setModelValues(triggeringElements, forceModelUpdate);
+          component.setModelValues(triggeringElements, forceModelUpdate, true);
         }
       }
     );

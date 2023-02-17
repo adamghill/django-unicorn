@@ -259,7 +259,7 @@ export class Component {
       } else {
         // Can hard-code `forceModelUpdate` to `true` since it is always required for
         // `callMethod` actions
-        this.setModelValues(triggeringElements, true);
+        this.setModelValues(triggeringElements, true, true);
       }
     });
   }
@@ -448,9 +448,10 @@ export class Component {
    * Sets all model values.
    * @param {[Element]} triggeringElements The elements that triggered the event.
    */
-  setModelValues(triggeringElements, forceModelUpdates) {
+  setModelValues(triggeringElements, forceModelUpdates, updateParents) {
     triggeringElements = triggeringElements || [];
     forceModelUpdates = forceModelUpdates || false;
+    updateParents = updateParents || false;
 
     let lastTriggeringElement = null;
 
@@ -490,6 +491,13 @@ export class Component {
         this.setValue(element);
       }
     });
+
+    if (updateParents) {
+      const parent = this.getParentComponent();
+      if (parent) {
+        parent.setModelValues(triggeringElements, forceModelUpdates, updateParents);
+      }
+    }
   }
 
   /**
