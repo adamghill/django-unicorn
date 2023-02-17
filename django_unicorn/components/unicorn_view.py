@@ -166,35 +166,33 @@ def construct_component(
 
 
 class UnicornView(TemplateView):
-    response_class = UnicornTemplateResponse
+    # These class variables are required to set these via kwargs
     component_name: str = ""
     component_key: str = ""
     component_id: str = ""
-    request = None
-    parent = None
-    children = []
-
-    # Caches to reduce the amount of time introspecting the class
-    _methods_cache: Dict[str, Callable] = {}
-    _attribute_names_cache: List[str] = []
-    _hook_methods_cache: List[str] = []
-
-    # Dictionary with key: attribute name; value: pickled attribute value
-    _resettable_attributes_cache: Dict[str, Any] = {}
-
-    # JavaScript method calls
-    calls = []
 
     def __init__(self, **kwargs):
-        # Set all these as instance variables instead of just class variables. Otherwise,
-        # calling UnicornView() outside the Django view/template logic results in odd
-        # shared class variables for these. For example in unit tests.
-        self.component_name = ""
-        self.component_key = ""
-        self.component_id = ""
-        self.request = None
-        self.parent = None
-        self.children = []
+        self.response_class = UnicornTemplateResponse
+
+        self.component_name: str = ""
+        self.component_key: str = ""
+        self.component_id: str = ""
+
+        # Without these instance variables calling UnicornView() outside the
+        # Django view/template logic (i.e. in unit tests) results in odd results.
+        self.request: HttpRequest = None
+        self.parent: UnicornView = None
+        self.children: List[UnicornView] = []
+
+        # Caches to reduce the amount of time introspecting the class
+        self._methods_cache: Dict[str, Callable] = {}
+        self._attribute_names_cache: List[str] = []
+        self._hook_methods_cache: List[str] = []
+
+        # Dictionary with key: attribute name; value: pickled attribute value
+        self._resettable_attributes_cache: Dict[str, Any] = {}
+
+        # JavaScript method calls
         self.calls = []
 
         super().__init__(**kwargs)
