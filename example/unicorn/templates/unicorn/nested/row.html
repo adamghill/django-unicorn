@@ -1,37 +1,37 @@
 {% load unicorn %}
 <tr>
-    <td>
-        {% if is_editing %}
-        <input type="text" unicorn:model.defer="model.name" />
-        {% else %}
-        {{ model.name }}
-        {% endif %}
+  <td>
+    {% if is_editing %}
+    <input type="text" unicorn:model.defer="model.name" />
+    {% else %}
+    {{ model.name }}
+    {% endif %}
+  </td>
+  <td>
+    {% if is_editing %}
+    <input type="text" unicorn:model.defer="model.label" />
+    {% else %}
+    {{ model.label }}
+    {% endif %}
+  </td>
+  <td>
+    {% if is_editing %}
+    <input type="text" unicorn:model.defer="model.datetime" />
+    {% elif model.datetime %}
+    {{ model.datetime }}
+    {% else %}
+    n/a
+    {% endif %}
+  </td>
+  <td{% if is_updated_by_child %} style="background-color: #2b8cee;" {% endif %}>
+    {% unicorn 'nested.favorite' key=model.favorite.id model=model.favorite %}
     </td>
     <td>
-        {% if is_editing %}
-        <input type="text" unicorn:model.defer="model.label" />
-        {% else %}
-        {{ model.label }}
-        {% endif %}
-    </td>
-    <td>
-        {% if is_editing %}
-        <input type="text" unicorn:model.defer="model.datetime" />
-        {% elif model.datetime %}
-        {{ model.datetime }}
-        {% else %}
-        n/a
-        {% endif %}
-    </td>
-    <td{% if is_updated_by_child %} style="background-color: #2b8cee;" {% endif %}>
-      {% unicorn 'nested.favorite' key=model.favorite.id model=model.favorite %}
-    </td>
-    <td>
-        {% if is_editing %}
-        <button unicorn:click="save">Save</button>
-        <button unicorn:click.discard="cancel" unicorn:partial.key="{{ model.pk }}">Cancel</button>
-        {% else %}
-        <button unicorn:click="edit" unicorn:partial.key="{{ model.pk }}">Edit</button>
-        {% endif %}
+      {% if is_editing %}
+      <button unicorn:click="save">Save</button>
+      <button unicorn:click.discard="cancel" unicorn:partial.key="{{ model.pk }}">Cancel</button>
+      {% else %}
+      <button unicorn:click="edit" unicorn:partial.key="{{ model.pk }}">Edit</button>
+      {% endif %}
     </td>
 </tr>

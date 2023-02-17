@@ -27,8 +27,14 @@ class TableView(UnicornView):
         self.load_table()
 
     def load_table(self):
-        self.flavors = Flavor.objects.select_related('favorite').all()[10:20]
-        self.favorite_count = sum([1 for f in self.flavors if f.favorite.is_favorite])
+        self.flavors = Flavor.objects.select_related("favorite").all()[10:20]
+        self.favorite_count = sum(
+            [
+                1
+                for f in self.flavors
+                if hasattr(f, "favorite") and f.favorite.is_favorite
+            ]
+        )
 
         def set_unedit(c):
             if hasattr(c, "is_editing"):
