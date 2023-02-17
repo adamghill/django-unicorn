@@ -2,7 +2,7 @@ import csv
 
 from django.core.management.base import BaseCommand, CommandError
 
-from ...models import Flavor, Favorite
+from ...models import Favorite, Flavor
 
 
 class Command(BaseCommand):

@@ -2,8 +2,8 @@ from unittest.mock import MagicMock
 
 from django_unicorn.components import UnicornView
 from django_unicorn.utils import (
-    generate_checksum,
     CacheableComponent,
+    generate_checksum,
     get_method_arguments,
     get_type_hints,
     is_non_string_sequence,
@@ -104,10 +104,14 @@ def test_cacheable_component_extra_context_is_none_then_restored():
 
 def test_cacheable_component_parents_have_request_restored():
     component = FakeComponent(component_id="asdf123498", component_name="hello-world")
-    component2 = FakeComponent(component_id="asdf123499", component_name="hello-world", parent=component)
-    component3 = FakeComponent(component_id="asdf123500", component_name="hello-world", parent=component2)
+    component2 = FakeComponent(
+        component_id="asdf123499", component_name="hello-world", parent=component
+    )
+    component3 = FakeComponent(
+        component_id="asdf123500", component_name="hello-world", parent=component2
+    )
     request = MagicMock()
-    extra_content = 'extra_content'
+    extra_content = "extra_content"
     for c in [component, component2, component3]:
         c.request = request
         c.extra_context = extra_content
@@ -136,7 +140,7 @@ def test_restore_cached_component_children_have_request_set():
     component3.children.append(component4)
     component.children.extend([component2, component3])
     request = MagicMock()
-    extra_content = 'extra_content'
+    extra_content = "extra_content"
     for c in [component, component2, component3, component4]:
         c.request = request
         c.extra_context = extra_content

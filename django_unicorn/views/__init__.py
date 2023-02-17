@@ -24,7 +24,7 @@ from django_unicorn.settings import (
     get_serial_enabled,
     get_serial_timeout,
 )
-from django_unicorn.utils import generate_checksum, CacheableComponent
+from django_unicorn.utils import CacheableComponent, generate_checksum
 from django_unicorn.views.action_parsers import call_method, sync_input
 from django_unicorn.views.objects import ComponentRequest
 from django_unicorn.views.utils import set_property_from_data

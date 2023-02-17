@@ -78,6 +78,7 @@ class CacheableComponent:
     or explicitly call `__enter__` `__exit__` to use. It will restore the original component
     on exit.
     """
+
     def __init__(self, component: "django_unicorn.views.UnicornView"):
         self._state = {}
         self.cacheable_component = component
@@ -89,7 +90,7 @@ class CacheableComponent:
             component = components.pop()
             if component.component_id in self._state:
                 continue
-            if hasattr(component, 'extra_context'):
+            if hasattr(component, "extra_context"):
                 extra_context = component.extra_context
                 component.extra_context = None
             else:
@@ -105,7 +106,12 @@ class CacheableComponent:
         for component, _, _ in self._state.values():
             try:
                 pickle.dumps(component)
-            except (TypeError, AttributeError, NotImplementedError, pickle.PicklingError) as e:
+            except (
+                TypeError,
+                AttributeError,
+                NotImplementedError,
+                pickle.PicklingError,
+            ) as e:
                 raise UnicornCacheError(
                     f"Cannot cache component '{type(component)}' because it is not picklable: {type(e)}: {e}"
                 ) from e
