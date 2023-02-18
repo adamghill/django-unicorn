@@ -1,10 +1,10 @@
 # Changelog
 
-## v0.49.3
+## v0.50.0
 
-- Fix: Support nested children past the first level ([#476](https://github.com/adamghill/django-unicorn/pull/507).
+- Support more than 1 level of nested children ([#476](https://github.com/adamghill/django-unicorn/pull/507) by [bazubii](https://github.com/bazubii)).
 
-[All changes since 0.49.2](https://github.com/adamghill/django-unicorn/compare/0.49.2...0.49.3).
+[All changes since 0.49.2](https://github.com/adamghill/django-unicorn/compare/0.49.2...0.50.0).
 
 ## v0.49.2
 
