@@ -156,6 +156,16 @@
         "code",
         "test"
       ]
+    },
+    {
+      "login": "bazubii",
+      "name": "bazubii",
+      "avatar_url": "https://avatars.githubusercontent.com/u/12039914?v=4",
+      "profile": "https://github.com/bazubii",
+      "contributions": [
+        "code",
+        "test"
+      ]
     }
   ],
   "contributorsPerLine": 7,
