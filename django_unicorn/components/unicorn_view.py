@@ -8,7 +8,6 @@ from typing import Any, Callable, Dict, List, Sequence, Tuple, Type
 
 from django.apps import AppConfig
 from django.conf import settings
-from django.core.cache import caches
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models import Model
 from django.forms.widgets import CheckboxInput
@@ -18,8 +17,6 @@ from django.views.generic.base import TemplateView
 
 import shortuuid
 
-from django_unicorn.settings import get_cache_alias
-
 from .. import serializer
 from ..decorators import timed
 from ..errors import (
@@ -28,7 +25,7 @@ from ..errors import (
     UnicornCacheError,
 )
 from ..settings import get_setting
-from ..utils import CacheableComponent, is_non_string_sequence
+from ..utils import is_non_string_sequence, restore_from_cache, cache_full_tree
 from .fields import UnicornField
 from .unicorn_template_response import UnicornTemplateResponse
 
@@ -155,7 +152,6 @@ def construct_component(
 
     component.calls = []
     component.children = []
-    component._children_set = False
 
     component.mount()
     component.hydrate()
@@ -212,9 +208,10 @@ class UnicornView(TemplateView):
 
         if "parent" in kwargs:
             self.parent = kwargs["parent"]
+            if self.parent and self not in self.parent.children:
+                self.parent.children.append(self)
 
         self._init_script: str = ""
-        self._children_set = False
         self._validate_called = False
         self.errors = {}
         self._set_default_template_name()
@@ -363,17 +360,6 @@ class UnicornView(TemplateView):
 
         rendered_component = response.content.decode("utf-8")
 
-        # Set the current component as a child of the parent if there is a parent
-        # If no parent, mark that the component has its children set.
-        # This works because the nested (internal) components get rendered first before the parent,
-        # so once we hit a component without a parent we know all of the children have been rendered correctly
-        # TODO: This might fall apart with a third layer of nesting components
-        if self.parent:
-            if not self.parent._children_set:
-                self.parent.children.append(self)
-        else:
-            self._children_set = True
-
         return rendered_component
 
     def dispatch(self, request, *args, **kwargs):
@@ -406,12 +392,9 @@ class UnicornView(TemplateView):
 
         # Put the instantiated component into a module cache and the Django cache
         try:
-            with CacheableComponent(self):
-                if COMPONENTS_MODULE_CACHE_ENABLED:
-                    constructed_views_cache[self.component_id] = self
-
-                cache = caches[get_cache_alias()]
-                cache.set(self.component_cache_key, self)
+            if COMPONENTS_MODULE_CACHE_ENABLED:
+                constructed_views_cache[self.component_id] = self
+            cache_full_tree(self)
         except UnicornCacheError as e:
             logger.warning(e)
 
@@ -812,32 +795,18 @@ class UnicornView(TemplateView):
 
             return component_class
 
-        cache = caches[get_cache_alias()]
         component_cache_key = f"unicorn:component:{component_id}"
-        cached_component = cache.get(component_cache_key)
-
-        if cached_component:
-            # Get the newest version of the parent from cache if it is available
-            # This needs to happen for Django cache because instances is pickled, so
-            # a change in the view won't be reflected automatically (like with the module
-            # cache) so it needs to be retrieved manually.
-            if cached_component.parent:
-                cached_parent_component = cache.get(
-                    cached_component.parent.component_cache_key
-                )
-
-                if cached_parent_component:
-                    cached_component.parent = cached_parent_component
-                    cached_component.parent.setup(request)
-        else:
-            cached_component = constructed_views_cache.get(component_id)
-
-        if use_cache and cached_component:
+        cached_component = restore_from_cache(component_cache_key)
+        if not cached_component:
             # Note that `hydrate()` and `complete` don't need to be called here
             # because this path only happens for re-rendering from the view
-            cached_component.setup(request)
-            cached_component._validate_called = False
-            cached_component.calls = []
+            cached_component = constructed_views_cache.get(component_id)
+            if cached_component:
+                cached_component.setup(request)
+                cached_component._validate_called = False
+                cached_component.calls = []
+
+        if use_cache and cached_component:
             logger.debug(f"Retrieve {component_id} from constructed views cache")
 
             return cached_component
