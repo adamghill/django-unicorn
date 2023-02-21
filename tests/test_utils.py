@@ -8,6 +8,8 @@ from django_unicorn.utils import (
     get_type_hints,
     is_non_string_sequence,
     sanitize_html,
+    cache_full_tree,
+    restore_from_cache,
 )
 
 
@@ -191,3 +193,53 @@ def test_is_non_string_sequence_string():
 
 def test_is_non_string_sequence_bytes():
     assert not is_non_string_sequence(b"")
+
+
+class ExampleCachingComponent(UnicornView):
+    name = "World"
+
+    def get_name(self):
+        return "World"
+
+    def __str__(self):
+        return f"ECC {self.component_id} - {self.component_name}"
+
+
+def test_caching_components(settings):
+    settings.CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": "unique-snowflake",
+        }
+    }
+    settings.UNICORN["CACHE_ALIAS"] = "default"
+    root = ExampleCachingComponent(component_id="rrr", component_name="root")
+    child1 = ExampleCachingComponent(component_id='1111', component_name="child1", parent=root)
+    child2 = ExampleCachingComponent(component_id='2222', component_name="child2", parent=root)
+    child3 = ExampleCachingComponent(component_id='3333', component_name="child3", parent=root)
+    grandchild = ExampleCachingComponent(component_id='4444', component_name="grandchild", parent=child1)
+    grandchild2 = ExampleCachingComponent(component_id='5555', component_name="grandchild2", parent=child1)
+    grandchild3 = ExampleCachingComponent(component_id='6666', component_name="grandchild3", parent=child3)
+
+    cache_full_tree(child3)
+    request = MagicMock()
+
+    restored: UnicornView = restore_from_cache(child2.component_cache_key, request)
+
+    restored_root = restored
+    while restored_root.parent:
+        restored_root = restored_root.parent
+
+    assert root.component_id == restored_root.component_id
+    assert 3 == len(restored_root.children)
+    for i, child in enumerate([child1, child2, child3]):
+        assert restored_root.children[i].component_id == child.component_id
+    assert 2 == len(restored_root.children[0].children)
+    for i, child in enumerate([grandchild, grandchild2]):
+        assert restored_root.children[0].children[i].component_id == child.component_id
+    assert not restored_root.children[1].children
+    assert 1 == len(restored_root.children[2].children)
+    assert grandchild3.component_id == restored_root.children[2].children[0].component_id
+
+
+

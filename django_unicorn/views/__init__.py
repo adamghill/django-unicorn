@@ -24,7 +24,7 @@ from django_unicorn.settings import (
     get_serial_enabled,
     get_serial_timeout,
 )
-from django_unicorn.utils import CacheableComponent, generate_checksum
+from django_unicorn.utils import generate_checksum, cache_full_tree
 from django_unicorn.views.action_parsers import call_method, sync_input
 from django_unicorn.views.objects import ComponentRequest
 from django_unicorn.views.utils import set_property_from_data
@@ -204,11 +204,8 @@ def _process_component_request(
         except AttributeError as e:
             logger.warning(e)
 
-    cache = caches[get_cache_alias()]
-
     try:
-        with CacheableComponent(component):
-            cache.set(component.component_cache_key, component)
+        cache_full_tree(component)
     except UnicornCacheError as e:
         logger.warning(e)
 
@@ -325,16 +322,6 @@ def _process_component_request(
         if not partial_doms:
             parent_dom = parent_component.render()
             component.parent_rendered(parent_dom)
-
-            try:
-
-                with CacheableComponent(parent_component):
-                    cache.set(
-                        parent_component.component_cache_key,
-                        parent_component,
-                    )
-            except UnicornCacheError as e:
-                logger.warning(e)
 
             parent.update(
                 {
