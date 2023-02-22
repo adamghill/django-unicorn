@@ -24,6 +24,7 @@ function handleLoading(component, targetElement) {
 
       if (targetedEl) {
         if (targetElement.el.isSameNode(targetedEl)) {
+          loadingElement.handleLoading();
           if (loadingElement.loading.hide) {
             loadingElement.hide();
           } else if (loadingElement.loading.show) {
@@ -31,10 +32,13 @@ function handleLoading(component, targetElement) {
           }
         }
       }
-    } else if (loadingElement.loading.hide) {
-      loadingElement.hide();
-    } else if (loadingElement.loading.show) {
-      loadingElement.show();
+    } else {
+      loadingElement.handleLoading();
+      if (loadingElement.loading.hide) {
+        loadingElement.hide();
+      } else if (loadingElement.loading.show) {
+        loadingElement.show();
+      }
     }
   });
 }
