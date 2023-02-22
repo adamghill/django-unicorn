@@ -150,15 +150,16 @@ export function addActionEventListener(component, eventType) {
             component.actionQueue = [];
           }
 
+          let actionName = action.name
           // Handle special arguments (e.g. $event)
-          args(action.name).forEach((eventArg) => {
+          args(actionName).forEach((eventArg) => {
             if (eventArg.startsWith("$event")) {
               try {
                 const data = parseEventArg(event, eventArg, "$event");
-                action.name = action.name.replace(eventArg, data);
+                actionName = actionName.replace(eventArg, data);
               } catch (err) {
                 // console.error(err);
-                action.name = action.name.replace(eventArg, "");
+                actionName = actionName.replace(eventArg, "");
               }
             } else if (eventArg.startsWith("$returnValue")) {
               if (
@@ -171,32 +172,23 @@ export function addActionEventListener(component, eventType) {
                     eventArg,
                     "$returnValue"
                   );
-                  action.name = action.name.replace(eventArg, data);
+                  actionName = actionName.replace(eventArg, data);
                 } catch (err) {
-                  action.name = action.name.replace(eventArg, "");
+                  actionName = actionName.replace(eventArg, "");
                 }
               } else {
-                action.name = action.name.replace(eventArg, "");
+                actionName = actionName.replace(eventArg, "");
               }
             }
           });
 
-          if (action.key) {
-            if (action.key === toKebabCase(event.key)) {
+          if (!action.key || action.key === toKebabCase(event.key)) {
               handleLoading(component, targetElement);
               component.callMethod(
-                action.name,
+                actionName,
                 action.debounceTime,
                 targetElement.partials
               );
-            }
-          } else {
-            handleLoading(component, targetElement);
-            component.callMethod(
-              action.name,
-              action.debounceTime,
-              targetElement.partials
-            );
           }
         }
       });
