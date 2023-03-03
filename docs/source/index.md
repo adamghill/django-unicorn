@@ -1,19 +1,11 @@
 # Introduction
 
 ```{toctree}
-:maxdepth: 2
+:caption: Basics
+:maxdepth: 3
 :hidden:
 
 self
-changelog
-faq
-```
-
-```{toctree}
-:caption: Basics
-:maxdepth: 2
-:hidden:
-
 installation
 components
 templates
@@ -45,6 +37,8 @@ queue-requests
 :maxdepth: 2
 :hidden:
 
+changelog
+faq
 troubleshooting
 settings
 cli
@@ -56,11 +50,24 @@ Sponsor <https://github.com/sponsors/adamghill>
 devmarks.io <https://devmarks.io>
 ```
 
-`Unicorn` is a reactive component framework that progressively enhances a normal Django view, makes AJAX calls in the background, and dynamically updates the DOM. It seamlessly extends Django past its server-side framework roots without giving up all of its niceties or re-building your website.
+Want to add some component based magic to your front-end, but don't need the overhead of React, Angular, Vue, or Svelte? Look no further, because Unicorn is here to revolutionize the way your users interact with your Django app! With Unicorn, you can create stunningly spiffy pages without ever leaving your beloved Django codebase.
 
-```{admonition} Bookmarking for Developers
-[devmarks.io](https://devmarks.io) is _Bookmarking for Developers_ -- designed by the creator of Unicorn and [free to try out](https://devmarks.io).
-```
+Unicorn is a reactive component framework that enhances your Django views by seamlessly making AJAX calls in the background and dynamically updating the DOM. It's like magic, but better! Say goodbye to your current limitations and hello to a new era of Django web development.
+
+Component-based design is here to stay, and Unicorn is leading the charge in bringing that developer experience to the python ecosystem. Join the Unicorn community today and unlock the power of reactive components in your Django projects.
+
+Here are a few reasons to consider Django Unicorn.
+
+1. **Reactive Components**: With Django Unicorn, you can create reactive components that dynamically update the DOM without the need for complex JavaScript. This makes it easier to build interactive web pages and enhances the user experience.
+
+2. **Seamless Integration**: Unicorn progressively enhances your Django views, making AJAX calls in the background, and updating the DOM without the need for a full re-build. This means you can seamlessly integrate Unicorn into your existing Django codebase without disrupting your current workflow.
+
+3. **Component-Based Design**: Unicorn brings the benefits of component-based design to the Python ecosystem, making it easier to build complex applications and enabling more efficient development.
+
+4. **Improved Performance**: By using AJAX calls to update the DOM, Unicorn reduces the need for full page reloads, which can result in improved performance and faster load times.
+
+5. **Familiarity**: With Django Unicorn, you don't need to learn a complicated front-end frameworks to create fancy interactive components. Instead, you can use the familiar Django syntax and templates to build your front-end components. This can save time and reduce complexity in your application.
+
 
 ## Related projects
 
@@ -105,3 +112,7 @@ devmarks.io <https://devmarks.io>
 ### Django packages to integrate lightweight frontend frameworks
 
 - [django-htmx](https://github.com/adamchainz/django-htmx) which has extensions for using Django with [htmx](https://htmx.org/).
+
+```{admonition} Bookmarking for Developers
+[devmarks.io](https://devmarks.io) is _Bookmarking for Developers_ -- designed by the creator of Unicorn and [free to try out](https://devmarks.io).
+```
