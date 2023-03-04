@@ -68,10 +68,10 @@ urlpatterns = (
 
 Unicorn uses the term "component" to refer to a set of interactive functionality that can be put into templates. A component consists of a Django HTML template with specific tags and a Python view class which provides the backend code for the template. After running the management command, you'll get two new files created:
 
-1. ```your_app/templates/unicorn/todo.html``` (Your component template)
-2. ```your_app/components/todo.py``` (View code for your component)
+- ```your_app/templates/unicorn/todo.html``` (Your component html template)
+- ```your_app/components/todo.py``` (Your component functionality)
 
-7. Here's an example. Check out this Wizardry. [LIVE DEMO](https://www.django-unicorn.com/examples/todo)
+7. Check out this Wizardry. [LIVE DEMO](https://www.django-unicorn.com/examples/todo)
 
 ```
 <!-- ../templates/unicorn/todo.html -->
@@ -119,7 +119,10 @@ class TodoView(UnicornView):
             self.task = ""
 ```
 
-8. Add the component anywhere in your app with `{% unicorn 'todo' %}`. You can even pass in params.
+8. Add the component anywhere in your app with `{% unicorn 'todo' %}`. 
+
+You can even pass params into a component right here, in-line.
+```{% unicorn 'hello-world' name=hello.world.name %}```
 
 9. Forget about complicated front-end frameworks.
 
