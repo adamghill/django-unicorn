@@ -2,7 +2,7 @@
   <a href="https://www.django-unicorn.com/"><img src="img/gu-logo.png" alt="django-unicorn logo" height="200"/></a>
 </p>
 
-# Django Unicorn
+# Django Unicorn ✨
 The Magical Reactive Component Framework for Django ✨
 
 ![PyPI](https://img.shields.io/pypi/v/django-unicorn?color=blue&style=flat-square)
