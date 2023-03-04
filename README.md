@@ -1,7 +1,7 @@
 <p align="center">
-  <a href="https://www.django-unicorn.com/"><img src="https://www.django-unicorn.com/static/img/unicorn.svg" alt="django-unicorn logo" height="80"/></a>
+  <a href="https://www.django-unicorn.com/"><img src="https://pasteboard.co/cIMvHAkVDm7c.png" alt="django-unicorn logo" height="200"/></a>
 </p>
-<h1 align="center"><a href="https://www.django-unicorn.com/">Unicorn</a></h1>
+<h1 align="center"><a href="https://www.django-unicorn.com/">Django Unicorn</a></h1>
 <p align="center">The magical full-stack framework for Django ✨</p>
 
 ![PyPI](https://img.shields.io/pypi/v/django-unicorn?color=blue&style=flat-square)
@@ -14,7 +14,7 @@
 
 [Unicorn](https://www.django-unicorn.com) is a reactive component framework that progressively enhances a normal Django view, makes AJAX calls in the background, and dynamically updates the DOM. It seamlessly extends Django past its server-side framework roots without giving up all of its niceties or re-building your website.
 
-## ⚡ How to use
+## ⚡ Getting Started
 
 1. [Install](https://www.django-unicorn.com/docs/installation/) `Unicorn`
 1. [Create](https://www.django-unicorn.com/docs/components/) a component
