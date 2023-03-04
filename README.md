@@ -64,7 +64,7 @@ urlpatterns = (
 ```python manage.py startunicorn todo```
 
 
-7. Check out this Wizardry.
+7. Check out this Wizardry. [DEMO] (https://www.django-unicorn.com/examples/todo)
 
 ```
 <!-- unicorn/templates/unicorn/todo.html -->
