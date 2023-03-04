@@ -16,11 +16,11 @@
 
 ## ⚡ Getting Started
 
-1. Install the package.
+**1. Install the package.**
 
 ```pip install django-unicorn```
 
-2. Add `django_unicorn` to INSTALLED_APPS.
+**2. Add `django_unicorn` to INSTALLED_APPS.**
 
 ```
 # settings.py
@@ -31,7 +31,7 @@ INSTALLED_APPS = (
 )
 ```
 
-3. Update urls.py to allow the magic to flow.
+**3. Update urls.py to allow the magic to flow.**
 
 ```
 # urls.py
@@ -44,9 +44,9 @@ urlpatterns = (
 )
 ```
 
-4. Add `{% load unicorn %}` to the top of your template.
+**4. Add `{% load unicorn %}` to the top of your template.**
 
-5. Add `{% unicorn_scripts %}` into your template and make sure there is a `{% csrf_token %}` in there as well.
+**5. Add `{% unicorn_scripts %}` into <head> and make sure there is a `{% csrf_token %}` in the body as well.**
 
 ```
 <!-- template.html -->
@@ -63,7 +63,7 @@ urlpatterns = (
 ```
 
 
-6. Create a component from the command line.
+**6. Create a component from the command line.**
 ```python manage.py startunicorn todo```
 
 Unicorn uses the term "component" to refer to a set of interactive functionality that can be put into templates. A component consists of a Django HTML template with specific tags and a Python view class which provides the backend code for the template. After running the management command, two new files will be created:
@@ -71,7 +71,7 @@ Unicorn uses the term "component" to refer to a set of interactive functionality
 - ```your_app/templates/unicorn/todo.html``` (Your component html template)
 - ```your_app/components/todo.py``` (Your component functionality)
 
-7. Check out this Wizardry. [LIVE DEMO](https://www.django-unicorn.com/examples/todo)
+**7. Check out this Wizardry. [LIVE DEMO](https://www.django-unicorn.com/examples/todo)**
 
 Notice the unicorn: properties on the html elements. These properties bind both data and events. Templates can also trigger methods by listening to any valid event type. The most common events would be click, input, keydown, keyup, and mouseenter. Consider how powerful this is.
 
@@ -121,13 +121,13 @@ class TodoView(UnicornView):
             self.task = ""
 ```
 
-8. Add the component anywhere in your app with `{% unicorn 'todo' %}`. 
+**8. Add the component anywhere in your app with `{% unicorn 'todo' %}`.**
 
 You can even pass params into a component right here, in-line.
 
 ```{% unicorn 'hello-world' name=hello.world.name %}```
 
-9. Forget about complicated front-end frameworks.
+**9. Forget about complicated front-end frameworks.**
 
 ## ✨ Wait, is this Magic? 
 ### Sort of! At least it might feel like it. 🤩
