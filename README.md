@@ -22,7 +22,8 @@ The Magical Reactive Component Framework for Django ✨
 2. Add `django_unicorn` to INSTALLED_APPS.
 
 ```
-<!-- settings.py -->
+# settings.py
+
 INSTALLED_APPS = (
     ...
     "django_unicorn",
@@ -32,7 +33,8 @@ INSTALLED_APPS = (
 3. Update urls.py to allow the magic to flow.
 
 ```
-<!-- urls.py -->
+# urls.py
+
 urlpatterns = (
     # other urls
     path("unicorn/", include("django_unicorn.urls")),
