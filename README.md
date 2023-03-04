@@ -59,7 +59,51 @@ index.html
 ```
 
 
-6. [Create](https://www.django-unicorn.com/docs/components/) a component.
+6. Check out this Wizardry.
+
+```
+<!-- unicorn/templates/unicorn/todo.html -->
+<div>
+  <form unicorn:submit.prevent="add">
+    <input type="text"
+      unicorn:model.defer="task"
+      unicorn:keyup.escape="task=''"
+      placeholder="New task" id="task"></input>
+  </form>
+  <button unicorn:click="add">Add</button>
+  <button unicorn:click="$reset">Clear all tasks</button>
+
+  <p>
+    {% if tasks %}
+      <ul>
+        {% for task in tasks %}
+          <li>{{ task }}</li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      No tasks 🎉
+    {% endif %}
+  </p>
+</div>
+```
+
+```
+# unicorn/components/todo.py
+from django_unicorn.components import UnicornView
+from django import forms
+
+class TodoForm(forms.Form):
+    task = forms.CharField(min_length=2, max_length=20, required=True)
+
+class TodoView(UnicornView):
+    task = ""
+    tasks = []
+
+    def add(self):
+        if self.is_valid():
+            self.tasks.append(self.task)
+            self.task = ""
+```
 
 7. Add the component to your template with `{% unicorn 'component-name' %}`
 
