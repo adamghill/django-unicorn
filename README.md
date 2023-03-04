@@ -17,6 +17,7 @@
 ## ⚡ Getting Started
 
 1. Install the package.
+
 ```pip install django-unicorn```
 
 2. Add `django_unicorn` to INSTALLED_APPS.
@@ -34,6 +35,8 @@ INSTALLED_APPS = (
 
 ```
 # urls.py
+
+import django_unicorn
 
 urlpatterns = (
     # other urls
