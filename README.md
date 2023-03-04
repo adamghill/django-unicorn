@@ -47,6 +47,7 @@ urlpatterns = (
 
 ```
 <!-- template.html -->
+
 {% load unicorn %}
 <html>
   <head>
@@ -67,6 +68,7 @@ urlpatterns = (
 
 ```
 <!-- unicorn/templates/unicorn/todo.html -->
+
 <div>
   <form unicorn:submit.prevent="add">
     <input type="text"
@@ -93,6 +95,7 @@ urlpatterns = (
 
 ```
 # unicorn/components/todo.py
+
 from django_unicorn.components import UnicornView
 from django import forms
 
