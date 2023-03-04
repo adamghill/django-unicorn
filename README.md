@@ -66,12 +66,14 @@ urlpatterns = (
 6. Create a component from the command line.
 ```python manage.py startunicorn todo```
 
-Unicorn uses the term "component" to refer to a set of interactive functionality that can be put into templates. A component consists of a Django HTML template with specific tags and a Python view class which provides the backend code for the template. After running the management command, you'll get two new files created:
+Unicorn uses the term "component" to refer to a set of interactive functionality that can be put into templates. A component consists of a Django HTML template with specific tags and a Python view class which provides the backend code for the template. After running the management command, two new files will be created:
 
 - ```your_app/templates/unicorn/todo.html``` (Your component html template)
 - ```your_app/components/todo.py``` (Your component functionality)
 
 7. Check out this Wizardry. [LIVE DEMO](https://www.django-unicorn.com/examples/todo)
+
+Notice the unicorn: properties on the html elements. These properties bind both data and events. Templates can also trigger methods by listening to any valid event type. The most common events would be click, input, keydown, keyup, and mouseenter. Consider how powerful this is.
 
 ```
 <!-- ../templates/unicorn/todo.html -->
@@ -122,6 +124,7 @@ class TodoView(UnicornView):
 8. Add the component anywhere in your app with `{% unicorn 'todo' %}`. 
 
 You can even pass params into a component right here, in-line.
+
 ```{% unicorn 'hello-world' name=hello.world.name %}```
 
 9. Forget about complicated front-end frameworks.
@@ -129,33 +132,38 @@ You can even pass params into a component right here, in-line.
 ## ✨ Wait, is this Magic? 
 ### Sort of! At least it might feel like it. 🤩
 
-- Unicorn progressively enhances a normal Django view, so the initial render of components is fast and great for SEO.
+- Unicorn progressively enhances a normal Django view, so the initial render is fast and great for SEO.
 - Next, Unicorn binds to the elements you specify and automatically makes AJAX calls when needed.
-- Then, Unicorn dynamically updates the DOM.
+- Then, Unicorn dynamically updates the DOM when things change. Reactivity with ease.
 
 **The end result is that you can focus on writing regular Django templates and Python classes without needing to switch to another language or build unnecessary plumbing.**
 
 **Best of all, the JavaScript portion is a paltry ~8 KB gzipped.**
 
-## 📖 Learn More
+**Once you try it, you'll never know how you lived without it.**
 
-- [Read The Docs](https://www.django-unicorn.com/docs/)
-- [More Examples](https://www.django-unicorn.com/examples/todo)
+## 🤯 But Wait, there's More!
+### As if that wasn't enough, you also get... 🤩
+
+- [Form Validation](https://www.django-unicorn.com/docs/validation/)
+- [Redirection](https://www.django-unicorn.com/docs/redirecting/)
+- [Loading States](https://www.django-unicorn.com/docs/loading-states/)
+- [Dirty States](https://www.django-unicorn.com/docs/dirty-states/)
+- [Partial Updates](https://www.django-unicorn.com/docs/partial-updates/)
+- [Polling](https://www.django-unicorn.com/docs/polling/)
+- [Scroll Triggering](https://www.django-unicorn.com/docs/visibility/)
+- [Messages](https://www.django-unicorn.com/docs/messages/)
+- [Javascript Integration](https://www.django-unicorn.com/docs/advanced/)
+
+## 📖 Dig In
+
+- [Documentation](https://www.django-unicorn.com/docs/)
+- [Examples](https://www.django-unicorn.com/examples/todo)
 - [Screencasts](https://www.django-unicorn.com/screencasts/installation)
 - [Changelog](https://www.django-unicorn.com/docs/changelog/)
 
 ## 🔧 Contributors
 Check out [this guide](DEVELOPING.md) for more details on how to contribute.
-
-### Python
-
-1. `poetry install -E minify -E docs`
-1. `poetry run pytest`
-
-### JavaScript
-
-1. `npm install`
-1. `npm run test`
 
 
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
