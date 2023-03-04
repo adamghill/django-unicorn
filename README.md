@@ -3,9 +3,7 @@
 </p>
 
 # Django Unicorn
-## The Magical Full-Stack Framework for Django ✨
-
-[Django Unicorn](https://www.django-unicorn.com) allows you to quickly add modern site functionality to your Django templates without having to learn a new templating language or fight with complicated JavaScript frameworks. Unicorn is a reactive component framework that progressively enhances a normal Django view, makes AJAX calls in the background, and dynamically updates the DOM. It seamlessly extends Django past its server-side framework roots without giving up all of its niceties or forcing you to re-building your application. With Django Unicorn, you can quickly and easily add rich interactions to your templates, all while using the power of Django.
+✨ The Magical Full-Stack Framework for Django ✨
 
 ![PyPI](https://img.shields.io/pypi/v/django-unicorn?color=blue&style=flat-square)
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/django-unicorn?color=blue&style=flat-square)
@@ -14,6 +12,9 @@
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 [![All Contributors](https://img.shields.io/badge/all_contributors-17-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
+
+[Django Unicorn](https://www.django-unicorn.com) allows you to quickly add modern site functionality to your Django templates without having to learn a new templating language or fight with complicated JavaScript frameworks. Unicorn is a reactive component framework that progressively enhances a normal Django view, makes AJAX calls in the background, and dynamically updates the DOM. It seamlessly extends Django past its server-side framework roots without giving up all of its niceties or forcing you to re-building your application. With Django Unicorn, you can quickly and easily add rich interactions to your templates, all while using the power of Django.
+
 
 ## ⚡ Getting Started
 
@@ -45,6 +46,7 @@ urlpatterns = (
 5. Add `{% unicorn_scripts %}` into the Django HTML template and make sure there is a `{% csrf_token %}` in the template as well.
 
 index.html
+```
 {% load unicorn %}
 <html>
   <head>
@@ -54,6 +56,7 @@ index.html
     {% csrf_token %}
   </body>
 </html>
+```
 
 
 6. [Create](https://www.django-unicorn.com/docs/components/) a component.
