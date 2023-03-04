@@ -66,11 +66,15 @@ urlpatterns = (
 6. Create a component from the command line.
 ```python manage.py startunicorn todo```
 
+Unicorn uses the term "component" to refer to a set of interactive functionality that can be put into templates. A component consists of a Django HTML template with specific tags and a Python view class which provides the backend code for the template. After running the management command, you'll get two new files created:
 
-7. Check out this Wizardry. [LIVE DEMO](https://www.django-unicorn.com/examples/todo)
+1. ```your_app/templates/unicorn/todo.html``` (Your component template)
+2. ```your_app/components/todo.py``` (View code for your component)
+
+7. Here's an example. Check out this Wizardry. [LIVE DEMO](https://www.django-unicorn.com/examples/todo)
 
 ```
-<!-- unicorn/templates/unicorn/todo.html -->
+<!-- ../templates/unicorn/todo.html -->
 
 <div>
   <form unicorn:submit.prevent="add">
@@ -97,7 +101,7 @@ urlpatterns = (
 ```
 
 ```
-# unicorn/components/todo.py
+# ../components/todo.py
 
 from django_unicorn.components import UnicornView
 from django import forms
@@ -115,7 +119,7 @@ class TodoView(UnicornView):
             self.task = ""
 ```
 
-8. Add the component to any template with `{% unicorn 'todo' %}`
+8. Add the component anywhere in your app with `{% unicorn 'todo' %}`. You can even pass in params.
 
 9. Forget about complicated front-end frameworks.
 
@@ -126,7 +130,9 @@ class TodoView(UnicornView):
 - Next, Unicorn binds to the elements you specify and automatically makes AJAX calls when needed.
 - Then, Unicorn dynamically updates the DOM.
 
-**The end result is that you can focus on writing regular Django templates and Python classes without needing to switch to another language or build unnecessary plumbing. Best of all, the JavaScript portion is a paltry ~8 KB gzipped.**
+**The end result is that you can focus on writing regular Django templates and Python classes without needing to switch to another language or build unnecessary plumbing.**
+
+**Best of all, the JavaScript portion is a paltry ~8 KB gzipped.**
 
 ## 📖 Learn More
 
