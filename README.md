@@ -3,7 +3,7 @@
 </p>
 
 # Django Unicorn
-✨ The Magical Full-Stack Framework for Django ✨
+The Magical Reactive Component Framework for Django ✨
 
 ![PyPI](https://img.shields.io/pypi/v/django-unicorn?color=blue&style=flat-square)
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/django-unicorn?color=blue&style=flat-square)
