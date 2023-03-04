@@ -2,7 +2,7 @@
   <a href="https://www.django-unicorn.com/"><img src="img/gu-logo.png" alt="django-unicorn logo" height="200"/></a>
 </p>
 <h1 align="center"><a href="https://www.django-unicorn.com/">Django Unicorn</a></h1>
-<p align="center">The magical full-stack framework for Django ✨</p>
+## The Magical Full-Stack Framework for Django ✨
 
 ![PyPI](https://img.shields.io/pypi/v/django-unicorn?color=blue&style=flat-square)
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/django-unicorn?color=blue&style=flat-square)
@@ -12,23 +12,60 @@
 [![All Contributors](https://img.shields.io/badge/all_contributors-17-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
-[Unicorn](https://www.django-unicorn.com) is a reactive component framework that progressively enhances a normal Django view, makes AJAX calls in the background, and dynamically updates the DOM. It seamlessly extends Django past its server-side framework roots without giving up all of its niceties or re-building your website.
+# Django Unicorn
+[Django Unicorn](https://www.django-unicorn.com) allows you to quickly add modern site functionality to your Django templates without having to learn a new templating language or fight with complicated JavaScript frameworks. Unicorn is a reactive component framework that progressively enhances a normal Django view, makes AJAX calls in the background, and dynamically updates the DOM. It seamlessly extends Django past its server-side framework roots without giving up all of its niceties or forcing you to re-building your application. With Django Unicorn, you can quickly and easily add rich interactions to your templates, all while using the power of Django.
 
 ## ⚡ Getting Started
 
-1. [Install](https://www.django-unicorn.com/docs/installation/) `Unicorn`
-1. [Create](https://www.django-unicorn.com/docs/components/) a component
-1. Load the `Unicorn` templatetag with `{% load unicorn %}` and add the component to your template with `{% unicorn 'component-name' %}`
-1. 🎉
+1. Install the package.
+```pip install django-unicorn```
 
-## 📖 More details
+2. Add `django_unicorn` to INSTALLED_APPS.
+
+settings.py
+```
+INSTALLED_APPS = (
+    ...
+    "django_unicorn",
+)
+```
+
+urls.py
+```
+urlpatterns = (
+    # other urls
+    path("unicorn/", include("django_unicorn.urls")),
+)
+```
+
+3. Add `{% load unicorn %}` to the top of the Django HTML template.
+
+4. Add `{% unicorn_scripts %}` into the Django HTML template and make sure there is a `{% csrf_token %}` in the template as well.
+
+index.html
+{% load unicorn %}
+<html>
+  <head>
+    {% unicorn_scripts %}
+  </head>
+  <body>
+    {% csrf_token %}
+  </body>
+</html>
+
+
+5. [Create](https://www.django-unicorn.com/docs/components/) a component.
+
+6. Add the component to your template with `{% unicorn 'component-name' %}`
+
+## 📖 Learn More
 
 - [Changelog](https://www.django-unicorn.com/docs/changelog/)
 - [Docs](https://www.django-unicorn.com/docs/)
 - [Screencasts](https://www.django-unicorn.com/screencasts/installation)
 - [Examples](https://www.django-unicorn.com/examples/todo)
 
-## 🔧 To hack on the code
+## 🔧 Contributors
 
 ### Python
 
