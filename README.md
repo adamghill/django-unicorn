@@ -116,15 +116,24 @@ class TodoView(UnicornView):
 
 9. Forget about complicated front-end frameworks.
 
+## ✨ Wait, is this Magic? 
+### Sort of! At least it might feel like it. 🤩
+
+- Unicorn progressively enhances a normal Django view, so the initial render of components is fast and great for SEO.
+- Next, Unicorn binds to the elements you specify and automatically makes AJAX calls when needed.
+- Then, Unicorn dynamically updates the DOM.
+
+**The end result is that you can focus on writing regular Django templates and Python classes without needing to switch to another language or build unnecessary plumbing. Best of all, the JavaScript portion is a paltry ~8 KB gzipped.**
+
 ## 📖 Learn More
 
-- [Docs](https://www.django-unicorn.com/docs/)
-- [Examples](https://www.django-unicorn.com/examples/todo)
+- [Read The Docs](https://www.django-unicorn.com/docs/)
+- [More Examples](https://www.django-unicorn.com/examples/todo)
 - [Screencasts](https://www.django-unicorn.com/screencasts/installation)
 - [Changelog](https://www.django-unicorn.com/docs/changelog/)
 
 ## 🔧 Contributors
-Check out [DEVELOPING.md](DEVELOPING.md) for more details.
+Check out [this guide](DEVELOPING.md) for more details on how to contribute.
 
 ### Python
 
