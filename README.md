@@ -115,12 +115,13 @@ class TodoView(UnicornView):
 
 ## 📖 Learn More
 
-- [Changelog](https://www.django-unicorn.com/docs/changelog/)
 - [Docs](https://www.django-unicorn.com/docs/)
-- [Screencasts](https://www.django-unicorn.com/screencasts/installation)
 - [Examples](https://www.django-unicorn.com/examples/todo)
+- [Screencasts](https://www.django-unicorn.com/screencasts/installation)
+- [Changelog](https://www.django-unicorn.com/docs/changelog/)
 
 ## 🔧 Contributors
+Check out [DEVELOPING.md](DEVELOPING.md) for more details.
 
 ### Python
 
@@ -132,9 +133,6 @@ class TodoView(UnicornView):
 1. `npm install`
 1. `npm run test`
 
-Check out [DEVELOPING.md](DEVELOPING.md) for more details.
-
-## 👏 Contributors
 
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
 
