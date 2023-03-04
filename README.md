@@ -23,8 +23,8 @@
 
 2. Add `django_unicorn` to INSTALLED_APPS.
 
-settings.py
 ```
+<!-- settings.py -->
 INSTALLED_APPS = (
     ...
     "django_unicorn",
@@ -33,20 +33,20 @@ INSTALLED_APPS = (
 
 3. Update urls.py to allow the magic to flow.
 
-urls.py
 ```
+<!-- urls.py -->
 urlpatterns = (
     # other urls
     path("unicorn/", include("django_unicorn.urls")),
 )
 ```
 
-4. Add `{% load unicorn %}` to the top of the Django HTML template.
+4. Add `{% load unicorn %}` to the top of your template.
 
-5. Add `{% unicorn_scripts %}` into the Django HTML template and make sure there is a `{% csrf_token %}` in the template as well.
+5. Add `{% unicorn_scripts %}` into your template and make sure there is a `{% csrf_token %}` in there as well.
 
-index.html
 ```
+<!-- template.html -->
 {% load unicorn %}
 <html>
   <head>
@@ -59,7 +59,11 @@ index.html
 ```
 
 
-6. Check out this Wizardry.
+6. Create a component from the command line.
+```python manage.py startunicorn todo```
+
+
+7. Check out this Wizardry.
 
 ```
 <!-- unicorn/templates/unicorn/todo.html -->
@@ -105,7 +109,9 @@ class TodoView(UnicornView):
             self.task = ""
 ```
 
-7. Add the component to your template with `{% unicorn 'component-name' %}`
+8. Add the component to any template with `{% unicorn 'todo' %}`
+
+9. Forget about complicated front-end frameworks.
 
 ## 📖 Learn More
 
