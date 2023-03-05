@@ -25,7 +25,7 @@ from ..errors import (
     UnicornCacheError,
 )
 from ..settings import get_setting
-from ..utils import is_non_string_sequence, restore_from_cache, cache_full_tree
+from ..utils import cache_full_tree, is_non_string_sequence, restore_from_cache
 from .fields import UnicornField
 from .unicorn_template_response import UnicornTemplateResponse
 
@@ -208,6 +208,7 @@ class UnicornView(TemplateView):
 
         if "parent" in kwargs:
             self.parent = kwargs["parent"]
+
             if self.parent and self not in self.parent.children:
                 self.parent.children.append(self)
 
@@ -394,6 +395,7 @@ class UnicornView(TemplateView):
         try:
             if COMPONENTS_MODULE_CACHE_ENABLED:
                 constructed_views_cache[self.component_id] = self
+
             cache_full_tree(self)
         except UnicornCacheError as e:
             logger.warning(e)
@@ -797,10 +799,12 @@ class UnicornView(TemplateView):
 
         component_cache_key = f"unicorn:component:{component_id}"
         cached_component = restore_from_cache(component_cache_key)
+
         if not cached_component:
             # Note that `hydrate()` and `complete` don't need to be called here
             # because this path only happens for re-rendering from the view
             cached_component = constructed_views_cache.get(component_id)
+
             if cached_component:
                 cached_component.setup(request)
                 cached_component._validate_called = False
