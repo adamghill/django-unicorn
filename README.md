@@ -1,9 +1,9 @@
 <p align="center">
-  <a href="https://www.django-unicorn.com/"><img src="img/unicorn-logo.png" alt="django-unicorn logo" height="200"/></a>
+  <a href="https://www.django-unicorn.com/"><img src="img/gu-logo.png" alt="django-unicorn logo" height="200"/></a>
 </p>
 
-# Django Unicorn ✨
-### The Magical Reactive Component Framework for Django ✨
+<h1 align="center"><a href="https://www.django-unicorn.com/">Unicorn</a></h1>
+<p align="center">The magical reactive component framework for Django ✨</p>
 
 ![PyPI](https://img.shields.io/pypi/v/django-unicorn?color=blue&style=flat-square)
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/django-unicorn?color=blue&style=flat-square)
@@ -11,29 +11,32 @@
 [![All Contributors](https://img.shields.io/badge/all_contributors-17-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE - Do not remove or modify above line -->
 
-[Django Unicorn](https://www.django-unicorn.com) allows you to quickly add modern reactive component functionality to your Django templates without having to learn a new templating language or fight with complicated JavaScript frameworks. Unicorn is a reactive component framework that progressively enhances a normal Django view, makes AJAX calls in the background, and dynamically updates the DOM. It seamlessly extends Django past its server-side framework roots without giving up all of its niceties or forcing you to re-building your application. With Django Unicorn, you can quickly and easily add rich front-end interactions to your templates, all while using the power of Django.
+[Unicorn](https://www.django-unicorn.com) adds modern reactive component functionality to your Django templates without having to learn a new templating language or fight with complicated JavaScript frameworks. It seamlessly extends Django past its server-side framework roots without giving up all of its niceties or forcing you to re-building your application. With Django Unicorn, you can quickly and easily add rich front-end interactions to your templates, all while using the power of Django.
 
+## ⚡ Getting started
 
-## ⚡ Getting Started
+### 1. [Install the package](https://www.django-unicorn.com/docs/installation/)
 
-**1. Install the package.**
+`poetry add django-unicorn`
 
-```pip install django-unicorn```
+<p align="center">OR</p>
 
-**2. Add `django_unicorn` to INSTALLED_APPS.**
+`pip install django-unicorn`
 
-```
+### 2. Add `django_unicorn` to `INSTALLED_APPS`
+
+```python
 # settings.py
 
 INSTALLED_APPS = (
-    ...
+    # other apps
     "django_unicorn",
 )
 ```
 
-**3. Update urls.py to allow the magic to flow.**
+### 3. Update urls.py
 
-```
+```python
 # urls.py
 
 import django_unicorn
@@ -44,14 +47,12 @@ urlpatterns = (
 )
 ```
 
-**4. Add `{% load unicorn %}` to the top of your template.**
+### 4. Add `Unicorn` to the HTML template
 
-**5. Add `{% unicorn_scripts %}` into <head> and make sure there is a `{% csrf_token %}` in the body as well.**
-
-```
+```html
 <!-- template.html -->
-
 {% load unicorn %}
+
 <html>
   <head>
     {% unicorn_scripts %}
@@ -62,20 +63,40 @@ urlpatterns = (
 </html>
 ```
 
+### 5. [Create a component](https://www.django-unicorn.com/docs/components/)
 
-**6. Create a component from the command line.**
-```python manage.py startunicorn todo```
+`python manage.py startunicorn COMPONENT_NAME`
 
-Unicorn uses the term "component" to refer to a set of interactive functionality that can be put into templates. A component consists of a Django HTML template with specific tags and a Python view class which provides the backend code for the template. After running the management command, two new files will be created:
+`Unicorn` uses the term "component" to refer to a set of interactive functionality that can be put into templates. A component consists of a Django HTML template and a Python view class which contains the backend code. After running the management command, two new files will be created:
 
-- ```your_app/templates/unicorn/todo.html``` (Your component html template)
-- ```your_app/components/todo.py``` (Your component functionality)
+- `your_app/templates/unicorn/COMPONENT_NAME.html` (component template)
+- `your_app/components/COMPONENT_NAME.py` (component view)
 
-**7. Check out this Wizardry. [LIVE DEMO](https://www.django-unicorn.com/examples/todo)**
+### 6. Add the component to your template
 
-Notice the unicorn: properties on the html elements. These properties bind both data and events. Templates can also trigger methods by listening to any valid event type. The most common events would be click, input, keydown, keyup, and mouseenter. Consider how powerful this is.
+```html
+<!-- template.html -->
+{% load unicorn %}
 
+<html>
+  <head>
+    {% unicorn_scripts %}
+  </head>
+  <body>
+    {% csrf_token %}
+
+    {% unicorn 'COMPONENT_NAME' %}
+  </body>
+</html>
 ```
+
+## Example todo component
+
+Live todo component demo: https://www.django-unicorn.com/examples/todo.
+
+The `unicorn:` attributes bind the element to data and can also trigger methods by listening for events, e.g. `click`, `input`, `keydown`, etc.
+
+```html
 <!-- ../templates/unicorn/todo.html -->
 
 <div>
@@ -102,7 +123,7 @@ Notice the unicorn: properties on the html elements. These properties bind both 
 </div>
 ```
 
-```
+```python
 # ../components/todo.py
 
 from django_unicorn.components import UnicornView
@@ -121,29 +142,19 @@ class TodoView(UnicornView):
             self.task = ""
 ```
 
-**8. Add the component anywhere in your app with `{% unicorn 'todo' %}`.**
+## ✨ Wait, is this magic?
 
-You can even pass params into a component right here, in-line.
+Sort of! At least it might feel like it. 🤩
 
-```{% unicorn 'hello-world' name=hello.world.name %}```
+1. `Unicorn` progressively enhances a normal Django view, so the initial render is fast and great for SEO.
+2. `Unicorn` binds to the elements you specify and automatically makes AJAX calls when needed.
+3. `Unicorn` seamlessly updates the DOM when the HTML changes.
 
-**9. Forget about complicated front-end frameworks.**
+Focus on building regular Django templates and Python classes without needing to switch to another language or use unnecessary infrastructure.
 
-## ✨ Wait, is this Magic? 
-### Sort of! At least it might feel like it. 🤩
+## 🤯 But wait, there's more!
 
-- Unicorn progressively enhances a normal Django view, so the initial render is fast and great for SEO.
-- Next, Unicorn binds to the elements you specify and automatically makes AJAX calls when needed.
-- Then, Unicorn dynamically updates the DOM when things change. Reactivity with ease.
-
-**The end result is that you can focus on writing regular Django templates and Python classes without needing to switch to another language or build unnecessary plumbing.**
-
-**Best of all, the JavaScript portion is a paltry ~8 KB gzipped.**
-
-**Once you try it, you'll never know how you lived without it.**
-
-## 🤯 But Wait, there's More!
-### As if that wasn't enough, you also get... 🤩
+As if that wasn't enough, other features include:
 
 - [Form Validation](https://www.django-unicorn.com/docs/validation/)
 - [Redirection](https://www.django-unicorn.com/docs/redirecting/)
@@ -163,10 +174,10 @@ You can even pass params into a component right here, in-line.
 - [Changelog](https://www.django-unicorn.com/docs/changelog/)
 
 ## 🔧 Contributors
+
 Check out [this guide](DEVELOPING.md) for more details on how to contribute.
 
-
-Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
+Thanks to the following wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)) who have helped build `Unicorn`.
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
