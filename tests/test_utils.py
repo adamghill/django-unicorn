@@ -3,13 +3,13 @@ from unittest.mock import MagicMock
 from django_unicorn.components import UnicornView
 from django_unicorn.utils import (
     CacheableComponent,
+    cache_full_tree,
     generate_checksum,
     get_method_arguments,
     get_type_hints,
     is_non_string_sequence,
-    sanitize_html,
-    cache_full_tree,
     restore_from_cache,
+    sanitize_html,
 )
 
 
@@ -214,12 +214,24 @@ def test_caching_components(settings):
     }
     settings.UNICORN["CACHE_ALIAS"] = "default"
     root = ExampleCachingComponent(component_id="rrr", component_name="root")
-    child1 = ExampleCachingComponent(component_id='1111', component_name="child1", parent=root)
-    child2 = ExampleCachingComponent(component_id='2222', component_name="child2", parent=root)
-    child3 = ExampleCachingComponent(component_id='3333', component_name="child3", parent=root)
-    grandchild = ExampleCachingComponent(component_id='4444', component_name="grandchild", parent=child1)
-    grandchild2 = ExampleCachingComponent(component_id='5555', component_name="grandchild2", parent=child1)
-    grandchild3 = ExampleCachingComponent(component_id='6666', component_name="grandchild3", parent=child3)
+    child1 = ExampleCachingComponent(
+        component_id="1111", component_name="child1", parent=root
+    )
+    child2 = ExampleCachingComponent(
+        component_id="2222", component_name="child2", parent=root
+    )
+    child3 = ExampleCachingComponent(
+        component_id="3333", component_name="child3", parent=root
+    )
+    grandchild = ExampleCachingComponent(
+        component_id="4444", component_name="grandchild", parent=child1
+    )
+    grandchild2 = ExampleCachingComponent(
+        component_id="5555", component_name="grandchild2", parent=child1
+    )
+    grandchild3 = ExampleCachingComponent(
+        component_id="6666", component_name="grandchild3", parent=child3
+    )
 
     cache_full_tree(child3)
     request = MagicMock()
@@ -239,7 +251,6 @@ def test_caching_components(settings):
         assert restored_root.children[0].children[i].component_id == child.component_id
     assert not restored_root.children[1].children
     assert 1 == len(restored_root.children[2].children)
-    assert grandchild3.component_id == restored_root.children[2].children[0].component_id
-
-
-
+    assert (
+        grandchild3.component_id == restored_root.children[2].children[0].component_id
+    )
