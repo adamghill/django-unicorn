@@ -166,6 +166,15 @@
         "code",
         "test"
       ]
+    },
+    {
+      "login": "dancaron",
+      "name": "Dan Caron",
+      "avatar_url": "https://avatars.githubusercontent.com/u/535851?v=4",
+      "profile": "https://github.com/dancaron",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
