@@ -1,9 +1,12 @@
 <p align="center">
-  <a href="https://www.django-unicorn.com/"><img src="img/gu-logo.png" alt="django-unicorn logo" height="200"/></a>
+  <a href="https://www.django-unicorn.com/"><img src="img/unicorn-logo.png" alt="django-unicorn logo" height="200"/></a>
 </p>
 
-<h1 align="center"><a href="https://www.django-unicorn.com/">Unicorn</a></h1>
-<p align="center">The magical reactive component framework for Django ✨</p>
+<h1 align="center">
+  <a href="https://www.django-unicorn.com/">Unicorn</a>
+  <p>The magical reactive component framework for Django ✨</p>
+</h1>
+
 
 ![PyPI](https://img.shields.io/pypi/v/django-unicorn?color=blue&style=flat-square)
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/django-unicorn?color=blue&style=flat-square)
@@ -17,17 +20,12 @@
 
 ### 1. [Install the package](https://www.django-unicorn.com/docs/installation/)
 
-`poetry add django-unicorn`
-
-<p align="center">OR</p>
-
-`pip install django-unicorn`
+`pip install django-unicorn` OR `poetry add django-unicorn`
 
 ### 2. Add `django_unicorn` to `INSTALLED_APPS`
 
 ```python
 # settings.py
-
 INSTALLED_APPS = (
     # other apps
     "django_unicorn",
@@ -38,7 +36,6 @@ INSTALLED_APPS = (
 
 ```python
 # urls.py
-
 import django_unicorn
 
 urlpatterns = (
@@ -90,9 +87,7 @@ urlpatterns = (
 </html>
 ```
 
-## Example todo component
-
-Live todo component demo: https://www.django-unicorn.com/examples/todo.
+## [Example todo component](https://www.django-unicorn.com/examples/todo)
 
 The `unicorn:` attributes bind the element to data and can also trigger methods by listening for events, e.g. `click`, `input`, `keydown`, etc.
 
