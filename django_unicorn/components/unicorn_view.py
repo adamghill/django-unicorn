@@ -531,24 +531,15 @@ class UnicornView(TemplateView):
             # that is valid. Validating the valid one should not show an error for
             # the invalid one. Only after the invalid field is updated, should the
             # error show up and persist, even after updating the valid form.
-            if self.errors:
-                keys_to_remove = []
 
-                for key, value in self.errors.items():
-                    if key in form_errors:
-                        self.errors[key] = value
+            self.errors = dict()
+            if form_errors:
+                for key in form_errors:
+                    if key != "__all__":
+                        self.errors[key] = form_errors[key]
                     else:
-                        keys_to_remove.append(key)
+                        self.errors['all'] = form_errors[key]
 
-                for key in keys_to_remove:
-                    self.errors.pop(key)
-
-            if model_names is not None:
-                for key, value in form_errors.items():
-                    if key in model_names:
-                        self.errors[key] = value
-            else:
-                self.errors.update(form_errors)
 
         return self.errors
 
