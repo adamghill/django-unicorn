@@ -280,7 +280,7 @@ def is_non_string_sequence(obj):
     if (
         isinstance(obj, collections.abc.Sequence)
         or isinstance(obj, collections.abc.Set)
-    ) and not isinstance(obj, (str, collections.abc.ByteString)):
+    ) and not isinstance(obj, (str, bytes, bytearray)):
         return True
 
     return False
