@@ -7,7 +7,6 @@
   <p>The magical reactive component framework for Django ✨</p>
 </h1>
 
-
 ![PyPI](https://img.shields.io/pypi/v/django-unicorn?color=blue&style=flat-square)
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/django-unicorn?color=blue&style=flat-square)
 ![GitHub Sponsors](https://img.shields.io/github/sponsors/adamghill?color=blue&style=flat-square)
@@ -167,6 +166,16 @@ As if that wasn't enough, other features include:
 - [Examples](https://www.django-unicorn.com/examples/todo)
 - [Screencasts](https://www.django-unicorn.com/screencasts/installation)
 - [Changelog](https://www.django-unicorn.com/docs/changelog/)
+
+## ❤️ Support
+
+This project is supported by GitHub [Sponsors](https://github.com/sponsors/adamghill) and [Digital Ocean](https://m.do.co/c/617d629f56c0).
+
+<p>
+  <a href="https://m.do.co/c/617d629f56c0">
+    <img src="https://opensource.nyc3.cdn.digitaloceanspaces.com/attribution/assets/SVG/DO_Logo_horizontal_blue.svg" width="201px">
+  </a>
+</p>
 
 ## 🔧 Contributors
 
