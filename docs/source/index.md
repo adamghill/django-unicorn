@@ -93,7 +93,7 @@ Here are a few reasons to consider `Unicorn`.
 - [Django inertia.js adapter](https://github.com/zodman/inertia-django) allows Django to use <a href="https://inertiajs.com">inertia.js</a> to build an SPA without building an API.
 - [Hotwire for Django](https://github.com/hotwire-django) contains a few different repositiories to integrate [Hotwire](https://hotwire.dev) with Django.
 - [Lona](https://lona-web.org/) is a web application framework, designed to write responsive web apps in full Python.
-- [IDOM](https://github.com/idom-team/idom), a port of ReactJS to Python. Fully compatible with all ReactJS components.
+- [ReactPy](https://reactpy.dev/) is a port of ReactJS to Python. Fully compatible with all ReactJS components.
 
 #### Comparison
 
@@ -103,7 +103,7 @@ Here are a few reasons to consider `Unicorn`.
 | [Reactor](https://github.com/edelvalle/reactor/)               |   ✔️   |       |      |       ✔️       |  ![PyPI version](https://img.shields.io/pypi/v/django-reactor?label=%20&style=flat-square)   | ![GitHub Repo stars](https://img.shields.io/github/stars/edelvalle/reactor?label=%20&style=flat-square)            |
 | [Sockpuppet](https://github.com/jonathan-s/django-sockpuppet)  |   ✔️   |       |      |       ✔️       | ![PyPI version](https://img.shields.io/pypi/v/django-sockpuppet?label=%20&style=flat-square) | ![GitHub Repo stars](https://img.shields.io/github/stars/jonathan-s/django-sockpuppet?label=%20&style=flat-square) |
 | [Flask-Meld](https://github.com/mikeabrahamsen/Flask-Meld)     |        |  ✔️   |      |       ✔️       |    ![PyPI version](https://img.shields.io/pypi/v/flask-meld?label=%20&style=flat-square)     | ![GitHub Repo stars](https://img.shields.io/github/stars/mikeabrahamsen/Flask-Meld?label=%20&style=flat-square)    |
-| [Django IDOM](https://github.com/idom-team/django-idom)        |   ✔️   |       |      |       ✔️       |    ![PyPI version](https://img.shields.io/pypi/v/django-idom?label=%20&style=flat-square)    | ![GitHub Repo stars](https://img.shields.io/github/stars/idom-team/django-idom?label=%20&style=flat-square)        |
+| [ReactPy](https://github.com/reactive-python/reactpy)        |   ✔️   |   ✔️      |    |       ✔️       |    ![PyPI version](https://img.shields.io/pypi/v/reactpy?label=%20&style=flat-square)    | ![GitHub Repo stars](https://img.shields.io/github/stars/reactive-python/reactpy?label=%20&style=flat-square)        |
 | [Turbo Django](https://github.com/hotwire-django/turbo-django) |   ✔️   |       |      | ✔️ for streams |   ![PyPI version](https://img.shields.io/pypi/v/turbo-django?label=%20&style=flat-square)    | ![GitHub Repo stars](https://img.shields.io/github/stars/hotwire-django/turbo-django?label=%20&style=flat-square)  |
 
 ### Django component packages
