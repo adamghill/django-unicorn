@@ -44,7 +44,11 @@ export function send(component, callback) {
       remove `Cookie` from `Vary` header.
    */
   if (component.useCsrfToken) {
-    headers[component.csrfTokenHeaderName] = getCsrfToken(component);
+    try {
+      headers[component.csrfTokenHeaderName] = getCsrfToken(component);
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   fetch(component.syncUrl, {
