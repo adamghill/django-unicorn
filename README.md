@@ -14,9 +14,9 @@ Available additional settings that can be set to `UNICORN` dict in settings.py w
 
 - `USE_CSRF_TOKEN` - default: `True` - If set to `False`, unicorn does not check or send `csrf` token value so `{% csrf_token %}` is not mandatory in the templates. This is added due the fact to additional page caching system like `Varnish` does not operate effective if `Cookie` value is present in `Vary` header. 
 
-### Customization changelog
+## Customization changelog
 
-#### 0.50.0.1 - (2023-05-11)
+### 0.50.0.1 - (2023-05-11)
 
 - Add `USE_CSRF_TOKEN` (`useCsrfToken`) setting that if set to `False` (`false`) avoids CSRF token check. By default  `USE_CSRF_TOKEN` is set to `True`.
 - [views.__init__.py:message] - Added decorator `csrf_handle` that checks `USE_CSRF_TOKEN` setting and based on boolean applies `csrf_protect` or `csrf_exempt` decorator.
