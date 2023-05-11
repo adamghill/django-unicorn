@@ -9,6 +9,9 @@ repository = "https://github.com/Styria-Digital/django-unicorn"
 homepage = "https://www.django-unicorn.com"
 documentation = "https://www.django-unicorn.com/docs/"
 keywords = ["django", "python", "javascript", "fullstack"]
+packages = [
+    { include = "django_unicorn" }
+]
 
 [tool.poetry.urls]
 "Funding" = "https://github.com/sponsors/adamghill"
