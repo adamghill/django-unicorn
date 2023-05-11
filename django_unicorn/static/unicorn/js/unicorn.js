@@ -18,7 +18,12 @@ export function init(_messageUrl, _csrfTokenHeaderName, _reloadScriptElements, _
     csrfTokenHeaderName = _csrfTokenHeaderName;
   }
 
-  if (_useCsrfToken) useCsrfToken = _useCsrfToken;
+  /**
+   * Extend Reason: 
+      Optionally ignore `CSRF` check for effective varnish caching 
+      remove `Cookie` from `Vary` header by setting `useCsrfToken` to false
+   */
+  if (_useCsrfToken !== undefined) useCsrfToken = _useCsrfToken;
 
   return {
     messageUrl,
