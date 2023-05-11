@@ -8,7 +8,7 @@ from django.forms import ValidationError
 from django.http import HttpRequest, JsonResponse
 from django.http.response import HttpResponseNotModified
 from django.utils.safestring import mark_safe
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_protect, csrf_exempt
 from django.views.decorators.http import require_POST
 
 import orjson
@@ -20,6 +20,7 @@ from django_unicorn.decorators import timed
 from django_unicorn.errors import RenderNotModified, UnicornCacheError, UnicornViewError
 from django_unicorn.serializer import loads
 from django_unicorn.settings import (
+    get_setting,
     get_cache_alias,
     get_serial_enabled,
     get_serial_timeout,
@@ -491,16 +492,26 @@ def _handle_queued_component_requests(
     return first_json_result
 
 
+def csrf_handle(func):
+    """
+    In case if `USE_CSRF_TOKEN` is set to False
+    CSRF token is not required.
+    """
+    if get_setting("USE_CSRF_TOKEN", True):
+        return csrf_protect(func)
+    return csrf_exempt(func)
+
+
 @timed
 @handle_error
-@csrf_exempt
+@csrf_handle
 @require_POST
 def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
     """
     Overwrite Reason: 
-        Ignore `CSRF` check for effective varnish caching remove `Cookie` from `Vary` header.
-        Remove `csrf_protect` decorator to enable requests without `CSRF` token.
-
+        Optionally Ignore `CSRF` check for effective varnish caching remove `Cookie` from `Vary` header.
+        Use `csrf_handle` decorator to optionally enable requests without `CSRF` token,
+        based on `USE_CSRF_TOKEN` setting.
     ----
     Endpoint that instantiates the component and does the correct action
     (set an attribute or call a method) depending on the JSON payload in the body.
