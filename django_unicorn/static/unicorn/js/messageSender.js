@@ -39,11 +39,13 @@ export function send(component, callback) {
     "X-Requested-With": "XMLHttpRequest",
   };
   /**
-   * Comment out Reason: 
-      Ignore `CSRF` check for effective varnish caching remove `Cookie` from `Vary` header.
-      Remove `csrf_protect` decorator to enable requests without `CSRF` token.
+   * Override Reason: 
+      Optionally ignore `CSRF` check for effective varnish caching 
+      remove `Cookie` from `Vary` header.
    */
-  // headers[component.csrfTokenHeaderName] = getCsrfToken(component);
+  if (component.useCsrfToken) {
+    headers[component.csrfTokenHeaderName] = getCsrfToken(component);
+  }
 
   fetch(component.syncUrl, {
     method: "POST",

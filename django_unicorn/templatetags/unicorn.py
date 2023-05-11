@@ -27,6 +27,7 @@ def unicorn_scripts():
 
     return {
         "MINIFIED": get_setting("MINIFIED", not settings.DEBUG),
+        "USE_CSRF_TOKEN": get_setting("USE_CSRF_TOKEN", True),
         "CSRF_HEADER_NAME": csrf_header_name,
         "RELOAD_SCRIPT_ELEMENTS": get_setting("RELOAD_SCRIPT_ELEMENTS", False),
     }
