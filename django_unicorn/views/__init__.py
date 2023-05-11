@@ -8,7 +8,7 @@ from django.forms import ValidationError
 from django.http import HttpRequest, JsonResponse
 from django.http.response import HttpResponseNotModified
 from django.utils.safestring import mark_safe
-from django.views.decorators.csrf import csrf_protect
+from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
 import orjson
@@ -493,10 +493,15 @@ def _handle_queued_component_requests(
 
 @timed
 @handle_error
-@csrf_protect
+@csrf_exempt
 @require_POST
 def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
     """
+    Overwrite Reason: 
+        Ignore `CSRF` check for effective varnish caching remove `Cookie` from `Vary` header.
+        Remove `csrf_protect` decorator to enable requests without `CSRF` token.
+
+    ----
     Endpoint that instantiates the component and does the correct action
     (set an attribute or call a method) depending on the JSON payload in the body.
 

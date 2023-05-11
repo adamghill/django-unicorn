@@ -38,7 +38,12 @@ export function send(component, callback) {
     Accept: "application/json",
     "X-Requested-With": "XMLHttpRequest",
   };
-  headers[component.csrfTokenHeaderName] = getCsrfToken(component);
+  /**
+   * Comment out Reason: 
+      Ignore `CSRF` check for effective varnish caching remove `Cookie` from `Vary` header.
+      Remove `csrf_protect` decorator to enable requests without `CSRF` token.
+   */
+  // headers[component.csrfTokenHeaderName] = getCsrfToken(component);
 
   fetch(component.syncUrl, {
     method: "POST",
