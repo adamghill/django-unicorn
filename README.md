@@ -14,6 +14,14 @@ Available additional settings that can be set to `UNICORN` dict in settings.py w
 
 - `USE_CSRF_TOKEN` - default: `True` - If set to `False`, unicorn does not check or send `csrf` token value so `{% csrf_token %}` is not mandatory in the templates. This is added due the fact to additional page caching system like `Varnish` does not operate effective if `Cookie` value is present in `Vary` header. 
 
+## Deployment
+
+1. Add your repository to poetry.config:
+  `poetry config repositories.myrepo http://to.my.repo`
+
+2. Publish package to your repository with `--build` flag
+  `poetry publish --build -r myrepo -u <myrepouser> -p <myrepopass>` 
+
 ## Customization changelog
 
 ### 0.50.0.1 - (2023-05-11)
