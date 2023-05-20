@@ -497,7 +497,11 @@ export class Component {
     if (updateParents) {
       const parent = this.getParentComponent();
       if (parent) {
-        parent.setModelValues(triggeringElements, forceModelUpdates, updateParents);
+        parent.setModelValues(
+          triggeringElements,
+          forceModelUpdates,
+          updateParents
+        );
       }
     }
   }
