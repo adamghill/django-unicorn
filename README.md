@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://www.django-unicorn.com/"><img src="img/unicorn-logo.png" alt="django-unicorn logo" height="200"/></a>
+  <a href="https://www.django-unicorn.com/"><img src="https://github.com/adamghill/django-unicorn/raw/a98539b6e4b1123705559116a77e63eea7e2b8d0/img/unicorn-logo.png" alt="django-unicorn logo" height="200"/></a>
 </p>
 
 <h1 align="center">
