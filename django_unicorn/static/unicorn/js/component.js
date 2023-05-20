@@ -323,6 +323,8 @@ export class Component {
           this.poll.disableData = this.poll.disableData.slice(1);
 
           if (this.data[this.poll.disableData]) {
+            this.poll.disableData = `!${this.poll.disableData}`;
+
             return true;
           }
 
