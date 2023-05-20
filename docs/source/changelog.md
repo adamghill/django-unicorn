@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.51.0
+
+- Fix: remove use of `ByteString` ([#534](https://github.com/adamghill/django-unicorn/pull/534)) by [hauntsaninja](https://github.com/hauntsaninja).
+- Fix: Update `loading` on elements other than the current action element ([#512]https://github.com/adamghill/django-unicorn/pull/512) by [bazubii](https://github.com/bazubii)).
+- Add new logo and doc changes ([#518](https://github.com/adamghill/django-unicorn/pull/518)) by [dancaron](https://github.com/dancaron).
+- Fix: Nested children caching issues ([#511](https://github.com/adamghill/django-unicorn/pull/511)) by [bazubii](https://github.com/bazubii)).
+- Fix: Negating a variable for `poll.disable` would not work correctly in some instances.
+
 ## v0.50.0
 
 - Support more than 1 level of nested children ([#476](https://github.com/adamghill/django-unicorn/pull/507) by [bazubii](https://github.com/bazubii)).
