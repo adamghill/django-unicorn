@@ -175,6 +175,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "hauntsaninja",
+      "name": "Shantanu",
+      "avatar_url": "https://avatars.githubusercontent.com/u/12621235?v=4",
+      "profile": "https://hauntsaninja.github.io/",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,

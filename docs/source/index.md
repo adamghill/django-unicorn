@@ -58,9 +58,13 @@ Sponsor <https://github.com/sponsors/adamghill>
 
 Want to add some component-based magic to your front-end, but don't need the overhead of a complete JavaScript front-end framework? `Unicorn` revolutionizes the way your users interact with your Django app! With `Unicorn`, you can create stunningly spiffy pages without ever leaving Python or your beloved Django codebase.
 
-`Unicorn` is a reactive component framework that enhances your Django views by seamlessly making AJAX calls in the background and dynamically updating HTML DOM. It's like magic, but better! Say goodbye to your current limitations and hello to a new era of Django web development.
+`Unicorn` is a reactive component framework that enhances your Django views by seamlessly making AJAX calls in the background and dynamically updates the HTML DOM. It's like magic, but better! `Unicorn` is leading the charge in bringing a component-based developer experience to Django. Join the `Unicorn` community today and unlock the power of reactivity!
 
-Component-based design is here to stay, and `Unicorn` is leading the charge in bringing that developer experience to the Python ecosystem. Join the `Unicorn` community today and unlock the power of reactive components in your Django projects.
+<p>
+  <a href="https://m.do.co/c/617d629f56c0">
+    <img src="https://opensource.nyc3.cdn.digitaloceanspaces.com/attribution/assets/PoweredByDO/DO_Powered_by_Badge_blue.svg" width="201px">
+  </a>
+</p>
 
 Here are a few reasons to consider `Unicorn`.
 
@@ -72,7 +76,7 @@ Here are a few reasons to consider `Unicorn`.
 
 4. **Improved Performance**: By using AJAX calls to update the DOM, `Unicorn` reduces the need for full page reloads, which can result in improved performance and faster load times.
 
-5. **Familiarity**: With `Unicorn`, you don't need to learn a complicated front-end frameworks to create fancy interactive components. Instead, you can use the familiar Django syntax and templates to build your front-end components. This can save time and reduce complexity in your application.
+5. **Familiarity**: With `Unicorn`, you don't need to learn a complicated front-end frameworks to create fancy interactive components. Instead, you can use the familiar Django syntax and templates to build your front-end components.
 
 ## Related projects
 
