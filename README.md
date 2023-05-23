@@ -24,6 +24,10 @@ Available additional settings that can be set to `UNICORN` dict in settings.py w
 
 ## Customization changelog
 
+### 0.50.1.1 - (2023-05-23)
+
+- No customizations, just sync with main package.
+
 ### 0.50.0.1 - (2023-05-11)
 
 - Add `USE_CSRF_TOKEN` (`useCsrfToken`) setting that if set to `False` (`false`) avoids CSRF token check. By default  `USE_CSRF_TOKEN` is set to `True`.
