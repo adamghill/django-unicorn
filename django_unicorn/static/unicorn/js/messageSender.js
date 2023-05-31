@@ -1,5 +1,49 @@
 import { $, getCsrfToken, hasValue, isFunction } from "./utils.js";
 import { getMorphdomOptions } from "./morphdom/2.6.1/options.js";
+import { components } from "./store.js";
+import { componentInit } from "./unicorn.js";
+
+function createNewJsonScriptTag(jsonData) {
+  // check if the component already exists
+  if (Object.prototype.hasOwnProperty.call(components, jsonData.id)) {
+    return;
+  }
+  const jsonString = JSON.stringify(jsonData);
+  const scriptTag = document.createElement("script");
+  scriptTag.id = `unicorn:data:${jsonData.id}`;
+  scriptTag.type = "application/json";
+  scriptTag.text = jsonString;
+  document.body.appendChild(scriptTag);
+  componentInit(jsonData);
+}
+
+function traverseChildNodes(node, responseJson) {
+  if (node.attributes && node.hasAttribute("unicorn:name")) {
+    const jsonData = {
+      id: node.getAttribute("unicorn:id"),
+      name: node.getAttribute("unicorn:name"),
+      key: node.getAttribute("unicorn:key"),
+      data: {}, // TODO: get data from component to validate checksum
+      calls: [],
+      hash: responseJson.hash,
+    };
+    createNewJsonScriptTag(jsonData);
+  }
+
+  // iterate over each child node
+  for (let i = 0; i < node.childNodes.length; i++) {
+    // recursively call traverseChildNodes()
+    traverseChildNodes(node.childNodes[i], responseJson);
+  }
+}
+
+function updateRootScripts(responseJson) {
+  const parser = new DOMParser();
+  const responseDoc = parser.parseFromString(responseJson.dom, "text/html");
+
+  // traverse the DOM tree starting from the root node
+  traverseChildNodes(responseDoc.documentElement, responseJson);
+}
 
 /**
  * Calls the message endpoint and merges the results into the document.
@@ -282,6 +326,8 @@ export function send(component, callback) {
       if (isFunction(callback)) {
         callback(triggeringElements, forceModelUpdate, null);
       }
+
+      updateRootScripts(responseJson);
     })
     .catch((err) => {
       // Make sure to clear the current queues in case of an error
