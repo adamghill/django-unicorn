@@ -1,4 +1,4 @@
-import { $, args, hasValue, toKebabCase } from "./utils.js";
+import { $, args, hasValue, toKebabCase, toRegExp } from "./utils.js";
 import { Element } from "./element.js";
 
 /**
@@ -12,23 +12,51 @@ function handleLoading(component, targetElement) {
   // Look at all elements with a loading attribute
   component.loadingEls.forEach((loadingElement) => {
     if (loadingElement.target) {
-      let targetedEl = $(`#${loadingElement.target}`, component.root);
+      // Get all ID matches
+      if (loadingElement.target.includes("*")) {
+        const targetRegex = toRegExp(loadingElement.target);
+        const targetedElArray = [];
+        const childrenCollection = component.root.children;
+        [...childrenCollection].forEach((child) => {
+          [...child.attributes].forEach((attr) => {
+            if (
+              ["id", "unicorn:key", "u:key"].includes(attr.name) &&
+              attr.value.match(targetRegex)
+            ) {
+              targetedElArray.push(child);
+            }
+          });
+        });
 
-      if (!targetedEl) {
-        component.keyEls.forEach((keyElement) => {
-          if (!targetedEl && keyElement.key === loadingElement.target) {
-            targetedEl = keyElement.el;
+        targetedElArray.forEach((targetedEl) => {
+          if (targetElement.el.isSameNode(targetedEl)) {
+            loadingElement.handleLoading();
+            if (loadingElement.loading.hide) {
+              loadingElement.hide();
+            } else if (loadingElement.loading.show) {
+              loadingElement.show();
+            }
           }
         });
-      }
+      } else {
+        let targetedEl = $(`#${loadingElement.target}`, component.root);
 
-      if (targetedEl) {
-        if (targetElement.el.isSameNode(targetedEl)) {
-          loadingElement.handleLoading();
-          if (loadingElement.loading.hide) {
-            loadingElement.hide();
-          } else if (loadingElement.loading.show) {
-            loadingElement.show();
+        if (!targetedEl) {
+          component.keyEls.forEach((keyElement) => {
+            if (!targetedEl && keyElement.key === loadingElement.target) {
+              targetedEl = keyElement.el;
+            }
+          });
+        }
+
+        if (targetedEl) {
+          if (targetElement.el.isSameNode(targetedEl)) {
+            loadingElement.handleLoading();
+            if (loadingElement.loading.hide) {
+              loadingElement.hide();
+            } else if (loadingElement.loading.show) {
+              loadingElement.show();
+            }
           }
         }
       }
@@ -150,7 +178,7 @@ export function addActionEventListener(component, eventType) {
             component.actionQueue = [];
           }
 
-          let actionName = action.name
+          let actionName = action.name;
           // Handle special arguments (e.g. $event)
           args(actionName).forEach((eventArg) => {
             if (eventArg.startsWith("$event")) {
@@ -183,12 +211,12 @@ export function addActionEventListener(component, eventType) {
           });
 
           if (!action.key || action.key === toKebabCase(event.key)) {
-              handleLoading(component, targetElement);
-              component.callMethod(
-                actionName,
-                action.debounceTime,
-                targetElement.partials
-              );
+            handleLoading(component, targetElement);
+            component.callMethod(
+              actionName,
+              action.debounceTime,
+              targetElement.partials
+            );
           }
         }
       });
