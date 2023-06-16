@@ -16,7 +16,7 @@ function handleLoading(component, targetElement) {
       if (loadingElement.target.includes("*")) {
         const targetRegex = toRegExp(loadingElement.target);
         const targetedElArray = [];
-        const childrenCollection = component.root.children;
+        const childrenCollection = component.root.getElementsByTagName("*");
         [...childrenCollection].forEach((child) => {
           [...child.attributes].forEach((attr) => {
             if (
