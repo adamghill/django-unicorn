@@ -478,7 +478,9 @@ test("event action wildcard loading by id", (t) => {
   const html = `
 <div unicorn:id="5jypjiyb" unicorn:name="text-inputs" unicorn:checksum="GXzew3Km">
   <button unicorn:click='test()' id='testId-1' u:key='testKey'></button>
-  <button unicorn:click='test()' id='testId-2' u:key='testKey'></button>
+  <div>
+    <button unicorn:click='test()' id='testId-2' u:key='testKey'></button>
+  </div>
   <button unicorn:click='test()' id='testId' u:key='testKey'></button>
   <div u:loading u:target='testId-*'>
   Loading
@@ -516,7 +518,9 @@ test("event action wildcard loading by key", (t) => {
   const html = `
 <div unicorn:id="5jypjiyb" unicorn:name="text-inputs" unicorn:checksum="GXzew3Km">
   <button unicorn:click='test()' id='testId' u:key='testKey-1'></button>
-  <button unicorn:click='test()' id='testId' u:key='testKey-2'></button>
+  <div>
+    <button unicorn:click='test()' id='testId' u:key='testKey-2'></button>
+  </div>
   <button unicorn:click='test()' id='testId' u:key='testKey3'></button>
   <div u:loading u:target='testKey-*'>
   Loading
