@@ -1,7 +1,10 @@
 {% load static %}
 
+<script>
+  var useCsrfToken = "{{ USE_CSRF_TOKEN }}" == "True";
+</script>
 {% if MINIFIED %}
-<script src="{% static 'unicorn/js/unicorn.min.js' %}"></script>
+<script src="{% static 'unicorn/js/unicorn.min.js' %}?bust=20230511"></script>
 
 <script>
   var url = "{% url 'django_unicorn:message' %}";
@@ -11,7 +14,7 @@
     reloadScriptElements = true;
   }
 
-  Unicorn.init(url, "{{ CSRF_HEADER_NAME }}", reloadScriptElements);
+  Unicorn.init(url, "{{ CSRF_HEADER_NAME }}", reloadScriptElements, useCsrfToken);
 </script>
 {% else %}
 <script type="module">
@@ -27,6 +30,6 @@
       reloadScriptElements = true;
     }
 
-    Unicorn.init(url, "{{ CSRF_HEADER_NAME }}", reloadScriptElements);
+    Unicorn.init(url, "{{ CSRF_HEADER_NAME }}", reloadScriptElements, useCsrfToken);
 </script>
 {% endif %}
