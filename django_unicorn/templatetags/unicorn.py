@@ -25,9 +25,12 @@ def unicorn_scripts():
 
     csrf_header_name = csrf_header_name.replace("_", "-")
 
+    csrf_cookie_name = settings.CSRF_COOKIE_NAME
+
     return {
         "MINIFIED": get_setting("MINIFIED", not settings.DEBUG),
         "CSRF_HEADER_NAME": csrf_header_name,
+        "CSRF_COOKIE_NAME": csrf_cookie_name,
         "RELOAD_SCRIPT_ELEMENTS": get_setting("RELOAD_SCRIPT_ELEMENTS", False),
     }
 
