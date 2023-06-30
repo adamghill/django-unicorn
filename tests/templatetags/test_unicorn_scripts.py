@@ -5,6 +5,7 @@ def test_unicorn_scripts():
     actual = unicorn_scripts()
 
     assert actual["CSRF_HEADER_NAME"] == "X-CSRFTOKEN"
+    assert actual["CSRF_COOKIE_NAME"] == "csrftoken"
     assert actual["MINIFIED"] is True
 
 
@@ -13,6 +14,7 @@ def test_unicorn_scripts_debug(settings):
     actual = unicorn_scripts()
 
     assert actual["CSRF_HEADER_NAME"] == "X-CSRFTOKEN"
+    assert actual["CSRF_COOKIE_NAME"] == "csrftoken"
     assert actual["MINIFIED"] is False
 
 
@@ -21,6 +23,7 @@ def test_unicorn_scripts_minified_true(settings):
     actual = unicorn_scripts()
 
     assert actual["CSRF_HEADER_NAME"] == "X-CSRFTOKEN"
+    assert actual["CSRF_COOKIE_NAME"] == "csrftoken"
     assert actual["MINIFIED"] is True
 
 
@@ -36,3 +39,9 @@ def test_unicorn_scripts_csrf_header_name(settings):
     actual = unicorn_scripts()
 
     assert actual["CSRF_HEADER_NAME"] == "X-UNICORN"
+
+def test_unicorn_scripts_csrf_cookie_name(settings):
+    settings.CSRF_COOKIE_NAME = "unicorn-csrftoken"
+    actual = unicorn_scripts()
+
+    assert actual["CSRF_COOKIE_NAME"] == "unicorn-csrftoken"
