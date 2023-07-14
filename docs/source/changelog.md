@@ -3,6 +3,7 @@
 ## v0.52.0
 
 - Use `CSRF_COOKIE_NAME` Django setting ([#545](https://github.com/adamghill/django-unicorn/pull/545)) by [frnidito](https://github.com/frnidito).
+- Asterisk wildcard support for targeting loading ([#543](https://github.com/adamghill/django-unicorn/pull/543)) by [regoawt](https://github.com/regoawt).
 
 ## v0.51.0
 
