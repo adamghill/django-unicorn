@@ -5,7 +5,7 @@ import { components, lifecycleEvents } from "./store.js";
 let messageUrl = "";
 let reloadScriptElements = false;
 let csrfTokenHeaderName = "X-CSRFToken";
-let csrfTokenCookieName = "csrftoken"
+let csrfTokenCookieName = "csrftoken";
 
 /**
  * Initializes the Unicorn object.
