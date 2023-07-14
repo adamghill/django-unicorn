@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.52.0
+
+- Use `CSRF_COOKIE_NAME` Django setting ([#545](https://github.com/adamghill/django-unicorn/pull/545)) by [frnidito](https://github.com/frnidito).
+
 ## v0.51.0
 
 - Fix: remove use of `ByteString` ([#534](https://github.com/adamghill/django-unicorn/pull/534)) by [hauntsaninja](https://github.com/hauntsaninja).
