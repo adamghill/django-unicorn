@@ -98,6 +98,7 @@ Here are a few reasons to consider `Unicorn`.
 - [Hotwire for Django](https://github.com/hotwire-django) contains a few different repositiories to integrate [Hotwire](https://hotwire.dev) with Django.
 - [Lona](https://lona-web.org/) is a web application framework, designed to write responsive web apps in full Python.
 - [ReactPy](https://reactpy.dev/) is a port of ReactJS to Python. Fully compatible with all ReactJS components.
+- [django-async-include](https://github.com/diegojromerolopez/django-async-include) load HTML via AJAX.
 
 #### Comparison
 
