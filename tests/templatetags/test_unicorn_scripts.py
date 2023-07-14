@@ -40,6 +40,7 @@ def test_unicorn_scripts_csrf_header_name(settings):
 
     assert actual["CSRF_HEADER_NAME"] == "X-UNICORN"
 
+
 def test_unicorn_scripts_csrf_cookie_name(settings):
     settings.CSRF_COOKIE_NAME = "unicorn-csrftoken"
     actual = unicorn_scripts()
