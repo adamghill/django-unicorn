@@ -51,7 +51,7 @@ export function $(selector, scope) {
  */
 export function getCsrfToken(component) {
   // Default to looking for the CSRF in the cookie
-  const cookieKey = component.csrfTokenCookieName + "="
+  const cookieKey = component.csrfTokenCookieName + "=";
   const csrfTokenCookie = component.document.cookie
     .split(";")
     .filter((item) => item.trim().startsWith(cookieKey));
