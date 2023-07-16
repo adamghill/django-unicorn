@@ -468,7 +468,7 @@ class UnicornView(TemplateView):
     def _get_form(self, data):
         if hasattr(self, "form_class"):
             try:
-                form = self.form_class(data)
+                form = self.form_class(data=data)
                 form.is_valid()
 
                 return form
