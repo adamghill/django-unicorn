@@ -3,6 +3,7 @@ from typing import Dict
 
 from django import forms
 from django.contrib import messages
+from django.contrib.auth.forms import AuthenticationForm
 from django.forms import ValidationError
 from django.shortcuts import redirect
 
@@ -99,6 +100,14 @@ class FakeValidationComponent(UnicornView):
 
     def set_number(self, number):
         self.number = number
+
+
+class FakeAuthenticationComponent(UnicornView):
+    template_name = "templates/test_component.html"
+    form_class = AuthenticationForm
+
+    username = ""
+    password = ""
 
 
 class FakeComponentWithDictionary(UnicornView):
