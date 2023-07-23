@@ -194,6 +194,15 @@
         "code",
         "test"
       ]
+    },
+    {
+      "login": "lassebomh",
+      "name": "Lasse H. Bomholt",
+      "avatar_url": "https://avatars.githubusercontent.com/u/31809070?v=4",
+      "profile": "https://github.com/lassebomh",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
