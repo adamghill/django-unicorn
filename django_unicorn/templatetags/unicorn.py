@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, List
 
 from django import template
 from django.conf import settings
@@ -50,22 +50,28 @@ def unicorn(parser, token):
 
     component_name = parser.compile_filter(contents[1])
 
+    args = []
     kwargs = {}
 
     for arg in contents[2:]:
         try:
-            kwarg = parse_kwarg(arg)
-            kwargs.update(kwarg)
+            parsed_kwarg = parse_kwarg(arg)
+            kwargs.update(parsed_kwarg)
         except InvalidKwarg:
-            pass
+            # Assume it's an arg if invalid kwarg and kwargs is empty
+            if not kwargs:
+                args.append(arg)
 
-    return UnicornNode(component_name, kwargs)
+    return UnicornNode(component_name, args, kwargs)
 
 
 class UnicornNode(template.Node):
-    def __init__(self, component_name: FilterExpression, kwargs: Dict = {}):
+    def __init__(
+        self, component_name: FilterExpression, args: List = None, kwargs: Dict = None
+    ):
         self.component_name = component_name
-        self.kwargs = kwargs
+        self.args = args if args is not None else []
+        self.kwargs = kwargs if kwargs is not None else {}
         self.component_key = ""
         self.parent = None
 
@@ -75,9 +81,15 @@ class UnicornNode(template.Node):
         if hasattr(context, "request"):
             request = context.request
 
-        resolved_kwargs = {}
-
         from ..components import UnicornView
+
+        resolved_args = []
+
+        for value in self.args:
+            resolved_arg = template.Variable(value).resolve(context)
+            resolved_args.append(resolved_arg)
+
+        resolved_kwargs = {}
 
         for key, value in self.kwargs.items():
             try:
@@ -178,8 +190,9 @@ class UnicornNode(template.Node):
             component_name=component_name,
             component_key=self.component_key,
             parent=self.parent,
-            kwargs=resolved_kwargs,
             request=request,
+            component_args=resolved_args,
+            kwargs=resolved_kwargs,
         )
 
         extra_context = {}

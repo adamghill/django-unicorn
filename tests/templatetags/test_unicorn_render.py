@@ -45,31 +45,36 @@ class FakeComponentChildImplicit(UnicornView):
         return self.parent is not None
 
 
+class FakeComponentArgs(UnicornView):
+    template_name = "templates/test_component_args.html"
+    hello = "world"
+
+    def mount(self):
+        self.hello = self.component_args[0]
+
+
 class FakeComponentKwargs(UnicornView):
     template_name = "templates/test_component_kwargs.html"
     hello = "world"
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(**kwargs)
-        self.hello = kwargs.get("test_kwarg")
+    def mount(self):
+        self.hello = self.component_kwargs.get("test_kwarg")
 
 
 class FakeComponentKwargsWithHtmlEntity(UnicornView):
     template_name = "templates/test_component_kwargs_with_html_entity.html"
     hello = "world"
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(**kwargs)
-        self.hello = kwargs.get("test_kwarg")
+    def mount(self):
+        self.hello = self.component_kwargs.get("test_kwarg")
 
 
 class FakeComponentModel(UnicornView):
     template_name = "templates/test_component_model.html"
     model_id = None
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(**kwargs)
-        self.model_id = kwargs.get("model_id")
+    def mount(self):
+        self.model_id = self.component_kwargs.get("model_id")
 
 
 class FakeComponentCalls(UnicornView):
@@ -156,6 +161,18 @@ def test_unicorn_template_renders_with_implicit_parent_and_child(client):
     assert "==child==" in content
     assert "has_parent:True" in content
     assert '<script type="application/json" id="unicorn:data:' in content
+
+
+def test_unicorn_render_arg():
+    token = Token(
+        TokenType.TEXT,
+        "unicorn 'tests.templatetags.test_unicorn_render.FakeComponentArgs' 'tested!'",
+    )
+    unicorn_node = unicorn(Parser([]), token)
+    context = {}
+    actual = unicorn_node.render(Context(context))
+
+    assert "<b>tested!</b>" in actual
 
 
 def test_unicorn_render_kwarg():
