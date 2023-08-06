@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.53.0
+
+- Support passing arguments into a component ([#560](https://github.com/adamghill/django-unicorn/pull/560)) by [adamghill](https://github.com/adamghill).
+
 ## v0.52.1
 
 - Better handling of `AuthenticationForm` when used in `Component.form_class` ([#552](https://github.com/adamghill/django-unicorn/pull/552)) by [lassebomh](https://github.com/lassebomh).
