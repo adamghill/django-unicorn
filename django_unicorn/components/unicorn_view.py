@@ -4,7 +4,7 @@ import logging
 import pickle
 import sys
 from functools import lru_cache
-from typing import Any, Callable, Dict, List, Sequence, Tuple, Type
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Type
 
 from django.apps import AppConfig
 from django.conf import settings
@@ -49,6 +49,17 @@ views_cache = LRUCache(maxsize=100)
 # This can create a subtle race condition so a more long-term solution needs to be found
 constructed_views_cache = LRUCache(maxsize=100)
 COMPONENTS_MODULE_CACHE_ENABLED = "pytest" not in sys.modules
+
+STANDARD_COMPONENT_KWARG_KEYS = set(
+    [
+        "id",
+        "component_id",
+        "component_name",
+        "component_key",
+        "parent",
+        "request",
+    ]
+)
 
 
 def convert_to_snake_case(s: str) -> str:
@@ -136,6 +147,7 @@ def construct_component(
     component_key,
     parent,
     request,
+    component_args,
     **kwargs,
 ):
     """
@@ -147,6 +159,7 @@ def construct_component(
         component_key=component_key,
         parent=parent,
         request=request,
+        component_args=component_args,
         **kwargs,
     )
 
@@ -166,8 +179,10 @@ class UnicornView(TemplateView):
     component_name: str = ""
     component_key: str = ""
     component_id: str = ""
+    component_args: List = None
+    component_kwargs: Dict = None
 
-    def __init__(self, **kwargs):
+    def __init__(self, component_args: Optional[List] = None, **kwargs):
         self.response_class = UnicornTemplateResponse
 
         self.component_name: str = ""
@@ -211,6 +226,14 @@ class UnicornView(TemplateView):
 
             if self.parent and self not in self.parent.children:
                 self.parent.children.append(self)
+
+        # Set component args
+        self.component_args = component_args if component_args is not None else []
+
+        # Only include custom kwargs since the standard kwargs are available
+        # as instance variables
+        custom_kwargs = set(kwargs.keys()) - STANDARD_COMPONENT_KWARG_KEYS
+        self.component_kwargs = {k: kwargs[k] for k in list(custom_kwargs)}
 
         self._init_script: str = ""
         self._validate_called = False
@@ -371,7 +394,7 @@ class UnicornView(TemplateView):
         self.mount()
         self.hydrate()
 
-        self._cache_component(request, **kwargs)
+        self._cache_component(request, *args, **kwargs)
 
         return self.render_to_response(
             context=self.get_context_data(),
@@ -379,17 +402,24 @@ class UnicornView(TemplateView):
             init_js=True,
         )
 
-    def _cache_component(self, request: HttpRequest, parent=None, **kwargs):
+    def _cache_component(
+        self, request: HttpRequest, parent=None, component_args=None, **kwargs
+    ):
         """
-        Cache the component in the module and the Django cache. Re-set the `request` that got
-        removed to make the component cacheable.
+        Cache the component in the module and the Django cache. Re-set the `request`
+        that got removed to make the component cacheable.
         """
 
         # Put the location for the component name in a module cache
         location_cache[self.component_name] = (self.__module__, self.__class__.__name__)
 
         # Put the component's class in a module cache
-        views_cache[self.component_id] = (self.__class__, parent, kwargs)
+        views_cache[self.component_id] = (
+            self.__class__,
+            parent,
+            component_args,
+            kwargs,
+        )
 
         # Put the instantiated component into a module cache and the Django cache
         try:
@@ -732,6 +762,8 @@ class UnicornView(TemplateView):
             "call",
             "calls",
             "component_cache_key",
+            "component_kwargs",
+            "component_args",
         )
         excludes = []
 
@@ -764,7 +796,8 @@ class UnicornView(TemplateView):
         parent: "UnicornView" = None,
         request: HttpRequest = None,
         use_cache=True,
-        kwargs: Dict[str, Any] = {},
+        component_args: List = None,
+        kwargs: Dict[str, Any] = None,
     ) -> "UnicornView":
         """
         Find and instantiate a component class based on `component_name`.
@@ -776,6 +809,7 @@ class UnicornView(TemplateView):
             param component_key: Key of the component to allow multiple components of the same name
                 to be differentiated. Optional.
             param parent: The parent component of the current component.
+            param component_args: Arguments for the component passed in from the template. Defaults to `[]`.
             param kwargs: Keyword arguments for the component passed in from the template. Defaults to `{}`.
 
         Returns:
@@ -784,6 +818,9 @@ class UnicornView(TemplateView):
         """
         assert component_id, "Component id is required"
         assert component_name, "Component name is required"
+
+        component_args = component_args if component_args is not None else []
+        kwargs = kwargs if kwargs is not None else {}
 
         @timed
         def _get_component_class(
@@ -816,7 +853,9 @@ class UnicornView(TemplateView):
             return cached_component
 
         if component_id in views_cache:
-            (component_class, parent, kwargs) = views_cache[component_id]
+            (component_class, parent, component_args, kwargs) = views_cache[
+                component_id
+            ]
 
             component = construct_component(
                 component_class=component_class,
@@ -825,6 +864,7 @@ class UnicornView(TemplateView):
                 component_key=component_key,
                 parent=parent,
                 request=request,
+                component_args=component_args,
                 **kwargs,
             )
             logger.debug(f"Retrieve {component_id} from views cache")
@@ -841,9 +881,10 @@ class UnicornView(TemplateView):
         class_name_not_found = None
         attribute_exception = None
 
-        for (module_name, class_name) in locations:
+        for module_name, class_name in locations:
             try:
                 component_class = _get_component_class(module_name, class_name)
+
                 component = construct_component(
                     component_class=component_class,
                     component_id=component_id,
@@ -851,10 +892,13 @@ class UnicornView(TemplateView):
                     component_key=component_key,
                     parent=parent,
                     request=request,
+                    component_args=component_args,
                     **kwargs,
                 )
 
-                component._cache_component(request, parent, **kwargs)
+                component._cache_component(
+                    request, parent=parent, component_args=component_args, **kwargs
+                )
 
                 return component
             except ModuleNotFoundError as e:

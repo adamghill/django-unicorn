@@ -16,21 +16,56 @@ class HelloWorldView(UnicornView):
 
 ## Instance properties
 
+### component_args
+
+The arguments passed into the component.
+
+```html
+<!-- index.html -->
+{% unicorn 'hello-arg' 'World' %}
+```
+
+```python
+# hello_arg.py
+from django_unicorn.components import UnicornView
+
+class HelloArgView(UnicornView):
+    def mount(self):
+      assert self.component_args[0] == "World"
+```
+
+### component_kwargs
+
+The keyword arguments passed into the component.
+
+```html
+<!-- index.html -->
+{% unicorn 'hello-kwarg' hello='World' %}
+```
+
+```python
+# hello_kwarg.py
+from django_unicorn.components import UnicornView
+
+class HelloKwargView(UnicornView):
+    def mount(self):
+      assert self.component_kwargs["hello"] == "World"
+```
+
 ### request
 
-The current `request` is available on `self` in the component's methods.
+The current `request`.
 
 ```python
 # hello_world.py
 from django_unicorn.components import UnicornView
 
 class HelloWorldView(UnicornView):
-    def __init__(self, *args, **kwargs):
-        super.__init__(**kwargs)
+    def mount(self):
         print("Initial request that rendered the component", self.request)
 
     def test(self):
-        print("callMethod request to re-render the component", self.request)
+        print("AJAX request that re-renders the component", self.request)
 ```
 
 ## Custom methods
@@ -75,22 +110,6 @@ class StateView(UnicornView):
 :::
 
 ## Instance methods
-
-### \_\_init\_\_()
-
-Gets called when the component gets constructed for the very first time. Note that constructed components get cached to reduce the amount of time discovering and instantiating them, so `__init__` only gets called the very first time the component gets rendered.
-
-```python
-# hello_world.py
-from django_unicorn.components import UnicornView
-
-class HelloWorldView(UnicornView):
-    name = "original"
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(**kwargs)
-        self.name = "initialized"
-```
 
 ### mount()
 
