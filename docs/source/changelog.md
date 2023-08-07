@@ -2,7 +2,8 @@
 
 ## 0.53.0
 
-- Support passing arguments into a component ([#560](https://github.com/adamghill/django-unicorn/pull/560)) by [adamghill](https://github.com/adamghill).
+- Support passing arguments into a component ([#560](https://github.com/adamghill/django-unicorn/pull/560)).
+- Fix the handling of `None` for select elements. ([#563](https://github.com/adamghill/django-unicorn/pull/563)).
 
 ## v0.52.1
 
