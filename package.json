@@ -20,7 +20,7 @@
         "eslint-plugin-import": "^2.22.0",
         "esm": "^3.2.25",
         "fetch-mock": "^9.11.0",
-        "jsdom": "^16.4.0",
+        "jsdom": "^16.7.0",
         "node-fetch": "^2.6.1",
         "prettier": "^2.1.2",
         "rollup": "^2.27.1",
