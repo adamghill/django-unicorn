@@ -1,86 +1,106 @@
 <div>
-    <div id="boolean-toggles-id">
-        <h2>Checkbox</h2>
-        <input type="checkbox" unicorn:model="is_checked" id="check">
-        {% if is_checked %}Yes! 🦄{% else %}Nope 🙁{% endif %}
-    </div>
+  <div id="boolean-toggles-id">
+    <h2>Checkbox</h2>
+    <input type="checkbox" unicorn:model="is_checked" id="check">
+    {% if is_checked %}Yes! 🦄{% else %}Nope 🙁{% endif %}
+  </div>
 
-    <div unicorn:key="boolean-toggles-key">
-        <h2>Boolean Toggles</h2>
-        {% if another_check %}Checked ✅{% else %}Not checked ❎{% endif %}
-        <br />
-        <button unicorn:click="$toggle('is_checked', 'another_check')">Toggle booleans (normal)</button><br />
-        <button unicorn:click="$toggle('is_checked', 'another_check')" u:partial.key="boolean-toggles-key">Toggle booleans (partial.key)</button>
-        <button unicorn:click="$toggle('is_checked', 'another_check')" u:partial.id="boolean-toggles-id">Toggle booleans (partial.id)</button><br />
-        <button unicorn:click="$toggle('is_checked', 'another_check')" u:partial.id="boolean-toggles-id" u:partial.key="boolean-toggles-key">Toggle booleans (multiple partials)</button><br />
-        <button unicorn:click="$toggle('is_checked', 'another_check')" u:partial="boolean-toggles-id">Toggle booleans (partial boolean-toggles-id)</button>
-        <button unicorn:click="$toggle('is_checked', 'another_check')" u:partial="boolean-toggles-key">Toggle booleans (partial boolean-toggles-key)</button>
-    </div>
+  <div unicorn:key="boolean-toggles-key">
+    <h2>Boolean Toggles</h2>
+    {% if another_check %}Checked ✅{% else %}Not checked ❎{% endif %}
+    <br />
+    <button unicorn:click="$toggle('is_checked', 'another_check')">Toggle booleans (normal)</button><br />
+    <button unicorn:click="$toggle('is_checked', 'another_check')" u:partial.key="boolean-toggles-key">Toggle booleans
+      (partial.key)</button>
+    <button unicorn:click="$toggle('is_checked', 'another_check')" u:partial.id="boolean-toggles-id">Toggle booleans
+      (partial.id)</button><br />
+    <button unicorn:click="$toggle('is_checked', 'another_check')" u:partial.id="boolean-toggles-id"
+      u:partial.key="boolean-toggles-key">Toggle booleans (multiple partials)</button><br />
+    <button unicorn:click="$toggle('is_checked', 'another_check')" u:partial="boolean-toggles-id">Toggle booleans
+      (partial boolean-toggles-id)</button>
+    <button unicorn:click="$toggle('is_checked', 'another_check')" u:partial="boolean-toggles-key">Toggle booleans
+      (partial boolean-toggles-key)</button>
+  </div>
 
-    <div>
-        <h2>Select</h2>
-        <select unicorn:model="thing" id="select">
-            <option>🐶</option>
-            <option>🐙</option>
-            <option>👾</option>
-        </select>
+  <div>
+    <h2>Select</h2>
+    <select unicorn:model="thing" id="select">
+      <option>🐶</option>
+      <option>🐙</option>
+      <option>👾</option>
+    </select>
 
-        <p>
-            Hi {{ thing }}
-        </p>
-    </div>
+    <p>
+      Hi {{ thing }}
+    </p>
+  </div>
 
-    <div>
-        <h2>Multiple select</h2>
-        <select unicorn:model="things" id="select-multiple" multiple>
-            <option value="doggo">🐶</option>
-            <option value="octopus">🐙</option>
-            <option value="alien">👾</option>
-        </select>
+  <div>
+    <h2>Default Select</h2>
+    <select unicorn:model="flavor" id="select-default">
+      <option value="cool">cool</option>
+      <option value="">-- select --</option>
+      {% for flavor in flavors %}
+      <option value="{{ flavor }}">{{ flavor }}</option>
+      {% endfor %}
+    </select>
 
-        <p>
-            Howdy {{ things|join:", " }}
-        </p>
-    </div>
+    <p>
+      Hi {{ flavor }}
+    </p>
+  </div>
 
-    <div>
-        <h2>Radio buttons</h2>
-        <input type="radio" unicorn:model="pie" name="pie" value="blueberry"> Blueberry</input><br />
-        <input type="radio" unicorn:model="pie" name="pie" value="apple"> Apple</input><br />
-        <input type="radio" unicorn:model="pie" name="pie" value="cherry"> Cherry</input>
+  <div>
+    <h2>Multiple select</h2>
+    <select unicorn:model="things" id="select-multiple" multiple>
+      <option value="doggo">🐶</option>
+      <option value="octopus">🐙</option>
+      <option value="alien">👾</option>
+    </select>
 
-        <p>
-            Delicious {{ pie|upper }} pie
-        </p>
-    </div>
+    <p>
+      Howdy {{ things|join:", " }}
+    </p>
+  </div>
 
-    <div>
-        <h2>Textarea</h2>
-        <textarea unicorn:model="paragraph" id="textarea"></textarea>
+  <div>
+    <h2>Radio buttons</h2>
+    <input type="radio" unicorn:model="pie" name="pie" value="blueberry"> Blueberry</input><br />
+    <input type="radio" unicorn:model="pie" name="pie" value="apple"> Apple</input><br />
+    <input type="radio" unicorn:model="pie" name="pie" value="cherry"> Cherry</input>
 
-        <p>
-            Number of characters: {{ paragraph|length }}
+    <p>
+      Delicious {{ pie|upper }} pie
+    </p>
+  </div>
 
-            <button unicorn:click="paragraph=''">Clear textarea</button>
-        </p>
-    </div>
+  <div>
+    <h2>Textarea</h2>
+    <textarea unicorn:model="paragraph" id="textarea"></textarea>
 
-    <div>
-        <h2>Typeahead</h2>
-        <input type="text" unicorn:model="state" placeholder="State name" id="typeahead"></input>
+    <p>
+      Number of characters: {{ paragraph|length }}
 
-        <p>
-            Matching states:
+      <button unicorn:click="paragraph=''">Clear textarea</button>
+    </p>
+  </div>
 
-            {% if states %}
-        <ul>
-            {% for s in states %}
-            <li>{{ s }}</li>
-            {% endfor %}
-        </ul>
+  <div>
+    <h2>Typeahead</h2>
+    <input type="text" unicorn:model="state" placeholder="State name" id="typeahead"></input>
 
-        <button unicorn:click="clear_states">Clear States</button>
-        {% endif %}
-        </p>
-    </div>
+    <p>
+      Matching states:
+
+      {% if states %}
+      <ul>
+        {% for s in states %}
+        <li>{{ s }}</li>
+        {% endfor %}
+      </ul>
+
+      <button unicorn:click="clear_states">Clear States</button>
+      {% endif %}
+    </p>
+  </div>
 </div>
