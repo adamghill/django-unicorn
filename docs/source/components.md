@@ -33,10 +33,11 @@ If there are multiple of the same components on the page, a `key` kwarg can be p
 
 ## Component arguments
 
-`kwargs` can be passed into the `unicorn` templatetag from the template. The `kwargs` will be available in the component [`__init__`](advanced.md#__init__) method.
+`args` and `kwargs` can be passed into the `unicorn` templatetag from the template. They will be available in the component [`component_args`](advanced.md#component_args) and [`component_kwargs`](advanced.md#component_kwargs) methods respectively.
 
-```{warning}
-When overriding `__init__` calling `super().__init__(**kwargs)` is required for the component to initialize properly.
+```html
+<!-- index.html -->
+{% unicorn 'hello-world' "Hello" name="World" %}
 ```
 
 ```python
@@ -44,19 +45,19 @@ When overriding `__init__` calling `super().__init__(**kwargs)` is required for 
 from django_unicorn.components import UnicornView
 
 class HelloWorldView(UnicornView):
-    name = "World"
+    def mount(self):
+        arg = self.component_args[0]
+        kwarg = self.component_kwargs["name"]
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(**kwargs)  # calling super is required
-        self.name = kwargs.get("name")
-```
-
-```html
-<!-- index.html -->
-{% unicorn 'hello-world' name="Universe" %}
+        assert f"{arg} {kwarg}" == "Hello World"
 ```
 
 Regular Django template variables can also be passed in as an argument as long as it is available in the template context.
+
+```html
+<!-- index.html -->
+{% unicorn 'hello-world' name=hello.world.name %}
+```
 
 ```python
 # views.py
@@ -67,9 +68,12 @@ def index(request):
     return render(request, "index.html", context)
 ```
 
-```html
-<!-- index.html -->
-{% unicorn 'hello-world' name=hello.world.name %}
+```python
+class HelloWorldView(UnicornView):
+    def mount(self):
+        kwarg = self.component_kwargs["name"]
+
+        assert kwarg == "Galaxy"
 ```
 
 ## Example component
@@ -222,7 +226,7 @@ Another option is to set the `form_class` on the component and utilize Django's 
 from django_unicorn.components import UnicornView, UnicornField
 
 class Author(UnicornField):
-    def __init__(self):
+    def mount(self):
         self.name = 'Neil Gaiman'
 
     # Not needed because inherited from `UnicornField`

@@ -26,6 +26,8 @@ def pytest_configure():
     installed_apps = [
         "django.contrib.sessions",
         "django.contrib.messages",
+        "django.contrib.contenttypes",
+        "django.contrib.auth",
         "django_unicorn",
         "example.coffee.apps.Config",
         "example.books.apps.Config",

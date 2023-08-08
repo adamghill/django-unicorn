@@ -51,7 +51,7 @@ export function $(selector, scope) {
  */
 export function getCsrfToken(component) {
   // Default to looking for the CSRF in the cookie
-  const cookieKey = "csrftoken=";
+  const cookieKey = component.csrfTokenCookieName + "=";
   const csrfTokenCookie = component.document.cookie
     .split(";")
     .filter((item) => item.trim().startsWith(cookieKey));
@@ -197,4 +197,24 @@ export function args(func) {
   }
 
   return functionArgs;
+}
+
+/**
+ * Converts string with '*' wildcards to RegExp.
+ */
+export function toRegExp(str) {
+  const strArray = str.split("*");
+  let regexp = "";
+  strArray.forEach((item, idx) => {
+    if (idx === 0 && item === "") {
+      regexp = regexp.concat("[a-zA-Z0-9_:.\\-]*");
+    } else if (idx === strArray.length - 1) {
+      if (item !== "") {
+        regexp = regexp.concat(`(${item})`);
+      }
+    } else {
+      regexp = regexp.concat(`(${item})`, "[a-zA-Z0-9_:.\\-]*");
+    }
+  });
+  return new RegExp(regexp);
 }

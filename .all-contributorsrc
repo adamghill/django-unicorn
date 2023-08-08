@@ -184,6 +184,34 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "regoawt",
+      "name": "regoawt",
+      "avatar_url": "https://avatars.githubusercontent.com/u/49868464?v=4",
+      "profile": "https://github.com/regoawt",
+      "contributions": [
+        "code",
+        "test"
+      ]
+    },
+    {
+      "login": "lassebomh",
+      "name": "Lasse H. Bomholt",
+      "avatar_url": "https://avatars.githubusercontent.com/u/31809070?v=4",
+      "profile": "https://github.com/lassebomh",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "martey",
+      "name": "Martey Dodoo",
+      "avatar_url": "https://avatars.githubusercontent.com/u/49076?v=4",
+      "profile": "https://marteydodoo.com",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
@@ -192,5 +220,6 @@
   "repoType": "github",
   "repoHost": "https://github.com",
   "skipCi": true,
-  "commitConvention": "angular"
+  "commitConvention": "angular",
+  "commitType": "docs"
 }

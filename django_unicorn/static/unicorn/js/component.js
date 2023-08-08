@@ -27,6 +27,7 @@ export class Component {
     this.messageUrl = args.messageUrl;
     this.csrfTokenHeaderName = args.csrfTokenHeaderName;
     this.useCsrfToken = args.useCsrfToken;
+    this.csrfTokenCookieName = args.csrfTokenCookieName;
     this.reloadScriptElements = args.reloadScriptElements;
     this.hash = args.hash;
     this.data = args.data || {};

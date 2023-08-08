@@ -67,7 +67,7 @@ def _get_expr_string(expr: ast.expr) -> str:
 @lru_cache(maxsize=128, typed=True)
 def eval_value(value):
     """
-    Uses `ast.literal_eval` to parse strings into an appropriate Python primative.
+    Uses `ast.literal_eval` to parse strings into an appropriate Python primitive.
 
     Also returns an appropriate object for strings that look like they represent datetime,
     date, time, duration, or UUID.

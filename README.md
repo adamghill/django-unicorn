@@ -43,7 +43,7 @@ Available additional settings that can be set to `UNICORN` dict in settings.py w
 --------------------------------
 
 <p align="center">
-  <a href="https://www.django-unicorn.com/"><img src="img/unicorn-logo.png" alt="django-unicorn logo" height="200"/></a>
+  <a href="https://www.django-unicorn.com/"><img src="https://github.com/adamghill/django-unicorn/raw/a98539b6e4b1123705559116a77e63eea7e2b8d0/img/unicorn-logo.png" alt="django-unicorn logo" height="200"/></a>
 </p>
 
 <h1 align="center">
@@ -256,6 +256,11 @@ Thanks to the following wonderful people ([emoji key](https://allcontributors.or
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/bazubii"><img src="https://avatars.githubusercontent.com/u/12039914?v=4?s=100" width="100px;" alt="bazubii"/><br /><sub><b>bazubii</b></sub></a><br /><a href="https://github.com/adamghill/django-unicorn/commits?author=bazubii" title="Code">💻</a> <a href="https://github.com/adamghill/django-unicorn/commits?author=bazubii" title="Tests">⚠️</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/dancaron"><img src="https://avatars.githubusercontent.com/u/535851?v=4?s=100" width="100px;" alt="Dan Caron"/><br /><sub><b>Dan Caron</b></sub></a><br /><a href="https://github.com/adamghill/django-unicorn/commits?author=dancaron" title="Documentation">📖</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://hauntsaninja.github.io/"><img src="https://avatars.githubusercontent.com/u/12621235?v=4?s=100" width="100px;" alt="Shantanu"/><br /><sub><b>Shantanu</b></sub></a><br /><a href="https://github.com/adamghill/django-unicorn/commits?author=hauntsaninja" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/regoawt"><img src="https://avatars.githubusercontent.com/u/49868464?v=4?s=100" width="100px;" alt="regoawt"/><br /><sub><b>regoawt</b></sub></a><br /><a href="https://github.com/adamghill/django-unicorn/commits?author=regoawt" title="Code">💻</a> <a href="https://github.com/adamghill/django-unicorn/commits?author=regoawt" title="Tests">⚠️</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/lassebomh"><img src="https://avatars.githubusercontent.com/u/31809070?v=4?s=100" width="100px;" alt="Lasse H. Bomholt"/><br /><sub><b>Lasse H. Bomholt</b></sub></a><br /><a href="https://github.com/adamghill/django-unicorn/commits?author=lassebomh" title="Code">💻</a></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://marteydodoo.com"><img src="https://avatars.githubusercontent.com/u/49076?v=4?s=100" width="100px;" alt="Martey Dodoo"/><br /><sub><b>Martey Dodoo</b></sub></a><br /><a href="https://github.com/adamghill/django-unicorn/commits?author=martey" title="Documentation">📖</a></td>
     </tr>
   </tbody>
 </table>

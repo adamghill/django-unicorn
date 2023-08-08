@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.53.0
+
+- Support passing arguments into a component ([#560](https://github.com/adamghill/django-unicorn/pull/560)).
+- Fix the handling of `None` for select elements. ([#563](https://github.com/adamghill/django-unicorn/pull/563)).
+- Better handling of `AuthenticationForm` when used in `Component.form_class` ([#552](https://github.com/adamghill/django-unicorn/pull/552)) by [lassebomh](https://github.com/lassebomh).
+
+## v0.52.0
+
+- Use `CSRF_COOKIE_NAME` Django setting ([#545](https://github.com/adamghill/django-unicorn/pull/545)) by [frnidito](https://github.com/frnidito).
+- Asterisk wildcard support for targeting loading ([#543](https://github.com/adamghill/django-unicorn/pull/543)) by [regoawt](https://github.com/regoawt).
+
 ## v0.51.0
 
 - Fix: remove use of `ByteString` ([#534](https://github.com/adamghill/django-unicorn/pull/534)) by [hauntsaninja](https://github.com/hauntsaninja).
