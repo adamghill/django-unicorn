@@ -215,6 +215,9 @@ Thanks to the following wonderful people ([emoji key](https://allcontributors.or
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/regoawt"><img src="https://avatars.githubusercontent.com/u/49868464?v=4?s=100" width="100px;" alt="regoawt"/><br /><sub><b>regoawt</b></sub></a><br /><a href="https://github.com/adamghill/django-unicorn/commits?author=regoawt" title="Code">💻</a> <a href="https://github.com/adamghill/django-unicorn/commits?author=regoawt" title="Tests">⚠️</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/lassebomh"><img src="https://avatars.githubusercontent.com/u/31809070?v=4?s=100" width="100px;" alt="Lasse H. Bomholt"/><br /><sub><b>Lasse H. Bomholt</b></sub></a><br /><a href="https://github.com/adamghill/django-unicorn/commits?author=lassebomh" title="Code">💻</a></td>
     </tr>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://marteydodoo.com"><img src="https://avatars.githubusercontent.com/u/49076?v=4?s=100" width="100px;" alt="Martey Dodoo"/><br /><sub><b>Martey Dodoo</b></sub></a><br /><a href="https://github.com/adamghill/django-unicorn/commits?author=martey" title="Documentation">📖</a></td>
+    </tr>
   </tbody>
 </table>
 

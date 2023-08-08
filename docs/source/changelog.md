@@ -1,7 +1,9 @@
 # Changelog
 
-## v0.52.1
+## 0.53.0
 
+- Support passing arguments into a component ([#560](https://github.com/adamghill/django-unicorn/pull/560)).
+- Fix the handling of `None` for select elements. ([#563](https://github.com/adamghill/django-unicorn/pull/563)).
 - Better handling of `AuthenticationForm` when used in `Component.form_class` ([#552](https://github.com/adamghill/django-unicorn/pull/552)) by [lassebomh](https://github.com/lassebomh).
 
 ## v0.52.0

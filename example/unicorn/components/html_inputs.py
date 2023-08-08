@@ -1,10 +1,15 @@
+from typing import Optional
+
 from django_unicorn.components import UnicornView
+from example.coffee.models import Flavor
 
 
 class HtmlInputsView(UnicornView):
     is_checked = False
     another_check = True
     thing = "🐙"
+    flavor: Optional[Flavor] = None
+    flavors = Flavor.objects.none()
     things = [
         "alien",
     ]
@@ -64,6 +69,9 @@ class HtmlInputsView(UnicornView):
         "Wisconsin",
         "Wyoming",
     )
+
+    def mount(self):
+        self.flavors = Flavor.objects.all()[:3]
 
     def set_name(self, name=None):
         if name:

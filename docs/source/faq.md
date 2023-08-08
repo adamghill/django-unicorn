@@ -8,9 +8,9 @@ Nope! `Unicorn` gives you some magical template tags and HTML attributes to spri
 
 Nope! `Django REST framework` is pretty magical on its own, and if you will need a mobile app or other use for a REST API, it's a great set of abstractions to follow REST best practices. But, it can be challenging implementing a robust API even with `Django REST framework`. And I wouldn't even attempt to build an API up from scratch unless it was extremely limited.
 
-## Do I need to need to install GraphQL to use `Unicorn`?
+## Do I need to install GraphQL to use `Unicorn`?
 
-Nope! GraphQL looks like an awesome technology for specific use-cases and solves some pain points around creating a RESTful API. But, it is another peiece of technology to wrestle with.
+Nope! GraphQL is an awesome piece of technology for specific use-cases and solves some pain points around creating a RESTful API, but it is another thing to wrestle with.
 
 ## Do I need to run an annoying separate node.js process or learn any tedious Webpack configuration incantations to use `Unicorn`?
 

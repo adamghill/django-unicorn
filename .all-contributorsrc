@@ -203,6 +203,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "martey",
+      "name": "Martey Dodoo",
+      "avatar_url": "https://avatars.githubusercontent.com/u/49076?v=4",
+      "profile": "https://marteydodoo.com",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
