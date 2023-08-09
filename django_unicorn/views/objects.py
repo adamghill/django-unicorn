@@ -29,6 +29,30 @@ class Action:
         )
 
 
+def is_int(s):
+    try:
+        int(s)
+    except ValueError:
+        return False
+    else:
+        return True
+
+
+def sort_dict(d):
+    items = [
+        [k, v]
+        for k, v in sorted(
+            d.items(), key=lambda x: x[0] if not is_int(x[0]) else int(x[0])
+        )
+    ]
+
+    for item in items:
+        if isinstance(item[1], dict):
+            item[1] = sort_dict(item[1])
+
+    return dict(items)
+
+
 class ComponentRequest:
     """
     Parses, validates, and stores all of the data from the message request.
@@ -49,6 +73,8 @@ class ComponentRequest:
 
         self.data = self.body.get("data")
         assert self.data is not None, "Missing data"  # data could theoretically be {}
+
+        # print("self.data", self.data)
 
         self.id = self.body.get("id")
         assert self.id, "Missing component id"
@@ -81,8 +107,12 @@ class ComponentRequest:
         """
         checksum = self.body.get("checksum")
         assert checksum, "Missing checksum"
+        print("1checksum", checksum)
 
+        print("1self.data", self.data)
+        # self.data = sort_dict(self.data)
         generated_checksum = generate_checksum(str(self.data))
+        print("1generated_checksum", generated_checksum)
         assert checksum == generated_checksum, "Checksum does not match"
 
 

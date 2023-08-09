@@ -24,7 +24,12 @@
     dictionary.name: {{ dictionary.name }}<br />
     dictionary.nested.name: {{ dictionary.nested.name }}<br />
     <button u:click='set_dictionary({"name": 1, "nested": {"name": 2}})'>set dictionary(1)</button>
-    <button u:click='dictionary.nested.name=2'>set dictionary(2)</button>
+    <button u:click='dictionary.nested.name=3'>set dictionary(3)</button>
+    <button u:click='set_dictionary_2'>set dictionary whoa</button>
+
+    <div>
+      {{ dictionary_2 }}
+    </div>
   </div>
 
   <div>
