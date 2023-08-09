@@ -33,6 +33,20 @@
   </div>
 
   <div>
+    <label>Datetime</label>
+
+    <div>
+      {{ date_example }}
+    </div>
+    <div>
+      <button u:click='get_date'>get_date</button>
+      <button u:click='check_date("2020-09-12T01:01:01")'>check_date static</button>
+      <button u:click='check_date("{{ date_example|date:'c' }}")'>check_date (c)</button>
+      <button u:click='check_date({{ date_example|date:'U' }})'>check_date (U)</button>
+    </div>
+  </div>
+
+  <div>
     <label>Pydantic field</label>
     <input u:model="pydantic_field.title" type="text" id="pydanticField">
     <input u:model="pydantic_field.publish_date" type="text" id="datetimePydanticField">
@@ -112,6 +126,7 @@
 
   <div>
     <label>Enums</label>
+    <br />
 
     <button unicorn:click="set_color({{ color.value }})">Sets color based on `self.color` enum</button>
     <button unicorn:click="set_color(2)">Sets `self.color` to `Color.GREEN`</button>
@@ -121,6 +136,8 @@
     color: {{ color }}
   </div>
 
-  <button u:click="$reset">$reset</button>
-  <button u:click="$refresh">$refresh</button>
+  <div>
+    <button u:click="$reset">$reset</button>
+    <button u:click="$refresh">$refresh</button>
+  </div>
 </div>

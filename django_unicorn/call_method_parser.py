@@ -1,5 +1,6 @@
 import ast
 import logging
+from datetime import date, datetime, time, timedelta
 from functools import lru_cache
 from types import MappingProxyType
 from typing import Any, Dict, List, Mapping, Tuple
@@ -15,14 +16,15 @@ from django.utils.dateparse import (
 
 logger = logging.getLogger(__name__)
 
-# Lambdas that attempt to convert something that failed while being parsed by `ast.literal_eval`.
-CASTERS = [
-    lambda a: parse_datetime(a),
-    lambda a: parse_time(a),
-    lambda a: parse_date(a),
-    lambda a: parse_duration(a),
-    lambda a: UUID(a),
-]
+# Functions that attempt to convert something that failed while being parsed by
+# `ast.literal_eval`.
+CASTERS = {
+    datetime: parse_datetime,
+    time: parse_time,
+    date: parse_date,
+    timedelta: parse_duration,
+    UUID: UUID,
+}
 
 
 class InvalidKwarg(Exception):
@@ -64,6 +66,24 @@ def _get_expr_string(expr: ast.expr) -> str:
     return expr_str
 
 
+def _cast_value(value):
+    """
+    Try to cast a value based on a list of casters.
+    """
+
+    for caster in CASTERS.values():
+        try:
+            casted_value = caster(value)
+
+            if casted_value:
+                value = casted_value
+                break
+        except ValueError:
+            pass
+
+    return value
+
+
 @lru_cache(maxsize=128, typed=True)
 def eval_value(value):
     """
@@ -76,15 +96,7 @@ def eval_value(value):
     try:
         value = ast.literal_eval(value)
     except SyntaxError:
-        for caster in CASTERS:
-            try:
-                casted_value = caster(value)
-
-                if casted_value:
-                    value = casted_value
-                    break
-            except ValueError:
-                pass
+        value = _cast_value(value)
 
     return value
 
@@ -120,8 +132,9 @@ def parse_kwarg(kwarg: str, raise_if_unparseable=False) -> Dict[str, Any]:
                 if raise_if_unparseable:
                     raise
 
-                # The value can be a template variable that will get set from the context when
-                # the templatetag is rendered, so just return the expr as a string.
+                # The value can be a template variable that will get set from the
+                # context when the templatetag is rendered, so just return the expr
+                # as a string.
                 value = _get_expr_string(assign.value)
                 return {target.id: value}
         else:
@@ -135,7 +148,8 @@ def parse_call_method_name(
     call_method_name: str,
 ) -> Tuple[str, Tuple[Any], Mapping[str, Any]]:
     """
-    Parses the method name from the request payload into a set of parameters to pass to a method.
+    Parses the method name from the request payload into a set of parameters to pass to
+    a method.
 
     Args:
         param call_method_name: String representation of a method name with parameters,

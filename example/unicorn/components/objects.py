@@ -50,6 +50,11 @@ class ObjectsView(UnicornView):
     def get_date(self):
         self.date_example = now()
 
+    def check_date(self, dt: datetime):
+        assert type(dt) is datetime
+
+        self.date_example = dt
+
     def set_dictionary(self, val):
         self.dictionary = val
 
