@@ -94,7 +94,7 @@ def _process_component_request(
     original_data = copy.deepcopy(component_request.data)
 
     # Set component properties based on request data
-    for (property_name, property_value) in component_request.data.items():
+    for property_name, property_value in component_request.data.items():
         set_property_from_data(component, property_name, property_value)
     component.hydrate()
 
@@ -251,6 +251,10 @@ def _process_component_request(
                         partial_doms.append({"id": target, "dom": str(element)})
                         partial_found = True
                         break
+
+    component_request.data = {
+        key: component_request.data[key] for key in sorted(component_request.data)
+    }
 
     res = {
         "id": component_request.id,

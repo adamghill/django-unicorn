@@ -38,6 +38,7 @@ class ObjectsView(UnicornView):
     unicorn_field = BookField()
     pydantic_field = PydanticBook()
     dictionary = {"name": "dictionary", "nested": {"name": "nested dictionary"}}
+    dictionary_2 = {"5": "a", "9": "b"}
     book = Book(title="The Sandman")
     books = Book.objects.all()
     date_example = now()
@@ -51,6 +52,11 @@ class ObjectsView(UnicornView):
 
     def set_dictionary(self, val):
         self.dictionary = val
+
+    def set_dictionary_2(self):
+        self.dictionary_2["1"] = "c"
+        self.dictionary_2["6"] = "d"
+        self.dictionary_2["11"] = "e"
 
     def add_one_to_float(self):
         self.float_example += 1

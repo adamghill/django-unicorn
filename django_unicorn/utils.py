@@ -284,3 +284,16 @@ def is_non_string_sequence(obj):
         return True
 
     return False
+
+
+def is_int(s: str) -> bool:
+    """
+    Checks whether a string is actually an integer.
+    """
+
+    try:
+        int(s)
+    except ValueError:
+        return False
+    else:
+        return True
