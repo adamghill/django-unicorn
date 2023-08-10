@@ -252,59 +252,13 @@ def _process_component_request(
                         partial_found = True
                         break
 
-    # print("updated_data", updated_data)
-    # if "dictionary_2" in updated_data:
-    #     updated_data["dictionary_2"] = {
-    #         "1": "c",
-    #         "5": "a",
-    #         "6": "d",
-    #         "9": "b",
-    #         "11": "e",
-    #     }
-    #     print("sadf", updated_data)
-
     component_request.data = {
         key: component_request.data[key] for key in sorted(component_request.data)
     }
 
-    # from collections import OrderedDict
-
-    def is_int(s):
-        try:
-            int(s)
-        except ValueError:
-            return False
-        else:
-            return True
-
-    def sort_dict(d):
-        items = [
-            [k, v]
-            for k, v in sorted(
-                d.items(), key=lambda x: x[0] if not is_int(x[0]) else int(x[0])
-            )
-        ]
-
-        for item in items:
-            if isinstance(item[1], dict):
-                item[1] = sort_dict(item[1])
-
-        return dict(items)
-
-    sorted_blob = sort_dict(component_request.data)
-    component_request.data = sorted_blob
-
-    # for key in sorted(component_request.data.keys()):
-    #     sorted_blob[key] = component_request.data[key]
-
-    print("0sorted_blob", sorted_blob)
-
-    print("0component_data", str(component_request.data))
-    print("0checksum", generate_checksum(str(component_request.data)))
-
     res = {
         "id": component_request.id,
-        "data": sort_dict(updated_data),
+        "data": updated_data,
         "errors": component.errors,
         "calls": component.calls,
         "checksum": generate_checksum(str(component_request.data)),
