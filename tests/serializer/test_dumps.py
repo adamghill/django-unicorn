@@ -818,20 +818,6 @@ def test_exclude_field_attributes_invalid_type():
         )
 
 
-from time import perf_counter
-
-
-class catchtime:
-    def __enter__(self):
-        self.time = perf_counter()
-        return self
-
-    def __exit__(self, type, value, traceback):
-        self.time = perf_counter() - self.time
-        self.readout = f"Time: {self.time:.9f} seconds"
-        print(self.readout)
-
-
 def test_dictionary_with_int_keys_as_strings():
     # Browsers will sort a dictionary that has stringified integers as if they the keys
     # were integers which messes up checksum calculation
