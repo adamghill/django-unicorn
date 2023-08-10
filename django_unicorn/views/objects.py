@@ -74,8 +74,6 @@ class ComponentRequest:
         self.data = self.body.get("data")
         assert self.data is not None, "Missing data"  # data could theoretically be {}
 
-        # print("self.data", self.data)
-
         self.id = self.body.get("id")
         assert self.id, "Missing component id"
 
@@ -107,12 +105,8 @@ class ComponentRequest:
         """
         checksum = self.body.get("checksum")
         assert checksum, "Missing checksum"
-        print("1checksum", checksum)
 
-        print("1self.data", self.data)
-        # self.data = sort_dict(self.data)
         generated_checksum = generate_checksum(str(self.data))
-        print("1generated_checksum", generated_checksum)
         assert checksum == generated_checksum, "Checksum does not match"
 
 
