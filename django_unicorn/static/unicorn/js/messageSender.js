@@ -46,7 +46,6 @@ export function send(component, callback) {
     body: JSON.stringify(body),
   })
     .then((response) => {
-      console.log("responseJson");
       if (response.ok) {
         return response.json();
       }
@@ -78,8 +77,6 @@ export function send(component, callback) {
       if (!responseJson) {
         return;
       }
-
-      console.log("responseJson", responseJson);
 
       if (responseJson.queued && responseJson.queued === true) {
         return;
