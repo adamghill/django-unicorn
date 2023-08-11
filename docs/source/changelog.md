@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.54.0-dev
+
+- Coerce type annotated arguments in an action method to the specified type ([#571](https://github.com/adamghill/django-unicorn/pull/571)).
+- Fix: Dictionary fields would sometimes create checksum errors ([#572](https://github.com/adamghill/django-unicorn/pull/572)).
+
 ## 0.53.0
 
 - Support passing arguments into a component ([#560](https://github.com/adamghill/django-unicorn/pull/560)).
