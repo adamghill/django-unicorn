@@ -99,8 +99,8 @@ class ArgumentTypeHintsView(UnicornView):
     def is_uuid(self, obj: UUID):
         assert type(obj) is UUID
 
-    def is_date(self, _date: date = None):
-        assert type(obj) is _date
+    def is_date(self, obj: date = None):
+        assert type(obj) is date
 ```
 
 ```html
@@ -109,7 +109,7 @@ class ArgumentTypeHintsView(UnicornView):
   <button unicorn:click="is_datetime('2020-09-12T01:01:01')">Check datetime with string</button>
   <button unicorn:click="is_datetime(1691499534)">Check datetime with epoch</button>
   <button unicorn:click="is_uuid('90144cb9-fc47-476d-b124-d543b0cff091')">Check UUID</button>
-  <button unicorn:click="is_date(date='2020-09-12')">Check date</button>
+  <button unicorn:click="is_date(obj='2020-09-12')">Check date</button>
 </div>
 ```
 
