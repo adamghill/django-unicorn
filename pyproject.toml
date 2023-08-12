@@ -55,7 +55,8 @@ coverage = {extras = ["toml"], version = "^6"}
 pytest-cov = "^3"
 pytest-benchmark = "^4.0.0"
 six = "^1.16.0"
-certifi = "^2023.7.22"
+certifi = "^2023.7.22"  # needed for testing on GitHub Actions
+virtualenv = "^20.22.0"  # needed for testing on GitHub Actions
 
 [tool.isort]
 default_section = "THIRDPARTY"
