@@ -37,7 +37,7 @@ rst2pdf = { version = "^0.98", optional = true }
 minify = ["htmlmin"]
 docs = ["Sphinx", "linkify-it-py", "myst-parser", "furo", "sphinx-copybutton", "sphinx-autobuild", "rst2pdf"]
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 pytest = "^6"
 black = "*"
 flake8 = "^3"
@@ -45,7 +45,6 @@ isort = "^5"
 mypy = "<1"
 django-stubs = "^1.5.0"
 pytest-django = "^3"
-bpython = "<1"
 django-mock-queries = "^2.1.5"
 pydantic = "^1.7.3"
 pywatchman = "^1.4.1"
@@ -55,6 +54,7 @@ poethepoet = "^0"
 coverage = {extras = ["toml"], version = "^6"}
 pytest-cov = "^3"
 pytest-benchmark = "^4.0.0"
+six = "^1.16.0"
 
 [tool.isort]
 default_section = "THIRDPARTY"
