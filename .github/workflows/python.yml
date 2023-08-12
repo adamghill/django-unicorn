@@ -25,7 +25,6 @@ jobs:
 
       - name: Set Poetry config
         run: |
-          poetry config virtualenvs.in-project false
           poetry config virtualenvs.path ~/.virtualenvs${{ matrix.python-version }}
 
       - name: Install dependencies
