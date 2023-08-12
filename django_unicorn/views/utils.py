@@ -208,7 +208,7 @@ def _create_queryset(field, type_hint, value) -> QuerySet:
             # Explicitly set `_result_cache` to an empty list
             queryset._result_cache = []
 
-        for (idx, model) in enumerate(queryset._result_cache):
+        for idx, model in enumerate(queryset._result_cache):
             if hasattr(model, "pk") and model.pk == model_value.get("pk"):
                 constructed_model = _construct_model(model_type, model_value)
                 queryset._result_cache[idx] = constructed_model
