@@ -187,7 +187,7 @@ files = [
 name = "certifi"
 version = "2023.7.22"
 description = "Python package for providing Mozilla's CA Bundle."
-optional = true
+optional = false
 python-versions = ">=3.6"
 files = [
     {file = "certifi-2023.7.22-py3-none-any.whl", hash = "sha256:92d6037539857d8206b8f6ae472e8b77db8058fec5937a1ef3f54304089edbb9"},
@@ -1961,4 +1961,4 @@ minify = ["htmlmin"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.7,<4"
-content-hash = "419305f6cd1640ae0ded6fac5e61b869498a44c7838e7671cb7dd1d4113e72ac"
+content-hash = "74f7d0ed9e1566deb97c287939565d211c9fd98ead14dbee38ac9d7d2f069037"
