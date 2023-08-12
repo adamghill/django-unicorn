@@ -21,7 +21,7 @@ jobs:
       - name: Install Poetry
         uses: abatilo/actions-poetry@v2.1.6
         with:
-          poetry-version: 1.1.15
+          poetry-version: 1.5.1
 
       - name: Set Poetry config
         run: |
