@@ -37,7 +37,7 @@ rst2pdf = { version = "^0.98", optional = true }
 minify = ["htmlmin"]
 docs = ["Sphinx", "linkify-it-py", "myst-parser", "furo", "sphinx-copybutton", "sphinx-autobuild", "rst2pdf"]
 
-[tool.poetry.dev.dependencies]
+[tool.poetry.dev-dependencies]
 pytest = "^6"
 black = "*"
 flake8 = "^3"
