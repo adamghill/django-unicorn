@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from decimal import Decimal as D
 from enum import Enum
 from typing import Optional
@@ -42,6 +42,7 @@ class ObjectsView(UnicornView):
     book = Book(title="The Sandman")
     books = Book.objects.all()
     date_example = now()
+    date_example_with_typehint: datetime = now()
     float_example: float = 1.1
     decimal_example = D("1.1")
     int_example = 4
@@ -54,6 +55,11 @@ class ObjectsView(UnicornView):
         assert type(dt) is datetime
 
         self.date_example = dt
+
+    def add_hour(self):
+        self.date_example_with_typehint = self.date_example_with_typehint + timedelta(
+            hours=1
+        )
 
     def set_dictionary(self, val):
         self.dictionary = val

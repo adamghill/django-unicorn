@@ -44,6 +44,13 @@
       <button u:click='check_date("{{ date_example|date:'c' }}")'>check_date (c)</button>
       <button u:click='check_date({{ date_example|date:'U' }})'>check_date (U)</button>
     </div>
+
+    <div>
+      {{ date_example_with_typehint }}
+    </div>
+    <div>
+      <button u:click='add_hour()'>add_hour()</button>
+    </div>
   </div>
 
   <div>
