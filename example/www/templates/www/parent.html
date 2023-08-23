@@ -1,0 +1,12 @@
+{% extends "www/base.html" %}
+{% load static unicorn %}
+
+{% block content %}
+
+<h2>Parent/Child</h2>
+
+This is the "parent" component, which in turn loads the "child" component. Click each.
+
+{% unicorn 'parent' %}
+
+{% endblock content %}
