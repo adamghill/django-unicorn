@@ -1,30 +1,13 @@
 import ast
 import logging
-from datetime import date, datetime, time, timedelta
 from functools import lru_cache
 from types import MappingProxyType
 from typing import Any, Dict, List, Mapping, Tuple
-from uuid import UUID
 
-from django.utils.dateparse import (
-    parse_date,
-    parse_datetime,
-    parse_duration,
-    parse_time,
-)
+from django_unicorn.utils import CASTERS
 
 
 logger = logging.getLogger(__name__)
-
-# Functions that attempt to convert something that failed while being parsed by
-# `ast.literal_eval`.
-CASTERS = {
-    datetime: parse_datetime,
-    time: parse_time,
-    date: parse_date,
-    timedelta: parse_duration,
-    UUID: UUID,
-}
 
 
 class InvalidKwarg(Exception):

@@ -8,6 +8,7 @@ from django_unicorn.components import UnicornField, UnicornView
 from django_unicorn.components.typing import QuerySetType
 from django_unicorn.decorators import timed
 from django_unicorn.utils import get_type_hints
+from django_unicorn.views.action_parsers.call_method import cast_value
 
 
 try:
@@ -73,12 +74,8 @@ def set_property_from_data(
             if is_dataclass(type_hint):
                 value = type_hint(**value)
             else:
-                # Construct the specified type by passing the value in
-                # Usually the value will be a string (because it is coming from JSON)
-                # and basic types can be constructed by passing in a string,
-                # i.e. int("1") or float("1.1")
                 try:
-                    value = type_hint(value)
+                    value = cast_value(type_hint, value)
                 except TypeError:
                     # Ignore this exception because some type-hints can't be instantiated like this (e.g. `List[]`)
                     pass
@@ -208,7 +205,7 @@ def _create_queryset(field, type_hint, value) -> QuerySet:
             # Explicitly set `_result_cache` to an empty list
             queryset._result_cache = []
 
-        for (idx, model) in enumerate(queryset._result_cache):
+        for idx, model in enumerate(queryset._result_cache):
             if hasattr(model, "pk") and model.pk == model_value.get("pk"):
                 constructed_model = _construct_model(model_type, model_value)
                 queryset._result_cache[idx] = constructed_model

@@ -1,29 +1,23 @@
-from datetime import date, datetime
 from typing import Any, Dict, Tuple, Union
 
 from django.db.models import Model
 
 from django_unicorn.call_method_parser import (
-    CASTERS,
     InvalidKwarg,
     parse_call_method_name,
     parse_kwarg,
 )
 from django_unicorn.components import UnicornView
 from django_unicorn.decorators import timed
-from django_unicorn.utils import get_method_arguments, get_type_hints
+from django_unicorn.utils import cast_value, get_method_arguments, get_type_hints
 from django_unicorn.views.action_parsers.utils import set_property_value
 from django_unicorn.views.objects import ComponentRequest, Return
 from django_unicorn.views.utils import set_property_from_data
 
 
 try:
-    from typing import get_args, get_origin
+    from typing import get_origin
 except ImportError:
-    # Fallback to dunder methods for older versions of Python
-    def get_args(type_hint):
-        if hasattr(type_hint, "__args__"):
-            return type_hint.__args__
 
     def get_origin(type_hint):
         if hasattr(type_hint, "__origin__"):
@@ -107,51 +101,6 @@ def handle(component_request: ComponentRequest, component: UnicornView, payload:
     )
 
 
-def _cast_value(type_hint, value):
-    """
-    Try to cast the value based on the type hint and
-    `django_unicorn.call_method_parser.CASTERS`.
-
-    Additional features:
-    - convert `int`/`float` epoch to `datetime` or `date`
-    - instantiate the `type_hint` class with passed-in value
-    """
-
-    type_hints = []
-
-    if get_origin(type_hint) is Union:
-        for arg in get_args(type_hint):
-            type_hints.append(arg)
-    else:
-        type_hints.append(type_hint)
-
-    for type_hint in type_hints:
-        caster = CASTERS.get(type_hint)
-
-        if caster:
-            try:
-                value = caster(value)
-                break
-            except TypeError:
-                if (type_hint is datetime or type_hint is date) and (
-                    isinstance(value, int) or isinstance(value, float)
-                ):
-                    try:
-                        value = datetime.fromtimestamp(value)
-
-                        if type_hint is date:
-                            value = value.date()
-
-                        break
-                    except ValueError:
-                        pass
-        else:
-            value = type_hint(value)
-            break
-
-    return value
-
-
 @timed
 def _call_method_name(
     component: UnicornView, method_name: str, args: Tuple[Any], kwargs: Dict[str, Any]
@@ -207,9 +156,9 @@ def _call_method_name(
                         parsed_kwargs[argument] = DbModel.objects.get(**{key: value})
 
                 elif argument in kwargs:
-                    parsed_kwargs[argument] = _cast_value(type_hint, kwargs[argument])
+                    parsed_kwargs[argument] = cast_value(type_hint, kwargs[argument])
                 else:
-                    parsed_args.append(_cast_value(type_hint, args[len(parsed_args)]))
+                    parsed_args.append(cast_value(type_hint, args[len(parsed_args)]))
             elif argument in kwargs:
                 parsed_kwargs[argument] = kwargs[argument]
             else:

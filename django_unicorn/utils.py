@@ -2,14 +2,22 @@ import collections.abc
 import hmac
 import logging
 import pickle
+from datetime import date, datetime, time, timedelta
 from inspect import signature
 from pprint import pprint
 from typing import Dict, List, Union
 from typing import get_type_hints as typing_get_type_hints
+from uuid import UUID
 
 from django.conf import settings
 from django.core.cache import caches
 from django.http import HttpRequest
+from django.utils.dateparse import (
+    parse_date,
+    parse_datetime,
+    parse_duration,
+    parse_time,
+)
 from django.utils.html import _json_script_escapes
 from django.utils.safestring import mark_safe
 
@@ -18,6 +26,19 @@ import shortuuid
 import django_unicorn
 from django_unicorn.errors import UnicornCacheError
 from django_unicorn.settings import get_cache_alias
+
+
+try:
+    from typing import get_args, get_origin
+except ImportError:
+    # Fallback to dunder methods for older versions of Python
+    def get_args(type_hint):
+        if hasattr(type_hint, "__args__"):
+            return type_hint.__args__
+
+    def get_origin(type_hint):
+        if hasattr(type_hint, "__origin__"):
+            return type_hint.__origin__
 
 
 try:
@@ -30,6 +51,17 @@ logger = logging.getLogger(__name__)
 
 type_hints_cache = LRUCache(maxsize=100)
 function_signature_cache = LRUCache(maxsize=100)
+
+
+# Functions that attempt to convert something that failed while being parsed by
+# `ast.literal_eval`.
+CASTERS = {
+    datetime: parse_datetime,
+    time: parse_time,
+    date: parse_date,
+    timedelta: parse_duration,
+    UUID: UUID,
+}
 
 
 def generate_checksum(data: Union[str, bytes]) -> str:
@@ -239,6 +271,51 @@ def get_type_hints(obj) -> Dict:
         # raised if the argument is not of a type that can contain annotations, and an empty dictionary
         # is returned if no annotations are present"
         return {}
+
+
+def cast_value(type_hint, value):
+    """
+    Try to cast the value based on the type hint and
+    `django_unicorn.call_method_parser.CASTERS`.
+
+    Additional features:
+    - convert `int`/`float` epoch to `datetime` or `date`
+    - instantiate the `type_hint` class with passed-in value
+    """
+
+    type_hints = []
+
+    if get_origin(type_hint) is Union:
+        for arg in get_args(type_hint):
+            type_hints.append(arg)
+    else:
+        type_hints.append(type_hint)
+
+    for type_hint in type_hints:
+        caster = CASTERS.get(type_hint)
+
+        if caster:
+            try:
+                value = caster(value)
+                break
+            except TypeError:
+                if (type_hint is datetime or type_hint is date) and (
+                    isinstance(value, int) or isinstance(value, float)
+                ):
+                    try:
+                        value = datetime.fromtimestamp(value)
+
+                        if type_hint is date:
+                            value = value.date()
+
+                        break
+                    except ValueError:
+                        pass
+        else:
+            value = type_hint(value)
+            break
+
+    return value
 
 
 def get_method_arguments(func) -> List[str]:

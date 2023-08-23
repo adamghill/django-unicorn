@@ -1,8 +1,6 @@
 from datetime import datetime
 from uuid import UUID
 
-import pytest
-
 from django_unicorn.call_method_parser import eval_value
 
 
