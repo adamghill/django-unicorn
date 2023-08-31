@@ -212,6 +212,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "bloodywing",
+      "name": "Pierre",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1392097?v=4",
+      "profile": "https://digitalpinup.art",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,

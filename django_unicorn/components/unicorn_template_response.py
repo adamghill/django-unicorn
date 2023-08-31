@@ -50,7 +50,7 @@ def is_html_well_formed(html: str) -> bool:
 
     for tag in tag_list:
         if "/" not in tag:
-            cleaned_tag = re.sub(r"(<(\w+)[^>!]*>)", r"<\2>", tag)
+            cleaned_tag = re.sub(r"(<([\w\-]+)[^>!]*>)", r"<\2>", tag)
 
             if cleaned_tag not in EMPTY_ELEMENTS:
                 stack.append(cleaned_tag)

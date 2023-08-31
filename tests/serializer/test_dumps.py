@@ -155,15 +155,15 @@ def test_complicated_model():
     )
 
     expected = {
-        "pk": 2,
-        "name": "abc",
-        "datetime": model.datetime.isoformat()[:-3],
-        "float_value": "0.583",
-        "decimal_value": "0.984",
-        "uuid": str(model.uuid),
         "date": str(model.date),
-        "time": str(model.time)[:-3],
+        "datetime": model.datetime.isoformat()[:-3],
+        "decimal_value": "0.984",
         "duration": "-1 19:00:00",
+        "float_value": "0.583",
+        "name": "abc",
+        "pk": 2,
+        "time": str(model.time)[:-3],
+        "uuid": str(model.uuid),
     }
 
     actual = serializer.dumps(model)
@@ -677,7 +677,7 @@ def test_nested_list_float():
 
 
 def test_nested_list_float_complicated():
-    expected = '{"name":{"blob":[1,2,"0.0"]},"more":["1.9",2,5],"another":[{"great":"1.0","ok":["1.6","0.0",4]}]}'
+    expected = '{"another":[{"great":"1.0","ok":["1.6","0.0",4]}],"more":["1.9",2,5],"name":{"blob":[1,2,"0.0"]}}'
     actual = serializer.dumps(
         {
             "name": {"blob": [1, 2, 0.0]},
@@ -707,7 +707,7 @@ def test_pydantic():
         title = "The Grapes of Wrath"
         author = "John Steinbeck"
 
-    expected = '{"title":"The Grapes of Wrath","author":"John Steinbeck"}'
+    expected = '{"author":"John Steinbeck","title":"The Grapes of Wrath"}'
     actual = serializer.dumps(Book())
 
     assert expected == actual
@@ -752,7 +752,7 @@ def test_exclude_field_attributes_nested():
 
 
 def test_exclude_field_attributes_invalid_field_attribute():
-    expected = '{"book":{"title":"The Grapes of Wrath","author":"John Steinbeck"}}'
+    expected = '{"book":{"author":"John Steinbeck","title":"The Grapes of Wrath"}}'
 
     actual = serializer.dumps(
         {"book": {"title": "The Grapes of Wrath", "author": "John Steinbeck"}},
@@ -763,7 +763,7 @@ def test_exclude_field_attributes_invalid_field_attribute():
 
 
 def test_exclude_field_attributes_empty_string():
-    expected = '{"book":{"title":"The Grapes of Wrath","author":"John Steinbeck"}}'
+    expected = '{"book":{"author":"John Steinbeck","title":"The Grapes of Wrath"}}'
 
     actual = serializer.dumps(
         {"book": {"title": "The Grapes of Wrath", "author": "John Steinbeck"}},
@@ -774,7 +774,7 @@ def test_exclude_field_attributes_empty_string():
 
 
 def test_exclude_field_attributes_none():
-    expected = '{"book":{"title":"The Grapes of Wrath","author":"John Steinbeck"}}'
+    expected = '{"book":{"author":"John Steinbeck","title":"The Grapes of Wrath"}}'
 
     actual = serializer.dumps(
         {"book": {"title": "The Grapes of Wrath", "author": "John Steinbeck"}},
@@ -816,3 +816,38 @@ def test_exclude_field_attributes_invalid_type():
             {"book": {"title": "The Grapes of Wrath", "author": "John Steinbeck"}},
             exclude_field_attributes=("book.blob"),
         )
+
+
+def test_dictionary_with_int_keys_as_strings():
+    # Browsers will sort a dictionary that has stringified integers as if they the keys
+    # were integers which messes up checksum calculation
+    expected = '{"1":"a","2":"b","4":"c","11":"d","24":"e"}'
+
+    actual = serializer.dumps(
+        {
+            "11": "d",
+            "4": "c",
+            "1": "a",
+            "24": "e",
+            "2": "b",
+        }
+    )
+
+    assert expected == actual
+
+
+def test_dictionary_with_int_keys_as_strings_no_sort():
+    expected = '{"11":"d","4":"c","1":"a","24":"e","2":"b"}'
+
+    actual = serializer.dumps(
+        {
+            "11": "d",
+            "4": "c",
+            "1": "a",
+            "24": "e",
+            "2": "b",
+        },
+        sort_dict=False,
+    )
+
+    assert expected == actual

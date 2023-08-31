@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from decimal import Decimal as D
 from enum import Enum
 from typing import Optional
@@ -38,9 +38,11 @@ class ObjectsView(UnicornView):
     unicorn_field = BookField()
     pydantic_field = PydanticBook()
     dictionary = {"name": "dictionary", "nested": {"name": "nested dictionary"}}
+    dictionary_2 = {"5": "a", "9": "b"}
     book = Book(title="The Sandman")
     books = Book.objects.all()
     date_example = now()
+    date_example_with_typehint: datetime = now()
     float_example: float = 1.1
     decimal_example = D("1.1")
     int_example = 4
@@ -49,8 +51,23 @@ class ObjectsView(UnicornView):
     def get_date(self):
         self.date_example = now()
 
+    def check_date(self, dt: datetime):
+        assert type(dt) is datetime
+
+        self.date_example = dt
+
+    def add_hour(self):
+        self.date_example_with_typehint = self.date_example_with_typehint + timedelta(
+            hours=1
+        )
+
     def set_dictionary(self, val):
         self.dictionary = val
+
+    def set_dictionary_2(self):
+        self.dictionary_2["1"] = "c"
+        self.dictionary_2["6"] = "d"
+        self.dictionary_2["11"] = "e"
 
     def add_one_to_float(self):
         self.float_example += 1

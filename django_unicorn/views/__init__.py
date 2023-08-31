@@ -87,15 +87,19 @@ def _process_component_request(
         request=request,
     )
 
-    # This shouldn't happen, but is a fail-safe to make sure that there is always a request on the component
+    # Make sure that there is always a request on the component if needed
     if component.request is None:
         component.request = request
+
+    # Make sure that there is always a request on the parent if needed
+    if component.parent is not None and component.parent.request is None:
+        component.parent.request = request
 
     # Get a deepcopy of the data passed in to determine what fields are updated later
     original_data = copy.deepcopy(component_request.data)
 
     # Set component properties based on request data
-    for (property_name, property_value) in component_request.data.items():
+    for property_name, property_value in component_request.data.items():
         set_property_from_data(component, property_name, property_value)
     component.hydrate()
 
@@ -252,6 +256,10 @@ def _process_component_request(
                         partial_doms.append({"id": target, "dom": str(element)})
                         partial_found = True
                         break
+
+    component_request.data = {
+        key: component_request.data[key] for key in sorted(component_request.data)
+    }
 
     res = {
         "id": component_request.id,

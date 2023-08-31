@@ -29,6 +29,30 @@ class Action:
         )
 
 
+def is_int(s):
+    try:
+        int(s)
+    except ValueError:
+        return False
+    else:
+        return True
+
+
+def sort_dict(d):
+    items = [
+        [k, v]
+        for k, v in sorted(
+            d.items(), key=lambda x: x[0] if not is_int(x[0]) else int(x[0])
+        )
+    ]
+
+    for item in items:
+        if isinstance(item[1], dict):
+            item[1] = sort_dict(item[1])
+
+    return dict(items)
+
+
 class ComponentRequest:
     """
     Parses, validates, and stores all of the data from the message request.
