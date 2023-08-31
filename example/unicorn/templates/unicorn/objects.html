@@ -51,6 +51,36 @@
     <div>
       <button u:click='add_hour()'>add_hour()</button>
     </div>
+
+    <div>
+      <div>Dates list with no type hint (will change to strings with an action)</div>
+      <ul>
+        {% for date in dates_with_no_typehint %}
+        <li>{{ date }}</li>
+        {% endfor %}
+      </ul>
+
+      <div>Dates list with just list type hint (will change to strings with an action)</div>
+      <ul>
+        {% for date in dates_with_list_typehint %}
+        <li>{{ date }}</li>
+        {% endfor %}
+      </ul>
+
+      <div>Dates list with old type hint (should stay datetimes with an action)</div>
+      <ul>
+        {% for date in dates_with_old_typehint %}
+        <li>{{ date }}</li>
+        {% endfor %}
+      </ul>
+
+      <div>Dates list with new type hint (should stay datetimes with an action)</div>
+      <ul>
+        {% for date in dates_with_new_typehint %}
+        <li>{{ date }}</li>
+        {% endfor %}
+      </ul>
+    </div>
   </div>
 
   <div>

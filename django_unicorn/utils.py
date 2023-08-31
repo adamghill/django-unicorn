@@ -285,11 +285,20 @@ def cast_value(type_hint, value):
 
     type_hints = []
 
-    if get_origin(type_hint) is Union:
+    if get_origin(type_hint) is Union or get_origin(type_hint) is list:
         for arg in get_args(type_hint):
             type_hints.append(arg)
     else:
         type_hints.append(type_hint)
+
+    if get_origin(type_hint) is list:
+        if len(type_hints) == 1:
+            # There should only be one argument for a list type hint
+            arg = type_hints[0]
+
+            # Handle type hints that are a list by looping over the value and
+            # casting each item individually
+            return [cast_value(arg, item) for item in value]
 
     for type_hint in type_hints:
         caster = CASTERS.get(type_hint)

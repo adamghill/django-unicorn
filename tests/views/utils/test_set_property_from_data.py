@@ -19,6 +19,10 @@ class FakeComponent(UnicornView):
     model = Flavor(name="test-initial")
     queryset = Flavor.objects.none()
     queryset_with_typehint: QuerySetType[Flavor] = []
+    datetimes = [datetime(2020, 3, 1)]
+    datetimes_with_old_typehint: List[datetime] = [datetime(2020, 4, 1)]
+    datetimes_with_new_typehint: list[datetime] = [datetime(2020, 5, 1)]
+    datetimes_with_list_typehint: list = [datetime(2020, 6, 1)]
 
 
 class FakeQuerySetComponent(UnicornView):
@@ -98,6 +102,48 @@ def test_set_property_from_data_list():
     set_property_from_data(component, "array", ["string"])
 
     assert ["string"] == component.array
+
+
+def test_set_property_from_data_list_datetimes():
+    component = FakeComponent(component_name="test", component_id="12345678")
+    assert [datetime(2020, 3, 1)] == component.datetimes
+
+    set_property_from_data(component, "datetimes", [str(datetime(2020, 3, 2))])
+
+    assert [str(datetime(2020, 3, 2))] == component.datetimes
+
+
+def test_set_property_from_data_list_datetimes_with_old_typehint():
+    component = FakeComponent(component_name="test", component_id="12345678")
+    assert [datetime(2020, 4, 1)] == component.datetimes_with_old_typehint
+
+    set_property_from_data(
+        component, "datetimes_with_old_typehint", [str(datetime(2020, 4, 2))]
+    )
+
+    assert [datetime(2020, 4, 2)] == component.datetimes_with_old_typehint
+
+
+def test_set_property_from_data_list_datetimes_with_new_typehint():
+    component = FakeComponent(component_name="test", component_id="12345678")
+    assert [datetime(2020, 5, 1)] == component.datetimes_with_new_typehint
+
+    set_property_from_data(
+        component, "datetimes_with_new_typehint", [str(datetime(2020, 5, 2))]
+    )
+
+    assert [datetime(2020, 5, 2)] == component.datetimes_with_new_typehint
+
+
+def test_set_property_from_data_list_datetimes():
+    component = FakeComponent(component_name="test", component_id="12345678")
+    assert [datetime(2020, 6, 1)] == component.datetimes_with_list_typehint
+
+    set_property_from_data(
+        component, "datetimes_with_list_typehint", [str(datetime(2020, 6, 2))]
+    )
+
+    assert [str(datetime(2020, 6, 2))] == component.datetimes_with_list_typehint
 
 
 def test_set_property_from_data_model():
