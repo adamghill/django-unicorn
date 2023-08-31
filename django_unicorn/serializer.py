@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime, timedelta
+from datetime import timedelta
 from decimal import Decimal
 from functools import lru_cache
 from typing import Any, Dict, List, Tuple
@@ -24,7 +24,7 @@ from django.utils.duration import duration_string
 
 import orjson
 
-from .utils import is_non_string_sequence
+from .utils import is_int, is_non_string_sequence
 
 
 try:
@@ -278,14 +278,14 @@ def _fix_floats(current: Dict, data: Dict = None, paths: List = None) -> None:
             _fix_floats(val, data, paths=paths)
             paths.pop()
     elif isinstance(current, list):
-        for (idx, item) in enumerate(current):
+        for idx, item in enumerate(current):
             paths.append(idx)
             _fix_floats(item, data, paths=paths)
             paths.pop()
     elif isinstance(current, float):
         _piece = data
 
-        for (idx, path) in enumerate(paths):
+        for idx, path in enumerate(paths):
             if idx == len(paths) - 1:
                 # `path` can be a dictionary key or list index,
                 # but in either instance it is set the same way
@@ -294,20 +294,31 @@ def _fix_floats(current: Dict, data: Dict = None, paths: List = None) -> None:
                 _piece = _piece[path]
 
 
-@lru_cache(maxsize=128, typed=True)
-def _dumps(
-    serialized_data: bytes, exclude_field_attributes: Tuple[str] = None
-) -> bytes:
+def _sort_dict(data: Dict) -> Dict:
     """
-    Dump serialized data with custom massaging to fix floats and remove specific keys as needed.
+    Recursively sort the dictionary keys so that JavaScript won't change the order
+    and change the generated checksum.
+
+    Params:
+        data: Dictionary to sort.
     """
 
-    dict_data = orjson.loads(serialized_data)
-    _fix_floats(dict_data)
-    _exclude_field_attributes(dict_data, exclude_field_attributes)
+    if type(data) is not dict:
+        return data
 
-    dumped_data = orjson.dumps(dict_data)
-    return dumped_data
+    items = [
+        [k, v]
+        for k, v in sorted(
+            data.items(),
+            key=lambda item: item[0] if not is_int(item[0]) else int(item[0]),
+        )
+    ]
+
+    for item in items:
+        if isinstance(item[1], dict):
+            item[1] = _sort_dict(item[1])
+
+    return dict(items)
 
 
 def _exclude_field_attributes(
@@ -346,8 +357,46 @@ def _exclude_field_attributes(
                     del dict_data[field_name][field_attr]
 
 
+@lru_cache(maxsize=128, typed=True)
+def _dumps(
+    serialized_data: bytes,
+    fix_floats: bool = True,
+    exclude_field_attributes: Tuple[str] = None,
+    sort_dict: bool = True,
+) -> Dict:
+    """
+    Dump serialized data with custom massaging.
+
+    Features:
+       - fix floats
+       - remove specific keys as needed
+       - sort dictionary
+    """
+
+    data = orjson.loads(serialized_data)
+
+    if fix_floats:
+        _fix_floats(data)
+
+    if exclude_field_attributes:
+        # Excluding field attributes needs to de-serialize and then serialize again to
+        # handle complex objects
+        _exclude_field_attributes(data, exclude_field_attributes)
+
+    if sort_dict:
+        # Sort dictionary manually because stringified integers don't get sorted
+        # correctly with `orjson.OPT_SORT_KEYS` and JavaScript will sort the keys
+        # as if they are integers
+        data = _sort_dict(data)
+
+    return data
+
+
 def dumps(
-    data: Dict, fix_floats: bool = True, exclude_field_attributes: Tuple[str] = None
+    data: Dict,
+    fix_floats: bool = True,
+    exclude_field_attributes: Tuple[str] = None,
+    sort_dict: bool = True,
 ) -> str:
     """
     Converts the passed-in dictionary to a string representation.
@@ -360,6 +409,8 @@ def dumps(
             but will be faster without it.
         param exclude_field_attributes: Tuple of strings with field attributes to remove, i.e. "1.2"
             to remove the key `2` from `{"1": {"2": "3"}}`
+        param sort_dict: Whether the `dict` should be sorted. Defaults to `True`, but
+            will be faster without it.
 
     Returns a `str` instead of `bytes` (which deviates from `orjson.dumps`), but seems more useful.
     """
@@ -368,17 +419,17 @@ def dumps(
         exclude_field_attributes
     ), "exclude_field_attributes type needs to be a sequence"
 
+    # Call `dumps` to make sure that complex objects are serialized correctly
     serialized_data = orjson.dumps(data, default=_json_serializer)
 
-    if fix_floats:
-        # Handle excluded field attributes in `_dumps` to reduce the amount of serialization/deserialization needed
-        serialized_data = _dumps(
-            serialized_data, exclude_field_attributes=exclude_field_attributes
-        )
-    elif exclude_field_attributes:
-        dict_data = orjson.loads(serialized_data)
-        _exclude_field_attributes(dict_data, exclude_field_attributes)
-        serialized_data = orjson.dumps(dict_data)
+    data = _dumps(
+        serialized_data,
+        fix_floats=fix_floats,
+        exclude_field_attributes=exclude_field_attributes,
+        sort_dict=sort_dict,
+    )
+
+    serialized_data = orjson.dumps(data)
 
     return serialized_data.decode("utf-8")
 

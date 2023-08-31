@@ -1,4 +1,4 @@
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, Tuple, Union
 
 from django.db.models import Model
 
@@ -9,10 +9,19 @@ from django_unicorn.call_method_parser import (
 )
 from django_unicorn.components import UnicornView
 from django_unicorn.decorators import timed
-from django_unicorn.utils import get_method_arguments, get_type_hints
+from django_unicorn.utils import cast_value, get_method_arguments, get_type_hints
 from django_unicorn.views.action_parsers.utils import set_property_value
 from django_unicorn.views.objects import ComponentRequest, Return
 from django_unicorn.views.utils import set_property_from_data
+
+
+try:
+    from typing import get_origin
+except ImportError:
+
+    def get_origin(type_hint):
+        if hasattr(type_hint, "__origin__"):
+            return type_hint.__origin__
 
 
 def handle(component_request: ComponentRequest, component: UnicornView, payload: Dict):
@@ -109,35 +118,56 @@ def _call_method_name(
     if method_name is not None and hasattr(component, method_name):
         func = getattr(component, method_name)
 
-        if len(args) == 1 or len(kwargs) == 1:
-            arguments = get_method_arguments(func)
-            type_hints = get_type_hints(func)
+        parsed_args = []
+        parsed_kwargs = {}
+        arguments = get_method_arguments(func)
+        type_hints = get_type_hints(func)
 
-            for argument in arguments:
-                if argument in type_hints:
-                    type_hint = type_hints[argument]
+        for argument in arguments:
+            if argument in type_hints:
+                type_hint = type_hints[argument]
 
-                    if isinstance(type_hint, type) and issubclass(type_hint, Model):
-                        DbModel = type_hint
-                        key = "pk"
-                        value = None
+                # Check that the type hint is a regular class or Union
+                # (which will also include Optional)
+                # TODO: Use types.UnionType to handle `|` for newer unions
+                if (
+                    not isinstance(type_hint, type)
+                    and get_origin(type_hint) is not Union
+                ):
+                    continue
 
-                        if args:
-                            value = args[0]
-                        elif kwargs:
-                            kwargs = kwargs.copy()  # no mutation of original
-                            (key, value) = list(kwargs.items())[0]
-                            del kwargs[key]
+                is_model = False
 
-                        model = DbModel.objects.get(**{key: value})
-                        args = [model]
+                try:
+                    is_model = issubclass(type_hint, Model)
+                except TypeError:
+                    pass
 
-        if args and kwargs:
-            return func(*args, **kwargs)
-        elif args:
-            return func(*args, **kwargs)
-        elif kwargs:
-            return func(**kwargs)
+                if is_model:
+                    DbModel = type_hint
+                    key = "pk"
+                    value = None
+
+                    if not kwargs:
+                        value = args[len(parsed_args)]
+                        parsed_args.append(DbModel.objects.get(**{key: value}))
+                    else:
+                        value = kwargs.get("pk")
+                        parsed_kwargs[argument] = DbModel.objects.get(**{key: value})
+
+                elif argument in kwargs:
+                    parsed_kwargs[argument] = cast_value(type_hint, kwargs[argument])
+                else:
+                    parsed_args.append(cast_value(type_hint, args[len(parsed_args)]))
+            elif argument in kwargs:
+                parsed_kwargs[argument] = kwargs[argument]
+            else:
+                parsed_args.append(args[len(parsed_args)])
+
+        if parsed_args:
+            return func(*parsed_args, **parsed_kwargs)
+        elif parsed_kwargs:
+            return func(**parsed_kwargs)
         else:
             return func()
 
@@ -159,7 +189,7 @@ def _get_property_value(component: UnicornView, property_name: str) -> Any:
     property_name_parts = property_name.split(".")
     component_or_field = component
 
-    for (idx, property_name_part) in enumerate(property_name_parts):
+    for idx, property_name_part in enumerate(property_name_parts):
         if hasattr(component_or_field, property_name_part):
             if idx == len(property_name_parts) - 1:
                 return getattr(component_or_field, property_name_part)

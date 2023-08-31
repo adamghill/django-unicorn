@@ -13,7 +13,8 @@ from example.coffee.models import Flavor
 class FakeComponent(UnicornView):
     string = "property_view"
     integer = 99
-    datetime = datetime(2020, 1, 1)
+    datetime_without_typehint = datetime(2020, 1, 1)
+    datetime_with_typehint: datetime = datetime(2020, 2, 1)
     array: List[str] = []
     model = Flavor(name="test-initial")
     queryset = Flavor.objects.none()
@@ -69,11 +70,22 @@ def test_set_property_from_data_int():
 
 def test_set_property_from_data_datetime():
     component = FakeComponent(component_name="test", component_id="12345678")
-    assert datetime(2020, 1, 1) == component.datetime
+    assert datetime(2020, 1, 1) == component.datetime_without_typehint
 
-    set_property_from_data(component, "datetime", datetime(2020, 1, 2))
+    set_property_from_data(component, "datetime_without_typehint", datetime(2020, 1, 2))
 
-    assert datetime(2020, 1, 2) == component.datetime
+    assert datetime(2020, 1, 2) == component.datetime_without_typehint
+
+
+def test_set_property_from_data_datetime_with_typehint():
+    component = FakeComponent(component_name="test", component_id="12345678")
+    assert datetime(2020, 2, 1) == component.datetime_with_typehint
+
+    set_property_from_data(
+        component, "datetime_with_typehint", str(datetime(2020, 2, 2))
+    )
+
+    assert datetime(2020, 2, 2) == component.datetime_with_typehint
 
 
 def test_set_property_from_data_list():

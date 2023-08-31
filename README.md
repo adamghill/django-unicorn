@@ -217,6 +217,7 @@ Thanks to the following wonderful people ([emoji key](https://allcontributors.or
     </tr>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://marteydodoo.com"><img src="https://avatars.githubusercontent.com/u/49076?v=4?s=100" width="100px;" alt="Martey Dodoo"/><br /><sub><b>Martey Dodoo</b></sub></a><br /><a href="https://github.com/adamghill/django-unicorn/commits?author=martey" title="Documentation">📖</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://digitalpinup.art"><img src="https://avatars.githubusercontent.com/u/1392097?v=4?s=100" width="100px;" alt="Pierre"/><br /><sub><b>Pierre</b></sub></a><br /><a href="https://github.com/adamghill/django-unicorn/commits?author=bloodywing" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
