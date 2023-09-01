@@ -14,7 +14,7 @@ keywords = ["django", "python", "javascript", "fullstack"]
 "Funding" = "https://github.com/sponsors/adamghill"
 
 [tool.poetry.dependencies]
-python = ">=3.7,<4"
+python = ">=3.8,<4"
 django = ">=2.2"
 beautifulsoup4 = ">=4.8.0"
 orjson = "^3.6.0"
@@ -32,12 +32,14 @@ furo = { version = "^2021.11.23", optional = true }
 sphinx-copybutton = { version = "^0.4.0", optional = true }
 sphinx-autobuild = { version = "^2021.3.14", optional = true }
 rst2pdf = { version = "^0.98", optional = true }
+six = {version = "^1.16.0", python = "3.8.*"}
 
 [tool.poetry.extras]
 minify = ["htmlmin"]
 docs = ["Sphinx", "linkify-it-py", "myst-parser", "furo", "sphinx-copybutton", "sphinx-autobuild", "rst2pdf"]
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
+certifi = "^2023.7.22"  # needed for GitHub Actions
 pytest = "^6"
 black = "*"
 flake8 = "^3"
@@ -45,7 +47,6 @@ isort = "^5"
 mypy = "<1"
 django-stubs = "^1.5.0"
 pytest-django = "^3"
-bpython = "<1"
 django-mock-queries = "^2.1.5"
 pydantic = "^1.7.3"
 pywatchman = "^1.4.1"
