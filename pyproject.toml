@@ -40,6 +40,7 @@ docs = ["Sphinx", "linkify-it-py", "myst-parser", "furo", "sphinx-copybutton", "
 
 [tool.poetry.group.dev.dependencies]
 certifi = "^2023.7.22"  # needed for GitHub Actions
+keyring = "24.2.0"  # needed for GitHub Actions
 pytest = "^6"
 black = "*"
 flake8 = "^3"
