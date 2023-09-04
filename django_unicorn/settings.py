@@ -76,7 +76,7 @@ def get_minify_html_enabled():
             import htmlmin
         except ModuleNotFoundError:
             logger.error(
-                "MINIFY_HTML is `True`, but minify extra could not be imported. Install with `unicorn[minify]`."
+                "MINIFY_HTML is `True`, but minify extra could not be imported. Install with `django-unicorn[minify]`."
             )
 
             return False
