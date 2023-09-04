@@ -221,6 +221,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "imankulov",
+      "name": "Roman Imankulov",
+      "avatar_url": "https://avatars.githubusercontent.com/u/75075?v=4",
+      "profile": "https://roman.pt",
+      "contributions": [
+        "test"
+      ]
     }
   ],
   "contributorsPerLine": 7,
