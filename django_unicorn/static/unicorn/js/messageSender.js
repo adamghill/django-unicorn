@@ -136,7 +136,7 @@ export function send(component, callback) {
       component.hash = responseJson.hash;
 
       let parent = responseJson.parent || {};
-      const rerenderedComponent = responseJson.dom || {};
+      const rerenderedComponent = responseJson.dom || "";
       const partials = responseJson.partials || [];
       const { checksum } = responseJson;
 

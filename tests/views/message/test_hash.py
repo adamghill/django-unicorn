@@ -8,6 +8,12 @@ from tests.views.message.utils import post_and_get_response
 
 
 class FakeComponentParent(UnicornView):
+    template_name = "templates/test_component_parent.html"
+
+    value: int = 0
+
+
+class FakeComponentParentWithValue(UnicornView):
     template_name = "templates/test_component_parent_with_value.html"
 
     value: int = 0
@@ -250,11 +256,13 @@ def test_message_hash_no_change_but_calls(client):
 
 def test_message_hash_no_change_but_parent(client):
     component_id = shortuuid.uuid()[:8]
-    component = FakeComponentParent(
+    component = FakeComponentParentWithValue(
         component_id=component_id,
-        component_name="tests.views.message.test_hash.FakeComponentParent",
+        component_name="tests.views.message.test_hash.FakeComponentParentWithValue",
     )
     component.render()
+
+    assert component.value == 0
 
     child = component.children[0]
     rendered_child_content = child.render()
