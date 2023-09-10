@@ -6,7 +6,13 @@ from django_unicorn.utils import generate_checksum
 
 
 def post_and_get_response(
-    client, url="", data=None, action_queue=None, component_id=None, hash=None
+    client,
+    url="",
+    data=None,
+    action_queue=None,
+    component_id=None,
+    hash=None,
+    return_response=False,
 ):
     if not data:
         data = {}
@@ -29,6 +35,9 @@ def post_and_get_response(
         message,
         content_type="application/json",
     )
+
+    if return_response:
+        return response
 
     try:
         return response.json()
