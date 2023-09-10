@@ -260,7 +260,7 @@ def _process_component_request(
         key: component_request.data[key] for key in sorted(component_request.data)
     }
 
-    res = {
+    result = {
         "id": component_request.id,
         "data": updated_data,
         "errors": component.errors,
@@ -269,7 +269,7 @@ def _process_component_request(
     }
 
     if partial_doms:
-        res.update({"partials": partial_doms})
+        result.update({"partials": partial_doms})
     else:
         hash = generate_checksum(rendered_component)
 
@@ -277,6 +277,9 @@ def _process_component_request(
             component_request.hash == hash
             and (not return_data or not return_data.value)
             and not component.calls
+            # TODO: Have a strategy to determine when to return a 304 when a component
+            # has a parent by looking closer at their metadata
+            and not component.parent
         ):
             raise RenderNotModified()
 
@@ -284,7 +287,7 @@ def _process_component_request(
         soup = BeautifulSoup(rendered_component, features="html.parser")
         rendered_component = str(get_root_element(soup))
 
-        res.update(
+        result.update(
             {
                 "dom": rendered_component,
                 "hash": hash,
@@ -292,28 +295,28 @@ def _process_component_request(
         )
 
     if return_data:
-        res.update(
+        result.update(
             {
                 "return": return_data.get_data(),
             }
         )
 
         if return_data.redirect:
-            res.update(
+            result.update(
                 {
                     "redirect": return_data.redirect,
                 }
             )
 
         if return_data.poll:
-            res.update(
+            result.update(
                 {
                     "poll": return_data.poll,
                 }
             )
 
     parent_component = component.parent
-    parent_res = res
+    parent_result = result
 
     while parent_component:
         # TODO: Should parent_component.hydrate() be called?
@@ -339,12 +342,12 @@ def _process_component_request(
                 }
             )
 
-        parent_res.update({"parent": parent})
+        parent_result.update({"parent": parent})
         component = parent_component
         parent_component = parent_component.parent
-        parent_res = parent
+        parent_result = parent
 
-    return res
+    return result
 
 
 def _handle_component_request(
