@@ -268,6 +268,8 @@ def _process_component_request(
         "checksum": generate_checksum(str(component_request.data)),
     }
 
+    render_not_modified = False
+
     if partial_doms:
         result.update({"partials": partial_doms})
     else:
@@ -277,13 +279,14 @@ def _process_component_request(
             component_request.hash == hash
             and (not return_data or not return_data.value)
             and not component.calls
-            # TODO: Have a strategy to determine when to return a 304 when a component
-            # has a parent by looking closer at their metadata
-            and not component.parent
         ):
-            raise RenderNotModified()
+            if not component.parent:
+                raise RenderNotModified()
+            else:
+                render_not_modified = True
 
-        # Make sure that partials with comments or blank lines before the root element only return the root element
+        # Make sure that partials with comments or blank lines before the root element
+        # only return the root element
         soup = BeautifulSoup(rendered_component, features="html.parser")
         rendered_component = str(get_root_element(soup))
 
@@ -341,6 +344,16 @@ def _process_component_request(
                     "errors": parent_component.errors,
                 }
             )
+
+        if render_not_modified:
+            # TODO: Determine if all parents have not changed and return a 304 if
+            # that's the case
+            # i.e. render_not_modified = render_not_modified and (parent hash test)
+            pass
+
+        # If there is a parent dom and a child dom, remove the child dom because it is superfluous
+        if parent.get("dom") and result.get("dom"):
+            del result["dom"]
 
         parent_result.update({"parent": parent})
         component = parent_component
