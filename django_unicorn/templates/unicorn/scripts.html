@@ -11,7 +11,7 @@
     reloadScriptElements = true;
   }
 
-  Unicorn.init(url, "{{ CSRF_HEADER_NAME }}", "{{ CSRF_COOKIE_NAME }}", reloadScriptElements);
+  Unicorn.init(url, "{{ CSRF_HEADER_NAME }}", "{{ CSRF_COOKIE_NAME }}", reloadScriptElements, "{{ MORPHER }}");
 </script>
 {% else %}
 <script type="module">
@@ -27,6 +27,6 @@
       reloadScriptElements = true;
     }
 
-    Unicorn.init(url, "{{ CSRF_HEADER_NAME }}", "{{ CSRF_COOKIE_NAME }}", reloadScriptElements);
+    Unicorn.init(url, "{{ CSRF_HEADER_NAME }}", "{{ CSRF_COOKIE_NAME }}", reloadScriptElements, "{{ MORPHER }}");
 </script>
 {% endif %}

@@ -33,6 +33,7 @@ def unicorn_scripts():
         "CSRF_HEADER_NAME": csrf_header_name,
         "CSRF_COOKIE_NAME": csrf_cookie_name,
         "RELOAD_SCRIPT_ELEMENTS": get_setting("RELOAD_SCRIPT_ELEMENTS", False),
+        "MORPHER": get_setting("MORPHER", "morphdom"),
     }
 
 
