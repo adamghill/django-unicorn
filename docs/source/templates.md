@@ -105,7 +105,7 @@ However, setting the same `id` on two elements with the same `unicorn:model` won
 
 ### DOM merging
 
-The JavaScript library used to merge changes in the DOM, `morphdom`, uses an element's `id` to intelligently update DOM elements. If it isn't possible to have an `id` attribute on the element, `unicorn:key` will be used if it is available.
+To merge changes in the DOM, we use an element's `id` to intelligently update DOM elements. If it isn't possible to have an `id` attribute on the element, `unicorn:key` will be used if it is available.
 
 ## Lifecycle events
 

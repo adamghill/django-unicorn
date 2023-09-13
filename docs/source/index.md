@@ -30,6 +30,7 @@ visibility
 messages
 advanced
 queue-requests
+custom-morphers
 ```
 
 ```{toctree}

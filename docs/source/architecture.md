@@ -26,4 +26,4 @@ Actions follow a similar path as the models above, however there is a different 
 
 ## HTML Diff
 
-After the AJAX endpoint returns its response, the newly rendered DOM is merged into the old DOM with `morphdom` and input values are set again based on the new data in the AJAX response.
+After the AJAX endpoint returns its response, the newly rendered DOM is merged into the old DOM and input values are set again based on the new data in the AJAX response. By default, a library called `morphdom` is used to do the diffing and merging of the DOM. However, this can be overridden by setting the `MORPHER` setting to use a different library.
