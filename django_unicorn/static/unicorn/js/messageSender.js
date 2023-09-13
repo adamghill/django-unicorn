@@ -1,5 +1,4 @@
 import { $, getCsrfToken, hasValue, isFunction } from "./utils.js";
-import { getMorphFn } from "./morpher.js";
 
 /**
  * Calls the message endpoint and merges the results into the document.
@@ -171,10 +170,9 @@ export function send(component, callback) {
           }
 
           if (parent.dom) {
-            getMorphFn(component.morpherName)(
+            component.morpher.morph(
               parentComponent.root,
               parent.dom,
-              component.reloadScriptElements,
             );
           }
 
@@ -216,10 +214,9 @@ export function send(component, callback) {
           }
 
           if (targetDom) {
-            getMorphFn(component.morpherName)(
+            component.morpher.morph(
               targetDom,
               partial.dom,
-              component.reloadScriptElements,
             );
           }
         }
@@ -229,10 +226,9 @@ export function send(component, callback) {
           component.refreshChecksum();
         }
       } else {
-        getMorphFn(component.morpherName)(
+        component.morpher.morph(
           component.root,
           rerenderedComponent,
-          component.reloadScriptElements,
         );
       }
 

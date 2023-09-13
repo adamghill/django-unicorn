@@ -26,7 +26,6 @@ export class Component {
     this.messageUrl = args.messageUrl;
     this.csrfTokenHeaderName = args.csrfTokenHeaderName;
     this.csrfTokenCookieName = args.csrfTokenCookieName;
-    this.reloadScriptElements = args.reloadScriptElements;
     this.hash = args.hash;
     this.data = args.data || {};
     this.syncUrl = `${this.messageUrl}/${this.name}`;
@@ -34,7 +33,7 @@ export class Component {
     this.document = args.document || document;
     this.walker = args.walker || walk;
     this.window = args.window || window;
-    this.morpherName = args.morpherName || "morphdom";
+    this.morpher = args.morpher;
 
     this.root = undefined;
     this.modelEls = [];

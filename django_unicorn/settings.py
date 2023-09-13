@@ -35,6 +35,22 @@ def get_cache_alias():
     return get_setting("CACHE_ALIAS", "default")
 
 
+def get_morpher():
+    return get_setting("MORPHER", "morphdom")
+
+
+def get_morpher_options():
+    options = get_setting("MORPHER_OPTIONS", {})
+
+    # Legacy "RELOAD_SCRIPT_ELEMENTS" setting that needs to go to
+    # MORPHER_OPTIONS["RELOAD_SCRIPT_ELEMENTS"].
+    reload_script_elements = get_setting("RELOAD_SCRIPT_ELEMENTS", False)
+    if reload_script_elements:
+        options["RELOAD_SCRIPT_ELEMENTS"] = True
+
+    return options
+
+
 def get_script_location():
     """
     Valid choices: "append", "after". Default is "after".

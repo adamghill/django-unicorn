@@ -3,17 +3,19 @@ import { isEmpty, hasValue } from "./utils.js";
 import { components, lifecycleEvents } from "./store.js";
 
 let messageUrl = "";
-let reloadScriptElements = false;
 let csrfTokenHeaderName = "X-CSRFToken";
 let csrfTokenCookieName = "csrftoken";
-let morpherName = "morphdom";
+let morpher;
 
 /**
  * Initializes the Unicorn object.
+ *
+ * @typedef
  */
-export function init(_messageUrl, _csrfTokenHeaderName, _csrfTokenCookieName, _reloadScriptElements, _morpherName) {
+export function init(_messageUrl, _csrfTokenHeaderName, _csrfTokenCookieName, _morpher) {
+  window.morpher = _morpher;
   messageUrl = _messageUrl;
-  reloadScriptElements = _reloadScriptElements || false;
+  morpher = _morpher;
 
   if (hasValue(_csrfTokenHeaderName)) {
     csrfTokenHeaderName = _csrfTokenHeaderName;
@@ -22,17 +24,11 @@ export function init(_messageUrl, _csrfTokenHeaderName, _csrfTokenCookieName, _r
   if (hasValue(_csrfTokenCookieName)) {
     csrfTokenCookieName = _csrfTokenCookieName;
   }
-
-  if (hasValue(_morpherName)) {
-    morpherName = _morpherName;
-  }
-
   return {
     messageUrl,
     csrfTokenHeaderName,
     csrfTokenCookieName,
-    reloadScriptElements,
-    morpherName,
+    morpher,
   };
 }
 
@@ -43,8 +39,7 @@ export function componentInit(args) {
   args.messageUrl = messageUrl;
   args.csrfTokenHeaderName = csrfTokenHeaderName;
   args.csrfTokenCookieName = csrfTokenCookieName;
-  args.morpherName = morpherName;
-  args.reloadScriptElements = reloadScriptElements;
+  args.morpher = morpher;
 
   const component = new Component(args);
   components[component.id] = component;
