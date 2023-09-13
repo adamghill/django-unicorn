@@ -1,0 +1,63 @@
+{% load unicorn %}
+
+<div>
+    <style>
+        [unicorn\:error\:invalid] {
+            border: 1px solid red !important;
+        }
+        [unicorn\:error\:required] {
+            border: 1px solid red !important;
+        }
+
+        .error {
+            color: red;
+        }
+    </style>
+
+    <div>
+        {% unicorn_errors %}
+
+        <div>
+            <label>Plain text</label>
+            <input unicorn:model="text" type="text" id="textId">
+            {% verbatim %}{{ text }}{% endverbatim %}: {{ text }}
+        </div>
+    
+        <div>
+            <label>Number with validation</label>
+            <input unicorn:model="number" type="text" id="numberId">
+            {% verbatim %}{{ number }}{% endverbatim %}: {{ number }}<br />
+            <button unicorn:click="set_number(1)">set_number(1)</button>
+        </div>
+
+        <div>
+            <label>Datetime attribute with validation</label>
+            <input unicorn:model="date_time" type="text" id="dateTimeId" unicorn:key="dateTime">
+            <span class="error">{{ unicorn.errors.date_time.0.message }}</span>
+
+            <p>
+                {% verbatim %}{{ date_time }}{% endverbatim %}: {{ date_time }}
+            </p>
+            
+            <p>
+                {% verbatim %}{{ date_time|date:"s" }}{% endverbatim %}: {{ date_time|date:"s" }}
+            </p>
+        </div>
+
+        <div>
+            <label>Email</label>
+            <input unicorn:model="email" type="text" id="emailId">
+            {% verbatim %}{{ email }}{% endverbatim %}: {{ email }}
+        </div>
+
+        <div>
+            <a href="blob" unicorn:click.prevent="text='prevent?'">set_text_no_validation()</a>
+            <button unicorn:click="set_text_no_validation">set_text_no_validation()</button>
+            <button unicorn:click="set_text_with_validation">set_text_with_validation()</button>
+            <button unicorn:click="$validate">$validate</button>
+            <button unicorn:click="$reset">$reset</button>
+            <button unicorn:click="$reset()">$reset()</button>
+            <button unicorn:click="$refresh">$refresh</button>
+        </div>
+    </div>
+</div>

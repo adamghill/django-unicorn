@@ -28,6 +28,7 @@ from ..settings import get_setting
 from ..utils import cache_full_tree, is_non_string_sequence, restore_from_cache
 from .fields import UnicornField
 from .unicorn_template_response import UnicornTemplateResponse
+from django.core.exceptions import ValidationError
 
 
 try:
@@ -555,31 +556,27 @@ class UnicornView(TemplateView):
 
         if form:
             form_errors = form.errors.get_json_data(escape_html=True)
+            existing_errors = self.errors
+            self.errors = dict()
+            
+            if form.errors:
+                validate_all_fields = False
+                if hasattr(self, "validate_all"):
+                    validate_all_fields= self.validate_all
 
-            # This code is confusing, but handles this use-case:
-            # the component has two models, one that starts with an error and one
-            # that is valid. Validating the valid one should not show an error for
-            # the invalid one. Only after the invalid field is updated, should the
-            # error show up and persist, even after updating the valid form.
-            if self.errors:
-                keys_to_remove = []
-
-                for key, value in self.errors.items():
-                    if key in form_errors:
-                        self.errors[key] = value
+                for key in form_errors:
+                    if key == "__all__":
+                        self.errors['all'] = form_errors[key]
+                    
+                    if validate_all_fields:
+                        self.errors[key] = form_errors[key]
                     else:
-                        keys_to_remove.append(key)
+                        if key in existing_errors:
+                            self.errors[key] = form_errors[key]
 
-                for key in keys_to_remove:
-                    self.errors.pop(key)
-
-            if model_names is not None:
-                for key, value in form_errors.items():
-                    if key in model_names:
-                        self.errors[key] = value
-            else:
-                self.errors.update(form_errors)
-
+                        if key in model_names:
+                            self.errors[key] = form_errors[key]  
+                    
         return self.errors
 
     @timed
