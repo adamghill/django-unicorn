@@ -6,6 +6,7 @@ import {
 } from "./eventListeners.js";
 import { components, lifecycleEvents } from "./store.js";
 import { send } from "./messageSender.js";
+import { getMorphdomOptions } from "./morphdom/2.6.1/options.js";
 import {
   $,
   hasValue,
@@ -216,9 +217,9 @@ export class Component {
 
             element.actions.forEach((action) => {
               if (this.actionEvents[action.eventType]) {
-                this.actionEvents[action.eventType].push({ action, element });
+                this.actionEvents[action.eventType].push({action, element});
               } else {
-                this.actionEvents[action.eventType] = [{ action, element }];
+                this.actionEvents[action.eventType] = [{action, element}];
 
                 if (
                   !this.attachedEventTypes.some((et) => et === action.eventType)
@@ -244,7 +245,7 @@ export class Component {
   callMethod(methodName, debounceTime, partials, errCallback) {
     const action = {
       type: "callMethod",
-      payload: { name: methodName },
+      payload: {name: methodName},
       partials,
     };
     this.actionQueue.push(action);
@@ -291,7 +292,7 @@ export class Component {
               );
             }
           },
-          { threshold: [element.visibility.threshold] }
+          {threshold: [element.visibility.threshold]}
         );
 
         observer.observe(element.el);
@@ -540,4 +541,46 @@ export class Component {
       }
     });
   }
+
+
+  /**
+   * Morph the component, while
+   */
+  morph(targetDom, rerenderedComponent) {
+    if (!rerenderedComponent) {
+      return
+    }
+
+    // Helper function that returns an array of nodes with an attribute unicorn:id
+    const findUnicorns = () => [...targetDom.querySelectorAll("[unicorn\\:id]")]
+
+    // Find component IDs before morphing
+    const componentIdsBeforeMorph = new Set(findUnicorns().map((el) => el.getAttribute("unicorn:id")))
+
+    // Morph
+    this.morphdom(
+      targetDom,
+      rerenderedComponent,
+      getMorphdomOptions(this.reloadScriptElements),
+    );
+
+    // Find all component IDs after morphing
+    const componentIdsAfterMorph = new Set(findUnicorns().map((el) => el.getAttribute("unicorn:id")));
+
+    // Delete components that were removed
+    const removedComponentIds = [...componentIdsBeforeMorph].filter((id) => !componentIdsAfterMorph.has(id));
+    removedComponentIds.forEach((id) => {
+      Unicorn.deleteComponent(id)
+    });
+
+    // Populate Unicorn with new components
+    findUnicorns().forEach((el) => {
+      Unicorn.insertComponentFromDom(el);
+    });
+  }
+
+  morphRoot(rerenderedComponent) {
+    this.morph(this.root, rerenderedComponent);
+  }
+
 }

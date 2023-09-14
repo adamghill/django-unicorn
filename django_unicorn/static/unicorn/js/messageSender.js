@@ -170,8 +170,7 @@ export function send(component, callback) {
           }
 
           if (parent.dom) {
-            component.morpher.morph(
-              parentComponent.root,
+            parentComponent.morphRoot(
               parent.dom,
             );
           }
@@ -214,7 +213,7 @@ export function send(component, callback) {
           }
 
           if (targetDom) {
-            component.morpher.morph(
+            component.morph(
               targetDom,
               partial.dom,
             );
@@ -226,10 +225,7 @@ export function send(component, callback) {
           component.refreshChecksum();
         }
       } else {
-        component.morpher.morph(
-          component.root,
-          rerenderedComponent,
-        );
+        component.morphRoot(rerenderedComponent);
       }
 
       component.triggerLifecycleEvent("updated");
