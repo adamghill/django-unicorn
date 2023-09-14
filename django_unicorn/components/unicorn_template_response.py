@@ -126,6 +126,7 @@ potentially cause errors in Unicorn."
         root_element["unicorn:name"] = self.component.component_name
         root_element["unicorn:key"] = self.component.component_key
         root_element["unicorn:checksum"] = checksum
+        root_element["unicorn:data"] = frontend_context_variables
 
         # Generate the checksum based on the rendered content (without script tag)
         checksum = generate_checksum(UnicornTemplateResponse._desoupify(soup))
