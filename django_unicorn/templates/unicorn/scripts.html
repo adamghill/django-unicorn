@@ -1,12 +1,12 @@
 {% load static %}
 
-{{ MORPHER_OPTIONS|json_script:"morpher-options" }}
+{{ MORPHER_OPTIONS|json_script:"unicorn:settings:morpher-options" }}
 
 {% if MINIFIED %}
 <script src="{% static 'unicorn/js/unicorn.min.js' %}"></script>
 <script>
   var url = "{% url 'django_unicorn:message' %}";
-  var morpherOptions = JSON.parse(document.getElementById("morpher-options").textContent);
+  var morpherOptions = JSON.parse(document.getElementById("unicorn:settings:morpher-options").textContent);
   var morpher = getMorpher("{{ MORPHER }}", morpherOptions);
   Unicorn.init(url, "{{ CSRF_HEADER_NAME }}", "{{ CSRF_COOKIE_NAME }}", morpher);
 </script>
@@ -18,7 +18,7 @@
   window.Unicorn = Unicorn;
 
   var url = "{% url 'django_unicorn:message' %}";
-  var morpherOptions = JSON.parse(document.getElementById("morpher-options").textContent);
+  var morpherOptions = JSON.parse(document.getElementById("unicorn:settings:morpher-options").textContent);
   var morpher = getMorpher("{{ MORPHER }}", morpherOptions);
   Unicorn.init(url, "{{ CSRF_HEADER_NAME }}", "{{ CSRF_COOKIE_NAME }}", morpher);
 </script>
