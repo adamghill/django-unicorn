@@ -11,7 +11,9 @@ See https://www.django-unicorn.com/docs/custom-morphers/#alpine for more informa
   }
 
   morph(dom, htmlElement) {
-    return window.Alpine.morph(dom, htmlElement, this.getOptions());
+    if (htmlElement) {
+      return window.Alpine.morph(dom, htmlElement, this.getOptions());
+    }
   }
 
   getOptions() {
