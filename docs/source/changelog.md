@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.55.0
+
+- Support `List`/`list` type annotations for component actions and fields ([#582](https://github.com/adamghill/django-unicorn/pull/582)).
+- Fix: calling a method in a parent will have the request available ([#583]https://github.com/adamghill/django-unicorn/pull/583).
+
+**Breaking changes**
+
+- Dropped official support for Python 3.7 because its [end of life was June 27, 2023](https://endoflife.date/python).
+- Dropped official support for Django 2.2 because its [end of life was April 1, 2022](https://endoflife.date/django).
+
 ## 0.54.0
 
 - Coerce type annotated arguments in an action method to the specified type ([#571](https://github.com/adamghill/django-unicorn/pull/571)).

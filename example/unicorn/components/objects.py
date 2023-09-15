@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from decimal import Decimal as D
 from enum import Enum
-from typing import Optional
+from typing import List, Optional
 
 from django.utils.timezone import now
 
@@ -43,10 +43,20 @@ class ObjectsView(UnicornView):
     books = Book.objects.all()
     date_example = now()
     date_example_with_typehint: datetime = now()
+    dates_with_no_typehint = []
+    dates_with_old_typehint: List[datetime] = []
+    dates_with_new_typehint: list[datetime] = []
+    dates_with_list_typehint: list = []
     float_example: float = 1.1
     decimal_example = D("1.1")
     int_example = 4
     color = Color.RED
+
+    def mount(self):
+        self.dates_with_no_typehint = [datetime(2021, 1, 1), datetime(2021, 1, 2)]
+        self.dates_with_old_typehint = [datetime(2022, 2, 1), datetime(2022, 2, 2)]
+        self.dates_with_new_typehint = [datetime(2023, 3, 1), datetime(2023, 3, 2)]
+        self.dates_with_list_typehint = [datetime(2024, 4, 1), datetime(2024, 4, 2)]
 
     def get_date(self):
         self.date_example = now()
