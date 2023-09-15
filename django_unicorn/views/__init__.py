@@ -261,7 +261,7 @@ def _process_component_request(
         key: component_request.data[key] for key in sorted(component_request.data)
     }
 
-    res = {
+    result = {
         "id": component_request.id,
         "data": updated_data,
         "errors": component.errors,
@@ -269,8 +269,10 @@ def _process_component_request(
         "checksum": generate_checksum(str(component_request.data)),
     }
 
+    render_not_modified = False
+
     if partial_doms:
-        res.update({"partials": partial_doms})
+        result.update({"partials": partial_doms})
     else:
         hash = generate_checksum(rendered_component)
 
@@ -279,13 +281,17 @@ def _process_component_request(
             and (not return_data or not return_data.value)
             and not component.calls
         ):
-            raise RenderNotModified()
+            if not component.parent:
+                raise RenderNotModified()
+            else:
+                render_not_modified = True
 
-        # Make sure that partials with comments or blank lines before the root element only return the root element
+        # Make sure that partials with comments or blank lines before the root element
+        # only return the root element
         soup = BeautifulSoup(rendered_component, features="html.parser")
         rendered_component = str(get_root_element(soup))
 
-        res.update(
+        result.update(
             {
                 "dom": rendered_component,
                 "hash": hash,
@@ -293,28 +299,28 @@ def _process_component_request(
         )
 
     if return_data:
-        res.update(
+        result.update(
             {
                 "return": return_data.get_data(),
             }
         )
 
         if return_data.redirect:
-            res.update(
+            result.update(
                 {
                     "redirect": return_data.redirect,
                 }
             )
 
         if return_data.poll:
-            res.update(
+            result.update(
                 {
                     "poll": return_data.poll,
                 }
             )
 
     parent_component = component.parent
-    parent_res = res
+    parent_result = result
 
     while parent_component:
         # TODO: Should parent_component.hydrate() be called?
@@ -340,12 +346,22 @@ def _process_component_request(
                 }
             )
 
-        parent_res.update({"parent": parent})
+        if render_not_modified:
+            # TODO: Determine if all parents have not changed and return a 304 if
+            # that's the case
+            # i.e. render_not_modified = render_not_modified and (parent hash test)
+            pass
+
+        # If there is a parent dom and a child dom, remove the child dom because it is superfluous
+        if parent.get("dom") and result.get("dom"):
+            del result["dom"]
+
+        parent_result.update({"parent": parent})
         component = parent_component
         parent_component = parent_component.parent
-        parent_res = parent
+        parent_result = parent
 
-    return res
+    return result
 
 
 def _handle_component_request(

@@ -46,7 +46,7 @@ def set_property_value(
     component_or_field = component
     data_or_dict = data  # Could be an internal portion of data that gets set
 
-    for (idx, property_name_part) in enumerate(property_name_parts):
+    for idx, property_name_part in enumerate(property_name_parts):
         if hasattr(component_or_field, property_name_part):
             if idx == len(property_name_parts) - 1:
                 if hasattr(component_or_field, "_set_property"):
