@@ -3,6 +3,7 @@ import uuid
 from datetime import timedelta
 from decimal import Decimal
 from typing import Dict
+from types import MappingProxyType
 
 from django.db import models
 from django.utils.timezone import now
@@ -96,6 +97,13 @@ def test_int():
 def test_decimal():
     expected = '{"name":"123.1"}'
     actual = serializer.dumps({"name": Decimal("123.1")})
+
+    assert expected == actual
+
+
+def test_mapping_proxy_type():
+    expected = '{"name":{"id":"123.1"}}'
+    actual = serializer.dumps({"name": MappingProxyType({"id": Decimal("123.1")})})
 
     assert expected == actual
 
