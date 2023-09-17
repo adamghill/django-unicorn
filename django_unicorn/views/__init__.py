@@ -1,8 +1,10 @@
 import copy
 import logging
 from functools import wraps
-from typing import Dict, Sequence
+from typing import Dict, Optional, Sequence
 
+import orjson
+from bs4 import BeautifulSoup
 from django.core.cache import caches
 from django.forms import ValidationError
 from django.http import HttpRequest, JsonResponse
@@ -11,13 +13,14 @@ from django.utils.safestring import mark_safe
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_POST
 
-import orjson
-from bs4 import BeautifulSoup
-
 from django_unicorn.components import UnicornView
 from django_unicorn.components.unicorn_template_response import get_root_element
 from django_unicorn.decorators import timed
-from django_unicorn.errors import RenderNotModified, UnicornCacheError, UnicornViewError
+from django_unicorn.errors import (
+    RenderNotModifiedError,
+    UnicornCacheError,
+    UnicornViewError,
+)
 from django_unicorn.serializer import loads
 from django_unicorn.settings import (
     get_cache_alias,
@@ -28,7 +31,6 @@ from django_unicorn.utils import cache_full_tree, generate_checksum
 from django_unicorn.views.action_parsers import call_method, sync_input
 from django_unicorn.views.objects import ComponentRequest
 from django_unicorn.views.utils import set_property_from_data
-
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -44,7 +46,7 @@ def handle_error(view_func):
             return view_func(*args, **kwargs)
         except UnicornViewError as e:
             return JsonResponse({"error": str(e)})
-        except RenderNotModified:
+        except RenderNotModifiedError:
             return HttpResponseNotModified()
         except AssertionError as e:
             return JsonResponse({"error": str(e)})
@@ -52,9 +54,7 @@ def handle_error(view_func):
     return wraps(view_func)(wrapped_view)
 
 
-def _process_component_request(
-    request: HttpRequest, component_request: ComponentRequest
-) -> Dict:
+def _process_component_request(request: HttpRequest, component_request: ComponentRequest) -> Dict:
     """
     Process a `ComponentRequest`:
         1. construct a Component view
@@ -130,22 +130,19 @@ def _process_component_request(
                 is_reset_called = is_reset_called | _is_reset_called
                 validate_all_fields = validate_all_fields | _validate_all_fields
             except ValidationError as e:
-                assert not hasattr(
-                    e, "error_list"
-                ), "ValidationError must be instantiated with a dictionary"
+                if hasattr(e, "error_list"):
+                    raise AssertionError("ValidationError must be instantiated with a dictionary") from e
 
                 for field, message in e.message_dict.items():
-                    assert e.args[1], "Error code must be specified"
+                    if not e.args[1]:
+                        raise AssertionError("Error code must be specified") from e
+
                     error_code = e.args[1]
 
                     if field in component.errors:
-                        component.errors[field].append(
-                            {"code": error_code, "message": message}
-                        )
+                        component.errors[field].append({"code": error_code, "message": message})
                     else:
-                        component.errors[field] = [
-                            {"code": error_code, "message": message}
-                        ]
+                        component.errors[field] = [{"code": error_code, "message": message}]
         else:
             raise UnicornViewError(f"Unknown action_type '{action.action_type}'")
 
@@ -166,7 +163,7 @@ def _process_component_request(
     for field_name in safe_fields:
         value = getattr(component, field_name)
         if isinstance(value, str):
-            setattr(component, field_name, mark_safe(value))
+            setattr(component, field_name, mark_safe(value))  # noqa: S308
 
     # Send back all available data for reset or refresh actions
     updated_data = component_request.data
@@ -191,9 +188,7 @@ def _process_component_request(
         # and make sure they get stored for the next page load instead of getting rendered
         # by the component
         try:
-            request_queued_messages = copy.deepcopy(
-                component.request._messages._queued_messages
-            )
+            request_queued_messages = copy.deepcopy(component.request._messages._queued_messages)
             component.request._messages._queued_messages = []
         except AttributeError as e:
             logger.warning(e)
@@ -237,14 +232,12 @@ def _process_component_request(
                 if target:
                     only_id = True
 
-            assert target, "Partial target is required"
+            if not target:
+                raise AssertionError("Partial target is required")
 
             if not only_id:
                 for element in soup.find_all():
-                    if (
-                        "unicorn:key" in element.attrs
-                        and element.attrs["unicorn:key"] == target
-                    ):
+                    if "unicorn:key" in element.attrs and element.attrs["unicorn:key"] == target:
                         partial_doms.append({"key": target, "dom": str(element)})
                         partial_found = True
                         break
@@ -256,9 +249,7 @@ def _process_component_request(
                         partial_found = True
                         break
 
-    component_request.data = {
-        key: component_request.data[key] for key in sorted(component_request.data)
-    }
+    component_request.data = {key: component_request.data[key] for key in sorted(component_request.data)}
 
     result = {
         "id": component_request.id,
@@ -273,15 +264,11 @@ def _process_component_request(
     if partial_doms:
         result.update({"partials": partial_doms})
     else:
-        hash = generate_checksum(rendered_component)
+        checksum = generate_checksum(rendered_component)
 
-        if (
-            component_request.hash == hash
-            and (not return_data or not return_data.value)
-            and not component.calls
-        ):
+        if component_request.hash == checksum and (not return_data or not return_data.value) and not component.calls:
             if not component.parent:
-                raise RenderNotModified()
+                raise RenderNotModifiedError()
             else:
                 render_not_modified = True
 
@@ -293,7 +280,7 @@ def _process_component_request(
         result.update(
             {
                 "dom": rendered_component,
-                "hash": hash,
+                "hash": checksum,
             }
         )
 
@@ -323,9 +310,7 @@ def _process_component_request(
 
     while parent_component:
         # TODO: Should parent_component.hydrate() be called?
-        parent_frontend_context_variables = loads(
-            parent_component.get_frontend_context_variables()
-        )
+        parent_frontend_context_variables = loads(parent_component.get_frontend_context_variables())
         parent_checksum = generate_checksum(str(parent_frontend_context_variables))
 
         parent = {
@@ -363,9 +348,7 @@ def _process_component_request(
     return result
 
 
-def _handle_component_request(
-    request: HttpRequest, component_request: ComponentRequest
-) -> Dict:
+def _handle_component_request(request: HttpRequest, component_request: ComponentRequest) -> Dict:
     """
     Process a `ComponentRequest` by adding it to the cache and then either:
         - processing all of the component requests in the cache and returning the resulting value if
@@ -415,14 +398,10 @@ def _handle_component_request(
             "original_epoch": original_epoch,
         }
 
-    return _handle_queued_component_requests(
-        request, component_request.name, queue_cache_key
-    )
+    return _handle_queued_component_requests(request, queue_cache_key)
 
 
-def _handle_queued_component_requests(
-    request: HttpRequest, component_name: str, queue_cache_key
-) -> Dict:
+def _handle_queued_component_requests(request: HttpRequest, queue_cache_key) -> Dict:
     """
     Process the current component requests that are stored in cache.
     Also recursively checks for new requests that might have happened
@@ -431,7 +410,6 @@ def _handle_queued_component_requests(
 
     Args:
         param request: HttpRequest for the view.
-        param: component_name: Name of the component, e.g. "hello-world".
         param: queue_cache_key: Cache key created from component id which should be unique
             for any particular user's request lifecycle.
 
@@ -460,7 +438,7 @@ def _handle_queued_component_requests(
     try:
         # Can't store request on a `ComponentRequest` and cache it because `HttpRequest` isn't pickleable
         first_json_result = _process_component_request(request, first_component_request)
-    except RenderNotModified:
+    except RenderNotModifiedError:
         # Catching this and re-raising, but need the finally clause to clear the cache
         raise
     finally:
@@ -483,9 +461,7 @@ def _handle_queued_component_requests(
         for additional_component_request in copy.deepcopy(component_requests):
             if merged_component_request:
                 # Add new component request action queue to the merged component request
-                merged_component_request.action_queue.extend(
-                    additional_component_request.action_queue
-                )
+                merged_component_request.action_queue.extend(additional_component_request.action_queue)
 
                 # Originally, the thought was to merge the `additional_component_request.data` into
                 # the `merged_component_request.data`, but I can't figure out a way to do that in a sane
@@ -506,9 +482,7 @@ def _handle_queued_component_requests(
                 timeout=get_serial_timeout(),
             )
 
-        merged_json_result = _handle_component_request(
-            request, merged_component_request
-        )
+        merged_json_result = _handle_component_request(request, merged_component_request)
 
         return merged_json_result
 
@@ -519,7 +493,7 @@ def _handle_queued_component_requests(
 @handle_error
 @csrf_protect
 @require_POST
-def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
+def message(request: HttpRequest, component_name: Optional[str] = None) -> JsonResponse:
     """
     Endpoint that instantiates the component and does the correct action
     (set an attribute or call a method) depending on the JSON payload in the body.
@@ -540,7 +514,8 @@ def message(request: HttpRequest, component_name: str = None) -> JsonResponse:
         }
     """
 
-    assert component_name, "Missing component name in url"
+    if not component_name:
+        raise AssertionError("Missing component name in url")
 
     component_request = ComponentRequest(request, component_name)
     json_result = _handle_component_request(request, component_request)

@@ -123,7 +123,7 @@ def test_list_args():
 
 
 def test_datetime():
-    expected = datetime(2020, 9, 12, 1, 1, 1)
+    expected = datetime(2020, 9, 12, 1, 1, 1)  # noqa: DTZ001
     actual = eval_value("2020-09-12T01:01:01")
 
     assert actual == expected

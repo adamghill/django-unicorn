@@ -67,9 +67,7 @@ class ObjectsView(UnicornView):
         self.date_example = dt
 
     def add_hour(self):
-        self.date_example_with_typehint = self.date_example_with_typehint + timedelta(
-            hours=1
-        )
+        self.date_example_with_typehint = self.date_example_with_typehint + timedelta(hours=1)
 
     def set_dictionary(self, val):
         self.dictionary = val

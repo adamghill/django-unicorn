@@ -1,12 +1,11 @@
 import re
 
+import pytest
 from django.template import Context
 from django.template.base import Parser, Token, TokenType
 
-import pytest
-
 from django_unicorn.components import UnicornView
-from django_unicorn.errors import ComponentNotValid
+from django_unicorn.errors import ComponentNotValidError
 from django_unicorn.templatetags.unicorn import unicorn
 from django_unicorn.utils import generate_checksum
 from example.coffee.models import Flavor
@@ -98,10 +97,7 @@ def test_unicorn_template_renders(client):
     assert response.wsgi_request.path == "/test"
     assert "WSGIRequest" in content
     assert content.startswith("<div unicorn:id")
-    assert (
-        'unicorn:name="tests.templatetags.test_unicorn_render.FakeComponentKwargs"'
-        in content
-    )
+    assert 'unicorn:name="tests.templatetags.test_unicorn_render.FakeComponentKwargs"' in content
     assert '<script type="application/json" id="unicorn:data:' in content
 
 
@@ -111,14 +107,8 @@ def test_unicorn_template_renders_with_parent_and_child(client):
 
     assert response.wsgi_request.path == "/test-parent"
     assert content.startswith("<div unicorn:id")
-    assert (
-        'unicorn:name="tests.templatetags.test_unicorn_render.FakeComponentParent"'
-        in content
-    )
-    assert (
-        'unicorn:name="tests.templatetags.test_unicorn_render.FakeComponentChild"'
-        in content
-    )
+    assert 'unicorn:name="tests.templatetags.test_unicorn_render.FakeComponentParent"' in content
+    assert 'unicorn:name="tests.templatetags.test_unicorn_render.FakeComponentChild"' in content
     assert "--parent--" in content
     assert "==child==" in content
     assert '<script type="application/json" id="unicorn:data:' in content
@@ -130,14 +120,8 @@ def test_unicorn_template_renders_with_parent_and_child_with_templateview(client
 
     assert response.wsgi_request.path == "/test-parent-template"
     assert content.startswith("<div unicorn:id")
-    assert (
-        'unicorn:name="tests.templatetags.test_unicorn_render.FakeComponentParent"'
-        in content
-    )
-    assert (
-        'unicorn:name="tests.templatetags.test_unicorn_render.FakeComponentChild"'
-        in content
-    )
+    assert 'unicorn:name="tests.templatetags.test_unicorn_render.FakeComponentParent"' in content
+    assert 'unicorn:name="tests.templatetags.test_unicorn_render.FakeComponentChild"' in content
     assert "--parent--" in content
     assert "==child==" in content
     assert '<script type="application/json" id="unicorn:data:' in content
@@ -149,14 +133,8 @@ def test_unicorn_template_renders_with_implicit_parent_and_child(client):
 
     assert response.wsgi_request.path == "/test-parent-implicit"
     assert content.startswith("<div unicorn:id")
-    assert (
-        'unicorn:name="tests.templatetags.test_unicorn_render.FakeComponentParentImplicit"'
-        in content
-    )
-    assert (
-        'unicorn:name="tests.templatetags.test_unicorn_render.FakeComponentChildImplicit"'
-        in content
-    )
+    assert 'unicorn:name="tests.templatetags.test_unicorn_render.FakeComponentParentImplicit"' in content
+    assert 'unicorn:name="tests.templatetags.test_unicorn_render.FakeComponentChildImplicit"' in content
     assert "--parent--" in content
     assert "==child==" in content
     assert "has_parent:True" in content
@@ -223,10 +201,7 @@ def test_unicorn_render_parent(settings):
     unicorn_node.render(Context(context))
 
     assert unicorn_node.parent
-    assert (
-        unicorn_node.component_id
-        == "asdf:tests.templatetags.test_unicorn_render.FakeComponentKwargs"
-    )
+    assert unicorn_node.component_id == "asdf:tests.templatetags.test_unicorn_render.FakeComponentKwargs"
 
 
 def test_unicorn_render_parent_with_key(settings):
@@ -240,10 +215,7 @@ def test_unicorn_render_parent_with_key(settings):
     context = {"view": view}
     unicorn_node.render(Context(context))
 
-    assert (
-        unicorn_node.component_id
-        == "asdf:tests.templatetags.test_unicorn_render.FakeComponentKwargs:blob"
-    )
+    assert unicorn_node.component_id == "asdf:tests.templatetags.test_unicorn_render.FakeComponentKwargs:blob"
 
 
 def test_unicorn_render_parent_with_id(settings):
@@ -257,10 +229,7 @@ def test_unicorn_render_parent_with_id(settings):
     context = {"view": view}
     unicorn_node.render(Context(context))
 
-    assert (
-        unicorn_node.component_id
-        == "asdf:tests.templatetags.test_unicorn_render.FakeComponentKwargs:flob"
-    )
+    assert unicorn_node.component_id == "asdf:tests.templatetags.test_unicorn_render.FakeComponentKwargs:flob"
 
 
 def test_unicorn_render_parent_with_pk(settings):
@@ -274,10 +243,7 @@ def test_unicorn_render_parent_with_pk(settings):
     context = {"view": view}
     unicorn_node.render(Context(context))
 
-    assert (
-        unicorn_node.component_id
-        == "asdf:tests.templatetags.test_unicorn_render.FakeComponentKwargs:99"
-    )
+    assert unicorn_node.component_id == "asdf:tests.templatetags.test_unicorn_render.FakeComponentKwargs:99"
 
 
 def test_unicorn_render_parent_with_model_id(settings):
@@ -292,10 +258,7 @@ def test_unicorn_render_parent_with_model_id(settings):
     context = {"view": view, "model": FakeModel()}
     unicorn_node.render(Context(context))
 
-    assert (
-        unicorn_node.component_id
-        == "asdf:tests.templatetags.test_unicorn_render.FakeComponentKwargs:178"
-    )
+    assert unicorn_node.component_id == "asdf:tests.templatetags.test_unicorn_render.FakeComponentKwargs:178"
 
 
 @pytest.mark.django_db
@@ -313,10 +276,7 @@ def test_unicorn_render_parent_with_model_pk(settings):
     context = {"view": view, "model": flavor}
     unicorn_node.render(Context(context))
 
-    assert (
-        unicorn_node.component_id
-        == "asdf:tests.templatetags.test_unicorn_render.FakeComponentKwargs:187"
-    )
+    assert unicorn_node.component_id == "asdf:tests.templatetags.test_unicorn_render.FakeComponentKwargs:187"
 
 
 def test_unicorn_render_id_use_pk():
@@ -502,10 +462,10 @@ def test_unicorn_render_with_invalid_component_name_from_context():
     unicorn_node = unicorn(Parser([]), token)
     context = {"component_name": "tests.templatetags.test_unicorn_render.FakeComponent"}
 
-    with pytest.raises(ComponentNotValid) as e:
+    with pytest.raises(ComponentNotValidError) as e:
         unicorn_node.render(Context(context))
 
     assert (
         e.exconly()
-        == "django_unicorn.errors.ComponentNotValid: Component template is not valid: bad_component_name."
+        == "django_unicorn.errors.ComponentNotValidError: Component template is not valid: bad_component_name."
     )

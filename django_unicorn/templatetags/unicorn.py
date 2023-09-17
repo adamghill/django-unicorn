@@ -1,16 +1,17 @@
-from typing import Dict, List
+from typing import Dict, List, Optional
 
+import shortuuid
 from django import template
 from django.conf import settings
 from django.template.base import FilterExpression
 
-import shortuuid
-
-from django_unicorn.call_method_parser import InvalidKwarg, parse_kwarg
-from django_unicorn.errors import ComponentNotValid
-
+from django_unicorn.call_method_parser import InvalidKwargError, parse_kwarg
+from django_unicorn.errors import ComponentNotValidError
 
 register = template.Library()
+
+
+MINIMUM_ARGUMENT_COUNT = 2
 
 
 @register.inclusion_tag("unicorn/scripts.html")
@@ -43,10 +44,8 @@ def unicorn_errors(context):
 def unicorn(parser, token):
     contents = token.split_contents()
 
-    if len(contents) < 2:
-        raise template.TemplateSyntaxError(
-            "%r tag requires at least a single argument" % token.contents.split()[0]
-        )
+    if len(contents) < MINIMUM_ARGUMENT_COUNT:
+        raise template.TemplateSyntaxError("%r tag requires at least a single argument" % token.contents.split()[0])
 
     component_name = parser.compile_filter(contents[1])
 
@@ -57,7 +56,7 @@ def unicorn(parser, token):
         try:
             parsed_kwarg = parse_kwarg(arg)
             kwargs.update(parsed_kwarg)
-        except InvalidKwarg:
+        except InvalidKwargError:
             # Assume it's an arg if invalid kwarg and kwargs is empty
             if not kwargs:
                 args.append(arg)
@@ -67,7 +66,10 @@ def unicorn(parser, token):
 
 class UnicornNode(template.Node):
     def __init__(
-        self, component_name: FilterExpression, args: List = None, kwargs: Dict = None
+        self,
+        component_name: FilterExpression,
+        args: Optional[List] = None,
+        kwargs: Optional[Dict] = None,
     ):
         self.component_name = component_name
         self.args = args if args is not None else []
@@ -81,7 +83,7 @@ class UnicornNode(template.Node):
         if hasattr(context, "request"):
             request = context.request
 
-        from ..components import UnicornView
+        from django_unicorn.components import UnicornView
 
         resolved_args = []
 
@@ -95,17 +97,11 @@ class UnicornNode(template.Node):
             try:
                 resolved_value = template.Variable(value).resolve(context)
 
-                if (
-                    key == "parent"
-                    and value == "view"
-                    and not isinstance(resolved_value, UnicornView)
-                ):
+                if key == "parent" and value == "view" and not isinstance(resolved_value, UnicornView):
                     # Handle rendering a parent component from a template that is called from
                     # a `TemplateView`; for some reason `view` is clobbered in this instance, but
                     # the `unicorn` dictionary has enough data to instantiate a `UnicornView`
-                    parent_component_data = template.Variable("unicorn").resolve(
-                        context
-                    )
+                    parent_component_data = template.Variable("unicorn").resolve(context)
 
                     resolved_value = UnicornView(
                         component_name=parent_component_data.get("component_name"),
@@ -122,9 +118,7 @@ class UnicornNode(template.Node):
                     pk_val = value.replace(".id", ".pk")
 
                     try:
-                        resolved_kwargs.update(
-                            {key: template.Variable(pk_val).resolve(context)}
-                        )
+                        resolved_kwargs.update({key: template.Variable(pk_val).resolve(context)})
                     except TypeError:
                         resolved_kwargs.update({key: value})
                     except template.VariableDoesNotExist:
@@ -139,9 +133,7 @@ class UnicornNode(template.Node):
             # if there is no explicit parent, but this node is rendering under an existing
             # unicorn template, set that as the parent
             try:
-                implicit_parent = template.Variable("unicorn.component").resolve(
-                    context
-                )
+                implicit_parent = template.Variable("unicorn.component").resolve(context)
                 if implicit_parent:
                     self.parent = implicit_parent
             except template.VariableDoesNotExist:
@@ -151,10 +143,8 @@ class UnicornNode(template.Node):
 
         try:
             component_name = self.component_name.resolve(context)
-        except AttributeError:
-            raise ComponentNotValid(
-                f"Component template is not valid: {self.component_name}."
-            )
+        except AttributeError as e:
+            raise ComponentNotValidError(f"Component template is not valid: {self.component_name}.") from e
 
         if self.parent:
             # Child components use the parent for part of the `component_id`

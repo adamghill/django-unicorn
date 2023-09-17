@@ -31,7 +31,10 @@ jobs:
         run: poetry install
 
       - name: black check
-        run: poetry run black . --check --extend-exclude migrations
+        run: poetry run black . --check
+
+      - name: ruff check
+        run: poetry run ruff .
 
       - name: Run all tests
         run: poetry run nox

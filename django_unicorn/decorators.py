@@ -1,9 +1,8 @@
 import logging
 import time
 
-from django.conf import settings
-
 from decorator import decorator
+from django.conf import settings
 
 
 @decorator
@@ -29,7 +28,7 @@ def timed(func, *args, **kwargs):
 
     for kwarg_key, kwarg_val in kwargs.items():
         if isinstance(kwarg_val, str):
-            kwarg_val = f"'{kwarg_val}'"
+            kwarg_val = f"'{kwarg_val}'"  # noqa: PLW2901
 
         arguments = f"{arguments}{kwarg_key}={kwarg_val}, "
 

@@ -1,10 +1,9 @@
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List
 
-from django.db.models import Model, QuerySet
-
 import pytest
+from django.db.models import Model, QuerySet
 
 from django_unicorn.components import QuerySetType, UnicornView
 from django_unicorn.views.utils import set_property_from_data
@@ -14,18 +13,18 @@ from example.coffee.models import Flavor
 class FakeComponent(UnicornView):
     string = "property_view"
     integer = 99
-    datetime_without_typehint = datetime(2020, 1, 1)
-    datetime_with_typehint: datetime = datetime(2020, 2, 1)
-    array: List[str] = []
+    datetime_without_typehint = datetime(2020, 1, 1, tzinfo=timezone.utc)
+    datetime_with_typehint: datetime = datetime(2020, 2, 1, tzinfo=timezone.utc)
+    array: List[str] = []  # noqa: RUF012
     model = Flavor(name="test-initial")
     queryset = Flavor.objects.none()
-    queryset_with_typehint: QuerySetType[Flavor] = []
-    datetimes = [datetime(2020, 3, 1)]
-    datetimes_with_old_typehint: List[datetime] = [datetime(2020, 4, 1)]
-    datetimes_with_list_typehint: list = [datetime(2020, 6, 1)]
+    queryset_with_typehint: QuerySetType[Flavor] = []  # noqa: RUF012
+    datetimes = [datetime(2020, 3, 1, tzinfo=timezone.utc)]  # noqa: RUF012
+    datetimes_with_old_typehint: List[datetime] = [datetime(2020, 4, 1, tzinfo=timezone.utc)]  # noqa: RUF012
+    datetimes_with_list_typehint: list = [datetime(2020, 6, 1, tzinfo=timezone.utc)]  # noqa: RUF012
 
     try:
-        datetimes_with_new_typehint: list[datetime] = [datetime(2020, 5, 1)]
+        datetimes_with_new_typehint: list[datetime] = [datetime(2020, 5, 1, tzinfo=timezone.utc)]
     except TypeError:
         datetimes_with_new_typehint: None
 
@@ -37,7 +36,7 @@ class FakeQuerySetComponent(UnicornView):
 class FakeDbComponent(UnicornView):
     queryset_with_data = Flavor.objects.none()
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, **kwargs):
         flavor = Flavor(pk=1, name="initial-test-data")
         flavor.save()
         self.queryset_with_data = Flavor.objects.filter()[:1]
@@ -45,7 +44,7 @@ class FakeDbComponent(UnicornView):
 
 
 class FakeAllQuerySetComponent(UnicornView):
-    queryset_with_empty_list: QuerySetType[Flavor] = []
+    queryset_with_empty_list: QuerySetType[Flavor] = []  # noqa: RUF012
     queryset_with_none: QuerySetType[Flavor] = None
     queryset_with_empty_queryset: QuerySetType[Flavor] = Flavor.objects.none()
     queryset_with_no_typehint = Flavor.objects.none()
@@ -79,22 +78,28 @@ def test_set_property_from_data_int():
 
 def test_set_property_from_data_datetime():
     component = FakeComponent(component_name="test", component_id="12345678")
-    assert datetime(2020, 1, 1) == component.datetime_without_typehint
+    assert datetime(2020, 1, 1, tzinfo=timezone.utc) == component.datetime_without_typehint
 
-    set_property_from_data(component, "datetime_without_typehint", datetime(2020, 1, 2))
+    set_property_from_data(
+        component,
+        "datetime_without_typehint",
+        datetime(2020, 1, 2, tzinfo=timezone.utc),
+    )
 
-    assert datetime(2020, 1, 2) == component.datetime_without_typehint
+    assert datetime(2020, 1, 2, tzinfo=timezone.utc) == component.datetime_without_typehint
 
 
 def test_set_property_from_data_datetime_with_typehint():
     component = FakeComponent(component_name="test", component_id="12345678")
-    assert datetime(2020, 2, 1) == component.datetime_with_typehint
+    assert datetime(2020, 2, 1, tzinfo=timezone.utc) == component.datetime_with_typehint
 
     set_property_from_data(
-        component, "datetime_with_typehint", str(datetime(2020, 2, 2))
+        component,
+        "datetime_with_typehint",
+        str(datetime(2020, 2, 2, tzinfo=timezone.utc)),
     )
 
-    assert datetime(2020, 2, 2) == component.datetime_with_typehint
+    assert datetime(2020, 2, 2, tzinfo=timezone.utc) == component.datetime_with_typehint
 
 
 def test_set_property_from_data_list():
@@ -111,48 +116,54 @@ def test_set_property_from_data_list():
 
 def test_set_property_from_data_list_datetimes():
     component = FakeComponent(component_name="test", component_id="12345678")
-    assert [datetime(2020, 3, 1)] == component.datetimes
+    assert [datetime(2020, 3, 1, tzinfo=timezone.utc)] == component.datetimes
 
-    set_property_from_data(component, "datetimes", [str(datetime(2020, 3, 2))])
+    set_property_from_data(component, "datetimes", [str(datetime(2020, 3, 2, tzinfo=timezone.utc))])
 
-    assert [str(datetime(2020, 3, 2))] == component.datetimes
+    assert [str(datetime(2020, 3, 2, tzinfo=timezone.utc))] == component.datetimes
 
 
 def test_set_property_from_data_list_datetimes_with_old_typehint():
     component = FakeComponent(component_name="test", component_id="12345678")
-    assert [datetime(2020, 4, 1)] == component.datetimes_with_old_typehint
+    assert [datetime(2020, 4, 1, tzinfo=timezone.utc)] == component.datetimes_with_old_typehint
 
     set_property_from_data(
-        component, "datetimes_with_old_typehint", [str(datetime(2020, 4, 2))]
+        component,
+        "datetimes_with_old_typehint",
+        [str(datetime(2020, 4, 2, tzinfo=timezone.utc))],
     )
 
-    assert [datetime(2020, 4, 2)] == component.datetimes_with_old_typehint
+    assert [datetime(2020, 4, 2, tzinfo=timezone.utc)] == component.datetimes_with_old_typehint
 
 
 @pytest.mark.skipif(
-    sys.version_info.major == 3 and sys.version_info.minor <= 8,
+    sys.version_info.major == 3 and sys.version_info.minor <= 8,  # noqa: YTT204
     reason="Skip new type hints for Python 3.8 or less",
 )
 def test_set_property_from_data_list_datetimes_with_new_typehint():
     component = FakeComponent(component_name="test", component_id="12345678")
-    assert [datetime(2020, 5, 1)] == component.datetimes_with_new_typehint
+    assert [datetime(2020, 5, 1, tzinfo=timezone.utc)] == component.datetimes_with_new_typehint
 
     set_property_from_data(
-        component, "datetimes_with_new_typehint", [str(datetime(2020, 5, 2))]
+        component,
+        "datetimes_with_new_typehint",
+        [str(datetime(2020, 5, 2, tzinfo=timezone.utc))],
     )
 
-    assert [datetime(2020, 5, 2)] == component.datetimes_with_new_typehint
+    assert [datetime(2020, 5, 2, tzinfo=timezone.utc)] == component.datetimes_with_new_typehint
 
 
 def test_set_property_from_data_list_datetimes_with_list_typehint():
     component = FakeComponent(component_name="test", component_id="12345678")
-    assert [datetime(2020, 6, 1)] == component.datetimes_with_list_typehint
+    assert [datetime(2020, 6, 1, tzinfo=timezone.utc)] == component.datetimes_with_list_typehint
 
     set_property_from_data(
-        component, "datetimes_with_list_typehint", [str(datetime(2020, 6, 2))]
+        component,
+        "datetimes_with_list_typehint",
+        [str(datetime(2020, 6, 2, tzinfo=timezone.utc))],
     )
 
-    assert [str(datetime(2020, 6, 2))] == component.datetimes_with_list_typehint
+    assert [str(datetime(2020, 6, 2, tzinfo=timezone.utc))] == component.datetimes_with_list_typehint
 
 
 def test_set_property_from_data_model():
@@ -180,9 +191,7 @@ def test_set_property_from_data_queryset():
     component = FakeDbComponent(component_name="test", component_id="12345678")
     assert len(component.queryset_with_data) == 1
 
-    set_property_from_data(
-        component, "queryset_with_data", [{"pk": 1, "name": "test-qs"}]
-    )
+    set_property_from_data(component, "queryset_with_data", [{"pk": 1, "name": "test-qs"}])
 
     component_queryset_field_asserts(component, "queryset_with_data")
 
@@ -219,12 +228,8 @@ def test_set_property_from_data_all_querysets():
 
     set_property_from_data(component, "queryset_with_empty_list", [{"name": "test-qs"}])
     set_property_from_data(component, "queryset_with_none", [{"name": "test-qs"}])
-    set_property_from_data(
-        component, "queryset_with_empty_queryset", [{"name": "test-qs"}]
-    )
-    set_property_from_data(
-        component, "queryset_with_no_typehint", [{"name": "test-qs"}]
-    )
+    set_property_from_data(component, "queryset_with_empty_queryset", [{"name": "test-qs"}])
+    set_property_from_data(component, "queryset_with_no_typehint", [{"name": "test-qs"}])
 
     component_queryset_field_asserts(component, "queryset_with_empty_list")
     component_queryset_field_asserts(component, "queryset_with_none")

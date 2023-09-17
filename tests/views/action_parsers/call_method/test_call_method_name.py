@@ -1,6 +1,6 @@
 from datetime import date, datetime, time, timedelta
 from types import MappingProxyType
-from typing import Union
+from typing import Optional, Union
 from uuid import UUID, uuid4
 
 import pytest
@@ -24,18 +24,18 @@ class FakeComponent(UnicornView):
     def save(self):
         return 1
 
-    def save_with_arg(self, id):
+    def save_with_arg(self, id):  # noqa: A002
         return 1 + id
 
-    def save_with_kwarg(self, id=0):
+    def save_with_kwarg(self, id=0):  # noqa: A002
         return 1 + id
 
     def save_with_model(self, model: Flavor):
         assert issubclass(type(model), Flavor), "model arg should be a `Flavor` model"
         return model.pk
 
-    def save_with_union(self, id: Union[int, str]):
-        assert isinstance(id, int) or isinstance(id, str)
+    def save_with_union(self, id: Union[int, str]):  # noqa: A002
+        assert isinstance(id, (int, str))
         return id
 
     def get_datetime_without_type_hint(self, _datetime):
@@ -56,7 +56,7 @@ class FakeComponent(UnicornView):
     def get_time(self, _time: time):
         return _time
 
-    def get_duration_and_time(self, _duration: timedelta = None, _time: time = None):
+    def get_duration_and_time(self, _duration: Optional[timedelta] = None, _time: Optional[time] = None):
         return (_duration, _time)
 
     def get_uuid(self, _uuid: UUID):
@@ -71,7 +71,7 @@ class FakeComponent(UnicornView):
 
 def test_call_method_name_missing():
     component = FakeComponent(component_name="test", component_id="asdf")
-    actual = _call_method_name(component, "save_missing", args=tuple(), kwargs={})
+    actual = _call_method_name(component, "save_missing", args=(), kwargs={})
 
     assert actual is None
 
@@ -80,7 +80,7 @@ def test_call_method_name_no_params():
     expected = 1
 
     component = FakeComponent(component_name="test", component_id="asdf")
-    actual = _call_method_name(component, "save", args=tuple(), kwargs={})
+    actual = _call_method_name(component, "save", args=(), kwargs={})
 
     assert actual == expected
 
@@ -98,9 +98,7 @@ def test_call_method_name_with_kwarg():
     expected = 3
 
     component = FakeComponent(component_name="test", component_id="asdf")
-    actual = _call_method_name(
-        component, "save_with_kwarg", args=tuple(), kwargs=MappingProxyType({"id": 2})
-    )
+    actual = _call_method_name(component, "save_with_kwarg", args=(), kwargs=MappingProxyType({"id": 2}))
 
     assert actual == expected
 
@@ -111,9 +109,7 @@ def test_call_method_name_arg_with_model_type_annotation():
     flavor.save()
 
     component = FakeComponent(component_name="test", component_id="asdf")
-    actual = _call_method_name(
-        component, "save_with_model", args=(flavor.pk,), kwargs={}
-    )
+    actual = _call_method_name(component, "save_with_model", args=(flavor.pk,), kwargs={})
 
     assert actual == flavor.pk
 
@@ -129,27 +125,19 @@ def test_call_method_name_arg_with_model_type_annotation_multiple():
     assert flavor_one.pk != flavor_two.pk
 
     component = FakeComponent(component_name="test", component_id="asdf")
-    actual = _call_method_name(
-        component, "save_with_model", args=(flavor_one.pk,), kwargs={}
-    )
+    actual = _call_method_name(component, "save_with_model", args=(flavor_one.pk,), kwargs={})
     assert actual == flavor_one.pk
 
     # second call
-    actual = _call_method_name(
-        component, "save_with_model", args=(flavor_two.pk,), kwargs={}
-    )
+    actual = _call_method_name(component, "save_with_model", args=(flavor_two.pk,), kwargs={})
     assert actual == flavor_two.pk
 
     # third call
-    actual = _call_method_name(
-        component, "save_with_model", args=(flavor_one.pk,), kwargs={}
-    )
+    actual = _call_method_name(component, "save_with_model", args=(flavor_one.pk,), kwargs={})
     assert actual == flavor_one.pk
 
     # fourth call
-    actual = _call_method_name(
-        component, "save_with_model", args=(flavor_one.pk,), kwargs={}
-    )
+    actual = _call_method_name(component, "save_with_model", args=(flavor_one.pk,), kwargs={})
     assert actual == flavor_one.pk
 
 
@@ -157,7 +145,7 @@ def _get_actual(method_name: str, args=None, kwargs=None):
     component = FakeComponent(component_name="test", component_id="asdf")
 
     if args is None:
-        args = tuple()
+        args = ()
 
     if kwargs is None:
         kwargs = {}
@@ -217,9 +205,7 @@ def test_call_method_name_with_time_type_hint():
 
 
 def test_call_method_name_with_datetime_and_date_type_hint():
-    actual = _get_actual(
-        "get_datetime_and_date", args=["2020-09-12T01:01:01", "2020-09-12"]
-    )
+    actual = _get_actual("get_datetime_and_date", args=["2020-09-12T01:01:01", "2020-09-12"])
 
     assert isinstance(actual[0], datetime)
     assert isinstance(actual[1], date)
@@ -232,9 +218,7 @@ def test_call_method_name_with_duration_type_hint():
 
 
 def test_call_method_name_with_duration_and_time_type_hint():
-    actual = _get_actual(
-        "get_duration_and_time", kwargs={"_duration": "3", "_time": "1:01:01"}
-    )
+    actual = _get_actual("get_duration_and_time", kwargs={"_duration": "3", "_time": "1:01:01"})
 
     assert isinstance(actual[0], timedelta)
     assert isinstance(actual[1], time)

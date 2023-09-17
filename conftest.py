@@ -1,6 +1,5 @@
-from django.conf import settings
-
 import pytest
+from django.conf import settings
 
 
 def pytest_configure():

@@ -42,8 +42,6 @@ certifi = "^2023.7.22"  # needed for GitHub Actions
 keyring = "24.2.0"  # needed for GitHub Actions
 pytest = "^6"
 black = "*"
-flake8 = "^3"
-isort = "^5"
 mypy = "<1"
 django-stubs = "^1.5.0"
 pytest-django = "^3"
@@ -56,17 +54,76 @@ poethepoet = "^0"
 coverage = {extras = ["toml"], version = "^6"}
 pytest-cov = "^3"
 pytest-benchmark = "^4.0.0"
+ruff = "^0.0.290"
 
-[tool.isort]
-default_section = "THIRDPARTY"
-known_first_party = ["django_unicorn", "example"]
-known_django = "django"
-sections = ["FUTURE", "STDLIB", "DJANGO", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
-lines_after_imports = 2
-multi_line_output = 3
-include_trailing_comma = true
-skip_glob = "*/migrations/*.py"
-profile = "black"
+[tool.black]
+target-version = ["py38", "py39", "py310"]
+line-length = 120
+extend-exclude = "migrations"
+
+[tool.ruff]
+src = ["django_unicorn"]
+exclude = ["example", "**/migrations/*"]
+target-version = "py38"
+line-length = 120
+select = [
+  "A",
+  "ARG",
+  "B",
+  "C",
+  "DTZ",
+  "E",
+  "EM",
+  "F",
+  "FBT",
+  "I",
+  "ICN",
+  "ISC",
+  "N",
+  "PLC",
+  "PLE",
+  "PLR",
+  "PLW",
+  "Q",
+  "RUF",
+  "S",
+  "T",
+  "TID",
+  "UP",
+  "W",
+  "YTT",
+]
+ignore = [
+  # Allow non-abstract empty methods in abstract base classes
+  "B027",
+  # Allow boolean positional values in function calls, like `dict.get(... True)`
+  "FBT003",
+  # Ignore checks for possible passwords
+  "S105", "S106", "S107",
+  # Ignore complexity
+  "C901", "PLR0911", "PLR0912", "PLR0913", "PLR0915",
+  # Ignore unused variables
+  "F841",
+   # Ignore exception strings
+  "EM101", "EM102",
+]
+unfixable = [
+  # Don't touch unused imports
+  "F401",
+]
+
+[tool.ruff.pydocstyle]
+convention = "google"  # Accepts: "google", "numpy", or "pep257".
+
+[tool.ruff.isort]
+known-first-party = ["django_unicorn", "example"]
+
+[tool.ruff.flake8-tidy-imports]
+ban-relative-imports = "all"
+
+[tool.ruff.per-file-ignores]
+# Tests can use magic values, assertions, and relative imports
+"tests/**/*" = ["PLR2004", "S101", "TID252"]
 
 [tool.pytest.ini_options]
 addopts = "--quiet --failed-first --reuse-db --nomigrations -p no:warnings -m 'not slow' --benchmark-skip"

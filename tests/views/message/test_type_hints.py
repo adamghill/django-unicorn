@@ -1,10 +1,9 @@
 from dataclasses import dataclass
 from decimal import Decimal
 
-import orjson
+from tests.views.message.utils import post_and_get_response
 
 from django_unicorn.components import UnicornView
-from tests.views.message.utils import post_and_get_response
 
 
 @dataclass
@@ -34,9 +33,7 @@ class FakeObjectsComponent(UnicornView):
         assert self.dataclass_example.hello == "world"
 
 
-FAKE_OBJECTS_COMPONENT_URL = (
-    "/message/tests.views.message.test_type_hints.FakeObjectsComponent"
-)
+FAKE_OBJECTS_COMPONENT_URL = "/message/tests.views.message.test_type_hints.FakeObjectsComponent"
 
 
 def test_message_int(client):
@@ -54,9 +51,7 @@ def test_message_int(client):
         action_queue=action_queue,
     )
 
-    assert not response.get(
-        "error"
-    )  # UnicornViewError/AssertionError returns a a JsonResponse with "error" key
+    assert not response.get("error")  # UnicornViewError/AssertionError returns a a JsonResponse with "error" key
     assert not response["errors"]
 
 
@@ -75,9 +70,7 @@ def test_message_float(client):
         action_queue=action_queue,
     )
 
-    assert not response.get(
-        "error"
-    )  # UnicornViewError/AssertionError returns a a JsonResponse with "error" key
+    assert not response.get("error")  # UnicornViewError/AssertionError returns a a JsonResponse with "error" key
     assert not response["errors"]
 
 
@@ -96,9 +89,7 @@ def test_message_decimal(client):
         action_queue=action_queue,
     )
 
-    assert not response.get(
-        "error"
-    )  # UnicornViewError/AssertionError returns a a JsonResponse with "error" key
+    assert not response.get("error")  # UnicornViewError/AssertionError returns a a JsonResponse with "error" key
     assert not response["errors"]
 
 
@@ -117,7 +108,5 @@ def test_message_dataclass(client):
         action_queue=action_queue,
     )
 
-    assert not response.get(
-        "error"
-    )  # UnicornViewError/AssertionError returns a a JsonResponse with "error" key
+    assert not response.get("error")  # UnicornViewError/AssertionError returns a a JsonResponse with "error" key
     assert not response["errors"]
