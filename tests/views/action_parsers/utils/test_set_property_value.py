@@ -11,8 +11,8 @@ from example.coffee.models import Flavor, Taste
 class FakeComponent(UnicornView):
     string = "property_view"
     integer = 99
-    datetime = datetime(2020, 1, 1)
-    array: List[str] = []
+    datetime = datetime(2020, 1, 1)  # noqa: DTZ001
+    array: List[str] = []  # noqa: RUF012
     model = Flavor(name="initial-flavor")
     queryset = Flavor.objects.none()
     taste = Taste(name="bitter")
@@ -51,9 +51,9 @@ def test_set_property_value_int():
 
 def test_set_property_value_datetime():
     component = FakeComponent(component_name="test", component_id="12345678")
-    assert datetime(2020, 1, 1) == component.datetime
+    assert datetime(2020, 1, 1) == component.datetime  # noqa: DTZ001
 
-    dt = datetime(2020, 1, 2)
+    dt = datetime(2020, 1, 2)  # noqa: DTZ001
     data = {"datetime": None}
 
     set_property_value(component, "datetime", dt, data)

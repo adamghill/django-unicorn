@@ -109,6 +109,9 @@ venv.bak/
 pip-wheel-metadata
 TODO.md
 
+# pycharm
+.idea/
+
 node_modules/
 tags
 staticfiles/

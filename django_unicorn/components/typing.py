@@ -2,7 +2,6 @@ from typing import Generic, Iterator, TypeVar
 
 from django.db.models import Model, QuerySet
 
-
 M_co = TypeVar("M_co", bound=Model, covariant=True)
 
 

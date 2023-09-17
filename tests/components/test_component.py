@@ -2,10 +2,13 @@ import types
 
 import orjson
 import pytest
+from tests.views.fake_components import (
+    FakeAuthenticationComponent,
+    FakeValidationComponent,
+)
 
 from django_unicorn.components import UnicornView
 from django_unicorn.serializer import InvalidFieldNameError
-from tests.views.fake_components import FakeValidationComponent
 
 
 class ExampleComponent(UnicornView):
@@ -81,7 +84,7 @@ def test_get_frontend_context_variables_javascript_exclude(component):
     class Meta:
         javascript_exclude = ("name",)
 
-    setattr(component, "Meta", Meta)
+    component.Meta = Meta
 
     frontend_context_variables = component.get_frontend_context_variables()
     frontend_context_variables_dict = orjson.loads(frontend_context_variables)
@@ -93,7 +96,7 @@ def test_get_frontend_context_variables_javascript_exclude_invalid_field(compone
     class Meta:
         javascript_exclude = ("blob",)
 
-    setattr(component, "Meta", Meta)
+    component.Meta = Meta
 
     with pytest.raises(InvalidFieldNameError):
         component.get_frontend_context_variables()
@@ -107,9 +110,7 @@ def test_get_frontend_context_variables_exclude_field(component):
         class Meta:
             exclude = ("name",)
 
-    component = ExampleComponentWithMetaExclude(
-        component_id="asdf1234", component_name="example"
-    )
+    component = ExampleComponentWithMetaExclude(component_id="asdf1234", component_name="example")
 
     frontend_context_variables = component.get_frontend_context_variables()
     frontend_context_variables_dict = orjson.loads(frontend_context_variables)
@@ -117,7 +118,7 @@ def test_get_frontend_context_variables_exclude_field(component):
     assert "name" not in frontend_context_variables_dict
 
 
-def test_get_frontend_context_variables_exclude_field_invalid_type(component):
+def test_get_frontend_context_variables_exclude_field_invalid_type():
     # Use internal class prevent class cache from causing issues
     class ExampleComponentWithMetaInvalidExclude(UnicornView):
         name = "world"
@@ -126,9 +127,7 @@ def test_get_frontend_context_variables_exclude_field_invalid_type(component):
             exclude = ""
 
     with pytest.raises(AssertionError):
-        ExampleComponentWithMetaInvalidExclude(
-            component_id="asdf1234", component_name="example"
-        )
+        ExampleComponentWithMetaInvalidExclude(component_id="asdf1234", component_name="example")
 
 
 def test_get_frontend_context_variables_exclude_invalid_field():
@@ -140,9 +139,7 @@ def test_get_frontend_context_variables_exclude_invalid_field():
             exclude = ("blob",)
 
     with pytest.raises(InvalidFieldNameError):
-        ExampleComponentWithMetaInvalidExclude(
-            component_id="asdf1234", component_name="example"
-        )
+        ExampleComponentWithMetaInvalidExclude(component_id="asdf1234", component_name="example")
 
 
 def test_get_frontend_context_variables(component):
@@ -154,11 +151,20 @@ def test_get_frontend_context_variables(component):
 
 def test_get_context_data(component):
     context_data = component.get_context_data()
-    assert (
-        len(context_data) == 4
-    )  # `unicorn` and `view` are added to context data by default
+    assert len(context_data) == 4  # `unicorn` and `view` are added to context data by default
     assert context_data.get("name") == "World"
     assert isinstance(context_data.get("get_name"), types.MethodType)
+
+
+def test_get_context_data_component():
+    class TestComponent(UnicornView):
+        pass
+
+    component = TestComponent(component_id="asdf1234", component_name="hello-world")
+    actual = component.get_context_data()
+
+    assert actual["unicorn"]
+    assert actual["unicorn"]["component"] == component
 
 
 def test_get_context_data_component_id():
@@ -203,11 +209,11 @@ def test_is_public(component):
 
 
 def test_is_public_protected(component):
-    assert component._is_public("_test_name") == False
+    assert component._is_public("_test_name") is False
 
 
 def test_is_public_http_method_names(component):
-    assert component._is_public("http_method_names") == False
+    assert component._is_public("http_method_names") is False
 
 
 def test_meta_javascript_exclude():
@@ -224,7 +230,7 @@ def test_meta_javascript_exclude():
 
 def test_meta_javascript_exclude_nested_with_tuple():
     class TestComponent(UnicornView):
-        name = {"Universe": {"World": "Earth"}}
+        name = {"Universe": {"World": "Earth"}}  # noqa: RUF012
 
         class Meta:
             javascript_exclude = ("name.Universe",)
@@ -236,15 +242,13 @@ def test_meta_javascript_exclude_nested_with_tuple():
 
 def test_meta_javascript_exclude_nested_multiple_with_spaces():
     class TestComponent(UnicornView):
-        name = {"Universe": {"World": "Earth"}}
-        another = {"Neutral Milk Hotel": {"album": {"On Avery Island": 1996}}}
+        name = {"Universe": {"World": "Earth"}}  # noqa: RUF012
+        another = {"Neutral Milk Hotel": {"album": {"On Avery Island": 1996}}}  # noqa: RUF012
 
         class Meta:
             javascript_exclude = ("another.Neutral Milk Hotel.album",)
 
-    expected = (
-        '{"another":{"Neutral Milk Hotel":{}},"name":{"Universe":{"World":"Earth"}}}'
-    )
+    expected = '{"another":{"Neutral Milk Hotel":{}},"name":{"Universe":{"World":"Earth"}}}'
     component = TestComponent(component_id="asdf1234", component_name="hello-world")
     actual = component.get_frontend_context_variables()
     assert expected == actual
@@ -252,10 +256,10 @@ def test_meta_javascript_exclude_nested_multiple_with_spaces():
 
 def test_meta_javascript_exclude_nested_with_list():
     class TestComponent(UnicornView):
-        name = {"Universe": {"World": "Earth"}}
+        name = {"Universe": {"World": "Earth"}}  # noqa: RUF012
 
         class Meta:
-            javascript_exclude = [
+            javascript_exclude = [  # noqa: RUF012
                 "name.Universe",
             ]
 
@@ -282,11 +286,20 @@ def test_get_frontend_context_variables_form_with_boolean_field(component):
     without an explicit fix.
     """
 
-    component = FakeValidationComponent(
-        component_id="asdf1234", component_name="example"
-    )
+    component = FakeValidationComponent(component_id="asdf1234", component_name="example")
 
     frontend_context_variables = component.get_frontend_context_variables()
     frontend_context_variables_dict = orjson.loads(frontend_context_variables)
 
     assert frontend_context_variables_dict.get("permanent")
+
+
+def test_get_frontend_context_variables_authentication_form(component):
+    """
+    `AuthenticationForm` have `request` as the first argument so `form_class` should
+    init with data as a kwarg.
+    """
+
+    component = FakeAuthenticationComponent(component_id="asdf1234", component_name="example")
+
+    component.get_frontend_context_variables()

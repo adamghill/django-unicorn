@@ -4,11 +4,11 @@ import logging
 import pickle
 import sys
 from functools import lru_cache
-from typing import Any, Callable, Dict, List, Sequence, Tuple, Type
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Type
 
+import shortuuid
 from django.apps import AppConfig
 from django.conf import settings
-from django.core.cache import caches
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models import Model
 from django.forms.widgets import CheckboxInput
@@ -16,22 +16,21 @@ from django.http import HttpRequest
 from django.utils.decorators import classonlymethod
 from django.views.generic.base import TemplateView
 
-import shortuuid
-
-from django_unicorn.settings import get_cache_alias
-
-from .. import serializer
-from ..decorators import timed
-from ..errors import (
+from django_unicorn import serializer
+from django_unicorn.components.fields import UnicornField
+from django_unicorn.components.unicorn_template_response import UnicornTemplateResponse
+from django_unicorn.decorators import timed
+from django_unicorn.errors import (
     ComponentClassLoadError,
     ComponentModuleLoadError,
     UnicornCacheError,
 )
-from ..settings import get_setting
-from ..utils import get_cacheable_component, is_non_string_sequence
-from .fields import UnicornField
-from .unicorn_template_response import UnicornTemplateResponse
-
+from django_unicorn.settings import get_setting
+from django_unicorn.utils import (
+    cache_full_tree,
+    is_non_string_sequence,
+    restore_from_cache,
+)
 
 try:
     from cachetools.lru import LRUCache
@@ -52,6 +51,15 @@ views_cache = LRUCache(maxsize=100)
 # This can create a subtle race condition so a more long-term solution needs to be found
 constructed_views_cache = LRUCache(maxsize=100)
 COMPONENTS_MODULE_CACHE_ENABLED = "pytest" not in sys.modules
+
+STANDARD_COMPONENT_KWARG_KEYS = {
+    "id",
+    "component_id",
+    "component_name",
+    "component_key",
+    "parent",
+    "request",
+}
 
 
 def convert_to_snake_case(s: str) -> str:
@@ -102,9 +110,8 @@ def get_locations(component_name: str) -> List[Tuple[str, str]]:
 
     unicorn_apps = get_setting("APPS", settings.INSTALLED_APPS)
 
-    assert is_non_string_sequence(
-        unicorn_apps
-    ), "APPS is expected to be a list, tuple or set"
+    if not is_non_string_sequence(unicorn_apps):
+        raise AssertionError("APPS is expected to be a list, tuple or set")
 
     for app in unicorn_apps:
         # Handle an installed app that actually points to an app config
@@ -116,14 +123,12 @@ def get_locations(component_name: str) -> List[Tuple[str, str]]:
                 app_config_module_name = app[: app_config_idx + 5]
                 app_config_class_name = app[app_config_idx + 6 :]
                 app_config_module = importlib.import_module(app_config_module_name)
-                is_app_config = type(
-                    getattr(app_config_module, app_config_class_name)
-                ) == type(AppConfig)
+                is_app_config = type(getattr(app_config_module, app_config_class_name)) == type(AppConfig)
             except ModuleNotFoundError:
                 pass
 
             if is_app_config:
-                app = app[:app_config_idx]
+                app = app[:app_config_idx]  # noqa: PLW2901
 
         app_module_name = f"{app}.components.{module_name}"
         locations.append((app_module_name, class_name))
@@ -139,6 +144,7 @@ def construct_component(
     component_key,
     parent,
     request,
+    component_args,
     **kwargs,
 ):
     """
@@ -150,12 +156,12 @@ def construct_component(
         component_key=component_key,
         parent=parent,
         request=request,
+        component_args=component_args,
         **kwargs,
     )
 
     component.calls = []
     component.children = []
-    component._children_set = False
 
     component.mount()
     component.hydrate()
@@ -166,36 +172,52 @@ def construct_component(
 
 
 class UnicornView(TemplateView):
-    response_class = UnicornTemplateResponse
+    # These class variables are required to set these via kwargs
     component_name: str = ""
     component_key: str = ""
     component_id: str = ""
-    request = None
-    parent = None
-    children = []
+    component_args: List = None
+    component_kwargs: Dict = None
 
-    # Caches to reduce the amount of time introspecting the class
-    _methods_cache: Dict[str, Callable] = {}
-    _attribute_names_cache: List[str] = []
-    _hook_methods_cache: List[str] = []
+    def __init__(self, component_args: Optional[List] = None, **kwargs):
+        self.response_class = UnicornTemplateResponse
 
-    # Dictionary with key: attribute name; value: pickled attribute value
-    _resettable_attributes_cache: Dict[str, Any] = {}
+        self.component_name: str = ""
+        self.component_key: str = ""
+        self.component_id: str = ""
 
-    # JavaScript method calls
-    calls = []
+        # Without these instance variables calling UnicornView() outside the
+        # Django view/template logic (i.e. in unit tests) results in odd results.
+        self.request: HttpRequest = None
+        self.parent: UnicornView = None
+        self.children: List[UnicornView] = []
 
-    def __init__(self, **kwargs):
+        # Caches to reduce the amount of time introspecting the class
+        self._methods_cache: Dict[str, Callable] = {}
+        self._attribute_names_cache: List[str] = []
+        self._hook_methods_cache: List[str] = []
+
+        # Dictionary with key: attribute name; value: pickled attribute value
+        self._resettable_attributes_cache: Dict[str, Any] = {}
+
+        # JavaScript method calls
+        self.calls = []
+
         super().__init__(**kwargs)
 
-        assert self.component_name, "Component name is required"
+        if not self.component_name:
+            raise AssertionError("Component name is required")
 
         if "id" in kwargs and kwargs["id"]:
             # Sometimes the component_id is initially in kwargs["id"]
             self.component_id = kwargs["id"]
 
-        assert hasattr(self, "component_id"), "Component id is required"
-        assert self.component_id, "Component id is required"
+        if not hasattr(self, "component_id"):
+            raise AssertionError("Component id is required")
+
+        if not self.component_id:
+            raise AssertionError("Component id is required")
+
         self.component_cache_key = f"unicorn:component:{self.component_id}"
 
         if "request" in kwargs:
@@ -204,8 +226,18 @@ class UnicornView(TemplateView):
         if "parent" in kwargs:
             self.parent = kwargs["parent"]
 
+            if self.parent and self not in self.parent.children:
+                self.parent.children.append(self)
+
+        # Set component args
+        self.component_args = component_args if component_args is not None else []
+
+        # Only include custom kwargs since the standard kwargs are available
+        # as instance variables
+        custom_kwargs = set(kwargs.keys()) - STANDARD_COMPONENT_KWARG_KEYS
+        self.component_kwargs = {k: kwargs[k] for k in list(custom_kwargs)}
+
         self._init_script: str = ""
-        self._children_set = False
         self._validate_called = False
         self.errors = {}
         self._set_default_template_name()
@@ -249,17 +281,13 @@ class UnicornView(TemplateView):
             pickled_value,
         ) in self._resettable_attributes_cache.items():
             try:
-                attribute_value = pickle.loads(pickled_value)
+                attribute_value = pickle.loads(pickled_value)  # noqa: S301
                 self._set_property(attribute_name, attribute_value)
             except TypeError:
-                logger.warn(
-                    f"Resetting '{attribute_name}' attribute failed because it could not be constructed."
-                )
+                logger.warn(f"Resetting '{attribute_name}' attribute failed because it could not be constructed.")
                 pass
             except pickle.PickleError:
-                logger.warn(
-                    f"Resetting '{attribute_name}' attribute failed because it could not be de-pickled."
-                )
+                logger.warn(f"Resetting '{attribute_name}' attribute failed because it could not be de-pickled.")
                 pass
 
     def call(self, function_name, *args):
@@ -323,7 +351,7 @@ class UnicornView(TemplateView):
         pass
 
     @timed
-    def render(self, init_js=False, extra_context=None, request=None) -> str:
+    def render(self, *, init_js=False, extra_context=None, request=None) -> str:
         """
         Renders a UnicornView component with the public properties available. Delegates to a
         UnicornTemplateResponse to actually render a response.
@@ -354,20 +382,9 @@ class UnicornView(TemplateView):
 
         rendered_component = response.content.decode("utf-8")
 
-        # Set the current component as a child of the parent if there is a parent
-        # If no parent, mark that the component has its children set.
-        # This works because the nested (internal) components get rendered first before the parent,
-        # so once we hit a component without a parent we know all of the children have been rendered correctly
-        # TODO: This might fall apart with a third layer of nesting components
-        if self.parent:
-            if not self.parent._children_set:
-                self.parent.children.append(self)
-        else:
-            self._children_set = True
-
         return rendered_component
 
-    def dispatch(self, request, *args, **kwargs):
+    def dispatch(self, request, *args, **kwargs):  # noqa: ARG002
         """
         Called by the `as_view` class method when utilizing a component directly as a view.
         """
@@ -375,7 +392,7 @@ class UnicornView(TemplateView):
         self.mount()
         self.hydrate()
 
-        self._cache_component(request, **kwargs)
+        self._cache_component(**kwargs)
 
         return self.render_to_response(
             context=self.get_context_data(),
@@ -383,38 +400,30 @@ class UnicornView(TemplateView):
             init_js=True,
         )
 
-    def _cache_component(self, request: HttpRequest, parent=None, **kwargs):
+    def _cache_component(self, *, parent=None, component_args=None, **kwargs):
         """
-        Cache the component in the module and the Django cache. Re-set the `request` that got
-        removed to make the component cacheable.
+        Cache the component in the module and the Django cache.
         """
 
         # Put the location for the component name in a module cache
         location_cache[self.component_name] = (self.__module__, self.__class__.__name__)
 
         # Put the component's class in a module cache
-        views_cache[self.component_id] = (self.__class__, parent, kwargs)
-
-        cacheable_component = None
+        views_cache[self.component_id] = (
+            self.__class__,
+            parent,
+            component_args,
+            kwargs,
+        )
 
         # Put the instantiated component into a module cache and the Django cache
         try:
-            cacheable_component = get_cacheable_component(self)
+            if COMPONENTS_MODULE_CACHE_ENABLED:
+                constructed_views_cache[self.component_id] = self
+
+            cache_full_tree(self)
         except UnicornCacheError as e:
             logger.warning(e)
-
-        if cacheable_component:
-            if COMPONENTS_MODULE_CACHE_ENABLED:
-                constructed_views_cache[self.component_id] = cacheable_component
-
-            cache = caches[get_cache_alias()]
-            cache.set(cacheable_component.component_cache_key, cacheable_component)
-
-        # Re-set `request` on the component that got removed when making it cacheable
-        self.request = request
-
-        for child in self.children:
-            child.request = request
 
     @timed
     def get_frontend_context_variables(self) -> str:
@@ -458,10 +467,9 @@ class UnicornView(TemplateView):
                         cleaned_value = form.cleaned_data[key]
                         value = field.widget.format_value(cleaned_value)
 
-                        if isinstance(field.widget, CheckboxInput) and isinstance(
-                            cleaned_value, bool
-                        ):
-                            # Handle booleans for checkboxes explicitly because `format_value` returns `None` in this case
+                        if isinstance(field.widget, CheckboxInput) and isinstance(cleaned_value, bool):
+                            # Handle booleans for checkboxes explicitly because `format_value`
+                            # returns `None` in this case
                             value = cleaned_value
 
                         # Don't update the frontend variable if the only change is
@@ -484,7 +492,7 @@ class UnicornView(TemplateView):
     def _get_form(self, data):
         if hasattr(self, "form_class"):
             try:
-                form = self.form_class(data)
+                form = self.form_class(data=data)
                 form.is_valid()
 
                 return form
@@ -509,6 +517,7 @@ class UnicornView(TemplateView):
                     "component_id": self.component_id,
                     "component_name": self.component_name,
                     "component_key": self.component_key,
+                    "component": self,
                     "errors": self.errors,
                 }
             }
@@ -517,11 +526,11 @@ class UnicornView(TemplateView):
         return context
 
     @timed
-    def is_valid(self, model_names: List = None) -> bool:
+    def is_valid(self, model_names: Optional[List] = None) -> bool:
         return len(self.validate(model_names).keys()) == 0
 
     @timed
-    def validate(self, model_names: List = None) -> Dict:
+    def validate(self, model_names: Optional[List] = None) -> Dict:
         """
         Validates the data using the `form_class` set on the component.
 
@@ -572,9 +581,7 @@ class UnicornView(TemplateView):
         """
         Gets publicly available attribute names. Cached in `_attribute_names_cache`.
         """
-        non_callables = [
-            member[0] for member in inspect.getmembers(self, lambda x: not callable(x))
-        ]
+        non_callables = [member[0] for member in inspect.getmembers(self, lambda x: not callable(x))]
         attribute_names = [name for name in non_callables if self._is_public(name)]
 
         return attribute_names
@@ -598,6 +605,7 @@ class UnicornView(TemplateView):
         self,
         name: str,
         value: Any,
+        *,
         call_updating_method: bool = False,
         call_updated_method: bool = False,
     ) -> None:
@@ -642,10 +650,8 @@ class UnicornView(TemplateView):
             return self._methods_cache
 
         member_methods = inspect.getmembers(self, inspect.ismethod)
-        public_methods = [
-            method for method in member_methods if self._is_public(method[0])
-        ]
-        methods = {k: v for (k, v) in public_methods}
+        public_methods = [method for method in member_methods if self._is_public(method[0])]
+        methods = dict(public_methods)
         self._methods_cache = methods
 
         return methods
@@ -680,20 +686,14 @@ class UnicornView(TemplateView):
 
         for attribute_name, attribute_value in self._attributes().items():
             if isinstance(attribute_value, UnicornField):
-                self._resettable_attributes_cache[attribute_name] = pickle.dumps(
-                    attribute_value
-                )
+                self._resettable_attributes_cache[attribute_name] = pickle.dumps(attribute_value)
             elif isinstance(attribute_value, Model):
                 if not attribute_value.pk:
                     if attribute_name not in self._resettable_attributes_cache:
                         try:
-                            self._resettable_attributes_cache[
-                                attribute_name
-                            ] = pickle.dumps(attribute_value)
+                            self._resettable_attributes_cache[attribute_name] = pickle.dumps(attribute_value)
                         except pickle.PickleError:
-                            logger.warn(
-                                f"Caching '{attribute_name}' failed because it could not be pickled."
-                            )
+                            logger.warn(f"Caching '{attribute_name}' failed because it could not be pickled.")
                             pass
 
     def _is_public(self, name: str) -> bool:
@@ -722,6 +722,7 @@ class UnicornView(TemplateView):
             "options",
             "setup",
             "fill",
+            "view_is_async",
             # Component methods
             "component_id",
             "component_name",
@@ -746,39 +747,37 @@ class UnicornView(TemplateView):
             "call",
             "calls",
             "component_cache_key",
+            "component_kwargs",
+            "component_args",
         )
         excludes = []
 
         if hasattr(self, "Meta") and hasattr(self.Meta, "exclude"):
-            assert is_non_string_sequence(
-                self.Meta.exclude
-            ), "Meta.exclude should be a list, tuple, or set"
+            if not is_non_string_sequence(self.Meta.exclude):
+                raise AssertionError("Meta.exclude should be a list, tuple, or set")
 
             for exclude in self.Meta.exclude:
                 if not hasattr(self, exclude):
-                    raise serializer.InvalidFieldNameError(
-                        field_name=exclude, data=self._attributes()
-                    )
+                    raise serializer.InvalidFieldNameError(field_name=exclude, data=self._attributes())
 
             excludes = self.Meta.exclude
 
         return not (
-            name.startswith("_")
-            or name in protected_names
-            or name in self._hook_methods_cache
-            or name in excludes
+            name.startswith("_") or name in protected_names or name in self._hook_methods_cache or name in excludes
         )
 
     @staticmethod
     @timed
     def create(
+        *,
         component_id: str,
         component_name: str,
         component_key: str = "",
         parent: "UnicornView" = None,
         request: HttpRequest = None,
         use_cache=True,
-        kwargs: Dict[str, Any] = {},
+        component_args: Optional[List] = None,
+        kwargs: Optional[Dict[str, Any]] = None,
     ) -> "UnicornView":
         """
         Find and instantiate a component class based on `component_name`.
@@ -790,19 +789,23 @@ class UnicornView(TemplateView):
             param component_key: Key of the component to allow multiple components of the same name
                 to be differentiated. Optional.
             param parent: The parent component of the current component.
+            param component_args: Arguments for the component passed in from the template. Defaults to `[]`.
             param kwargs: Keyword arguments for the component passed in from the template. Defaults to `{}`.
 
         Returns:
             Instantiated `UnicornView` component.
             Raises `ComponentModuleLoadError` or `ComponentClassLoadError` if the component could not be loaded.
         """
-        assert component_id, "Component id is required"
-        assert component_name, "Component name is required"
+        if not component_id:
+            raise AssertionError("Component id is required")
+        if not component_name:
+            raise AssertionError("Component name is required")
+
+        component_args = component_args if component_args is not None else []
+        kwargs = kwargs if kwargs is not None else {}
 
         @timed
-        def _get_component_class(
-            module_name: str, class_name: str
-        ) -> Type[UnicornView]:
+        def _get_component_class(module_name: str, class_name: str) -> Type[UnicornView]:
             """
             Imports a component based on module and class name.
             """
@@ -811,38 +814,26 @@ class UnicornView(TemplateView):
 
             return component_class
 
-        cache = caches[get_cache_alias()]
         component_cache_key = f"unicorn:component:{component_id}"
-        cached_component = cache.get(component_cache_key)
+        cached_component = restore_from_cache(component_cache_key)
 
-        if cached_component:
-            # Get the newest version of the parent from cache if it is available
-            # This needs to happen for Django cache because instances is pickled, so
-            # a change in the view won't be reflected automatically (like with the module
-            # cache) so it needs to be retrieved manually.
-            if cached_component.parent:
-                cached_parent_component = cache.get(
-                    cached_component.parent.component_cache_key
-                )
-
-                if cached_parent_component:
-                    cached_component.parent = cached_parent_component
-                    cached_component.parent.setup(request)
-        else:
-            cached_component = constructed_views_cache.get(component_id)
-
-        if use_cache and cached_component:
+        if not cached_component:
             # Note that `hydrate()` and `complete` don't need to be called here
             # because this path only happens for re-rendering from the view
-            cached_component.setup(request)
-            cached_component._validate_called = False
-            cached_component.calls = []
+            cached_component = constructed_views_cache.get(component_id)
+
+            if cached_component:
+                cached_component.setup(request)
+                cached_component._validate_called = False
+                cached_component.calls = []
+
+        if use_cache and cached_component:
             logger.debug(f"Retrieve {component_id} from constructed views cache")
 
             return cached_component
 
         if component_id in views_cache:
-            (component_class, parent, kwargs) = views_cache[component_id]
+            (component_class, parent, component_args, kwargs) = views_cache[component_id]
 
             component = construct_component(
                 component_class=component_class,
@@ -851,6 +842,7 @@ class UnicornView(TemplateView):
                 component_key=component_key,
                 parent=parent,
                 request=request,
+                component_args=component_args,
                 **kwargs,
             )
             logger.debug(f"Retrieve {component_id} from views cache")
@@ -867,9 +859,10 @@ class UnicornView(TemplateView):
         class_name_not_found = None
         attribute_exception = None
 
-        for (module_name, class_name) in locations:
+        for module_name, class_name in locations:
             try:
                 component_class = _get_component_class(module_name, class_name)
+
                 component = construct_component(
                     component_class=component_class,
                     component_id=component_id,
@@ -877,10 +870,11 @@ class UnicornView(TemplateView):
                     component_key=component_key,
                     parent=parent,
                     request=request,
+                    component_args=component_args,
                     **kwargs,
                 )
 
-                component._cache_component(request, parent, **kwargs)
+                component._cache_component(parent=parent, component_args=component_args, **kwargs)
 
                 return component
             except ModuleNotFoundError as e:
@@ -892,12 +886,8 @@ class UnicornView(TemplateView):
                 class_name_not_found = f"{module_name}.{class_name}"
 
         if class_name_not_found is not None and attribute_exception is not None:
-            message = (
-                f"The component class '{class_name_not_found}' could not be loaded:\n  {attribute_exception}"
-            )
-            raise ComponentClassLoadError(
-                message, locations=locations
-            ) from attribute_exception
+            message = f"The component class '{class_name_not_found}' could not be loaded:\n {attribute_exception}"
+            raise ComponentClassLoadError(message, locations=locations) from attribute_exception
 
         module_name_not_found = component_name.replace("-", "_")
         message = f"The component module '{module_name_not_found}' could not be loaded."
@@ -905,7 +895,7 @@ class UnicornView(TemplateView):
         raise ComponentModuleLoadError(message, locations=locations)
 
     @classonlymethod
-    def as_view(cls, **initkwargs):
+    def as_view(cls, **initkwargs):  # noqa: N805
         if "component_id" not in initkwargs:
             initkwargs["component_id"] = shortuuid.uuid()[:8]
 

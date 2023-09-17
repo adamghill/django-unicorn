@@ -1,5 +1,65 @@
 # Changelog
 
+## 0.55.0
+
+- Support `List`/`list` type annotations for component actions and fields ([#582](https://github.com/adamghill/django-unicorn/pull/582)).
+- Fix: calling a method in a parent will have the request available ([#583]https://github.com/adamghill/django-unicorn/pull/583).
+
+**Breaking changes**
+
+- Dropped official support for Python 3.7 because its [end of life was June 27, 2023](https://endoflife.date/python).
+- Dropped official support for Django 2.2 because its [end of life was April 1, 2022](https://endoflife.date/django).
+
+## 0.54.0
+
+- Coerce type annotated arguments in an action method to the specified type ([#571](https://github.com/adamghill/django-unicorn/pull/571)).
+- Fix: Dictionary fields would sometimes create checksum errors ([#572](https://github.com/adamghill/django-unicorn/pull/572)).
+
+## 0.53.0
+
+- Support passing arguments into a component ([#560](https://github.com/adamghill/django-unicorn/pull/560)).
+- Fix the handling of `None` for select elements. ([#563](https://github.com/adamghill/django-unicorn/pull/563)).
+- Better handling of `AuthenticationForm` when used in `Component.form_class` ([#552](https://github.com/adamghill/django-unicorn/pull/552)) by [lassebomh](https://github.com/lassebomh).
+
+## v0.52.0
+
+- Use `CSRF_COOKIE_NAME` Django setting ([#545](https://github.com/adamghill/django-unicorn/pull/545)) by [frnidito](https://github.com/frnidito).
+- Asterisk wildcard support for targeting loading ([#543](https://github.com/adamghill/django-unicorn/pull/543)) by [regoawt](https://github.com/regoawt).
+
+## v0.51.0
+
+- Fix: remove use of `ByteString` ([#534](https://github.com/adamghill/django-unicorn/pull/534)) by [hauntsaninja](https://github.com/hauntsaninja).
+- Fix: Update `loading` on elements other than the current action element ([#512]https://github.com/adamghill/django-unicorn/pull/512) by [bazubii](https://github.com/bazubii)).
+- Add new logo and doc changes ([#518](https://github.com/adamghill/django-unicorn/pull/518)) by [dancaron](https://github.com/dancaron).
+- Fix: Nested children caching issues ([#511](https://github.com/adamghill/django-unicorn/pull/511)) by [bazubii](https://github.com/bazubii)).
+- Fix: Negating a variable for `poll.disable` would not work correctly in some instances.
+
+## v0.50.0
+
+- Support more than 1 level of nested children ([#476](https://github.com/adamghill/django-unicorn/pull/507) by [bazubii](https://github.com/bazubii)).
+
+[All changes since 0.49.2](https://github.com/adamghill/django-unicorn/compare/0.49.2...0.50.0).
+
+## v0.49.2
+
+- Fix: Calling methods with a model typehint would fail after being called multiple times ([#476](https://github.com/adamghill/django-unicorn/pull/476) by [stat1c-void](https://github.com/stat1c-void)).
+
+[All changes since 0.49.1](https://github.com/adamghill/django-unicorn/compare/0.49.1...0.49.2).
+
+## v0.49.1
+
+- Fix: Missing `pp` import in Python 3.7.
+
+[All changes since 0.49.0](https://github.com/adamghill/django-unicorn/compare/0.49.0...0.49.1).
+
+## v0.49.0
+
+- Fix: Handle inherited (i.e. subclassed) models [#459](https://github.com/adamghill/django-unicorn/issues/459).
+- Fix: Support abbreviated `u:view` ([#464](https://github.com/adamghill/django-unicorn/pull/464) by [nerdoc](https://github.com/nerdoc)).
+- Add version and build date to minified JavaScript for easier debugging.
+
+[All changes since 0.48.0](https://github.com/adamghill/django-unicorn/compare/0.48.0...0.49.0).
+
 ## v0.48.0
 
 - Reload JavaScript script elements when a template is re-rendered. Currently only enabled with the [`RELOAD_SCRIPT_ELEMENTS` setting](settings.md/#reload_script_elements).
@@ -22,7 +82,7 @@
 
 ## v0.45.1
 
-- Fix JavaScript error that sometimes happens with nested components. [237](https://github.com/adamghill/django-unicorn/issues/237) by [clangley](https://github.com/clangley)
+- Fix: Handle JavaScript error that sometimes happens with nested components. [237](https://github.com/adamghill/django-unicorn/issues/237) by [clangley](https://github.com/clangley)
 
 [All changes since 0.45.0](https://github.com/adamghill/django-unicorn/compare/0.45.0...0.45.1).
 
@@ -173,14 +233,14 @@
 ## v0.35.2
 
 - Fix: Make sure `visible:elements` trigger as expected in more cases.
-- Prevent the visibile element from continuing to trigger if the visbility element method returns `False`.
+- Prevent the visible element from continuing to trigger if the visibility element method returns `False`.
 
 [All changes since 0.35.0](https://github.com/adamghill/django-unicorn/compare/0.35.0...0.35.2).
 
 ## v0.35.0
 
-- [Trigger](advanced.md#trigger-model-update) an `input` or `blur` event for a model element from JavaScript
-- [Visibility](visibility.md) event with `unicorn:visible` attribute
+- [Trigger](advanced.md#trigger-model-update) an `input` or `blur` event for a model element from JavaScript.
+- [Visibility](visibility.md) event with `unicorn:visible` attribute.
 
 **Breaking changes**
 
@@ -191,7 +251,7 @@
 ## v0.34.0
 
 - Initial prototype for component template [lifecycle events](templates.md#lifecycle-events).
-- Fix: elements after a child component would not get initialized [262](https://github.com/adamghill/django-unicorn/pull/262) by [joshiggins](https://github.com/joshiggins).
+- Fix: elements after a child component would not get initialized [#262](https://github.com/adamghill/django-unicorn/pull/262) by [joshiggins](https://github.com/joshiggins).
 - Fix: cache would fail in some instances [258](https://github.com/adamghill/django-unicorn/issues/258).
 
 [All changes since 0.33.0](https://github.com/adamghill/django-unicorn/compare/0.33.0...0.34.0).

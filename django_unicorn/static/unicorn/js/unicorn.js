@@ -5,11 +5,12 @@ import { components, lifecycleEvents } from "./store.js";
 let messageUrl = "";
 let reloadScriptElements = false;
 let csrfTokenHeaderName = "X-CSRFToken";
+let csrfTokenCookieName = "csrftoken";
 
 /**
  * Initializes the Unicorn object.
  */
-export function init(_messageUrl, _csrfTokenHeaderName, _reloadScriptElements) {
+export function init(_messageUrl, _csrfTokenHeaderName, _csrfTokenCookieName, _reloadScriptElements) {
   messageUrl = _messageUrl;
   reloadScriptElements = _reloadScriptElements || false;
 
@@ -17,9 +18,14 @@ export function init(_messageUrl, _csrfTokenHeaderName, _reloadScriptElements) {
     csrfTokenHeaderName = _csrfTokenHeaderName;
   }
 
+  if (hasValue(_csrfTokenCookieName)) {
+    csrfTokenCookieName = _csrfTokenCookieName;
+  }
+
   return {
     messageUrl,
     csrfTokenHeaderName,
+    csrfTokenCookieName,
     reloadScriptElements,
   };
 }
@@ -30,6 +36,7 @@ export function init(_messageUrl, _csrfTokenHeaderName, _reloadScriptElements) {
 export function componentInit(args) {
   args.messageUrl = messageUrl;
   args.csrfTokenHeaderName = csrfTokenHeaderName;
+  args.csrfTokenCookieName = csrfTokenCookieName;
   args.reloadScriptElements = reloadScriptElements;
 
   const component = new Component(args);

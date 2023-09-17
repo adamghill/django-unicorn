@@ -29,6 +29,7 @@
 # Bump version
 
 1. Update changelog.md
+1. Update package.json
 1. Run all build processes: `poe build`
 1. `poetry version major|minor|patch`
 1. Commit/tag/push version bump

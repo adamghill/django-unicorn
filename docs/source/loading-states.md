@@ -34,7 +34,7 @@ You can also hide an element while an action is processed by adding a `remove` m
 </div>
 :::
 
-If there are multiple actions that happen in the component, you can show or hide a loading element for a specifc action by targetting another element's `id` with `unicorn:target`.
+If there are multiple actions that happen in the component, you can show or hide a loading element for a specific action by targeting another element's `id` with `unicorn:target`.
 
 ```html
 <!-- loading-target-id.html -->
@@ -58,6 +58,22 @@ An element's `unicorn:key` can also be targeted.
   <div unicorn:loading unicorn:target="updateKey">Updating!</div>
   <div unicorn:loading unicorn:target="deleteKey">Deleting!</div>
 </div>
+```
+
+```{note}
+An asterisk can be used as wildcard to target more than one element at a time.
+
+:::{code} html
+:force: true
+
+<!-- loading-target-wildcard-id.html -->
+<div>
+  <button unicorn:click="update" id="update1Id">Update 1</button>
+  <button unicorn:click="update" id="update2Id">Update 2</button>
+
+  <div unicorn:loading unicorn:target="update*Id">Updating!</div>
+</div>
+:::
 ```
 
 ## Toggling Attributes

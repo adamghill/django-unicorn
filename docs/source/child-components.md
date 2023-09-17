@@ -6,13 +6,11 @@ We will slowly build a nested component example with three components: table, fi
 
 ## Parent component
 
-So that `Unicorn` knows about the parent-child relationship, the child component must pass in a `parent` keyword argument with the parent's component view.
-
 ```html
 <!-- table.html -->
 {% load unicorn %}
 <div>
-  {% unicorn 'filter' parent=view %}
+  {% unicorn 'filter' %}
 
   <table>
     <thead>
@@ -46,13 +44,9 @@ class TableView(UnicornView):
         self.books = Book.objects.all()[0:10]
 ```
 
-```{note}
-`view` will always be the current component's view, so passing `view` into `parent` (i.e. `parent=view`) will always create the relationship correctly.
-```
-
 ## Child component
 
-The child filter component, `{% unicorn 'filter' parent=view %}`, will have access to its parent through the view's `self.parent`. The `FilterView` is using the [updated](https://www.django-unicorn.com/docs/advanced/#updated-property-name-value) method to filter the `books` queryset on the table component when the filter's `search` model is changed.
+The child component, `filter`, will have access to its parent through the view's `self.parent`. The `FilterView` is using the [updated](https://www.django-unicorn.com/docs/advanced/#updated-property-name-value) method to filter the `books` queryset on the table component when the filter's `search` model is changed.
 
 ```html
 <!-- filter.html -->
@@ -139,7 +133,7 @@ The changes for the table component where the row child component is added in. V
 <!-- table.html --->
 {% load unicorn %}
 <div>
-  {% unicorn 'filter' parent=view %}
+  {% unicorn 'filter' %}
 
   <table>
     <thead>
@@ -148,7 +142,7 @@ The changes for the table component where the row child component is added in. V
         <td>Title</td>
       </tr>
     </thead>
-    {% for book in books %} {% unicorn 'row' parent=view book=book key=book.id
+    {% for book in books %} {% unicorn 'row' book=book key=book.id
     %} {% endfor %}
   </table>
 </div>
@@ -180,15 +174,15 @@ For child components, `unicorn:id` is automatically created from the parent's `u
 
 - pass in a `key` keyword argument to the child component
 ```html
-{% unicorn 'row' parent=view book=book key=book.id %}
+{% unicorn 'row' book=book key=book.id %}
 ```
 - pass in an `id` keyword argument to the child component
 ```html
-{% unicorn 'row' parent=view book=book id=book.id %}
+{% unicorn 'row' book=book id=book.id %}
 ```
 - the view has an attribute named `model` which has either a `pk` or `id` attribute
 ```html
-{% unicorn 'row' parent=view model=book %}
+{% unicorn 'row' model=book %}
 ```
 
 ````

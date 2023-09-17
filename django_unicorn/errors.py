@@ -20,17 +20,17 @@ class ComponentClassLoadError(ComponentLoadError):
     pass
 
 
-class RenderNotModified(Exception):
+class RenderNotModifiedError(Exception):
     pass
 
 
-class MissingComponentElement(Exception):
+class MissingComponentElementError(Exception):
     pass
 
 
-class MissingComponentViewElement(Exception):
+class MissingComponentViewElementError(Exception):
     pass
 
 
-class ComponentNotValid(Exception):
+class ComponentNotValidError(Exception):
     pass

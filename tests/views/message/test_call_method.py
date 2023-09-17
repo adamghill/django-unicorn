@@ -1,16 +1,19 @@
 import time
-from typing import Dict
+from typing import Dict, Optional
 
 import orjson
 import shortuuid
+from tests.views.message.utils import post_and_get_response
 
 from django_unicorn.components import UnicornView, unicorn_view
 from django_unicorn.utils import generate_checksum
-from tests.views.message.utils import post_and_get_response
 
 
 def _post_to_component(
-    client, method_name: str, component_name: str = "FakeComponent", data: Dict = None
+    client,
+    method_name: str,
+    component_name: str = "FakeComponent",
+    data: Optional[Dict] = None,
 ) -> str:
     if data is None:
         data = {}
@@ -54,9 +57,7 @@ def test_message_call_method_redirect(client):
 
 
 def test_message_call_method_with_message(client):
-    body = _post_to_component(
-        client, method_name="test_message", component_name="FakeComponentWithMessage"
-    )
+    body = _post_to_component(client, method_name="test_message", component_name="FakeComponentWithMessage")
 
     assert not body["errors"]
 
@@ -158,9 +159,7 @@ def test_message_call_method_nested_setter(client):
 
 def test_message_call_method_multiple_nested_setter(client):
     data = {"nested": {"another": {"bool": True}}}
-    body = _post_to_component(
-        client, method_name="nested.another.bool=False", data=data
-    )
+    body = _post_to_component(client, method_name="nested.another.bool=False", data=data)
 
     assert body["data"].get("nested").get("another").get("bool") is False
 
@@ -188,9 +187,7 @@ def test_message_call_method_args(client):
 
 def test_message_call_method_kwargs(client):
     data = {"method_count": 0}
-    body = _post_to_component(
-        client, method_name="test_method_kwargs(count=99)", data=data
-    )
+    body = _post_to_component(client, method_name="test_method_kwargs(count=99)", data=data)
 
     assert body["data"].get("method_count") == 99
 
@@ -252,9 +249,7 @@ def test_message_call_method_refresh(client):
 
 def test_message_call_method_caches_disabled(client, monkeypatch, settings):
     monkeypatch.setattr(unicorn_view, "COMPONENTS_MODULE_CACHE_ENABLED", False)
-    settings.CACHES["default"][
-        "BACKEND"
-    ] = "django.core.cache.backends.dummy.DummyCache"
+    settings.CACHES["default"]["BACKEND"] = "django.core.cache.backends.dummy.DummyCache"
 
     component_id = shortuuid.uuid()[:8]
     response = post_and_get_response(
@@ -288,9 +283,7 @@ def test_message_call_method_caches_disabled(client, monkeypatch, settings):
 def test_message_call_method_module_cache_disabled(client, monkeypatch, settings):
     monkeypatch.setattr(unicorn_view, "COMPONENTS_MODULE_CACHE_ENABLED", False)
     settings.UNICORN["CACHE_ALIAS"] = "default"
-    settings.CACHES["default"][
-        "BACKEND"
-    ] = "django.core.cache.backends.locmem.LocMemCache"
+    settings.CACHES["default"]["BACKEND"] = "django.core.cache.backends.locmem.LocMemCache"
 
     component_id = shortuuid.uuid()[:8]
     response = post_and_get_response(
@@ -323,9 +316,7 @@ def test_message_call_method_module_cache_disabled(client, monkeypatch, settings
 
 def test_message_call_method_cache_backend_dummy(client, monkeypatch, settings):
     monkeypatch.setattr(unicorn_view, "COMPONENTS_MODULE_CACHE_ENABLED", True)
-    settings.CACHES["default"][
-        "BACKEND"
-    ] = "django.core.cache.backends.dummy.DummyCache"
+    settings.CACHES["default"]["BACKEND"] = "django.core.cache.backends.dummy.DummyCache"
 
     component_id = shortuuid.uuid()[:8]
     response = post_and_get_response(

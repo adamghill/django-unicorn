@@ -8,9 +8,7 @@ class Flavor(models.Model):
     label = models.CharField(max_length=255)
     parent = models.ForeignKey("self", blank=True, null=True, on_delete=models.SET_NULL)
     float_value = models.FloatField(blank=True, null=True)
-    decimal_value = models.DecimalField(
-        blank=True, null=True, max_digits=10, decimal_places=2
-    )
+    decimal_value = models.DecimalField(blank=True, null=True, max_digits=10, decimal_places=2)
     uuid = models.UUIDField(default=uuid.uuid4)
     datetime = models.DateTimeField(blank=True, null=True)
     date = models.DateField(blank=True, null=True)
@@ -21,6 +19,11 @@ class Flavor(models.Model):
         return self.name
 
 
+class Favorite(models.Model):
+    is_favorite = models.BooleanField(default=False)
+    flavor = models.OneToOneField(Flavor, on_delete=models.CASCADE)
+
+
 class Taste(models.Model):
     name = models.CharField(max_length=255)
     flavor = models.ManyToManyField(Flavor)
@@ -29,3 +32,7 @@ class Taste(models.Model):
 class Origin(models.Model):
     name = models.CharField(max_length=255)
     flavor = models.ManyToManyField(Flavor, related_name="origins")
+
+
+class NewFlavor(Flavor):
+    new_name = models.CharField(max_length=255)

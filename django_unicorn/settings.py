@@ -2,7 +2,6 @@ import logging
 
 from django.conf import settings
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -73,10 +72,10 @@ def get_minify_html_enabled():
 
     if minify_html_enabled:
         try:
-            import htmlmin
+            import htmlmin  # noqa: F401
         except ModuleNotFoundError:
             logger.error(
-                "MINIFY_HTML is `True`, but minify extra could not be imported. Install with `unicorn[minify]`."
+                "MINIFY_HTML is `True`, but minify extra could not be imported. Install with `django-unicorn[minify]`."
             )
 
             return False

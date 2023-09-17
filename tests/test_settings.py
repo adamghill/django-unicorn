@@ -32,9 +32,7 @@ def test_get_serial_enabled(settings):
 
     settings.UNICORN["SERIAL"]["ENABLED"] = True
     settings.CACHES["unicorn_cache"] = {}
-    settings.CACHES["unicorn_cache"][
-        "BACKEND"
-    ] = "django.core.cache.backends.dummy.DummyCache"
+    settings.CACHES["unicorn_cache"]["BACKEND"] = "django.core.cache.backends.dummy.DummyCache"
     settings.UNICORN["CACHE_ALIAS"] = "unicorn_cache"
     assert get_serial_enabled() is False
 

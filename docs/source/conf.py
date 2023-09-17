@@ -1,6 +1,5 @@
 import toml
 
-
 # -- Path setup --------------------------------------------------------------
 
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -17,7 +16,7 @@ import toml
 # -- Project information -----------------------------------------------------
 
 project = "Unicorn"
-copyright = "2021, Adam Hill"
+copyright = "2021, Adam Hill"  # noqa: A001
 author = "Adam Hill"
 
 pyproject = toml.load("../../pyproject.toml")

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "django-unicorn"
-version = "0.48.0"
+version = "0.55.0"
 description = "A magical full-stack framework for Django."
 authors = ["Adam Hill <unicorn@adamghill.com>"]
 license = "MIT"
@@ -14,13 +14,12 @@ keywords = ["django", "python", "javascript", "fullstack"]
 "Funding" = "https://github.com/sponsors/adamghill"
 
 [tool.poetry.dependencies]
-python = ">=3.7,<4"
+python = ">=3.8,<4"
 django = ">=2.2"
 beautifulsoup4 = ">=4.8.0"
 orjson = "^3.6.0"
 shortuuid = "^1.0.1"
 cachetools = "^4.1.1"
-dataclasses = {version = "^0.8.0", python = "<3.7"}
 decorator = "^4.4.2"
 htmlmin = { version = "^0.1.12", optional = true }
 
@@ -32,20 +31,20 @@ furo = { version = "^2021.11.23", optional = true }
 sphinx-copybutton = { version = "^0.4.0", optional = true }
 sphinx-autobuild = { version = "^2021.3.14", optional = true }
 rst2pdf = { version = "^0.98", optional = true }
+six = {version = "^1.16.0", python = "3.8.*"}
 
 [tool.poetry.extras]
 minify = ["htmlmin"]
 docs = ["Sphinx", "linkify-it-py", "myst-parser", "furo", "sphinx-copybutton", "sphinx-autobuild", "rst2pdf"]
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
+certifi = "^2023.7.22"  # needed for GitHub Actions
+keyring = "24.2.0"  # needed for GitHub Actions
 pytest = "^6"
 black = "*"
-flake8 = "^3"
-isort = "^5"
 mypy = "<1"
 django-stubs = "^1.5.0"
 pytest-django = "^3"
-bpython = "<1"
 django-mock-queries = "^2.1.5"
 pydantic = "^1.7.3"
 pywatchman = "^1.4.1"
@@ -54,20 +53,80 @@ nox = "^2020.12.31"
 poethepoet = "^0"
 coverage = {extras = ["toml"], version = "^6"}
 pytest-cov = "^3"
+pytest-benchmark = "^4.0.0"
+ruff = "^0.0.290"
 
-[tool.isort]
-default_section = "THIRDPARTY"
-known_first_party = ["django_unicorn", "example"]
-known_django = "django"
-sections = ["FUTURE", "STDLIB", "DJANGO", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
-lines_after_imports = 2
-multi_line_output = 3
-include_trailing_comma = true
-skip_glob = "*/migrations/*.py"
-profile = "black"
+[tool.black]
+target-version = ["py38", "py39", "py310"]
+line-length = 120
+extend-exclude = "migrations"
+
+[tool.ruff]
+src = ["django_unicorn"]
+exclude = ["example", "**/migrations/*"]
+target-version = "py38"
+line-length = 120
+select = [
+  "A",
+  "ARG",
+  "B",
+  "C",
+  "DTZ",
+  "E",
+  "EM",
+  "F",
+  "FBT",
+  "I",
+  "ICN",
+  "ISC",
+  "N",
+  "PLC",
+  "PLE",
+  "PLR",
+  "PLW",
+  "Q",
+  "RUF",
+  "S",
+  "T",
+  "TID",
+  "UP",
+  "W",
+  "YTT",
+]
+ignore = [
+  # Allow non-abstract empty methods in abstract base classes
+  "B027",
+  # Allow boolean positional values in function calls, like `dict.get(... True)`
+  "FBT003",
+  # Ignore checks for possible passwords
+  "S105", "S106", "S107",
+  # Ignore complexity
+  "C901", "PLR0911", "PLR0912", "PLR0913", "PLR0915",
+  # Ignore unused variables
+  "F841",
+   # Ignore exception strings
+  "EM101", "EM102",
+]
+unfixable = [
+  # Don't touch unused imports
+  "F401",
+]
+
+[tool.ruff.pydocstyle]
+convention = "google"  # Accepts: "google", "numpy", or "pep257".
+
+[tool.ruff.isort]
+known-first-party = ["django_unicorn", "example"]
+
+[tool.ruff.flake8-tidy-imports]
+ban-relative-imports = "all"
+
+[tool.ruff.per-file-ignores]
+# Tests can use magic values, assertions, and relative imports
+"tests/**/*" = ["PLR2004", "S101", "TID252"]
 
 [tool.pytest.ini_options]
-addopts = "--quiet --failed-first --reuse-db --nomigrations -p no:warnings -m 'not slow'"
+addopts = "--quiet --failed-first --reuse-db --nomigrations -p no:warnings -m 'not slow' --benchmark-skip"
 testpaths = [
     "tests"
 ]
@@ -86,6 +145,8 @@ tj = { cmd = "npm run-script test", help = "Run the JavaScript unit tests" }
 ta = ["tp", "tj"]
 jb = { cmd = "npm run build", help = "Build the JavaScript library" }
 t = { cmd = "pytest -m 'not slow'", help = "Run Python unit tests" }
+tb = { cmd = "pytest tests/benchmarks/ --benchmark-autosave --benchmark-only", help = "Run Python unit tests with benchmarks" }
+tbc = { cmd = "pytest tests/benchmarks/ --benchmark-only --benchmark-compare", help = "Run Python unit tests with compared benchmarks" }
 tc = { cmd = "pytest --cov=django_unicorn", help = "Run tests with coverage" }
 cr = { cmd = "coverage report", help = "Show coverage report" }
 my = { cmd = "mypy .", help = "Run mypy" }

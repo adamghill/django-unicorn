@@ -12,7 +12,6 @@ from django_unicorn.components.unicorn_view import (
     convert_to_snake_case,
 )
 
-
 COMPONENT_FILE_CONTENT = """from django_unicorn.components import UnicornView
 
 
@@ -35,15 +34,13 @@ def get_app_path(app_name: str) -> Path:
 
 
 class Command(BaseCommand):
-    help = "Creates a new component for `django-unicorn`"
+    help = "Creates a new component for `django-unicorn`"  # noqa: A003
 
     def add_arguments(self, parser):
         parser.add_argument("app_name", type=str)
-        parser.add_argument(
-            "component_names", nargs="+", type=str, help="Names of components"
-        )
+        parser.add_argument("component_names", nargs="+", type=str, help="Names of components")
 
-    def handle(self, *args, **options):
+    def handle(self, **options):
         # Default from `django-cookiecutter`
         base_path = getattr(settings, "APPS_DIR", None)
 
@@ -68,7 +65,7 @@ class Command(BaseCommand):
 
         try:
             app_directory = get_app_path(app_name)
-        except LookupError:
+        except LookupError as e:
             should_create_app = input(
                 f"\n'{app_name}' cannot be found. Should it be created automatically with `startapp {app_name}`? [y/N] "
             )
@@ -85,7 +82,7 @@ class Command(BaseCommand):
             else:
                 raise CommandError(
                     f"An app named '{app_name}' does not exist yet. You might need to create it first."
-                )
+                ) from e
 
         is_first_component = False
 
@@ -98,9 +95,7 @@ class Command(BaseCommand):
         if not component_base_path.exists():
             component_base_path.mkdir()
 
-            self.stdout.write(
-                self.style.SUCCESS(f"Created your first component in '{app_name}'! ✨\n")
-            )
+            self.stdout.write(self.style.SUCCESS(f"Created your first component in '{app_name}'! ✨\n"))
 
             is_first_component = True
 
@@ -110,7 +105,7 @@ class Command(BaseCommand):
 
         for component_name in options["component_names"]:
             if "." in component_name:
-                (*nested_paths, component_name) = component_name.split(".")
+                (*nested_paths, component_name) = component_name.split(".")  # noqa: PLW2901
 
                 for nested_path in nested_paths:
                     component_base_path /= nested_path
@@ -127,15 +122,11 @@ class Command(BaseCommand):
 
             if component_path.exists():
                 self.stdout.write(
-                    self.style.ERROR(
-                        f"Skipping creating {snake_case_component_name}.py because it already exists."
-                    )
+                    self.style.ERROR(f"Skipping creating {snake_case_component_name}.py because it already exists.")
                 )
             else:
                 component_path.write_text(
-                    COMPONENT_FILE_CONTENT.format(
-                        **{"pascal_case_component_name": pascal_case_component_name}
-                    )
+                    COMPONENT_FILE_CONTENT.format(**{"pascal_case_component_name": pascal_case_component_name})
                 )
                 self.stdout.write(self.style.SUCCESS(f"Created {component_path}."))
 
@@ -158,9 +149,7 @@ class Command(BaseCommand):
 
             if template_path.exists():
                 self.stdout.write(
-                    self.style.ERROR(
-                        f"Skipping creating {component_name}.html because it already exists."
-                    )
+                    self.style.ERROR(f"Skipping creating {component_name}.html because it already exists.")
                 )
             else:
                 template_path.write_text(TEMPLATE_FILE_CONTENT)
@@ -172,11 +161,7 @@ class Command(BaseCommand):
                 )
 
                 if will_star_repo.strip().lower() in ("y", "yes"):
-                    self.stdout.write(
-                        self.style.SUCCESS(
-                            "Thank you for helping spread the word about Unicorn!"
-                        )
-                    )
+                    self.stdout.write(self.style.SUCCESS("Thank you for helping spread the word about Unicorn!"))
 
                     self.stdout.write(
                         """
@@ -199,19 +184,12 @@ class Command(BaseCommand):
 """
                     )
 
-                    webbrowser.open(
-                        "https://github.com/adamghill/django-unicorn", new=2
-                    )
+                    webbrowser.open("https://github.com/adamghill/django-unicorn", new=2)
                 else:
                     self.stdout.write(
-                        self.style.ERROR(
-                            "That's a bummer, but I understand. I hope you will star it for me later!"
-                        )
+                        self.style.ERROR("That's a bummer, but I understand. I hope you will star it for me later!")
                     )
 
             if is_new_app:
-                self.stdout.write(
-                    self.style.WARNING(
-                        f'\nMake sure to add `"{app_name}",` to your INSTALLED_APPS list in your settings file if necessary.'
-                    )
-                )
+                msg = f'\nMake sure to add `"{app_name}",` to your INSTALLED_APPS list in your settings file if necessary.'  # noqa: E501
+                self.stdout.write(self.style.WARNING(msg))

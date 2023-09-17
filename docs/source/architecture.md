@@ -10,7 +10,7 @@ Once the component view and template are found, a serialized version of all of t
 
 ## JavaScript initialization
 
-After the template is rendered, the JavaScript library parses the HTML for DOM elements that start with `unicorn:` or `u:` and creates a list of attributes that end with `:model`, `:poll`, or other specific `Unicorn` functionality. For attributes that are let, the assumption is that they are an event type (e.g. `unicorn:click`).
+After the template is rendered, the JavaScript library parses the HTML for DOM elements that start with `unicorn:` or `u:` and creates a list of attributes that end with `:model`, `:poll`, or other specific `Unicorn` functionality. For attributes that are left, the assumption is that they are an event type (e.g. `unicorn:click`).
 
 For anything that is a model, the JavaScript sets the value for the element based on the serialized data of the publicly available attributes from the component view. Event listeners are attached for all event types. Then, other custom functionality is setup (e.g. polling).
 

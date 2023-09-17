@@ -24,7 +24,63 @@
     dictionary.name: {{ dictionary.name }}<br />
     dictionary.nested.name: {{ dictionary.nested.name }}<br />
     <button u:click='set_dictionary({"name": 1, "nested": {"name": 2}})'>set dictionary(1)</button>
-    <button u:click='dictionary.nested.name=2'>set dictionary(2)</button>
+    <button u:click='dictionary.nested.name=3'>set dictionary(3)</button>
+    <button u:click='set_dictionary_2'>set dictionary whoa</button>
+
+    <div>
+      {{ dictionary_2 }}
+    </div>
+  </div>
+
+  <div>
+    <label>Datetime</label>
+
+    <div>
+      {{ date_example }}
+    </div>
+    <div>
+      <button u:click='get_date'>get_date</button>
+      <button u:click='check_date("2020-09-12T01:01:01")'>check_date static</button>
+      <button u:click='check_date("{{ date_example|date:'c' }}")'>check_date (c)</button>
+      <button u:click='check_date({{ date_example|date:'U' }})'>check_date (U)</button>
+    </div>
+
+    <div>
+      {{ date_example_with_typehint }}
+    </div>
+    <div>
+      <button u:click='add_hour()'>add_hour()</button>
+    </div>
+
+    <div>
+      <div>Dates list with no type hint (will change to strings with an action)</div>
+      <ul>
+        {% for date in dates_with_no_typehint %}
+        <li>{{ date }}</li>
+        {% endfor %}
+      </ul>
+
+      <div>Dates list with just list type hint (will change to strings with an action)</div>
+      <ul>
+        {% for date in dates_with_list_typehint %}
+        <li>{{ date }}</li>
+        {% endfor %}
+      </ul>
+
+      <div>Dates list with old type hint (should stay datetimes with an action)</div>
+      <ul>
+        {% for date in dates_with_old_typehint %}
+        <li>{{ date }}</li>
+        {% endfor %}
+      </ul>
+
+      <div>Dates list with new type hint (should stay datetimes with an action)</div>
+      <ul>
+        {% for date in dates_with_new_typehint %}
+        <li>{{ date }}</li>
+        {% endfor %}
+      </ul>
+    </div>
   </div>
 
   <div>
@@ -107,6 +163,7 @@
 
   <div>
     <label>Enums</label>
+    <br />
 
     <button unicorn:click="set_color({{ color.value }})">Sets color based on `self.color` enum</button>
     <button unicorn:click="set_color(2)">Sets `self.color` to `Color.GREEN`</button>
@@ -116,6 +173,8 @@
     color: {{ color }}
   </div>
 
-  <button u:click="$reset">$reset</button>
-  <button u:click="$refresh">$refresh</button>
+  <div>
+    <button u:click="$reset">$reset</button>
+    <button u:click="$refresh">$refresh</button>
+  </div>
 </div>

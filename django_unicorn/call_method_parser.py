@@ -1,30 +1,15 @@
 import ast
 import logging
 from functools import lru_cache
-from typing import Any, Dict, List, Tuple
-from uuid import UUID
+from types import MappingProxyType
+from typing import Any, Dict, List, Mapping, Tuple
 
-from django.utils.dateparse import (
-    parse_date,
-    parse_datetime,
-    parse_duration,
-    parse_time,
-)
-
+from django_unicorn.utils import CASTERS
 
 logger = logging.getLogger(__name__)
 
-# Lambdas that attempt to convert something that failed while being parsed by `ast.literal_eval`.
-CASTERS = [
-    lambda a: parse_datetime(a),
-    lambda a: parse_time(a),
-    lambda a: parse_date(a),
-    lambda a: parse_duration(a),
-    lambda a: UUID(a),
-]
 
-
-class InvalidKwarg(Exception):
+class InvalidKwargError(Exception):
     pass
 
 
@@ -63,10 +48,28 @@ def _get_expr_string(expr: ast.expr) -> str:
     return expr_str
 
 
+def _cast_value(value):
+    """
+    Try to cast a value based on a list of casters.
+    """
+
+    for caster in CASTERS.values():
+        try:
+            casted_value = caster(value)
+
+            if casted_value:
+                value = casted_value
+                break
+        except ValueError:
+            pass
+
+    return value
+
+
 @lru_cache(maxsize=128, typed=True)
 def eval_value(value):
     """
-    Uses `ast.literal_eval` to parse strings into an appropriate Python primative.
+    Uses `ast.literal_eval` to parse strings into an appropriate Python primitive.
 
     Also returns an appropriate object for strings that look like they represent datetime,
     date, time, duration, or UUID.
@@ -75,21 +78,13 @@ def eval_value(value):
     try:
         value = ast.literal_eval(value)
     except SyntaxError:
-        for caster in CASTERS:
-            try:
-                casted_value = caster(value)
-
-                if casted_value:
-                    value = casted_value
-                    break
-            except ValueError:
-                pass
+        value = _cast_value(value)
 
     return value
 
 
 @lru_cache(maxsize=128, typed=True)
-def parse_kwarg(kwarg: str, raise_if_unparseable=False) -> Dict[str, Any]:
+def parse_kwarg(kwarg: str, *, raise_if_unparseable=False) -> Dict[str, Any]:
     """
     Parses a potential kwarg as a string into a dictionary.
 
@@ -119,26 +114,31 @@ def parse_kwarg(kwarg: str, raise_if_unparseable=False) -> Dict[str, Any]:
                 if raise_if_unparseable:
                     raise
 
-                # The value can be a template variable that will get set from the context when
-                # the templatetag is rendered, so just return the expr as a string.
+                # The value can be a template variable that will get set from the
+                # context when the templatetag is rendered, so just return the expr
+                # as a string.
                 value = _get_expr_string(assign.value)
                 return {target.id: value}
         else:
-            raise InvalidKwarg(f"'{kwarg}' is invalid")
-    except SyntaxError:
-        raise InvalidKwarg(f"'{kwarg}' could not be parsed")
+            raise InvalidKwargError(f"'{kwarg}' is invalid")
+    except SyntaxError as e:
+        raise InvalidKwargError(f"'{kwarg}' could not be parsed") from e
 
 
 @lru_cache(maxsize=128, typed=True)
-def parse_call_method_name(call_method_name: str) -> Tuple[str, List[Any]]:
+def parse_call_method_name(
+    call_method_name: str,
+) -> Tuple[str, Tuple[Any], Mapping[str, Any]]:
     """
-    Parses the method name from the request payload into a set of parameters to pass to a method.
+    Parses the method name from the request payload into a set of parameters to pass to
+    a method.
 
     Args:
-        param call_method_name: String representation of a method name with parameters, e.g. "set_name('Bob')"
+        param call_method_name: String representation of a method name with parameters,
+            e.g. "set_name('Bob')"
 
     Returns:
-        Tuple of method_name and a list of arguments.
+        Tuple of method_name, a list of arguments and a dict of keyword arguments
     """
 
     is_special_method = False
@@ -164,4 +164,5 @@ def parse_call_method_name(call_method_name: str) -> Tuple[str, List[Any]]:
     if is_special_method:
         method_name = f"${method_name}"
 
-    return (method_name, args, kwargs)
+    # conversion to immutable types - tuple and MappingProxyType
+    return method_name, tuple(args), MappingProxyType(kwargs)

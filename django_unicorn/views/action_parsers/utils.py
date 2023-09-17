@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Dict, Optional
 
 from django.db.models import QuerySet
 
@@ -8,7 +8,10 @@ from django_unicorn.decorators import timed
 
 @timed
 def set_property_value(
-    component: UnicornView, property_name: str, property_value: Any, data: dict = None
+    component: UnicornView,
+    property_name: str,
+    property_value: Any,
+    data: Optional[Dict] = None,
 ) -> None:
     """
     Sets properties on the component.
@@ -21,8 +24,10 @@ def set_property_value(
         param data: Dictionary that gets sent back with the response. Defaults to {}.
     """
 
-    assert property_name is not None, "Property name is required"
-    assert property_value is not None, "Property value is required"
+    if property_name is None:
+        raise AssertionError("Property name is required")
+    if property_value is None:
+        raise AssertionError("Property value is required")
 
     if not data:
         data = {}
@@ -46,7 +51,7 @@ def set_property_value(
     component_or_field = component
     data_or_dict = data  # Could be an internal portion of data that gets set
 
-    for (idx, property_name_part) in enumerate(property_name_parts):
+    for idx, property_name_part in enumerate(property_name_parts):
         if hasattr(component_or_field, property_name_part):
             if idx == len(property_name_parts) - 1:
                 if hasattr(component_or_field, "_set_property"):
@@ -76,14 +81,10 @@ def set_property_value(
                                 related_name = field.name
 
                                 if field.auto_created:
-                                    related_name = (
-                                        field.related_name or f"{field.name}_set"
-                                    )
+                                    related_name = field.related_name or f"{field.name}_set"
 
                                 if related_name == property_name_part:
-                                    related_descriptor = getattr(
-                                        component_or_field, related_name
-                                    )
+                                    related_descriptor = getattr(component_or_field, related_name)
                                     related_descriptor.set(property_value)
                                     is_relation_field = True
                                     break
@@ -114,18 +115,16 @@ def set_property_value(
             else:
                 component_or_field = component_or_field[property_name_part]
                 data_or_dict = data_or_dict.get(property_name_part, {})
-        elif isinstance(component_or_field, list) or isinstance(
-            component_or_field, QuerySet
-        ):
-            # TODO: Check for iterable instad of list? `from collections.abc import Iterable`
-            property_name_part = int(property_name_part)
+        elif isinstance(component_or_field, (QuerySet, list)):
+            # TODO: Check for iterable instead of list? `from collections.abc import Iterable`
+            property_name_part_int = int(property_name_part)
 
             if idx == len(property_name_parts) - 1:
-                component_or_field[property_name_part] = property_value
-                data_or_dict[property_name_part] = property_value
+                component_or_field[property_name_part_int] = property_value
+                data_or_dict[property_name_part_int] = property_value
             else:
-                component_or_field = component_or_field[property_name_part]
-                data_or_dict = data_or_dict[property_name_part]
+                component_or_field = component_or_field[property_name_part_int]
+                data_or_dict = data_or_dict[property_name_part_int]
         else:
             break
 

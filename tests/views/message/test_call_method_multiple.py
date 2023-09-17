@@ -108,7 +108,7 @@ def test_message_two(client, settings):
 
         second_result = results[1]
         second_body = orjson.loads(second_result.content)
-        assert second_body["queued"] == True
+        assert second_body["queued"] is True
 
 
 @pytest.mark.slow
@@ -139,9 +139,8 @@ def test_message_multiple(client, settings):
         assert first_body["data"].get("counter") == len(results)
 
         for result in results[1:]:
-            result = results[1]
             body = orjson.loads(result.content)
-            assert body.get("queued") == True
+            assert body.get("queued") is True
 
 
 @pytest.mark.slow
@@ -173,9 +172,8 @@ def test_message_multiple_return_is_correct(client, settings):
         assert first_body["return"].get("value") == len(results)
 
         for result in results[1:]:
-            result = results[1]
             body = orjson.loads(result.content)
-            assert body.get("queued") == True
+            assert body.get("queued") is True
 
 
 @pytest.mark.slow
@@ -206,9 +204,7 @@ def test_message_multiple_with_updated_data(client, settings):
     # sure how to reconcile this with resulting data from queued messages
     message_with_new_data = deepcopy(message)
     message_with_new_data["data"] = {"counter": 7}
-    message_with_new_data["checksum"] = generate_checksum(
-        str(message_with_new_data["data"])
-    )
+    message_with_new_data["checksum"] = generate_checksum(str(message_with_new_data["data"]))
     messages.append((client, 0.4, message_with_new_data))
 
     with ThreadPool(len(messages)) as pool:
@@ -220,9 +216,8 @@ def test_message_multiple_with_updated_data(client, settings):
         assert first_body["data"].get("counter") == 4
 
         for result in results[1:]:
-            result = results[1]
             body = orjson.loads(result.content)
-            assert body.get("queued") == True
+            assert body.get("queued") is True
 
 
 @pytest.mark.slow
@@ -324,9 +319,7 @@ def test_message_second_request_not_queued_because_serial_disabled(client, setti
 @pytest.mark.slow
 @pytest.mark.skip
 def test_message_second_request_not_queued_because_dummy_cache(client, settings):
-    _set_serial(
-        settings, True, 5, cache_backend="django.core.cache.backends.dummy.DummyCache"
-    )
+    _set_serial(settings, True, 5, cache_backend="django.core.cache.backends.dummy.DummyCache")
 
     data = {"counter": 0}
     component_id = shortuuid.uuid()[:8]

@@ -1,8 +1,7 @@
 import time
 
-from django.http import JsonResponse
-
 import pytest
+from django.http import JsonResponse
 
 from django_unicorn.errors import ComponentClassLoadError, ComponentModuleLoadError
 from django_unicorn.views import message
@@ -117,10 +116,9 @@ def test_message_component_class_not_loaded(client):
             url="/message/tests.views.fake_components.FakeComponentNotThere",
         )
 
-    print(e.value.locations)
     assert (
         e.exconly()
-        == "django_unicorn.errors.ComponentClassLoadError: The component class 'tests.views.fake_components.FakeComponentNotThere' could not be loaded."
+        == "django_unicorn.errors.ComponentClassLoadError: The component class 'tests.views.fake_components.FakeComponentNotThere' could not be loaded."  # noqa: E501
     )
     assert e.value.locations == [
         ("tests.views.fake_components", "FakeComponentNotThere"),
