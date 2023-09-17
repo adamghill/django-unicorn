@@ -3,6 +3,7 @@ from datetime import timedelta
 from decimal import Decimal
 from functools import lru_cache
 from typing import Any, Dict, List, Tuple
+from types import MappingProxyType
 
 from django.core.serializers import serialize
 from django.core.serializers.json import DjangoJSONEncoder
@@ -248,6 +249,9 @@ def _json_serializer(obj):
             return obj.dict()
         elif isinstance(obj, Decimal):
             return str(obj)
+        elif isinstance(obj, MappingProxyType):
+            # Return a regular dict for `mappingproxy`
+            return obj.copy()
         elif hasattr(obj, "to_json"):
             return obj.to_json()
     except Exception as e:
