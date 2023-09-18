@@ -116,17 +116,20 @@ def test_message_component_class_not_loaded(client):
             url="/message/tests.views.fake_components.FakeComponentNotThere",
         )
 
-    assert (
-        e.exconly()
-        == "django_unicorn.errors.ComponentClassLoadError: The component class 'tests.views.fake_components.FakeComponentNotThere' could not be loaded."  # noqa: E501
-    )
-    assert e.value.locations == [
+    expected_exception_message = "django_unicorn.errors.ComponentClassLoadError: The component class \
+'tests.views.fake_components.FakeComponentNotThere' could not be loaded: module 'tests.views.fake_components' \
+has no attribute 'FakeComponentNotThere'"
+
+    assert e.exconly() == expected_exception_message
+
+    expected_locations = [
         ("tests.views.fake_components", "FakeComponentNotThere"),
         (
             "unicorn.components.tests.views.fake_components.FakeComponentNotThere",
             "FakecomponentnotthereView",
         ),
     ]
+    assert e.value.locations == expected_locations
 
 
 def test_message_component_class_with_attribute_error(client):
@@ -175,7 +178,8 @@ def test_message_component_with_dot(client):
     with pytest.raises(ComponentClassLoadError) as e:
         post_json(client, data, url="/message/test.a")
 
-    assert (
-        e.exconly()
-        == "django_unicorn.errors.ComponentClassLoadError: The component class 'test.a' could not be loaded."
-    )
+    expected = "django_unicorn.errors.ComponentClassLoadError: The component class 'test.a' could not be loaded: \
+module 'test' has no attribute 'a'"
+    actual = e.exconly()
+
+    assert actual == expected

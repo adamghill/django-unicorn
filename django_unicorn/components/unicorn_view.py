@@ -886,7 +886,7 @@ class UnicornView(TemplateView):
                 class_name_not_found = f"{module_name}.{class_name}"
 
         if class_name_not_found is not None and attribute_exception is not None:
-            message = f"The component class '{class_name_not_found}' could not be loaded:\n {attribute_exception}"
+            message = f"The component class '{class_name_not_found}' could not be loaded: {attribute_exception}"
             raise ComponentClassLoadError(message, locations=locations) from attribute_exception
 
         module_name_not_found = component_name.replace("-", "_")
