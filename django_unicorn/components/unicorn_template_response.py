@@ -21,7 +21,6 @@ from django_unicorn.utils import generate_checksum, sanitize_html
 
 logger = logging.getLogger(__name__)
 
-
 # https://developer.mozilla.org/en-US/docs/Glossary/Empty_element
 EMPTY_ELEMENTS = (
     "<area>",
@@ -154,7 +153,9 @@ potentially cause errors in Unicorn."
         root_element["unicorn:key"] = self.component.component_key
         root_element["unicorn:checksum"] = checksum
         root_element["unicorn:data"] = frontend_context_variables
-
+        root_element["unicorn:calls"] = orjson.dumps(self.component.calls).decode(
+            "utf-8"
+        )
         # Generate the checksum based on the rendered content (without script tag)
         checksum = generate_checksum(UnicornTemplateResponse._desoupify(soup))
 
