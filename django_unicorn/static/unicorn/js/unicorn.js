@@ -70,7 +70,7 @@ export function insertComponentFromDom(node) {
       key: node.getAttribute("unicorn:key"),
       checksum: node.getAttribute("unicorn:checksum"),
       data: JSON.parse(node.getAttribute("unicorn:data")),
-      calls: [],
+      calls: JSON.parse(node.getAttribute("unicorn:calls")),
     }
     componentInit(args);
   }
