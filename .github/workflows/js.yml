@@ -16,5 +16,10 @@ jobs:
       - name: Install node packages
         run: npm install
 
+      - name: See if unicorn.min.js is up-to-date
+        run: |
+          npm run build
+          git diff --stat --exit-code
+
       - name: Test with ava
         run: npm run-script test
