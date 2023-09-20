@@ -7,19 +7,18 @@
 <script>
   var url = "{% url 'django_unicorn:message' %}";
   var morpherOptions = JSON.parse(document.getElementById("unicorn:settings:morpher-options").textContent);
-  var morpher = getMorpher("{{ MORPHER }}", morpherOptions);
+  var morpher = Unicorn.getMorpher("{{ MORPHER }}", morpherOptions);
   Unicorn.init(url, "{{ CSRF_HEADER_NAME }}", "{{ CSRF_COOKIE_NAME }}", morpher);
 </script>
 {% else %}
 <script type="module">
   import * as Unicorn from "{% static 'unicorn/js/unicorn.js' %}";
-  import { getMorpher } from "{% static 'unicorn/js/morpher.js' %}";
   // Set Unicorn to the global, so it can be used by components
   window.Unicorn = Unicorn;
 
   var url = "{% url 'django_unicorn:message' %}";
   var morpherOptions = JSON.parse(document.getElementById("unicorn:settings:morpher-options").textContent);
-  var morpher = getMorpher("{{ MORPHER }}", morpherOptions);
+  var morpher = Unicorn.getMorpher("{{ MORPHER }}", morpherOptions);
   Unicorn.init(url, "{{ CSRF_HEADER_NAME }}", "{{ CSRF_COOKIE_NAME }}", morpher);
 </script>
 {% endif %}

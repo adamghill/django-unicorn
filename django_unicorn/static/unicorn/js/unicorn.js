@@ -1,6 +1,8 @@
 import { Component } from "./component.js";
 import { isEmpty, hasValue } from "./utils.js";
 import { components, lifecycleEvents } from "./store.js";
+import { MorphdomMorpher} from "./morphers/morphdom.js";
+import { AlpineMorpher } from "./morphers/alpine.js";
 
 let messageUrl = "";
 let csrfTokenHeaderName = "X-CSRFToken";
@@ -140,4 +142,18 @@ export function addEventListener(eventName, callback) {
 export function trigger(componentNameOrKey, elementKey) {
   const component = getComponent(componentNameOrKey);
   component.trigger(elementKey);
+}
+
+/**
+ * Returns the morpher for the specified name and options.
+ */
+export function getMorpher(morpherName, morpherOptions) {
+  const MorpherClass = {
+    morphdom: MorphdomMorpher,
+    alpine: AlpineMorpher,
+  }[morpherName];
+  if (MorpherClass) {
+    return new MorpherClass(morpherOptions);
+  }
+  throw Error(`No morpher found for: ${morpherName}`);
 }
