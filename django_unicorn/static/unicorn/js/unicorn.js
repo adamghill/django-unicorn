@@ -15,7 +15,6 @@ let morpher;
  * @typedef
  */
 export function init(_messageUrl, _csrfTokenHeaderName, _csrfTokenCookieName, _morpher) {
-  window.morpher = _morpher;
   messageUrl = _messageUrl;
   morpher = _morpher;
 
