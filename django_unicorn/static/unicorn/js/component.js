@@ -544,7 +544,10 @@ export class Component {
 
 
   /**
-   * Morph the component, while
+   * Replace the target DOM with the rerendered component.
+   *
+   * The function updates the DOM, and updates the Unicorn component store by deleting
+   * components that were removed, and adding new components.
    */
   morph(targetDom, rerenderedComponent) {
     if (!rerenderedComponent) {
