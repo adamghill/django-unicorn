@@ -7,7 +7,7 @@ from django.template.base import FilterExpression
 
 from django_unicorn.call_method_parser import InvalidKwargError, parse_kwarg
 from django_unicorn.errors import ComponentNotValidError
-from django_unicorn.settings import get_morpher, get_morpher_options
+from django_unicorn.settings import get_morpher_settings
 
 register = template.Library()
 
@@ -33,8 +33,7 @@ def unicorn_scripts():
         "MINIFIED": get_setting("MINIFIED", not settings.DEBUG),
         "CSRF_HEADER_NAME": csrf_header_name,
         "CSRF_COOKIE_NAME": csrf_cookie_name,
-        "MORPHER": get_morpher(),
-        "MORPHER_OPTIONS": get_morpher_options(),
+        "MORPHER": get_morpher_settings(),
     }
 
 

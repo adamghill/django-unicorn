@@ -1,6 +1,9 @@
+import pytest
+
 from django_unicorn.settings import (
     get_cache_alias,
     get_minify_html_enabled,
+    get_morpher_settings,
     get_script_location,
     get_serial_enabled,
 )
@@ -61,3 +64,20 @@ def test_get_script_location(settings):
     del settings.UNICORN["SCRIPT_LOCATION"]
 
     assert get_script_location() == "after"
+
+
+def test_get_morpher_settings(settings):
+    assert get_morpher_settings() == {"NAME": "morphdom"}
+
+    settings.UNICORN["MORPHER"] = {"NAME": "alpine"}
+    assert get_morpher_settings()["NAME"] == "alpine"
+
+    settings.UNICORN["MORPHER"] = {"NAME": "blob"}
+
+    with pytest.raises(AssertionError) as e:
+        get_morpher_settings()
+
+    assert e.type == AssertionError
+    assert e.exconly() == "AssertionError: Unknown morpher name: blob"
+
+    del settings.UNICORN["MORPHER"]

@@ -7,6 +7,7 @@ Alpine morpher requires Alpine to be loaded. Add Alpine and Alpine Morph to your
 See https://www.django-unicorn.com/docs/custom-morphers/#alpine for more information.
 `);
     }
+
     this.options = options;
   }
 
@@ -21,15 +22,15 @@ See https://www.django-unicorn.com/docs/custom-morphers/#alpine for more informa
       key(el) {
         if (el.attributes) {
           const key =
-            el.getAttribute("unicorn:key") ||
-            el.getAttribute("u:key") ||
-            el.id;
+            el.getAttribute("unicorn:key") || el.getAttribute("u:key") || el.id;
+
           if (key) {
             return key;
           }
         }
-        return el.id
-      }
-    }
+
+        return el.id;
+      },
+    };
   }
 }

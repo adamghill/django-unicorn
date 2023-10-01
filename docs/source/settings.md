@@ -9,14 +9,13 @@ UNICORN = {
     "CACHE_ALIAS": "default",
     "MINIFY_HTML": False,
     "MINIFIED": True,
-    "RELOAD_SCRIPT_ELEMENTS": False,
     "SERIAL": {
         "ENABLED": False,
         "TIMEOUT": 60,
     },
     "SCRIPT_LOCATION": "after",
-    "MORPHER": "morphdom",
-    "MORPHER_OPTIONS": {
+    "MORPHER": {
+        "NAME": "morphdom",
         "RELOAD_SCRIPT_ELEMENTS": False,
     },
 }
@@ -58,7 +57,14 @@ Where the initial JavaScript data is included on initial render. Two values are 
 
 **append** will render the JavaScript _inside_ of the HTML component.
 
-
 ## MORPHER
 
-The library to use for diffing and merging the DOM. Defaults to `"morphdom"`. Can be set to "alpine" to use the [Alpine.js Morph Plugin](https://alpinejs.dev/plugins/morph). See [Custom Morphers](custom-morphers.md) for more information.
+Configures the library to use for diffing and merging the DOM. Defaults to `{}`.
+
+### NAME
+
+The name of the morpher to use. Defaults to `"morphdom"`. Specify `"alpine"` to use the [Alpine.js Morph Plugin](https://alpinejs.dev/plugins/morph). See [Custom Morphers](custom-morphers.md) for more information.
+
+### RELOAD_SCRIPT_ELEMENTS
+
+Whether script elements should be reloaded when a component is re-rendered. Defaults to `False`. Only available with the `"morphdom"` morpher.

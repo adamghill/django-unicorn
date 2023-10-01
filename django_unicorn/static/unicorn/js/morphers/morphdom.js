@@ -1,6 +1,5 @@
 import morphdom from "../morphdom/2.6.1/morphdom.js";
 
-
 export class MorphdomMorpher {
   constructor(options) {
     this.options = options;
@@ -12,6 +11,7 @@ export class MorphdomMorpher {
 
   getOptions() {
     const reloadScriptElements = this.options.RELOAD_SCRIPT_ELEMENTS || false;
+
     return {
       childrenOnly: false,
       // eslint-disable-next-line consistent-return
@@ -71,6 +71,6 @@ export class MorphdomMorpher {
           }
         }
       },
-    }
+    };
   }
 }
