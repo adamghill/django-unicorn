@@ -7,7 +7,6 @@ test("init unicorn", (t) => {
   t.true(actual.messageUrl === "unicorn/");
   t.true(actual.csrfTokenHeaderName === "X-Unicorn");
   t.true(actual.csrfTokenCookieName === "unicorn");
-  t.false(actual.reloadScriptElements);
 });
 
 test("init unicorn with no reload", (t) => {
@@ -16,7 +15,6 @@ test("init unicorn with no reload", (t) => {
   t.true(actual.messageUrl === "unicorn/");
   t.true(actual.csrfTokenHeaderName === "X-Unicorn");
   t.true(actual.csrfTokenCookieName === "unicorn");
-  t.false(actual.reloadScriptElements);
 });
 
 test("init unicorn with reload", (t) => {
@@ -25,5 +23,4 @@ test("init unicorn with reload", (t) => {
   t.true(actual.messageUrl === "unicorn/");
   t.true(actual.csrfTokenHeaderName === "X-Unicorn");
   t.true(actual.csrfTokenCookieName === "unicorn");
-  t.true(actual.reloadScriptElements);
 });

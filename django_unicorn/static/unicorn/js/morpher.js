@@ -1,4 +1,4 @@
-import { MorphdomMorpher} from "./morphers/morphdom.js";
+import { MorphdomMorpher } from "./morphers/morphdom.js";
 import { AlpineMorpher } from "./morphers/alpine.js";
 
 export function getMorpher(morpherName, morpherOptions) {
