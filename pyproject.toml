@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "django-unicorn"
-version = "0.55.0"
+version = "0.56.0"
 description = "A magical full-stack framework for Django."
 authors = ["Adam Hill <unicorn@adamghill.com>"]
 license = "MIT"
@@ -151,11 +151,11 @@ tc = { cmd = "pytest --cov=django_unicorn", help = "Run tests with coverage" }
 cr = { cmd = "coverage report", help = "Show coverage report" }
 my = { cmd = "mypy .", help = "Run mypy" }
 b = { cmd = "black . --check --quiet --extend-exclude migrations", help = "Run black" }
-i = { cmd = "isort . --check --quiet", help = "Run isort" }
-tm = ["b", "i", "tc", "my"]
+rf = { cmd = "ruff .", help = "Run ruff" }
+tm = ["b", "rf", "tc", "my"]
 sa = { cmd = "sphinx-autobuild -W docs/source docs/build", help = "Sphinx autobuild" }
 sb = { cmd = "sphinx-build -W docs/source docs/build", help = "Build documentation" }
-build = ["b", "i", "tc", "tj", "jb", "sb"]
+build = ["b", "rf", "tc", "tj", "jb", "sb"]
 publish = { shell = "poetry publish --build -r test && poetry publish" }
 
 [build-system]

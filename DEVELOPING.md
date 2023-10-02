@@ -30,8 +30,8 @@
 
 1. Update changelog.md
 1. Update package.json
-1. Run all build processes: `poe build`
 1. `poetry version major|minor|patch`
+1. Run all build processes: `poe build`
 1. Commit/tag/push version bump
 1. `poe publish`
 1. Make sure test package can be installed as expected (https://test.pypi.org/project/django-unicorn/)

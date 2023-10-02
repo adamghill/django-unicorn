@@ -8,26 +8,11 @@ The default morpher used in Unicorn is [`morphdom`](https://github.com/patrick-s
 
 `morphdom` is the default morpher so no extra settings or installation is required to use it.
 
-### Example settings
-
-```python
-# settings.py
-
-UNICORN = {
-    ...
-    "MORPHER": {
-        "NAME": "morphdom",
-        "RELOAD_SCRIPT_ELEMENTS": True,
-    }
-    ...
-}
-```
-
 ## `Alpine`
 
 Components which use both `Unicorn` and `Alpine.js` should use the `Alpine.js` morpher to prevent losing state when it gets re-rendered.
 
-### Example settings
+## Django Settings
 
 ```python
 # settings.py
@@ -42,7 +27,7 @@ UNICORN = {
 ```
 
 ```{note}
-`RELOAD_SCRIPT_ELEMENTS` is not currently supported for the `Alpine.js` morpher.
+`MORPHER.RELOAD_SCRIPT_ELEMENTS` is not currently supported for the `Alpine.js` morpher.
 ```
 
 ### JavaScript Installation

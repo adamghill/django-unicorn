@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.56.0
+
+- Add support for using both Alpine.js and `Unicorn` together in a component ([#597](https://github.com/adamghill/django-unicorn/pull/597)) by [imankulov](https://github.com/imankulov).
+- Do not send a 304 if the child has a parent.  ([#595](https://github.com/adamghill/django-unicorn/pull/595)).
+- Prevent sending the child DOM if there is a parent to reduce network payload size.
+- More verbose error message when a component can not be loaded ((#453)[https://github.com/adamghill/django-unicorn/pull/453] by [nerdoc](https://github.com/nerdoc)).
+
 ## 0.55.0
 
 - Support `List`/`list` type annotations for component actions and fields ([#582](https://github.com/adamghill/django-unicorn/pull/582)).

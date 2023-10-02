@@ -112,8 +112,11 @@ UNICORN = {
     },
     "CACHE_ALIAS": "default",
     "MORPHER": {
+        # "NAME": "alpine",
+        "NAME": "morphdom",
         "RELOAD_SCRIPT_ELEMENTS": True,
     },
+    "MINIFIED": False,
 }
 
 
