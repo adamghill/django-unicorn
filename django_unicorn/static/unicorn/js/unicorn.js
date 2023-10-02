@@ -1,6 +1,7 @@
 import { Component } from "./component.js";
 import { isEmpty, hasValue } from "./utils.js";
 import { components, lifecycleEvents } from "./store.js";
+import { getMorpher } from "./morpher.js";
 
 let messageUrl = "";
 let csrfTokenHeaderName = "X-CSRFToken";
@@ -12,10 +13,15 @@ let morpher;
  *
  * @typedef
  */
-export function init(_messageUrl, _csrfTokenHeaderName, _csrfTokenCookieName, _morpher) {
-  window.morpher = _morpher;
+export function init(
+  _messageUrl,
+  _csrfTokenHeaderName,
+  _csrfTokenCookieName,
+  _morpherSettings
+) {
   messageUrl = _messageUrl;
-  morpher = _morpher;
+
+  morpher = getMorpher(_morpherSettings);
 
   if (hasValue(_csrfTokenHeaderName)) {
     csrfTokenHeaderName = _csrfTokenHeaderName;
@@ -24,6 +30,7 @@ export function init(_messageUrl, _csrfTokenHeaderName, _csrfTokenCookieName, _m
   if (hasValue(_csrfTokenCookieName)) {
     csrfTokenCookieName = _csrfTokenCookieName;
   }
+
   return {
     messageUrl,
     csrfTokenHeaderName,

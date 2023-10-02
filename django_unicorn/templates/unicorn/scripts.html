@@ -6,11 +6,9 @@
 <script src="{% static 'unicorn/js/unicorn.min.js' %}"></script>
 <script>
   const url = "{% url 'django_unicorn:message' %}";
-
   const morpherSettings = JSON.parse(document.getElementById("unicorn:settings:morpher").textContent);
-  const morpher = getMorpher(morpherSettings);
 
-  Unicorn.init(url, "{{ CSRF_HEADER_NAME }}", "{{ CSRF_COOKIE_NAME }}", morpher);
+  Unicorn.init(url, "{{ CSRF_HEADER_NAME }}", "{{ CSRF_COOKIE_NAME }}", morpherSettings);
 
 </script>
 {% else %}
@@ -22,10 +20,8 @@
   window.Unicorn = Unicorn;
 
   const url = "{% url 'django_unicorn:message' %}";
-
   const morpherSettings = JSON.parse(document.getElementById("unicorn:settings:morpher").textContent);
-  const morpher = getMorpher(morpherSettings);
 
-  Unicorn.init(url, "{{ CSRF_HEADER_NAME }}", "{{ CSRF_COOKIE_NAME }}", morpher);
+  Unicorn.init(url, "{{ CSRF_HEADER_NAME }}", "{{ CSRF_COOKIE_NAME }}", morpherSettings);
 </script>
 {% endif %}
