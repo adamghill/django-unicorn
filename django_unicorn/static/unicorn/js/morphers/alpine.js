@@ -1,18 +1,18 @@
 export class AlpineMorpher {
   constructor(options) {
-    // Check if window has Alpine and Alpine Morph
-    if (!window.Alpine || !window.Alpine.morph) {
-      throw Error(`
-Alpine morpher requires Alpine to be loaded. Add Alpine and Alpine Morph to your page.
-See https://www.django-unicorn.com/docs/custom-morphers/#alpine for more information.
-`);
-    }
-
     this.options = options;
   }
 
   morph(dom, htmlElement) {
     if (htmlElement) {
+      // Check if window has Alpine and Alpine Morph
+      if (!window.Alpine || !window.Alpine.morph) {
+        throw Error(`
+  Alpine.js and the Alpine morph plugin can not be found.
+  See https://www.django-unicorn.com/docs/custom-morphers/#alpine for more information.
+  `);
+      }
+
       return window.Alpine.morph(dom, htmlElement, this.getOptions());
     }
   }

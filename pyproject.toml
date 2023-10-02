@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "django-unicorn"
-version = "0.56.0"
+version = "0.56.1"
 description = "A magical full-stack framework for Django."
 authors = ["Adam Hill <unicorn@adamghill.com>"]
 license = "MIT"
@@ -144,6 +144,7 @@ tp = { cmd = "nox -r", help = "Run the entire Python test suite with nox" }
 tj = { cmd = "npm run-script test", help = "Run the JavaScript unit tests" }
 ta = ["tp", "tj"]
 jb = { cmd = "npm run build", help = "Build the JavaScript library" }
+ji = { cmd = "npm install", help = "Install JS" }
 t = { cmd = "pytest -m 'not slow'", help = "Run Python unit tests" }
 tb = { cmd = "pytest tests/benchmarks/ --benchmark-autosave --benchmark-only", help = "Run Python unit tests with benchmarks" }
 tbc = { cmd = "pytest tests/benchmarks/ --benchmark-only --benchmark-compare", help = "Run Python unit tests with compared benchmarks" }
@@ -155,7 +156,7 @@ rf = { cmd = "ruff .", help = "Run ruff" }
 tm = ["b", "rf", "tc", "my"]
 sa = { cmd = "sphinx-autobuild -W docs/source docs/build", help = "Sphinx autobuild" }
 sb = { cmd = "sphinx-build -W docs/source docs/build", help = "Build documentation" }
-build = ["b", "rf", "tc", "tj", "jb", "sb"]
+build = ["b", "rf", "tc", "ji", "tj", "jb", "sb"]
 publish = { shell = "poetry publish --build -r test && poetry publish" }
 
 [build-system]

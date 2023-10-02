@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.56.1
+
+- Handle Alpine.js being loaded with defer.
+
 ## 0.56.0
 
 - Add support for using both Alpine.js and `Unicorn` together in a component ([#597](https://github.com/adamghill/django-unicorn/pull/597) by [imankulov](https://github.com/imankulov)).

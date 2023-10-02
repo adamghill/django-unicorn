@@ -4,6 +4,8 @@
 
 {% if MINIFIED %}
 <script src="{% static 'unicorn/js/unicorn.min.js' %}"></script>
+{% comment %} <script src="../static/unicorn/js/unicorn.min.js"></script> {% endcomment %}
+
 <script>
   const url = "{% url 'django_unicorn:message' %}";
   const morpherSettings = JSON.parse(document.getElementById("unicorn:settings:morpher").textContent);
