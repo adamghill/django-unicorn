@@ -6,7 +6,6 @@ import {
 } from "./eventListeners.js";
 import { components, lifecycleEvents } from "./store.js";
 import { send } from "./messageSender.js";
-import { getMorphdomOptions } from "./morphdom/2.6.1/options.js";
 import {
   $,
   hasValue,
@@ -561,10 +560,9 @@ export class Component {
     const componentIdsBeforeMorph = new Set(findUnicorns().map((el) => el.getAttribute("unicorn:id")))
 
     // Morph
-    this.morphdom(
+    this.morpher.morph(
       targetDom,
       rerenderedComponent,
-      getMorphdomOptions(this.reloadScriptElements),
     );
 
     // Find all component IDs after morphing
