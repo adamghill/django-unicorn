@@ -21,7 +21,7 @@ export class MorphdomMorpher {
         if (node.attributes) {
           const key =
             node.getAttribute("unicorn:key") ||
-            node.getAttribute("u:key") ||
+            node.getAttribute("unicorn:id") ||
             node.id;
 
           if (key) {
