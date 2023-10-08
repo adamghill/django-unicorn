@@ -170,9 +170,7 @@ export function send(component, callback) {
           }
 
           if (parent.dom) {
-            parentComponent.morphRoot(
-              parent.dom,
-            );
+            parentComponent.morphRoot(parent.dom);
           }
 
           if (parent.checksum) {
@@ -213,10 +211,7 @@ export function send(component, callback) {
           }
 
           if (targetDom) {
-            component.morph(
-              targetDom,
-              partial.dom,
-            );
+            component.morph(targetDom, partial.dom);
           }
         }
 
@@ -230,8 +225,10 @@ export function send(component, callback) {
 
       component.triggerLifecycleEvent("updated");
 
-      // Re-init to refresh the root and checksum based on the new data
-      component.init();
+      if (!responseJson.parent) {
+        // Re-init to refresh the root and checksum based on the new data
+        component.init();
+      }
 
       // Reset all event listeners
       component.refreshEventListeners();
