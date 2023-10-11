@@ -1,6 +1,7 @@
 import logging
 import re
 from collections import deque
+from typing import Sequence
 
 import orjson
 from bs4 import BeautifulSoup
@@ -117,10 +118,6 @@ class UnicornTemplateResponse(TemplateResponse):
 potentially cause errors in Unicorn."
             )
 
-        frontend_context_variables = self.component.get_frontend_context_variables()
-        frontend_context_variables_dict = orjson.loads(frontend_context_variables)
-        checksum = generate_checksum(str(frontend_context_variables_dict))
-
         # Use `html.parser` and not `lxml` because in testing it was no faster even with `cchardet`
         # despite https://thehftguy.com/2020/07/28/making-beautifulsoup-parsing-10-times-faster/
         soup = BeautifulSoup(content, features="html.parser")
@@ -130,8 +127,14 @@ potentially cause errors in Unicorn."
         unicorn_model_elements = root_element.find_all(_has_unicorn_model_attribute)
         unicorn_models = [e.attrs.get("unicorn:model") or e.attrs.get("u:model") for e in unicorn_model_elements]
 
-        for key_in_context_not_a_model in set(frontend_context_variables_dict.keys()) - set(unicorn_models):
-            del frontend_context_variables_dict[key_in_context_not_a_model]
+        # Get all frontend variables to generate the checksum
+        frontend_context_variables = self.component.get_frontend_context_variables(only_fields=unicorn_models)
+        frontend_context_variables_dict = orjson.loads(frontend_context_variables)
+        checksum = generate_checksum(str(frontend_context_variables_dict))
+
+        # Re-get frontend variables based on what unicorn:model elements are in the rendered content
+        frontend_context_variables = self.component.get_frontend_context_variables(only_fields=unicorn_models)
+        frontend_context_variables_dict = orjson.loads(frontend_context_variables)
 
         root_element["unicorn:id"] = self.component.component_id
         root_element["unicorn:name"] = self.component.component_name
