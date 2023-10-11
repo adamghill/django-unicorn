@@ -353,10 +353,6 @@ def _process_component_request(request: HttpRequest, component_request: Componen
             # i.e. render_not_modified = render_not_modified and (parent hash test)
             pass
 
-        # If there is a parent dom and a child dom, remove the child dom because it is superfluous
-        if parent.get("dom") and result.get("dom"):
-            del result["dom"]
-
         parent_result.update({"parent": parent})
         component = parent_component
         parent_component = parent_component.parent
