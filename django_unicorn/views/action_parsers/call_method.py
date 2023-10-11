@@ -31,12 +31,12 @@ def handle(component_request: ComponentRequest, component: UnicornView, payload:
     if not call_method_name:
         raise AssertionError("Missing 'name' key for callMethod")
 
-    original_component = component
+    parent_component = None
     parents = call_method_name.split(".")
 
     for parent in parents:
         if parent == "$parent":
-            component = component.parent
+            parent_component = component.parent
             call_method_name = call_method_name[8:]
 
     (method_name, args, kwargs) = parse_call_method_name(call_method_name)
@@ -98,12 +98,14 @@ def handle(component_request: ComponentRequest, component: UnicornView, payload:
         # Handle the validate special action
         validate_all_fields = True
     else:
-        component.calling(method_name, args)
-        return_data.value = _call_method_name(component, method_name, args, kwargs)
-        component.called(method_name, args)
+        component_with_method = parent_component or component
+
+        component_with_method.calling(method_name, args)
+        return_data.value = _call_method_name(component_with_method, method_name, args, kwargs)
+        component_with_method.called(method_name, args)
 
     return (
-        original_component,
+        component,
         is_refresh_called,
         is_reset_called,
         validate_all_fields,
