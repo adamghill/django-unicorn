@@ -38,6 +38,10 @@ EMPTY_ELEMENTS = (
 )
 
 
+def _has_unicorn_model_attribute(tag):
+    return tag.has_attr("unicorn:model") or tag.has_attr("u:model")
+
+
 def is_html_well_formed(html: str) -> bool:
     """
     Whether the passed-in HTML is missing any closing elements which can cause issues when rendering.
@@ -121,6 +125,14 @@ potentially cause errors in Unicorn."
         # despite https://thehftguy.com/2020/07/28/making-beautifulsoup-parsing-10-times-faster/
         soup = BeautifulSoup(content, features="html.parser")
         root_element = get_root_element(soup)
+
+        # Get all `unicorn:model`s to determine what data is necessary to send
+        unicorn_model_elements = root_element.find_all(_has_unicorn_model_attribute)
+        unicorn_models = [e.attrs.get("unicorn:model") or e.attrs.get("u:model") for e in unicorn_model_elements]
+
+        for key_in_context_not_a_model in set(frontend_context_variables_dict.keys()) - set(unicorn_models):
+            del frontend_context_variables_dict[key_in_context_not_a_model]
+
         root_element["unicorn:id"] = self.component.component_id
         root_element["unicorn:name"] = self.component.component_name
         root_element["unicorn:key"] = self.component.component_key
