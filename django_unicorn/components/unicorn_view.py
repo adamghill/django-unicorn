@@ -28,6 +28,7 @@ from django_unicorn.errors import (
 from django_unicorn.settings import get_setting
 from django_unicorn.utils import (
     cache_full_tree,
+    get_type_hints,
     is_non_string_sequence,
     restore_from_cache,
 )
@@ -581,8 +582,16 @@ class UnicornView(TemplateView):
         """
         Gets publicly available attribute names. Cached in `_attribute_names_cache`.
         """
+
         non_callables = [member[0] for member in inspect.getmembers(self, lambda x: not callable(x))]
         attribute_names = [name for name in non_callables if self._is_public(name)]
+
+        # Add type hints for the component to the attribute names since in some
+        # instances they won't be returned from `getmembers`
+        for type_hint_attribute_name in get_type_hints(self).keys():
+            if self._is_public(type_hint_attribute_name):
+                if type_hint_attribute_name not in attribute_names:
+                    attribute_names.append(type_hint_attribute_name)
 
         return attribute_names
 
@@ -596,7 +605,7 @@ class UnicornView(TemplateView):
         attributes = {}
 
         for attribute_name in attribute_names:
-            attributes[attribute_name] = getattr(self, attribute_name)
+            attributes[attribute_name] = getattr(self, attribute_name, None)
 
         return attributes
 
