@@ -277,9 +277,13 @@ def _process_component_request(request: HttpRequest, component_request: Componen
     if partial_doms:
         result.update({"partials": partial_doms})
     else:
-        checksum = generate_checksum(rendered_component)
+        rendered_component_hash = generate_checksum(rendered_component)
 
-        if component_request.hash == checksum and (not return_data or not return_data.value) and not component.calls:
+        if (
+            component_request.hash == rendered_component_hash
+            and (not return_data or not return_data.value)
+            and not component.calls
+        ):
             if not component.parent:
                 raise RenderNotModifiedError()
             else:
@@ -293,7 +297,7 @@ def _process_component_request(request: HttpRequest, component_request: Componen
         result.update(
             {
                 "dom": rendered_component,
-                "hash": checksum,
+                "hash": rendered_component_hash,
             }
         )
 
