@@ -225,9 +225,11 @@ export function send(component, callback) {
 
       component.triggerLifecycleEvent("updated");
 
-      if (!responseJson.parent) {
-        // Re-init to refresh the root and checksum based on the new data
+      try {
         component.init();
+      } catch (err) {
+        // No id found error will be thrown here for child components.
+        return;
       }
 
       // Reset all event listeners
