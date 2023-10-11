@@ -8,3 +8,6 @@ class Step1View(UnicornView):
     def mount(self):
         self.name = "Test"
         self.email = "test@example.com"
+
+    def noop(self):
+        print("no-op")
