@@ -122,6 +122,15 @@ potentially cause errors in Unicorn."
         # despite https://thehftguy.com/2020/07/28/making-beautifulsoup-parsing-10-times-faster/
         soup = BeautifulSoup(content, features="html.parser")
         root_element = get_root_element(soup)
+
+        try:
+            next(root_element.descendants)
+        except StopIteration:
+            logger.warning(
+                f"The '{self.component.component_name}' component does not appear to have one root element with \
+Unicorn elements as children."
+            )
+
         root_element["unicorn:id"] = self.component.component_id
         root_element["unicorn:name"] = self.component.component_name
         root_element["unicorn:key"] = self.component.component_key
