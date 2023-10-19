@@ -32,5 +32,13 @@ class MissingComponentViewElementError(Exception):
     pass
 
 
+class NoRootComponentElementError(Exception):
+    pass
+
+
+class MultipleRootComponentElementError(Exception):
+    pass
+
+
 class ComponentNotValidError(Exception):
     pass
