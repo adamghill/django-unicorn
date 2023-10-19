@@ -13,6 +13,8 @@ from django_unicorn.decorators import timed
 from django_unicorn.errors import (
     MissingComponentElementError,
     MissingComponentViewElementError,
+    MultipleRootComponentElementError,
+    NoRootComponentElementError,
 )
 from django_unicorn.settings import get_minify_html_enabled, get_script_location
 from django_unicorn.utils import generate_checksum, sanitize_html
@@ -57,6 +59,25 @@ def is_html_well_formed(html: str) -> bool:
             stack.pop()
 
     return len(stack) == 0
+
+
+def assert_has_single_root_element(root_element: Tag, component_name: str) -> None:
+    # Check that the root element has at least one child
+    try:
+        next(root_element.descendants)
+    except StopIteration:
+        raise NoRootComponentElementError(
+            f"The '{component_name}' component does not appear to have one root element."
+        ) from None
+
+    # Check that there is not more than one root element
+    parent_element = root_element.parent
+    tag_count = len([c for c in parent_element.children if isinstance(c, Tag)])
+
+    if tag_count > 1:
+        raise MultipleRootComponentElementError(
+            f"The '{component_name}' component appears to have multiple root elements."
+        ) from None
 
 
 class UnsortedAttributes(HTMLFormatter):
@@ -124,12 +145,9 @@ potentially cause errors in Unicorn."
         root_element = get_root_element(soup)
 
         try:
-            next(root_element.descendants)
-        except StopIteration:
-            logger.warning(
-                f"The '{self.component.component_name}' component does not appear to have one root element with \
-Unicorn elements as children."
-            )
+            assert_has_single_root_element(root_element, self.component.component_name)
+        except (NoRootComponentElementError, MultipleRootComponentElementError) as ex:
+            logger.warning(ex)
 
         root_element["unicorn:id"] = self.component.component_id
         root_element["unicorn:name"] = self.component.component_name
