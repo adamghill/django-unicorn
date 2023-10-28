@@ -40,17 +40,26 @@
     </div>
     <div>
       <button u:click='get_date'>get_date</button>
-      <button u:click='check_date("2020-09-12T01:01:01")'>check_date static</button>
+      <button u:click='check_date("2020-09-12T01:01:01")'>check_date static string</button>
       <button u:click='check_date("{{ date_example|date:'c' }}")'>check_date (c)</button>
-      <button u:click='check_date({{ date_example|date:'U' }})'>check_date (U)</button>
     </div>
+  </div>
+
+  <div>
+    <label>Datetime with type hint</label>
 
     <div>
       {{ date_example_with_typehint }}
     </div>
     <div>
+      <button u:click='check_date("{{ date_example_with_typehint|date:'c' }}")'>check_date (c)</button>
+      <button u:click='check_date({{ date_example_with_typehint|date:'U' }})'>check_date (U)</button>
       <button u:click='add_hour()'>add_hour()</button>
     </div>
+  </div>
+
+  <div>
+    <label>Datetimes in a list</label>
 
     <div>
       <div>Dates list with no type hint (will change to strings with an action)</div>
