@@ -1,8 +1,6 @@
-# Advanced Views
+# JavaScript Integration
 
-## JavaScript Integration
-
-### Call JavaScript from View
+## Call JavaScript from View
 
 To integrate with other JavaScript functions, view methods can call an arbitrary JavaScript function after it gets rendered.
 
@@ -34,7 +32,7 @@ class CallJavascriptView(UnicornView):
         self.call("hello", self.name)
 ```
 
-### Trigger Model Update
+## Trigger Model Update
 
 Normally when a model element gets changed by a user it will trigger an event which `Unicorn` listens for (either `input` or `blur` depending on if it has a `lazy` modifier). However, when setting an element with JavaScript those events do not fire. `Unicorn.trigger()` provides a way to trigger that event from JavaScript manually.
 

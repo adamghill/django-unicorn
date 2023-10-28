@@ -11,7 +11,7 @@ Using this functionality will serialize your entire model by default and expose 
 
 One option is to customize the serialization of the model into a dictionary to only expose the data that should be publicly available.
 
-Another option is to use [Meta.exclude](advanced.md#exclude) or [Meta.javascript_exclude](advanced.md#javascript_exclude) so those fields are not exposed.
+Another option is to use [Meta.exclude](views.md#exclude) or [Meta.javascript_exclude](views.md#javascript_exclude) so those fields are not exposed.
 :::
 
 :::{code} html

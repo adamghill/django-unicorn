@@ -1,36 +1,8 @@
-# Validation
+# Forms and Validation
 
 `Unicorn` has two options for validation. It can either use the standard Django `forms` infrastructure for re-usability or `ValidationError` can be raised for simpler use-cases.
 
-## ValidationError
-
-If you do not want to create a form class or you want to specifically target a nested field you can raise a `ValidationError` inside of an action method. The `ValidationError` must be instantiated with a `dict` with the model name as the key and error message as the value. A `code` keyword argument must also be passed in. The typical error codes used are `required` or `invalid`.
-
-```python
-# book_validation_error.py
-from django.utils.timezone import now
-from django_unicorn.components import UnicornView
-
-class BookView(UnicornView):
-    book: Book
-
-    def publish(self):
-        if not self.book.title:
-            raise ValidationError({"book.title": "Books must have a title"}, code="required")
-        
-        self.publish_date = now()
-        self.book.save()
-```
-
-```html
-<!-- book-validation-error.html -->
-<div>
-  <input unicorn:model="book.title" type="text" id="title" /><br />
-  <button unicorn:click="publish">Publish Book</button>
-</div>
-```
-
-## Django Form
+## Forms
 
 `Unicorn` can use the Django `forms` infrastructure for validation. This means that a form could be re-used between any other Django views and a `Unicorn` component.
 

@@ -231,7 +231,7 @@
 
 ** Breaking changes **
 
-- responses will be HTML encoded going forward (to explicitly opt-in to previous behavior use [safe](advanced.md#safe))
+- responses will be HTML encoded going forward (to explicitly opt-in to previous behavior use [safe](views.md#safe))
 
 [All changes since 0.35.3](https://github.com/adamghill/django-unicorn/compare/0.35.3...0.36.0).
 
@@ -250,7 +250,7 @@
 
 ## v0.35.0
 
-- [Trigger](advanced.md#trigger-model-update) an `input` or `blur` event for a model element from JavaScript.
+- [Trigger](javascript.md#trigger-model-update) an `input` or `blur` event for a model element from JavaScript.
 - [Visibility](visibility.md) event with `unicorn:visible` attribute.
 
 **Breaking changes**
@@ -374,17 +374,17 @@
 ## v0.21.0
 
 - Bug fix: Prevent disabled polls from firing at all.
-- Support [`Decimal` field type](components.md#supported-property-types).
-- Support [`dataclass` field type](components.md#supported-property-types).
-- Use [type hints](components.md#property-type-hints) to cast fields to primitive Python types if possible.
+- Support [`Decimal` field type](views.md#class-variables).
+- Support [`dataclass` field type](views.md#class-variables).
+- Use [type hints](views.md#class-variable-type-hints) to cast fields to primitive Python types if possible.
 
 [All changes since 0.20.0](https://github.com/adamghill/django-unicorn/compare/0.20.0...0.21.0).
 
 ## v0.20.0
 
-- Add ability to exclude component view properties from JavaScript to reduce the amount of data initially rendered to the page with [`javascript_exclude`](advanced.md#javascript_exclude).
-- Add [`complete`](advanced.md#complete), [`rendered`](advanced.md#renderedhtml), [`parent_rendered`](advanced.md#parent_renderedhtml) component hooks.
-- Call [JavaScript functions](advanced.md#javascript-integration) from a component view's method.
+- Add ability to exclude component view properties from JavaScript to reduce the amount of data initially rendered to the page with [`javascript_exclude`](views.md#javascript_exclude).
+- Add [`complete`](views.md#complete), [`rendered`](views.md#renderedhtml), [`parent_rendered`](views.md#parent_renderedhtml) component hooks.
+- Call [JavaScript functions](javascript.md) from a component view's method.
 
 [All changes since 0.19.0](https://github.com/adamghill/django-unicorn/compare/0.19.0...0.20.0).
 
@@ -525,8 +525,8 @@
 
 ## v0.10.0
 
-- Add support for [passing kwargs](components.md#component-arguments) into the component on the template
-- Provide access to the [current request](advanced.md#request) in the component's methods
+- Add support for [passing kwargs](components.md#pass-data-to-a-component) into the component on the template
+- Provide access to the [current request](views.md#request) in the component's methods
 
 [All changes since 0.9.4](https://github.com/adamghill/django-unicorn/compare/0.9.4...0.10.0).
 
@@ -554,7 +554,7 @@
 
 - [Loading states](loading-states.md) for improved UX.
 - `$event` [special argument](actions.md#events) for `actions`.
-- `u` [unicorn attribute](components.md#unicorn-attributes).
+- `u` [unicorn attribute](templates.md#unicorn-attributes).
 - `APPS` [setting](settings.md#apps) for determing where to look for components.
 - Add support for parent elements for non-db models.
 - Fix: Handle if `Meta` doesn't exist for db models.
@@ -628,7 +628,7 @@
 
 - [Realtime validation](validation.md) of a Unicorn model.
 - [Polling](polling.md) for component updates.
-- [More component hooks](advanced.md)
+- [More component hooks](views.md)
 
 [All changes since 0.5.0](https://github.com/adamghill/django-unicorn/compare/0.5.0...0.6.0).
 
@@ -652,7 +652,7 @@
 
 ## v0.3.0
 
-- Add [mount hook](advanced.md#mount).
+- Add [mount hook](views.md#mount).
 - Add [reset](actions.md#reset) action.
 - Remove lag when typing fast in a text input and overall improved performance.
 - Better error handling for exceptional cases.

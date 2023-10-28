@@ -179,7 +179,7 @@ class Author(UnicornField):
 ```
 
 ```{danger}
-Never put sensitive data into a public property because that information will publicly available in the HTML source code, unless explicitly prevented with [`javascript_exclude`](advanced.md#javascript_exclude).
+Never put sensitive data into a public property because that information will publicly available in the HTML source code, unless explicitly prevented with [`javascript_exclude`](views.md#javascript_exclude).
 ```
 
 ## Class properties
