@@ -75,7 +75,7 @@ By default `unicorn:model` updates are triggered by listening to `input` events 
 
 ## Pass data to a component
 
-`args` and `kwargs` can be passed into the `unicorn` templatetag from the outer template. They will be available in the component [`component_args`](advanced.md#component_args) and [`component_kwargs`](advanced.md#component_kwargs) instance methods respectively.
+`args` and `kwargs` can be passed into the `unicorn` templatetag from the outer template. They will be available in the component [`component_args`](views.md#component_args) and [`component_kwargs`](views.md#component_kwargs) instance methods respectively.
 
 ```html
 <!-- index.html -->
