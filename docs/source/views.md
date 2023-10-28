@@ -151,9 +151,9 @@ class HelloWorldView(UnicornView):
 
 ### Custom class
 
-Custom classes need to define how they are serialized. If you have access to the object to serialize, you can define a `to_json` method on the object to return a dictionary that can be used to serialize. Inheriting from `unicorn.components.UnicornField` is a quick way to serialize a custom class, but note that it just calls `self.__dict__` under the hood, so it is not doing anything particularly smart.
+Custom classes need to define how they are serialized. If you have access to the object to serialize, you can define a `to_json` method on the object to return a dictionary that can be used to serialize. Inheriting from `unicorn.components.UnicornField` is a quick way to serialize a custom class, but it uses `self.__dict__` under the hood, so it is not doing anything particularly smart.
 
-Another option is to set the `form_class` on the component and utilize Django's built-in forms and widgets to handle how the class should be deserialized. More details are provided in [validation](validation.md).
+Another option is to set the `form_class` on the component and utilize [Django's built-in forms and widgets](validation.md) to handle how the class should be deserialized.
 
 ```python
 # hello_world.py
