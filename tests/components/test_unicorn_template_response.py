@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 
 from django_unicorn.components.unicorn_template_response import (
     UnicornTemplateResponse,
-    assert_has_single_root_element,
+    assert_has_single_wrapper_element,
     get_root_element,
 )
 from django_unicorn.errors import (
@@ -97,16 +97,16 @@ def test_desoupify():
     assert expected == actual
 
 
-def test_assert_has_single_root_element_one_element_no_children():
+def test_assert_has_single_wrapper_element_one_element_no_children():
     html = '<input unicorn:model="name"></input>'
     soup = BeautifulSoup(html, "html.parser")
     root_element = get_root_element(soup)
 
     with pytest.raises(NoRootComponentElementError):
-        assert_has_single_root_element(root_element, "test-component-name")
+        assert_has_single_wrapper_element(root_element, "test-component-name")
 
 
-def test_assert_has_single_root_element_no_parent():
+def test_assert_has_single_wrapper_element_no_parent():
     html = """<div>
     <input unicorn:model="name1"></input>
 </div>
@@ -116,12 +116,12 @@ def test_assert_has_single_root_element_no_parent():
     root_element = get_root_element(soup)
 
     with pytest.raises(MultipleRootComponentElementError):
-        assert_has_single_root_element(root_element, "test-component-name")
+        assert_has_single_wrapper_element(root_element, "test-component-name")
 
 
-def test_assert_has_single_root_element_true():
+def test_assert_has_single_wrapper_element_true():
     html = '<div><input unicorn:model="name"></input></div>'
     soup = BeautifulSoup(html, "html.parser")
     root_element = get_root_element(soup)
 
-    assert_has_single_root_element(root_element, "test-component-name")
+    assert_has_single_wrapper_element(root_element, "test-component-name")
