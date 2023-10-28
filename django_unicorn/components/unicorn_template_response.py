@@ -61,7 +61,7 @@ def is_html_well_formed(html: str) -> bool:
     return len(stack) == 0
 
 
-def assert_has_single_root_element(root_element: Tag, component_name: str) -> None:
+def assert_has_single_wrapper_element(root_element: Tag, component_name: str) -> None:
     # Check that the root element has at least one child
     try:
         next(root_element.descendants)
@@ -145,7 +145,7 @@ potentially cause errors in Unicorn."
         root_element = get_root_element(soup)
 
         try:
-            assert_has_single_root_element(root_element, self.component.component_name)
+            assert_has_single_wrapper_element(root_element, self.component.component_name)
         except (NoRootComponentElementError, MultipleRootComponentElementError) as ex:
             logger.warning(ex)
 
