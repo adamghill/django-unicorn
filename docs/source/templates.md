@@ -27,6 +27,40 @@ This template is **valid**:
 
 `Unicorn` element attributes usually start with `unicorn:`, however the shortcut `u:` is also supported. So, for example, `unicorn:model` could also be written as `u:model`.
 
+## Accessing nested fields
+
+Fields in a `dictionary` or Django model can be accessed similarly to the Django template language with "dot notation".
+
+```python
+# hello_world.py
+from django_unicorn.components import UnicornView
+from book.models import Book
+
+class HelloWorldView(UnicornView):
+    book: Book
+    book_ratings: dict[str[dict[str, str]]]
+
+    def mount(self):
+        book = Book.objects.get(title='American Gods')
+        book_ratings = {'excellent': {'title': 'American Gods'}}
+```
+
+```html
+<!-- hello-world.html -->
+<div>
+  <input unicorn:model="book.title" type="text" id="model" />
+  <input
+    unicorn:model="book_ratings.excellent.title"
+    type="text"
+    id="dictionary"
+  />
+</div>
+```
+
+```{note}
+[Django models](django-models.md) has many more details about using Django models in `Unicorn`.
+```
+
 ## Model modifiers
 
 ### Lazy
@@ -130,7 +164,7 @@ To merge changes in the DOM, we use an element's `id` to intelligently update DO
 
 ### updated
 
-The `updated` event is fired after the AJAX call finishes and the component is merged with the newly rendered component template. The callback gets called with one argument, `component`, which can be inspected if necessary.
+The `updated` event is fired after the AJAX call finishes and the component is merged with the newly rendered component template. The callback gets called with one argument, `component`.
 
 ```html
 <!-- updated-event.html -->

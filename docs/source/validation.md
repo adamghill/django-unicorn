@@ -145,3 +145,32 @@ There is a `unicorn_errors` template tag that shows all errors for the component
   <input unicorn:model="publish_date" type="text" id="publish-date" /><br />
 </div>
 ```
+
+## ValidationError
+
+If you do not want to create a form class or you want to specifically target a nested field you can raise a `ValidationError` inside of an action method. The `ValidationError` must be instantiated with a `dict` with the model name as the key and error message as the value. A `code` keyword argument must also be passed in. The typical error codes used are `required` or `invalid`.
+
+```python
+# book_validation_error.py
+from django.core.exceptions import ValidationError
+from django.utils.timezone import now
+from django_unicorn.components import UnicornView
+
+class BookView(UnicornView):
+    book: Book
+
+    def publish(self):
+        if not self.book.title:
+            raise ValidationError({"book.title": "Books must have a title"}, code="required")
+        
+        self.publish_date = now()
+        self.book.save()
+```
+
+```html
+<!-- book-validation-error.html -->
+<div>
+  <input unicorn:model="book.title" type="text" id="title" /><br />
+  <button unicorn:click="publish">Publish Book</button>
+</div>
+```
