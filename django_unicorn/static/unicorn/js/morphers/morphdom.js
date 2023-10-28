@@ -20,8 +20,8 @@ export class MorphdomMorpher {
         // creating and destroying an element that already exists.
         if (node.attributes) {
           const key =
+            node.getAttribute("unicorn:id") ||
             node.getAttribute("unicorn:key") ||
-            node.getAttribute("u:key") ||
             node.id;
 
           if (key) {

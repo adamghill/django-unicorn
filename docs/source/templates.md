@@ -140,7 +140,7 @@ Setting a unique `id` on elements with `unicorn:model` will prevent changes to a
 <input type="text" id="someFancyId" unicorn:model="name"></input>
 ```
 
-However, setting the same `id` on two elements with the same `unicorn:model` won't work. The `unicorn:key` attribute can be used to make sure that the elements can be synced as expected.
+The `unicorn:key` attribute can be used when multiple elements have the same `id`.
 
 ```html
 <!-- missing-updates.html -->
@@ -149,14 +149,14 @@ However, setting the same `id` on two elements with the same `unicorn:model` won
 ```
 
 ```html
-<!-- this-should-work.html -->
+<!-- this-works.html -->
 <input type="text" id="someFancyId" unicorn:model="name"></input>
 <input type="text" id="someFancyId" unicorn:model="name" unicorn:key="someFancyKey"></input>
 ```
 
 ### DOM merging
 
-To merge changes in the DOM, we use an element's `id` to intelligently update DOM elements. If it isn't possible to have an `id` attribute on the element, `unicorn:key` will be used if it is available.
+To merge changes in the DOM, `Unicorn` uses, in order, `unicorn:id`, `unicorn:key`, or the element's `id` to intelligently update DOM elements.
 
 ## Lifecycle events
 
