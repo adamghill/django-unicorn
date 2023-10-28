@@ -13,7 +13,7 @@
 [![All Contributors](https://img.shields.io/badge/all_contributors-17-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE - Do not remove or modify above line -->
 
-[Unicorn](https://www.django-unicorn.com) adds modern reactive component functionality to your Django templates without having to learn a new templating language or fight with complicated JavaScript frameworks. It seamlessly extends Django past its server-side framework roots without giving up all of its niceties or forcing you to re-building your application. With Django Unicorn, you can quickly and easily add rich front-end interactions to your templates, all while using the power of Django.
+[Unicorn](https://www.django-unicorn.com) adds modern reactive component functionality to your Django templates without having to learn a new templating language or fight with complicated JavaScript frameworks. It seamlessly extends Django past its server-side framework roots without giving up all of its niceties or forcing you to rebuild your application. With Django Unicorn, you can quickly and easily add rich front-end interactions to your templates, all while using the power of Django.
 
 ## ⚡ Getting started
 
