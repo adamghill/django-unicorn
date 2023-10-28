@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.57.0
+
+- Warn if there is a missing root element.
+- Use `unicorn:id` to merge elements with `morphdom`.
+
 ## 0.56.1
 
 - Handle Alpine.js being loaded with defer.
