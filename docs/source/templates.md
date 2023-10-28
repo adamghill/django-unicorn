@@ -1,14 +1,31 @@
 # Templates
 
-Templates are just normal Django HTML templates, so anything you could normally do in a Django template will still work, including template tags, filters, loops, if statements, etc.
+Templates are normal Django HTML templates, so anything you could normally do in a Django template will still work, including template tags, filters, loops, if statements, etc.
 
 ```{warning}
-`Unicorn` requires there to be one root element surrounding the component template.
+`Unicorn` requires there to be one root element that contains the component HTML. Valid HTML and a wrapper element is required for the DOM diffing algorithm to work correctly, so `Unicorn` will try to log a warning message if they seem invalid.
+
+For example, this is an **invalid** template:
+:::{code} html
+:force: true
+<input unicorn:model="name"></input><br />
+Name: {{ name }}
+:::
+
+This template is **valid**:
+:::{code} html
+:force: true
+<div>
+  <input unicorn:model="name"></input><br />
+  Name: {{ name }}
+</div>
+:::
+
 ```
 
-```{note}
-To reduce the verbosity of templates, `u:` can be used as a shorthand for any attribute that starts with `unicorn:`. All of the examples in the documentation use `unicorn:` to be explicit, but both are supported.
-```
+## Unicorn attributes
+
+`Unicorn` element attributes usually start with `unicorn:`, however the shortcut `u:` is also supported. So, for example, `unicorn:model` could also be written as `u:model`.
 
 ## Model modifiers
 
