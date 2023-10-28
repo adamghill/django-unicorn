@@ -35,7 +35,7 @@ Automatically handled field types:
 
 ### A word of caution about mutable class variables
 
-Be careful when using a default mutable class variables, namely `list`, `dictionary`, and objects. As mentioned in [A Word About Names and Objects](https://docs.python.org/3.8/tutorial/classes.html#tut-object) using a class variable that is mutable can have subtle and unexpected consequences. Using mutable class variables in a field _will_ cause multiple component instances to share state.
+Be careful when using a default mutable class variables, namely `list`, `dictionary`, and objects. As mentioned in [A Word About Names and Objects](https://docs.python.org/3.8/tutorial/classes.html#tut-object) defining a mutable default for a class variable can have subtle and unexpected consequences -- it _will_ cause component instances to share state which is usually not the intention.
 
 ```python
 # sentence.py
@@ -43,32 +43,32 @@ from django_unicorn.components import UnicornView
 
 # This will cause unexpected consequences
 class SentenceView(UnicornView):
-    words: list[str] = []  # all component instances will share a reference to one list
-    word_counts: dict[str, int] = {}  # all component instances will share a reference to one dictionary
+    words: list[str] = []  # all SentenceView instances will share a reference to one list in memory
+    word_counts: dict[str, int] = {}  # all SentenceView instances will share a reference to one dictionary in memory
 
     def add_word(self, word: str):
         ...
 ```
 
-The correct way to initialize a mutable object:
+The correct way to initialize a mutable object.
 
 ```python
 # sentence.py
 from django_unicorn.components import UnicornView
 
 class SentenceView(UnicornView):
-    words: list[str]  # no default value is valid
+    words: list[str]  # not setting a default value is valid
     word_counts: dict[str, int] = None  # using None for the default is valid
 
     def mount(self):
-        self.words = []  # initialize a new list every time a component is mounted
-        self.word_counts = {}  # initialize a new dictionary every time a component is mounted
+        self.words = []  # initialize a new list every time a SentenceView is initialized and mounted
+        self.word_counts = {}  # initialize a new dictionary every time a SentenceView is initialized and mounted
 
     def add_word(self, word: str):
         ...
 ```
 
-`list`, `dictionaries`, and objects will all run into this problem, so be sure to initialize any mutable object in the component's `mount` function.
+`list`, `dictionaries`, and objects all run into this problem, so be sure to initialize mutable objects in the component's `mount` function.
 
 ### Class variable type hints
 
@@ -87,67 +87,6 @@ class RatingView(UnicornView):
 ```
 
 Without the `float` type hint on `rating`, Python will complain that `rating` is a `str`.
-
-### Accessing nested fields
-
-Fields in a `dictionary` or Django model can be accessed similarly to the Django template language with "dot notation".
-
-```python
-# hello_world.py
-from django_unicorn.components import UnicornView
-from book.models import Book
-
-class HelloWorldView(UnicornView):
-    book: Book
-    book_ratings: dict[str[dict[str, str]]]
-
-    def mount(self):
-        book = Book.objects.get(title='American Gods')
-        book_ratings = {'excellent': {'title': 'American Gods'}}
-```
-
-```html
-<!-- hello-world.html -->
-<div>
-  <input unicorn:model="book.title" type="text" id="model" />
-  <input
-    unicorn:model="book_ratings.excellent.title"
-    type="text"
-    id="dictionary"
-  />
-</div>
-```
-
-```{note}
-[Django models](django-models.md) has many more details about using Django models in `Unicorn`.
-```
-
-### Django QuerySet
-
-A Django `QuerySet` can be accessed in a `unicorn:model` with "dot notation".
-
-```python
-# hello_world.py
-from django_unicorn.components import UnicornView
-from book.models import Book
-
-class HelloWorldView(UnicornView):
-    books = Book.objects.none()
-
-    def mount(self):
-        self.books = Book.objects.all()
-```
-
-```html
-<!-- hello-world.html -->
-<div>
-  <input unicorn:model="books.0.title" type="text" id="text" />
-</div>
-```
-
-```{note}
-[Django models](django-models.md#queryset) has many more details about using Django QuerySets in `Unicorn`.
-```
 
 ### Custom class
 

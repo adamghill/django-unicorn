@@ -58,7 +58,43 @@ def delete(self, book_to_delete: Book):
 
 ## QuerySet
 
-A Django `QuerySet` can be set to a property on a component just like a regular `list`.
+Django models in a `QuerySet` can be accessed in a `unicorn:model` with "dot notation" similar to a `list`.
+
+```python
+# hello_world.py
+from django_unicorn.components import UnicornView
+from book.models import Book
+
+class HelloWorldView(UnicornView):
+    books = Book.objects.none()
+
+    def mount(self):
+        self.books = Book.objects.all()
+```
+
+```html
+<!-- hello-world.html -->
+<div>
+  <input unicorn:model="books.0.title" type="text" id="text" />
+</div>
+```
+
+An example of looping over all models in a queryset.
+
+```python
+# queryset.py
+from django_unicorn.components import UnicornView
+from books.models import Book
+
+class QuerysetView(UnicornView):
+    books = Book.objects.none()
+
+    def mount(self):
+        self.books = Book.objects.all().order_by("-id")[:5]
+
+    def save(self, book_idx: int):
+        self.books[book_idx].save()
+```
 
 :::{code} html
 :force: true
@@ -83,6 +119,10 @@ A Django `QuerySet` can be set to a property on a component just like a regular 
 </div>
 :::
 
+:::{warning}
+
+This will expose all of the model values for the `QuerySet` in the HTML source. One way to avoid leaking all model information is to pass the fields that are publicly viewable into `values()` on your `QuerySet`.
+
 ```python
 # queryset.py
 from django_unicorn.components import UnicornView
@@ -92,24 +132,12 @@ class QuerysetView(UnicornView):
     books = Book.objects.none()
 
     def mount(self):
-        self.books = Book.objects.all().order_by("-id")[:5]
-
-    def save(self, book_idx: int):
-        self.books[book_idx].save()
-```
-
-:::{warning}
-
-This will expose all of the model values for the `QuerySet` in the HTML source. One way to avoid leaking all model information is to pass the fields that are publicly viewable into `values()` on your `QuerySet`.
-
-```python
-def mount(self):
-  self.books = Book.objects.all().order_by("-id").values("pk", "title")[:5]
+      self.books = Book.objects.all().order_by("-id").values("pk", "title")
 ```
 
 :::
 
-A `QuerySetType` type hint can also be used for `QuerySet` to ensure the correct type is used for the component field.
+A `QuerySetType` type hint can be used to ensure the correct `QuerySet` is used for the component field.
 
 ```python
 # queryset.py

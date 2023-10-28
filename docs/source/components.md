@@ -1,6 +1,6 @@
 # Components
 
-`Unicorn` uses the term "component" to refer to a set of interactive functionality. A component consists of a Python `view` class which provides the backend code and a Django HTML `template`.
+`Unicorn` uses the term "component" to refer to a set of interactive functionality. A component consists of a Python [`view`](views.md) class which provides the backend code and a Django HTML [`template`](templates.md).
 
 ## Create a component
 
