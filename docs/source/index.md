@@ -8,6 +8,14 @@
 self
 installation
 components
+```
+
+```{toctree}
+:caption: Components
+:maxdepth: 3
+:hidden:
+
+views
 templates
 actions
 child-components
