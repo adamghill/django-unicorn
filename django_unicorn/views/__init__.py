@@ -10,7 +10,7 @@ from django.forms import ValidationError
 from django.http import HttpRequest, JsonResponse
 from django.http.response import HttpResponseNotModified
 from django.utils.safestring import mark_safe
-from django.views.decorators.csrf import csrf_protect
+from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
 from django.views.decorators.http import require_POST
 
 from django_unicorn.components import UnicornView
@@ -491,6 +491,7 @@ def _handle_queued_component_requests(request: HttpRequest, queue_cache_key) -> 
 
 @timed
 @handle_error
+@ensure_csrf_cookie
 @csrf_protect
 @require_POST
 def message(request: HttpRequest, component_name: Optional[str] = None) -> JsonResponse:
