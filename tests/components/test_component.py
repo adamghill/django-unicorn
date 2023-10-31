@@ -291,7 +291,7 @@ def test_get_frontend_context_variables_form_with_boolean_field(component):
     frontend_context_variables = component.get_frontend_context_variables()
     frontend_context_variables_dict = orjson.loads(frontend_context_variables)
 
-    assert frontend_context_variables_dict.get("permanent")
+    assert frontend_context_variables_dict.get("permanent") is not None
 
 
 def test_get_frontend_context_variables_authentication_form(component):

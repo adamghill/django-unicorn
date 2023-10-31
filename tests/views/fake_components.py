@@ -13,6 +13,7 @@ from django_unicorn.components import (
     PollUpdate,
     UnicornView,
 )
+from example.books.models import Book
 from example.coffee.models import Flavor
 
 
@@ -63,6 +64,21 @@ class FakeComponent(UnicornView):
 
     def test_validation_error_list(self):
         raise ValidationError([ValidationError({"check": "Check is required"}, code="required")])
+
+
+class FakeModelForm(forms.ModelForm):
+    class Meta:
+        model = Book
+        fields = ("title", "date_published", "type")
+
+
+class FakeModelFormComponent(UnicornView):
+    template_name = "templates/test_component.html"
+    form_class = FakeModelForm
+
+    title = None
+    date_published = None
+    type = None  # noqa: A003
 
 
 class FakeModelComponent(UnicornView):

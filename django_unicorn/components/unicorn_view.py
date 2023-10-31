@@ -11,7 +11,7 @@ from django.apps import AppConfig
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models import Model
-from django.forms.widgets import CheckboxInput
+from django.forms.widgets import CheckboxInput, Select
 from django.http import HttpRequest
 from django.utils.decorators import classonlymethod
 from django.views.generic.base import TemplateView
@@ -457,20 +457,23 @@ class UnicornView(TemplateView):
         form = self._get_form(attributes)
 
         if form:
-            form.is_valid()
-
             for key in attributes.keys():
                 if key in form.fields:
                     field = form.fields[key]
 
                     if key in form.cleaned_data:
                         cleaned_value = form.cleaned_data[key]
-                        value = field.widget.format_value(cleaned_value)
 
                         if isinstance(field.widget, CheckboxInput) and isinstance(cleaned_value, bool):
                             # Handle booleans for checkboxes explicitly because `format_value`
-                            # returns `None` in this case
+                            # returns `None`
                             value = cleaned_value
+                        elif isinstance(field.widget, Select) and not field.widget.allow_multiple_selected:
+                            # Handle value for Select widgets explicitly because `format_value`
+                            # returns a list of stringified values
+                            value = cleaned_value
+                        else:
+                            value = field.widget.format_value(cleaned_value)
 
                         # Don't update the frontend variable if the only change is
                         # stripping off the whitespace from the field value
