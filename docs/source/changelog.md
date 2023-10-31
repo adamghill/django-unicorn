@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.58.0.dev
+
+- Fix: Correctly serialize forms that have a a field with a Select widget.
+
 ## 0.57.0
 
 - Warn if there is a missing root element.
