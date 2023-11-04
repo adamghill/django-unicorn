@@ -1,5 +1,5 @@
 {
-    "version": "0.57.0",
+    "version": "0.57.1",
     "name": "django-unicorn",
     "scripts": {
         "build": "npx rollup -c",
