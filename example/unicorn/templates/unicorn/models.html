@@ -20,6 +20,11 @@
         <input type="text" unicorn:model="flavor.label"></input>
       </div>
 
+      <div>
+        <label>Data</label>
+        <input type="text" unicorn:model="flavor.data"></input>
+      </div>
+
       <button unicorn:click="save_flavor">save_flavor</button>
 
       {% for flavor in flavors %}
@@ -43,6 +48,11 @@
         <label>Decimal value</label>
         <input type="text" unicorn:model="flavors.{{ forloop.counter0 }}.decimal_value"></input>
         {{ flavor.decimal_value }}
+        <br />
+
+        <label>Data</label>
+        <input type="text" unicorn:model="flavors.{{ forloop.counter0 }}.data"></input>
+        {{ flavor.data }}
         <br />
 
         <label>Parent</label>

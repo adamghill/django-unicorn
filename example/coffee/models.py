@@ -14,6 +14,7 @@ class Flavor(models.Model):
     date = models.DateField(blank=True, null=True)
     time = models.TimeField(blank=True, null=True)
     duration = models.DurationField(blank=True, null=True)
+    data = models.JSONField(blank=True, null=True)
 
     def __str__(self):
         return self.name
