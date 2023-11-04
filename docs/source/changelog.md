@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.58.0-dev
+
+- Handle a list of `ValidationError` or just a string instead of requiring a the `dict` version.
+
 ## 0.57.1
 
 - Fix: Correctly serialize forms that have a a field with a Select widget.

@@ -6,6 +6,7 @@ from typing import Dict, Optional, Sequence
 import orjson
 from bs4 import BeautifulSoup
 from django.core.cache import caches
+from django.core.exceptions import NON_FIELD_ERRORS
 from django.forms import ValidationError
 from django.http import HttpRequest, JsonResponse
 from django.http.response import HttpResponseNotModified
@@ -34,6 +35,9 @@ from django_unicorn.views.utils import set_property_from_data
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
+
+
+MIN_VALIDATION_ERROR_ARGS = 2
 
 
 def handle_error(view_func):
@@ -130,19 +134,28 @@ def _process_component_request(request: HttpRequest, component_request: Componen
                 is_reset_called = is_reset_called | _is_reset_called
                 validate_all_fields = validate_all_fields | _validate_all_fields
             except ValidationError as e:
+                if len(e.args) < MIN_VALIDATION_ERROR_ARGS or not e.args[1]:
+                    raise AssertionError("Error code must be specified") from e
+
                 if hasattr(e, "error_list"):
-                    raise AssertionError("ValidationError must be instantiated with a dictionary") from e
-
-                for field, message in e.message_dict.items():
-                    if not e.args[1]:
-                        raise AssertionError("Error code must be specified") from e
-
                     error_code = e.args[1]
 
-                    if field in component.errors:
-                        component.errors[field].append({"code": error_code, "message": message})
-                    else:
-                        component.errors[field] = [{"code": error_code, "message": message}]
+                    for error in e.error_list:
+                        if NON_FIELD_ERRORS in component.errors:
+                            component.errors[NON_FIELD_ERRORS].append({"code": error_code, "message": error.message})
+                        else:
+                            component.errors[NON_FIELD_ERRORS] = [{"code": error_code, "message": error.message}]
+                elif hasattr(e, "message_dict"):
+                    for field, message in e.message_dict.items():
+                        if not e.args[1]:
+                            raise AssertionError("Error code must be specified") from e
+
+                        error_code = e.args[1]
+
+                        if field in component.errors:
+                            component.errors[field].append({"code": error_code, "message": message})
+                        else:
+                            component.errors[field] = [{"code": error_code, "message": message}]
         else:
             raise UnicornViewError(f"Unknown action_type '{action.action_type}'")
 

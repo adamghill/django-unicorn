@@ -62,8 +62,14 @@ class FakeComponent(UnicornView):
     def test_validation_error_string(self):
         raise ValidationError("Check is required", code="required")
 
+    def test_validation_error_string_no_code(self):
+        raise ValidationError("Check is required")
+
     def test_validation_error_list(self):
-        raise ValidationError([ValidationError({"check": "Check is required"}, code="required")])
+        raise ValidationError([ValidationError({"check": "Check is required"})], code="required")
+
+    def test_validation_error_list_no_code(self):
+        raise ValidationError([ValidationError({"check": "Check is required"})])
 
 
 class FakeModelForm(forms.ModelForm):

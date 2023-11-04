@@ -360,8 +360,15 @@ def test_message_call_method_validation_error(client):
 def test_message_call_method_validation_error_list(client):
     body = _post_to_component(client, "test_validation_error_list")
 
+    assert body["errors"]
+    assert body["errors"]["__all__"] == [{"code": "required", "message": "Check is required"}]
+
+
+def test_message_call_method_validation_error_list_no_code(client):
+    body = _post_to_component(client, "test_validation_error_list_no_code")
+
     assert body["error"]
-    assert body["error"] == "ValidationError must be instantiated with a dictionary"
+    assert body["error"] == "Error code must be specified"
 
 
 def test_message_call_method_validation_error_no_code(client):
@@ -374,5 +381,12 @@ def test_message_call_method_validation_error_no_code(client):
 def test_message_call_method_validation_error_string(client):
     body = _post_to_component(client, "test_validation_error_string")
 
+    assert body["errors"]
+    assert body["errors"]["__all__"] == [{"code": "required", "message": "Check is required"}]
+
+
+def test_message_call_method_validation_error_string_no_code(client):
+    body = _post_to_component(client, "test_validation_error_string_no_code")
+
     assert body["error"]
-    assert body["error"] == "ValidationError must be instantiated with a dictionary"
+    assert body["error"] == "Error code must be specified"
