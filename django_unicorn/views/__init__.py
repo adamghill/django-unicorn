@@ -519,12 +519,12 @@ def message(request: HttpRequest, component_name: Optional[str] = None) -> JsonR
     Returns:
         `JsonRequest` with the following structure in the body:
         {
-            "id": component_id,
-            "dom": html,  // re-rendered version of the component after actions in the payload are completed
-            "data": {},  // updated data after actions in the payload are completed
-            "errors": {},  // form validation errors
-            "return": {}, // optional return value from an executed action
-            "parent": {},  // optional representation of the parent component
+        "id": component_id,
+        "dom": html,  # re-rendered version of the component after actions in the payload are completed
+        "data": {},  # updated data after actions in the payload are completed
+        "errors": {},  # form validation errors
+        "return": {}, # optional return value from an executed action
+        "parent": {}  # optional representation of the parent component
         }
     """
 

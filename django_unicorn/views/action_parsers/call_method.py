@@ -12,7 +12,6 @@ from django_unicorn.decorators import timed
 from django_unicorn.utils import cast_value, get_method_arguments, get_type_hints
 from django_unicorn.views.action_parsers.utils import set_property_value
 from django_unicorn.views.objects import ComponentRequest, Return
-from django_unicorn.views.utils import set_property_from_data
 
 try:
     from typing import get_origin
@@ -24,6 +23,9 @@ except ImportError:
 
 
 def handle(component_request: ComponentRequest, component: UnicornView, payload: Dict):
+    # Import here to prevent cyclic import
+    from django_unicorn.views.utils import set_property_from_data
+
     call_method_name = payload.get("name", "")
     if not call_method_name:
         raise AssertionError("Missing 'name' key for callMethod")

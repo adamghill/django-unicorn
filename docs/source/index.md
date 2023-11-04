@@ -72,6 +72,14 @@ Code repo <https://github.com/adamghill/django-unicorn>
 Sponsor <https://github.com/sponsors/adamghill>
 ```
 
+```{toctree}
+:caption: API
+:maxdepth: 3
+:hidden:
+
+api/django_unicorn/index
+```
+
 Want to add some component-based magic to your front-end, but don't need the overhead of a complete JavaScript front-end framework? `Unicorn` revolutionizes the way your users interact with your Django app! With `Unicorn`, you can create stunningly spiffy pages without ever leaving Python or your beloved Django codebase.
 
 `Unicorn` is a reactive component framework that enhances your Django views by seamlessly making AJAX calls in the background and dynamically updates the HTML DOM. It's like magic, but better! `Unicorn` is leading the charge in bringing a component-based developer experience to Django. Join the `Unicorn` community today and unlock the power of reactivity!

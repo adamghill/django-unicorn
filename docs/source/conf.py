@@ -16,7 +16,7 @@ import toml
 # -- Project information -----------------------------------------------------
 
 project = "Unicorn"
-copyright = "2021, Adam Hill"  # noqa: A001
+copyright = "2023, Adam Hill"  # noqa: A001
 author = "Adam Hill"
 
 pyproject = toml.load("../../pyproject.toml")
@@ -32,7 +32,6 @@ release = version
 extensions = [
     "sphinx.ext.duration",
     "sphinx.ext.doctest",
-    "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
     "sphinx.ext.intersphinx",
     "myst_parser",
@@ -40,6 +39,7 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.autosectionlabel",
     "rst2pdf.pdfbuilder",
+    "autoapi.extension",
 ]
 
 intersphinx_mapping = {
@@ -79,3 +79,31 @@ myst_enable_extensions = ["linkify", "colon_fence"]
 pdf_documents = [
     ("index", "unicorn-latest", "Unicorn", "Adam Hill"),
 ]
+
+autoapi_dirs = [
+    "../../django_unicorn",
+]
+autoapi_root = "api"
+autoapi_add_toctree_entry = False
+autoapi_generate_api_docs = True
+# autoapi_keep_files = True  # useful for debugging generated errors
+autoapi_options = [
+    "members",
+    "undoc-members",
+    "show-inheritance",
+]
+autoapi_type = "python"
+autodoc_typehints = "signature"
+
+
+def skip_member(app, what, name, obj, skip, options):  # noqa: ARG001
+    if what == "data" and name.endswith(".logger"):
+        skip = True
+    elif "startunicorn" in name:
+        skip = True
+
+    return skip
+
+
+def setup(sphinx):
+    sphinx.connect("autoapi-skip-member", skip_member)
