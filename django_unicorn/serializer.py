@@ -24,6 +24,7 @@ from django.utils.dateparse import (
 )
 from django.utils.duration import duration_string
 
+from django_unicorn.mergedeep import Strategy, merge
 from django_unicorn.utils import is_int, is_non_string_sequence
 
 try:
@@ -347,12 +348,45 @@ def _exclude_field_attributes(dict_data: Dict[Any, Any], exclude_field_attribute
                     del dict_data[field_name][field_attr]
 
 
+def _only_field_attributes(dict_data: Dict[Any, Any], only_field_attributes: Optional[Tuple[str]] = None) -> dict:
+    data = {}
+
+    if dict_data:
+        for field in only_field_attributes:
+            field_dict = {}
+
+            sub_dict_data = dict_data
+            sub_dict = {}
+            field_splits = field.split(".")
+
+            if len(field_splits) == 1:
+                field_dict = sub_dict
+
+            for idx, field_split in enumerate(field_splits):
+                if field_split in sub_dict_data:
+                    if idx == len(field_splits) - 1:
+                        sub_dict.update({field_split: sub_dict_data[field_split]})
+                    else:
+                        sub_dict.update({field_split: {}})
+
+                        if field_dict == {}:
+                            field_dict.update(sub_dict)
+
+                        sub_dict = sub_dict[field_split]
+                        sub_dict_data = sub_dict_data[field_split]
+
+            merge(data, field_dict, strategy=Strategy.ADDITIVE)
+
+    return data
+
+
 @lru_cache(maxsize=128, typed=True)
 def _dumps(
     serialized_data: bytes,
     *,
     fix_floats: bool = True,
     exclude_field_attributes: Optional[Tuple[str]] = None,
+    only_field_attributes: Optional[Tuple[str]] = None,
     sort_dict: bool = True,
 ) -> Dict:
     """
@@ -374,6 +408,9 @@ def _dumps(
         # handle complex objects
         _exclude_field_attributes(data, exclude_field_attributes)
 
+    if only_field_attributes:
+        data = _only_field_attributes(data, only_field_attributes)
+
     if sort_dict:
         # Sort dictionary manually because stringified integers don't get sorted
         # correctly with `orjson.OPT_SORT_KEYS` and JavaScript will sort the keys
@@ -388,6 +425,7 @@ def dumps(
     *,
     fix_floats: bool = True,
     exclude_field_attributes: Optional[Tuple[str]] = None,
+    only_field_attributes: Optional[Tuple[str]] = None,
     sort_dict: bool = True,
 ) -> str:
     """
@@ -410,6 +448,9 @@ def dumps(
     if exclude_field_attributes is not None and not is_non_string_sequence(exclude_field_attributes):
         raise AssertionError("exclude_field_attributes type needs to be a sequence")
 
+    if only_field_attributes is not None and not is_non_string_sequence(only_field_attributes):
+        raise AssertionError("only_field_attributes type needs to be a sequence")
+
     # Call `dumps` to make sure that complex objects are serialized correctly
     serialized_data = orjson.dumps(data, default=_json_serializer)
 
@@ -417,6 +458,7 @@ def dumps(
         serialized_data,
         fix_floats=fix_floats,
         exclude_field_attributes=exclude_field_attributes,
+        only_field_attributes=only_field_attributes,
         sort_dict=sort_dict,
     )
 

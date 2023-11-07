@@ -1,0 +1,2 @@
+- Original MIT code: https://github.com/clarketm/mergedeep
+- Last updated September 2021

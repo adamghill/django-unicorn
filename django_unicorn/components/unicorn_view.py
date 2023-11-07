@@ -427,13 +427,13 @@ class UnicornView(TemplateView):
             logger.warning(e)
 
     @timed
-    def get_frontend_context_variables(self, only_fields=None) -> str:
+    def get_frontend_context_variables(self, only_field_attributes: Optional[list] = None) -> str:
         """
         Get publicly available properties and output them in a string-encoded JSON object.
         """
 
-        if only_fields is None:
-            only_fields = []
+        if only_field_attributes is None:
+            only_field_attributes = []
 
         frontend_context_variables = {}
         attributes = self._attributes()
@@ -488,13 +488,10 @@ class UnicornView(TemplateView):
                         ):
                             frontend_context_variables[key] = value
 
-        if only_fields:
-            for field in set(frontend_context_variables.keys()) - set(only_fields):
-                del frontend_context_variables[field]
-
         encoded_frontend_context_variables = serializer.dumps(
             frontend_context_variables,
             exclude_field_attributes=tuple(exclude_field_attributes),
+            only_field_attributes=tuple(only_field_attributes),
         )
 
         return encoded_frontend_context_variables

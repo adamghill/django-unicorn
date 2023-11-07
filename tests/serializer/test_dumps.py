@@ -808,6 +808,81 @@ def test_exclude_field_attributes_invalid_type():
         )
 
 
+def test_only_field_attributes():
+    expected = '{"book":{"author":"John Steinbeck","title":"The Grapes of Wrath"}}'
+
+    actual = serializer.dumps(
+        {"book": {"title": "The Grapes of Wrath", "author": "John Steinbeck"}},
+        only_field_attributes=("book",),
+    )
+
+    assert expected == actual
+
+
+def test_only_field_attributes_nested():
+    expected = '{"book":{"author":"John Steinbeck"}}'
+
+    actual = serializer.dumps(
+        {"book": {"title": "The Grapes of Wrath", "author": "John Steinbeck"}},
+        only_field_attributes=("book.author",),
+    )
+
+    assert expected == actual
+
+
+def test_only_field_attributes_nested_multiple():
+    expected = '{"book":{"language":{"US":"English"}}}'
+
+    actual = serializer.dumps(
+        {"book": {"title": "The Grapes of Wrath", "author": "John Steinbeck", "language": {"US": "English"}}},
+        only_field_attributes=("book.language.US",),
+    )
+
+    assert expected == actual
+
+
+def test_only_field_attributes_multiple_nested_multiple():
+    expected = '{"book":{"author":"John Steinbeck","language":{"US":"English"}}}'
+
+    actual = serializer.dumps(
+        {"book": {"title": "The Grapes of Wrath", "author": "John Steinbeck", "language": {"US": "English"}}},
+        only_field_attributes=(
+            "book.author",
+            "book.language.US",
+        ),
+    )
+
+    assert actual == expected
+
+
+def test_only_field_attributes_multiple_override():
+    expected = '{"book":{"author":"John Steinbeck","language":{"US":"English"},"title":"The Grapes of Wrath"}}'
+
+    actual = serializer.dumps(
+        {"book": {"title": "The Grapes of Wrath", "author": "John Steinbeck", "language": {"US": "English"}}},
+        only_field_attributes=(
+            "book",
+            "book.author",
+        ),
+    )
+
+    assert actual == expected
+
+
+def test_only_field_attributes_multiple_override_2():
+    expected = '{"book":{"author":"John Steinbeck","language":{"US":"English"},"title":"The Grapes of Wrath"}}'
+
+    actual = serializer.dumps(
+        {"book": {"title": "The Grapes of Wrath", "author": "John Steinbeck", "language": {"US": "English"}}},
+        only_field_attributes=(
+            "book.author",
+            "book",
+        ),
+    )
+
+    assert actual == expected
+
+
 def test_dictionary_with_int_keys_as_strings():
     # Browsers will sort a dictionary that has stringified integers as if they the keys
     # were integers which messes up checksum calculation

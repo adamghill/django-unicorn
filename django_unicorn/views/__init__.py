@@ -15,7 +15,7 @@ from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
 from django.views.decorators.http import require_POST
 
 from django_unicorn.components import UnicornView
-from django_unicorn.components.unicorn_template_response import get_root_element
+from django_unicorn.components.unicorn_template_response import get_root_element, get_unicorn_models
 from django_unicorn.decorators import timed
 from django_unicorn.errors import (
     RenderNotModifiedError,
@@ -209,6 +209,13 @@ def _process_component_request(request: HttpRequest, component_request: Componen
     # Pass the current request so that it can be used inside the component template
     rendered_component = component.render(request=request)
     component.rendered(rendered_component)
+
+    # Re-get data with unicorn models so the checksum is correct
+    soup = BeautifulSoup(rendered_component, features="html.parser")
+    unicorn_models = get_unicorn_models(soup)
+    component_request.data = orjson.loads(
+        component.get_frontend_context_variables(only_field_attributes=unicorn_models)
+    )
 
     if request_queued_messages:
         try:

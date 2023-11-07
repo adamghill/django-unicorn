@@ -3,10 +3,11 @@ from example.coffee.models import Flavor, Taste
 
 
 class ModelsView(UnicornView):
-    flavor: Flavor = Flavor()
+    flavor: Flavor = None
     flavors: QuerySetType[Flavor] = Flavor.objects.none()
 
     def mount(self):
+        self.flavor = Flavor()
         self.refresh_flavors()
 
     def refresh_flavors(self):

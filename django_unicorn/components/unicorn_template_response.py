@@ -41,8 +41,12 @@ EMPTY_ELEMENTS = (
 )
 
 
-def _has_unicorn_model_attribute(tag):
-    return tag.has_attr("unicorn:model") or tag.has_attr("u:model")
+def _has_unicorn_model_attribute(tag: Tag):
+    for attr in tag.attrs.keys():
+        if attr.startswith("unicorn:model") or attr.startswith("u:model"):
+            return True
+
+    return False
 
 
 def is_html_well_formed(html: str) -> bool:
@@ -82,6 +86,22 @@ def assert_has_single_wrapper_element(root_element: Tag, component_name: str) ->
         raise MultipleRootComponentElementError(
             f"The '{component_name}' component appears to have multiple root elements."
         ) from None
+
+
+def get_unicorn_models(root_element: Tag) -> list:
+    # Get all `unicorn:model`s to determine what data is necessary to send
+    unicorn_model_elements = root_element.find_all(_has_unicorn_model_attribute)
+    unicorn_model_element_values = set()
+
+    for el in unicorn_model_elements:
+        for key in el.attrs.keys():
+            if key.startswith("unicorn:model") or key.startswith("u:model"):
+                value = el.attrs[key]
+
+                if value not in unicorn_model_element_values:
+                    unicorn_model_element_values.add(value)
+
+    return list(unicorn_model_element_values)
 
 
 class UnsortedAttributes(HTMLFormatter):
@@ -149,18 +169,12 @@ potentially cause errors in Unicorn."
         except (NoRootComponentElementError, MultipleRootComponentElementError) as ex:
             logger.warning(ex)
 
-        # Get all `unicorn:model`s to determine what data is necessary to send
-        unicorn_model_elements = root_element.find_all(_has_unicorn_model_attribute)
-        unicorn_models = [e.attrs.get("unicorn:model") or e.attrs.get("u:model") for e in unicorn_model_elements]
+        unicorn_models = get_unicorn_models(root_element)
 
         # Get all frontend variables to generate the checksum
-        frontend_context_variables = self.component.get_frontend_context_variables(only_fields=unicorn_models)
+        frontend_context_variables = self.component.get_frontend_context_variables(only_field_attributes=unicorn_models)
         frontend_context_variables_dict = orjson.loads(frontend_context_variables)
         checksum = generate_checksum(str(frontend_context_variables_dict))
-
-        # Re-get frontend variables based on what unicorn:model elements are in the rendered content
-        frontend_context_variables = self.component.get_frontend_context_variables(only_fields=unicorn_models)
-        frontend_context_variables_dict = orjson.loads(frontend_context_variables)
 
         root_element["unicorn:id"] = self.component.component_id
         root_element["unicorn:name"] = self.component.component_name
