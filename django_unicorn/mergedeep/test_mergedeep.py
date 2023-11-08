@@ -14,7 +14,9 @@ class test_mergedeep(unittest.TestCase):
     # REPLACE
     ##############################################################################################################################
 
-    def test_should_merge_3_dicts_into_new_dict_using_replace_strategy_and_only_mutate_target(self,):
+    def test_should_merge_3_dicts_into_new_dict_using_replace_strategy_and_only_mutate_target(
+        self,
+    ):
         expected = {
             "a": {"b": {"c": 5, "_c": 15}, "B": {"C": 10}},
             "d": 3,
@@ -67,7 +69,9 @@ class test_mergedeep(unittest.TestCase):
         self.assertEqual(b, b_copy)
         self.assertEqual(c, c_copy)
 
-    def test_should_merge_2_dicts_into_existing_dict_using_replace_strategy_and_only_mutate_target(self,):
+    def test_should_merge_2_dicts_into_existing_dict_using_replace_strategy_and_only_mutate_target(
+        self,
+    ):
         expected = {
             "a": {"b": {"c": 5, "_c": 15}, "B": {"C": 10}},
             "d": 3,
@@ -124,7 +128,9 @@ class test_mergedeep(unittest.TestCase):
     # ADDITIVE
     ##############################################################################################################################
 
-    def test_should_merge_3_dicts_into_new_dict_using_additive_strategy_on_lists_and_only_mutate_target(self,):
+    def test_should_merge_3_dicts_into_new_dict_using_additive_strategy_on_lists_and_only_mutate_target(
+        self,
+    ):
         expected = {
             "a": {"b": {"c": 5, "_c": 15}, "B": {"C": 10}},
             "d": 3,
@@ -148,7 +154,9 @@ class test_mergedeep(unittest.TestCase):
         self.assertEqual(b, b_copy)
         self.assertEqual(c, c_copy)
 
-    def test_should_merge_3_dicts_into_new_dict_using_additive_strategy_on_sets_and_only_mutate_target(self,):
+    def test_should_merge_3_dicts_into_new_dict_using_additive_strategy_on_sets_and_only_mutate_target(
+        self,
+    ):
         expected = {
             "a": {"b": {"c": 5, "_c": 15}, "B": {"C": 10}},
             "d": 3,
@@ -172,7 +180,9 @@ class test_mergedeep(unittest.TestCase):
         self.assertEqual(b, b_copy)
         self.assertEqual(c, c_copy)
 
-    def test_should_merge_3_dicts_into_new_dict_using_additive_strategy_on_tuples_and_only_mutate_target(self,):
+    def test_should_merge_3_dicts_into_new_dict_using_additive_strategy_on_tuples_and_only_mutate_target(
+        self,
+    ):
         expected = {
             "a": {"b": {"c": 5, "_c": 15}, "B": {"C": 10}},
             "d": 3,
@@ -196,7 +206,9 @@ class test_mergedeep(unittest.TestCase):
         self.assertEqual(b, b_copy)
         self.assertEqual(c, c_copy)
 
-    def test_should_merge_3_dicts_into_new_dict_using_additive_strategy_on_counters_and_only_mutate_target(self,):
+    def test_should_merge_3_dicts_into_new_dict_using_additive_strategy_on_counters_and_only_mutate_target(
+        self,
+    ):
         expected = {
             "a": {"b": {"c": 5, "_c": 15}, "B": {"C": 10}},
             "d": 3,
@@ -288,7 +300,9 @@ class test_mergedeep(unittest.TestCase):
         with self.assertRaises(TypeError):
             merge({}, a, b, c, strategy=Strategy.TYPESAFE)
 
-    def test_should_raise_TypeError_using_typesafe_replace_strategy_if_types_differ(self,):
+    def test_should_raise_TypeError_using_typesafe_replace_strategy_if_types_differ(
+        self,
+    ):
         a = {"a": {"b": {"c": 5}}, "d": 1, "e": {2: 3}, "f": [1, 2, 3]}
         b = {"a": {"B": {"C": 10}}, "d": 2, "e": 2, "f": [4, 5, 6]}
         c = {"a": {"b": {"_c": 15}}, "d": 3, "e": {1: 2, "a": {"f": 2}}}
@@ -356,7 +370,9 @@ class test_mergedeep(unittest.TestCase):
     # TYPESAFE_ADDITIVE
     ##############################################################################################################################
 
-    def test_should_raise_TypeError_using_typesafe_additive_strategy_if_types_differ(self,):
+    def test_should_raise_TypeError_using_typesafe_additive_strategy_if_types_differ(
+        self,
+    ):
         a = {"a": {"b": {"c": 5}}, "d": 1, "e": {2: 3}, "f": [1, 2, 3]}
         b = {"a": {"B": {"C": 10}}, "d": 2, "e": 2, "f": [4, 5, 6]}
         c = {"a": {"b": {"_c": 15}}, "d": 3, "e": {1: 2, "a": {"f": 2}}}
