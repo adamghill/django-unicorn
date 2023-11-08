@@ -31,12 +31,12 @@ furo = { version = "^2023", optional = true }
 sphinx-copybutton = { version = "^0", optional = true }
 sphinx-autobuild = { version = ">=2021.3.14", optional = true }
 rst2pdf = { version = "^0", optional = true }
-six = {version = "^1", python = "3.8.*"}
-sphinx-autoapi = "^3.0.0"
+sphinx-autoapi = { version = "^3.0.0", optional = true }
+sphinxext-opengraph = { version = "^0", optional = true }
 
 [tool.poetry.extras]
 minify = ["htmlmin"]
-docs = ["Sphinx", "linkify-it-py", "myst-parser", "furo", "sphinx-copybutton", "sphinx-autobuild", "rst2pdf"]
+docs = ["Sphinx", "linkify-it-py", "myst-parser", "furo", "sphinx-copybutton", "sphinx-autobuild", "rst2pdf", "sphinx-autoapi", "sphinxext-opengraph"]
 
 [tool.poetry.group.dev.dependencies]
 certifi = "^2023.7.22"  # needed for GitHub Actions

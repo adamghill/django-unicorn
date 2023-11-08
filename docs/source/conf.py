@@ -40,6 +40,7 @@ extensions = [
     "sphinx.ext.autosectionlabel",
     "rst2pdf.pdfbuilder",
     "autoapi.extension",
+    "sphinxext.opengraph",
 ]
 
 intersphinx_mapping = {
@@ -107,3 +108,6 @@ def skip_member(app, what, name, obj, skip, options):  # noqa: ARG001
 
 def setup(sphinx):
     sphinx.connect("autoapi-skip-member", skip_member)
+
+
+ogp_site_url = "https://www.django-unicorn.com/"
