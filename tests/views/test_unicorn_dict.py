@@ -3,8 +3,8 @@ from django_unicorn.views.utils import set_property_from_data
 
 
 class DictPropertyView(UnicornView):
-    dictionary = {"name": "dictionary"}
-    nested_dictionary = {"nested": {"name": "nested_dictionary"}}
+    dictionary = {"name": "dictionary"}  # noqa: RUF012
+    nested_dictionary = {"nested": {"name": "nested_dictionary"}}  # noqa: RUF012
 
 
 def test_set_property_from_data_dict():
@@ -26,6 +26,4 @@ def test_set_property_from_data_nested_dict():
         {"nested": {"name": "nested_dictionary_updated"}},
     )
 
-    assert "nested_dictionary_updated" == component.nested_dictionary.get("nested").get(
-        "name"
-    )
+    assert "nested_dictionary_updated" == component.nested_dictionary.get("nested").get("name")

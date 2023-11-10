@@ -6,9 +6,7 @@ import shortuuid
 from django_unicorn.utils import generate_checksum
 
 
-def _post_message_and_get_body(
-    client, message, url="/message/tests.views.fake_components.FakeComponent"
-):
+def _post_message_and_get_body(client, message, url="/message/tests.views.fake_components.FakeComponent"):
     response = client.post(
         url,
         message,

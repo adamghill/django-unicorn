@@ -33,6 +33,4 @@ def test_set_property_from_data_nested_unicorn_field():
     data = {"nested_property_one": {"name": "nested_property_one_updated"}}
     set_property_from_data(component, "property_one", data)
 
-    assert (
-        "nested_property_one_updated" == component.property_one.nested_property_one.name
-    )
+    assert "nested_property_one_updated" == component.property_one.nested_property_one.name

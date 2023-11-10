@@ -1,6 +1,5 @@
-from django.db import models
-
 import pytest
+from django.db import models
 
 from django_unicorn.components import ModelValueMixin
 from django_unicorn.serializer import model_value

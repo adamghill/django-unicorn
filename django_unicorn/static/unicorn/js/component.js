@@ -6,7 +6,6 @@ import {
 } from "./eventListeners.js";
 import { components, lifecycleEvents } from "./store.js";
 import { send } from "./messageSender.js";
-import morphdom from "./morphdom/2.6.1/morphdom.js";
 import {
   $,
   hasValue,
@@ -27,7 +26,6 @@ export class Component {
     this.messageUrl = args.messageUrl;
     this.csrfTokenHeaderName = args.csrfTokenHeaderName;
     this.csrfTokenCookieName = args.csrfTokenCookieName;
-    this.reloadScriptElements = args.reloadScriptElements;
     this.hash = args.hash;
     this.data = args.data || {};
     this.syncUrl = `${this.messageUrl}/${this.name}`;
@@ -35,7 +33,7 @@ export class Component {
     this.document = args.document || document;
     this.walker = args.walker || walk;
     this.window = args.window || window;
-    this.morphdom = args.morphdom || morphdom;
+    this.morpher = args.morpher;
 
     this.root = undefined;
     this.modelEls = [];

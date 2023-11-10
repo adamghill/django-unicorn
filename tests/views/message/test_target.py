@@ -1,6 +1,5 @@
 import time
 
-import orjson
 import shortuuid
 from bs4 import BeautifulSoup
 
@@ -44,7 +43,7 @@ def test_message_generated_checksum_matches_dom_checksum(client):
 
     assert dom
     assert not body.get("partials")
-    assert body.get("data", {}).get("clicked") == True
+    assert body.get("data", {}).get("clicked") is True
 
     soup = BeautifulSoup(dom, features="html.parser")
 
@@ -80,7 +79,7 @@ def test_message_target_invalid(client):
 
     assert body.get("dom")
     assert not body.get("partials")
-    assert body.get("data", {}).get("clicked") == True
+    assert body.get("data", {}).get("clicked") is True
 
 
 def test_message_target_id(client):
@@ -111,7 +110,7 @@ def test_message_target_id(client):
     assert len(body["partials"]) == 1
     assert body["partials"][0]["id"] == "test-target-id"
     assert body["partials"][0]["dom"] == '<div id="test-target-id"></div>'
-    assert body.get("data", {}).get("clicked") == True
+    assert body.get("data", {}).get("clicked") is True
 
 
 def test_message_target_only_id(client):
@@ -142,7 +141,7 @@ def test_message_target_only_id(client):
     assert len(body["partials"]) == 1
     assert body["partials"][0]["id"] == "test-target-id"
     assert body["partials"][0]["dom"] == '<div id="test-target-id"></div>'
-    assert body.get("data", {}).get("clicked") == True
+    assert body.get("data", {}).get("clicked") is True
 
 
 def test_message_target_only_key(client):
@@ -173,7 +172,7 @@ def test_message_target_only_key(client):
     assert len(body["partials"]) == 1
     assert body["partials"][0]["key"] == "test-target-key"
     assert body["partials"][0]["dom"] == '<div unicorn:key="test-target-key"></div>'
-    assert body.get("data", {}).get("clicked") == True
+    assert body.get("data", {}).get("clicked") is True
 
 
 def test_message_target_key(client):
@@ -204,4 +203,4 @@ def test_message_target_key(client):
     assert len(body["partials"]) == 1
     assert body["partials"][0]["key"] == "test-target-key"
     assert body["partials"][0]["dom"] == '<div unicorn:key="test-target-key"></div>'
-    assert body.get("data", {}).get("clicked") == True
+    assert body.get("data", {}).get("clicked") is True

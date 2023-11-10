@@ -32,7 +32,7 @@ def test_message_toggle(client):
     body = _post_message_and_get_body(client, message)
 
     assert not body["errors"]
-    assert body["data"]["check"] == True
+    assert body["data"]["check"] is True
 
 
 def test_message_nested_toggle(client):
@@ -50,4 +50,4 @@ def test_message_nested_toggle(client):
     body = _post_message_and_get_body(client, message)
 
     assert not body["errors"]
-    assert body["data"]["nested"]["check"] == True
+    assert body["data"]["nested"]["check"] is True

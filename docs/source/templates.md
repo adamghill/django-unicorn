@@ -1,13 +1,64 @@
 # Templates
 
-Templates are just normal Django HTML templates, so anything you could normally do in a Django template will still work, including template tags, filters, loops, if statements, etc.
+Templates are normal Django HTML templates, so anything you could normally do in a Django template will still work, including template tags, filters, loops, if statements, etc.
 
 ```{warning}
-`Unicorn` requires there to be one root element surrounding the component template.
+`Unicorn` requires there to be one root element that contains the component HTML. Valid HTML and a wrapper element is required for the DOM diffing algorithm to work correctly, so `Unicorn` will try to log a warning message if they seem invalid.
+
+For example, this is an **invalid** template:
+:::{code} html
+:force: true
+<input unicorn:model="name"></input><br />
+Name: {{ name }}
+:::
+
+This template is **valid**:
+:::{code} html
+:force: true
+<div>
+  <input unicorn:model="name"></input><br />
+  Name: {{ name }}
+</div>
+:::
+
+```
+
+## Unicorn attributes
+
+`Unicorn` element attributes usually start with `unicorn:`, however the shortcut `u:` is also supported. So, for example, `unicorn:model` could also be written as `u:model`.
+
+## Accessing nested fields
+
+Fields in a `dictionary` or Django model can be accessed similarly to the Django template language with "dot notation".
+
+```python
+# hello_world.py
+from django_unicorn.components import UnicornView
+from book.models import Book
+
+class HelloWorldView(UnicornView):
+    book: Book
+    book_ratings: dict[str[dict[str, str]]]
+
+    def mount(self):
+        book = Book.objects.get(title='American Gods')
+        book_ratings = {'excellent': {'title': 'American Gods'}}
+```
+
+```html
+<!-- hello-world.html -->
+<div>
+  <input unicorn:model="book.title" type="text" id="model" />
+  <input
+    unicorn:model="book_ratings.excellent.title"
+    type="text"
+    id="dictionary"
+  />
+</div>
 ```
 
 ```{note}
-To reduce the verbosity of templates, `u:` can be used as a shorthand for any attribute that starts with `unicorn:`. All of the examples in the documentation use `unicorn:` to be explicit, but both are supported.
+[Django models](django-models.md) has many more details about using Django models in `Unicorn`.
 ```
 
 ## Model modifiers
@@ -89,7 +140,7 @@ Setting a unique `id` on elements with `unicorn:model` will prevent changes to a
 <input type="text" id="someFancyId" unicorn:model="name"></input>
 ```
 
-However, setting the same `id` on two elements with the same `unicorn:model` won't work. The `unicorn:key` attribute can be used to make sure that the elements can be synced as expected.
+The `unicorn:key` attribute can be used when multiple elements have the same `id`.
 
 ```html
 <!-- missing-updates.html -->
@@ -98,14 +149,14 @@ However, setting the same `id` on two elements with the same `unicorn:model` won
 ```
 
 ```html
-<!-- this-should-work.html -->
+<!-- this-works.html -->
 <input type="text" id="someFancyId" unicorn:model="name"></input>
 <input type="text" id="someFancyId" unicorn:model="name" unicorn:key="someFancyKey"></input>
 ```
 
 ### DOM merging
 
-The JavaScript library used to merge changes in the DOM, `morphdom`, uses an element's `id` to intelligently update DOM elements. If it isn't possible to have an `id` attribute on the element, `unicorn:key` will be used if it is available.
+To merge changes in the DOM, `Unicorn` uses, in order, `unicorn:id`, `unicorn:key`, or the element's `id` to intelligently update DOM elements.
 
 ## Lifecycle events
 
@@ -113,7 +164,7 @@ The JavaScript library used to merge changes in the DOM, `morphdom`, uses an ele
 
 ### updated
 
-The `updated` event is fired after the AJAX call finishes and the component is merged with the newly rendered component template. The callback gets called with one argument, `component`, which can be inspected if necessary.
+The `updated` event is fired after the AJAX call finishes and the component is merged with the newly rendered component template. The callback gets called with one argument, `component`.
 
 ```html
 <!-- updated-event.html -->

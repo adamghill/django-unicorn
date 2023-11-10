@@ -2,8 +2,10 @@ import logging
 from datetime import timedelta
 from decimal import Decimal
 from functools import lru_cache
-from typing import Any, Dict, List, Tuple
+from types import MappingProxyType
+from typing import Any, Dict, List, Optional, Tuple
 
+import orjson
 from django.core.serializers import serialize
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import (
@@ -22,10 +24,7 @@ from django.utils.dateparse import (
 )
 from django.utils.duration import duration_string
 
-import orjson
-
-from .utils import is_int, is_non_string_sequence
-
+from django_unicorn.utils import is_int, is_non_string_sequence
 
 try:
     from pydantic import BaseModel as PydanticBaseModel
@@ -43,7 +42,7 @@ class JSONDecodeError(Exception):
 
 
 class InvalidFieldNameError(Exception):
-    def __init__(self, field_name: str, data: Dict = None):
+    def __init__(self, field_name: str, data: Optional[Dict] = None):
         message = f"Cannot resolve '{field_name}'."
 
         if data:
@@ -54,7 +53,7 @@ class InvalidFieldNameError(Exception):
 
 
 class InvalidFieldAttributeError(Exception):
-    def __init__(self, field_name: str, field_attr: str, data: Dict = None):
+    def __init__(self, field_name: str, field_attr: str, data: Optional[Dict] = None):
         message = f"Cannot resolve '{field_attr}'."
 
         if data:
@@ -139,11 +138,7 @@ def _handle_inherited_models(model: Model, model_json: Dict):
 
     if model._meta.get_parent_list():
         for field in model._meta.get_fields():
-            if (
-                field.name not in model_json
-                and hasattr(field, "primary_key")
-                and not field.primary_key
-            ):
+            if field.name not in model_json and hasattr(field, "primary_key") and not field.primary_key:
                 if field.is_relation:
                     # We already serialized the m2m fields above, so we can skip them, but need to handle FKs
                     if not field.many_to_many:
@@ -165,11 +160,7 @@ def _handle_inherited_models(model: Model, model_json: Dict):
                         value = django_json_encoder.encode(value)
 
                         # The DjangoJSONEncoder has extra double-quotes for strings so remove them
-                        if (
-                            isinstance(value, str)
-                            and value.startswith('"')
-                            and value.endswith('"')
-                        ):
+                        if isinstance(value, str) and value.startswith('"') and value.endswith('"'):
                             value = value[1:-1]
 
                     model_json[field.name] = value
@@ -220,7 +211,7 @@ def _json_serializer(obj):
     TODO: Investigate other ways to serialize objects automatically.
     e.g. Using DRF serializer: https://www.django-rest-framework.org/api-guide/serializers/#serializing-objects
     """
-    from .components import UnicornView
+    from django_unicorn.components import UnicornView
 
     try:
         if isinstance(obj, UnicornView):
@@ -248,6 +239,9 @@ def _json_serializer(obj):
             return obj.dict()
         elif isinstance(obj, Decimal):
             return str(obj)
+        elif isinstance(obj, MappingProxyType):
+            # Return a regular dict for `mappingproxy`
+            return obj.copy()
         elif hasattr(obj, "to_json"):
             return obj.to_json()
     except Exception as e:
@@ -257,7 +251,7 @@ def _json_serializer(obj):
     raise TypeError
 
 
-def _fix_floats(current: Dict, data: Dict = None, paths: List = None) -> None:
+def _fix_floats(current: Dict, data: Optional[Dict] = None, paths: Optional[List] = None) -> None:
     """
     Recursively change any Python floats to a string so that JavaScript
     won't convert the float to an integer when deserializing.
@@ -303,7 +297,7 @@ def _sort_dict(data: Dict) -> Dict:
         data: Dictionary to sort.
     """
 
-    if type(data) is not dict:
+    if not isinstance(data, dict):
         return data
 
     items = [
@@ -321,9 +315,7 @@ def _sort_dict(data: Dict) -> Dict:
     return dict(items)
 
 
-def _exclude_field_attributes(
-    dict_data: Dict[Any, Any], exclude_field_attributes: Tuple[str] = None
-) -> None:
+def _exclude_field_attributes(dict_data: Dict[Any, Any], exclude_field_attributes: Optional[Tuple[str]] = None) -> None:
     """
     Remove the field attribute from `dict_data`. Handles nested attributes with a dot.
 
@@ -334,15 +326,15 @@ def _exclude_field_attributes(
     if exclude_field_attributes:
         for field in exclude_field_attributes:
             field_splits = field.split(".")
+            nested_attribute_split_count = 2
 
-            if len(field_splits) > 2:
-                remaining_field_attributes = field[field.index(".") + 1 :]
+            if len(field_splits) > nested_attribute_split_count:
+                next_attribute_index = field.index(".") + 1
+                remaining_field_attributes = field[next_attribute_index:]
                 remaining_dict_data = dict_data[field_splits[0]]
 
-                return _exclude_field_attributes(
-                    remaining_dict_data, (remaining_field_attributes,)
-                )
-            elif len(field_splits) == 2:
+                return _exclude_field_attributes(remaining_dict_data, (remaining_field_attributes,))
+            elif len(field_splits) == nested_attribute_split_count:
                 (field_name, field_attr) = field_splits
 
                 if field_name not in dict_data:
@@ -350,9 +342,7 @@ def _exclude_field_attributes(
 
                 if dict_data[field_name] is not None:
                     if field_attr not in dict_data[field_name]:
-                        raise InvalidFieldAttributeError(
-                            field_name=field_name, field_attr=field_attr, data=dict_data
-                        )
+                        raise InvalidFieldAttributeError(field_name=field_name, field_attr=field_attr, data=dict_data)
 
                     del dict_data[field_name][field_attr]
 
@@ -360,8 +350,9 @@ def _exclude_field_attributes(
 @lru_cache(maxsize=128, typed=True)
 def _dumps(
     serialized_data: bytes,
+    *,
     fix_floats: bool = True,
-    exclude_field_attributes: Tuple[str] = None,
+    exclude_field_attributes: Optional[Tuple[str]] = None,
     sort_dict: bool = True,
 ) -> Dict:
     """
@@ -394,8 +385,9 @@ def _dumps(
 
 def dumps(
     data: Dict,
+    *,
     fix_floats: bool = True,
-    exclude_field_attributes: Tuple[str] = None,
+    exclude_field_attributes: Optional[Tuple[str]] = None,
     sort_dict: bool = True,
 ) -> str:
     """
@@ -415,9 +407,8 @@ def dumps(
     Returns a `str` instead of `bytes` (which deviates from `orjson.dumps`), but seems more useful.
     """
 
-    assert exclude_field_attributes is None or is_non_string_sequence(
-        exclude_field_attributes
-    ), "exclude_field_attributes type needs to be a sequence"
+    if exclude_field_attributes is not None and not is_non_string_sequence(exclude_field_attributes):
+        raise AssertionError("exclude_field_attributes type needs to be a sequence")
 
     # Call `dumps` to make sure that complex objects are serialized correctly
     serialized_data = orjson.dumps(data, default=_json_serializer)
@@ -434,13 +425,13 @@ def dumps(
     return serialized_data.decode("utf-8")
 
 
-def loads(str: str) -> dict:
+def loads(string: str) -> dict:
     """
     Converts a string representation to dictionary.
     """
 
     try:
-        return orjson.loads(str)
+        return orjson.loads(string)
     except orjson.JSONDecodeError as e:
         raise JSONDecodeError from e
 

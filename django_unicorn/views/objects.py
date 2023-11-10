@@ -7,7 +7,6 @@ from django_unicorn.errors import UnicornViewError
 from django_unicorn.serializer import JSONDecodeError, dumps, loads
 from django_unicorn.utils import generate_checksum
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -23,10 +22,7 @@ class Action:
         self.partials = data.get("partials", [])
 
     def __repr__(self):
-        return (
-            f"Action(action_type='{self.action_type}' payload={self.payload}"
-            f" partials={self.partials})"
-        )
+        return f"Action(action_type='{self.action_type}' payload={self.payload} partials={self.partials})"
 
 
 def is_int(s):
@@ -39,12 +35,7 @@ def is_int(s):
 
 
 def sort_dict(d):
-    items = [
-        [k, v]
-        for k, v in sorted(
-            d.items(), key=lambda x: x[0] if not is_int(x[0]) else int(x[0])
-        )
-    ]
+    items = [[k, v] for k, v in sorted(d.items(), key=lambda x: x[0] if not is_int(x[0]) else int(x[0]))]
 
     for item in items:
         if isinstance(item[1], dict):
@@ -64,21 +55,27 @@ class ComponentRequest:
 
         try:
             self.body = loads(request.body)
-            assert self.body, "Invalid JSON body"
+
+            if not self.body:
+                raise AssertionError("Invalid JSON body")
         except JSONDecodeError as e:
             raise UnicornViewError("Body could not be parsed") from e
 
         self.name = component_name
-        assert self.name, "Missing component name"
+        if not self.name:
+            raise AssertionError("Missing component name")
 
         self.data = self.body.get("data")
-        assert self.data is not None, "Missing data"  # data could theoretically be {}
+        if not self.data is not None:
+            raise AssertionError("Missing data")  # data could theoretically be {}
 
         self.id = self.body.get("id")
-        assert self.id, "Missing component id"
+        if not self.id:
+            raise AssertionError("Missing component id")
 
         self.epoch = self.body.get("epoch", "")
-        assert self.epoch, "Missing epoch"
+        if not self.epoch:
+            raise AssertionError("Missing epoch")
 
         self.key = self.body.get("key", "")
         self.hash = self.body.get("hash", "")
@@ -104,10 +101,16 @@ class ComponentRequest:
             Raises `AssertionError` if the checksums don't match.
         """
         checksum = self.body.get("checksum")
-        assert checksum, "Missing checksum"
+
+        if not checksum:
+            # TODO: Raise specific exception
+            raise AssertionError("Missing checksum")
 
         generated_checksum = generate_checksum(str(self.data))
-        assert checksum == generated_checksum, "Checksum does not match"
+
+        if checksum != generated_checksum:
+            # TODO: Raise specific exception
+            raise AssertionError("Checksum does not match")
 
 
 class Return:

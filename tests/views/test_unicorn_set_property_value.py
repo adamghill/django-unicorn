@@ -21,9 +21,9 @@ class PropertyView(UnicornView):
 
 
 class FakeComponent(UnicornView):
-    flavors = []
+    flavors = []  # noqa: RUF012
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, **kwargs):
         self.flavors = list(Flavor.objects.all())
 
         super().__init__(**kwargs)

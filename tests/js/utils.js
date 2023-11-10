@@ -118,7 +118,7 @@ export function getComponent(html, id, name, data) {
     document: getDocument(html),
     messageUrl: "test",
     walker: walkDOM,
-    morphdom,
+    morpher: { morph: morphdom },
     window: {
       document: { title: "" },
       history: mockHistory,

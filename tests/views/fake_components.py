@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict
 
 from django import forms
@@ -13,15 +13,16 @@ from django_unicorn.components import (
     PollUpdate,
     UnicornView,
 )
+from example.books.models import Book
 from example.coffee.models import Flavor
 
 
 class FakeComponent(UnicornView):
     template_name = "templates/test_component.html"
-    dictionary = {"name": "test"}
+    dictionary = {"name": "test"}  # noqa: RUF012
     method_count = 0
     check = False
-    nested = {"check": False, "another": {"bool": False}}
+    nested = {"check": False, "another": {"bool": False}}  # noqa: RUF012
     method_arg = ""
 
     def test_method(self):
@@ -61,10 +62,29 @@ class FakeComponent(UnicornView):
     def test_validation_error_string(self):
         raise ValidationError("Check is required", code="required")
 
+    def test_validation_error_string_no_code(self):
+        raise ValidationError("Check is required")
+
     def test_validation_error_list(self):
-        raise ValidationError(
-            [ValidationError({"check": "Check is required"}, code="required")]
-        )
+        raise ValidationError([ValidationError({"check": "Check is required"})], code="required")
+
+    def test_validation_error_list_no_code(self):
+        raise ValidationError([ValidationError({"check": "Check is required"})])
+
+
+class FakeModelForm(forms.ModelForm):
+    class Meta:
+        model = Book
+        fields = ("title", "date_published", "type")
+
+
+class FakeModelFormComponent(UnicornView):
+    template_name = "templates/test_component.html"
+    form_class = FakeModelForm
+
+    title = None
+    date_published = None
+    type = None  # noqa: A003
 
 
 class FakeModelComponent(UnicornView):
@@ -88,7 +108,7 @@ class FakeValidationComponent(UnicornView):
 
     text = "hello"
     number = ""
-    date_time = datetime(2020, 9, 13, 17, 45, 14)
+    date_time = datetime(2020, 9, 13, 17, 45, 14, tzinfo=timezone.utc)
     permanent = True
 
     def set_text_no_validation(self):
@@ -135,7 +155,7 @@ class FakeComponentWithError(UnicornView):
     template_name = "templates/test_component.html"
 
     def mount(self):
-        print(self.not_a_valid_attribute)
+        print(self.not_a_valid_attribute)  # noqa: T201
 
 
 global count_updating
@@ -150,15 +170,15 @@ class FakeComponentWithUpdateMethods(UnicornView):
 
     count = 0
 
-    def updating_count(self, c):
-        global count_updating
+    def updating_count(self, _):
+        global count_updating  # noqa: PLW0603
         count_updating += 1
 
         if count_updating >= 2:
             raise Exception("updating_count called more than once")
 
-    def updated_count(self, c):
-        global count_updated
+    def updated_count(self, _):
+        global count_updated  # noqa: PLW0603
         count_updated += 1
 
         if count_updated >= 2:

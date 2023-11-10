@@ -6,11 +6,10 @@ from typing import Any, Dict, List, Mapping, Tuple
 
 from django_unicorn.utils import CASTERS
 
-
 logger = logging.getLogger(__name__)
 
 
-class InvalidKwarg(Exception):
+class InvalidKwargError(Exception):
     pass
 
 
@@ -85,7 +84,7 @@ def eval_value(value):
 
 
 @lru_cache(maxsize=128, typed=True)
-def parse_kwarg(kwarg: str, raise_if_unparseable=False) -> Dict[str, Any]:
+def parse_kwarg(kwarg: str, *, raise_if_unparseable=False) -> Dict[str, Any]:
     """
     Parses a potential kwarg as a string into a dictionary.
 
@@ -121,9 +120,9 @@ def parse_kwarg(kwarg: str, raise_if_unparseable=False) -> Dict[str, Any]:
                 value = _get_expr_string(assign.value)
                 return {target.id: value}
         else:
-            raise InvalidKwarg(f"'{kwarg}' is invalid")
-    except SyntaxError:
-        raise InvalidKwarg(f"'{kwarg}' could not be parsed")
+            raise InvalidKwargError(f"'{kwarg}' is invalid")
+    except SyntaxError as e:
+        raise InvalidKwargError(f"'{kwarg}' could not be parsed") from e
 
 
 @lru_cache(maxsize=128, typed=True)

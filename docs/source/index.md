@@ -8,6 +8,14 @@
 self
 installation
 components
+```
+
+```{toctree}
+:caption: Components
+:maxdepth: 3
+:hidden:
+
+views
 templates
 actions
 child-components
@@ -16,7 +24,7 @@ django-models
 
 ```{toctree}
 :caption: Features
-:maxdepth: 2
+:maxdepth: 3
 :hidden:
 
 direct-view
@@ -28,13 +36,21 @@ partial-updates
 polling
 visibility
 messages
-advanced
+```
+
+```{toctree}
+:caption: Advanced
+:maxdepth: 3
+:hidden:
+
+javascript
 queue-requests
+custom-morphers
 ```
 
 ```{toctree}
 :caption: Misc
-:maxdepth: 2
+:maxdepth: 3
 :hidden:
 
 cli
@@ -43,7 +59,7 @@ settings
 
 ```{toctree}
 :caption: Info
-:maxdepth: 2
+:maxdepth: 3
 :hidden:
 
 faq
@@ -54,6 +70,14 @@ code-of-conduct
 PDF docs <https://www.django-unicorn.com/docs/unicorn-latest.pdf>
 Code repo <https://github.com/adamghill/django-unicorn>
 Sponsor <https://github.com/sponsors/adamghill>
+```
+
+```{toctree}
+:caption: API
+:maxdepth: 3
+:hidden:
+
+api/django_unicorn/index
 ```
 
 Want to add some component-based magic to your front-end, but don't need the overhead of a complete JavaScript front-end framework? `Unicorn` revolutionizes the way your users interact with your Django app! With `Unicorn`, you can create stunningly spiffy pages without ever leaving Python or your beloved Django codebase.
