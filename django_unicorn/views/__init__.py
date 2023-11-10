@@ -509,7 +509,7 @@ def csrf_handle(func):
     CSRF token is not required.
     """
     if get_setting("USE_CSRF_TOKEN", True):
-        return csrf_protect(func)
+        return ensure_csrf_cookie(csrf_protect(func))
     return csrf_exempt(func)
 
 
