@@ -69,7 +69,9 @@ Available additional settings that can be set to `UNICORN` dict in settings.py w
 [![All Contributors](https://img.shields.io/badge/all_contributors-17-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE - Do not remove or modify above line -->
 
-[Unicorn](https://www.django-unicorn.com) adds modern reactive component functionality to your Django templates without having to learn a new templating language or fight with complicated JavaScript frameworks. It seamlessly extends Django past its server-side framework roots without giving up all of its niceties or forcing you to re-building your application. With Django Unicorn, you can quickly and easily add rich front-end interactions to your templates, all while using the power of Django.
+[Unicorn](https://www.django-unicorn.com) adds modern reactive component functionality to your Django templates without having to learn a new templating language or fight with complicated JavaScript frameworks. It seamlessly extends Django past its server-side framework roots without giving up all of its niceties or forcing you to rebuild your application. With Django Unicorn, you can quickly and easily add rich front-end interactions to your templates, all while using the power of Django.
+
+**[https://www.django-unicorn.com](https://www.django-unicorn.com) has extensive documentation, code examples, and more!**
 
 ## ⚡ Getting started
 
@@ -117,12 +119,12 @@ urlpatterns = (
 
 ### 5. [Create a component](https://www.django-unicorn.com/docs/components/)
 
-`python manage.py startunicorn COMPONENT_NAME`
+`python manage.py startunicorn myapp COMPONENT_NAME`
 
 `Unicorn` uses the term "component" to refer to a set of interactive functionality that can be put into templates. A component consists of a Django HTML template and a Python view class which contains the backend code. After running the management command, two new files will be created:
 
-- `your_app/templates/unicorn/COMPONENT_NAME.html` (component template)
-- `your_app/components/COMPONENT_NAME.py` (component view)
+- `myapp/templates/unicorn/COMPONENT_NAME.html` (component template)
+- `myapp/components/COMPONENT_NAME.py` (component view)
 
 ### 6. Add the component to your template
 
@@ -147,7 +149,7 @@ urlpatterns = (
 The `unicorn:` attributes bind the element to data and can also trigger methods by listening for events, e.g. `click`, `input`, `keydown`, etc.
 
 ```html
-<!-- ../templates/unicorn/todo.html -->
+<!-- todo.html -->
 
 <div>
   <form unicorn:submit.prevent="add">
@@ -174,7 +176,7 @@ The `unicorn:` attributes bind the element to data and can also trigger methods 
 ```
 
 ```python
-# ../components/todo.py
+# todo.py
 
 from django_unicorn.components import UnicornView
 from django import forms

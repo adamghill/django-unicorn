@@ -1,5 +1,6 @@
-from django_unicorn.components import UnicornView
 from tests.views.message.utils import post_and_get_response
+
+from django_unicorn.components import UnicornView
 
 
 class FakeCallsComponent(UnicornView):
@@ -27,9 +28,7 @@ def test_message_calls(client):
         }
     ]
 
-    response = post_and_get_response(
-        client, url=FAKE_CALLS_COMPONENT_URL, action_queue=action_queue
-    )
+    response = post_and_get_response(client, url=FAKE_CALLS_COMPONENT_URL, action_queue=action_queue)
 
     assert response.get("calls") == [{"args": [], "fn": "testCall"}]
 
@@ -47,9 +46,7 @@ def test_message_multiple_calls(client):
             "target": None,
         },
     ]
-    response = post_and_get_response(
-        client, url=FAKE_CALLS_COMPONENT_URL, action_queue=action_queue
-    )
+    response = post_and_get_response(client, url=FAKE_CALLS_COMPONENT_URL, action_queue=action_queue)
 
     assert response.get("calls") == [
         {"args": [], "fn": "testCall"},
@@ -66,8 +63,6 @@ def test_message_calls_with_arg(client):
         }
     ]
 
-    response = post_and_get_response(
-        client, url=FAKE_CALLS_COMPONENT_URL, action_queue=action_queue
-    )
+    response = post_and_get_response(client, url=FAKE_CALLS_COMPONENT_URL, action_queue=action_queue)
 
     assert response.get("calls") == [{"args": ["hello"], "fn": "testCall3"}]

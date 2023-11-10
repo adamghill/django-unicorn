@@ -1,10 +1,10 @@
 import shortuuid
-
-from django_unicorn.components import UnicornView
-from django_unicorn.utils import generate_checksum
 from tests.views.fake_components import FakeComponent
 from tests.views.message.test_calls import FakeCallsComponent
 from tests.views.message.utils import post_and_get_response
+
+from django_unicorn.components import UnicornView
+from django_unicorn.utils import generate_checksum
 
 
 class FakeComponentParent(UnicornView):
@@ -33,7 +33,7 @@ def test_message_hash_no_change(client):
         component_name="tests.views.fake_components.FakeComponent",
     )
     rendered_content = component.render()
-    hash = generate_checksum(rendered_content)
+    checksum = generate_checksum(rendered_content)
 
     data = {"method_count": 0}
     response = post_and_get_response(
@@ -47,7 +47,7 @@ def test_message_hash_no_change(client):
             }
         ],
         component_id=component_id,
-        hash=hash,
+        hash=checksum,
     )
 
     assert response.status_code == 304
@@ -60,7 +60,7 @@ def test_message_hash_changes(client):
         component_name="tests.views.fake_components.FakeComponent",
     )
     rendered_content = component.render()
-    hash = generate_checksum(rendered_content)
+    checksum = generate_checksum(rendered_content)
 
     data = {"method_count": 0}
     response = post_and_get_response(
@@ -74,7 +74,7 @@ def test_message_hash_changes(client):
             }
         ],
         component_id=component_id,
-        hash=hash,
+        hash=checksum,
     )
 
     assert response["data"]["method_count"] == 1
@@ -87,7 +87,7 @@ def test_message_hash_no_change_but_return_value(client):
         component_name="tests.views.fake_components.FakeComponent",
     )
     rendered_content = component.render()
-    hash = generate_checksum(rendered_content)
+    checksum = generate_checksum(rendered_content)
 
     data = {"method_count": 0}
     response = post_and_get_response(
@@ -101,7 +101,7 @@ def test_message_hash_no_change_but_return_value(client):
             }
         ],
         component_id=component_id,
-        hash=hash,
+        hash=checksum,
     )
 
     # check that the response is JSON and not a 304
@@ -116,7 +116,7 @@ def test_message_hash_no_change_but_return_redirect(client):
         component_name="tests.views.fake_components.FakeComponent",
     )
     rendered_content = component.render()
-    hash = generate_checksum(rendered_content)
+    checksum = generate_checksum(rendered_content)
 
     data = {"method_count": 0}
     response = post_and_get_response(
@@ -130,7 +130,7 @@ def test_message_hash_no_change_but_return_redirect(client):
             }
         ],
         component_id=component_id,
-        hash=hash,
+        hash=checksum,
     )
 
     # check that the response is JSON and not a 304
@@ -145,7 +145,7 @@ def test_message_hash_no_change_but_return_hash_update(client):
         component_name="tests.views.fake_components.FakeComponent",
     )
     rendered_content = component.render()
-    hash = generate_checksum(rendered_content)
+    checksum = generate_checksum(rendered_content)
 
     data = {"method_count": 0}
     response = post_and_get_response(
@@ -159,7 +159,7 @@ def test_message_hash_no_change_but_return_hash_update(client):
             }
         ],
         component_id=component_id,
-        hash=hash,
+        hash=checksum,
     )
 
     # check that the response is JSON and not a 304
@@ -174,7 +174,7 @@ def test_message_hash_no_change_but_return_poll_update(client):
         component_name="tests.views.fake_components.FakeComponent",
     )
     rendered_content = component.render()
-    hash = generate_checksum(rendered_content)
+    checksum = generate_checksum(rendered_content)
 
     data = {"method_count": 0}
     response = post_and_get_response(
@@ -188,7 +188,7 @@ def test_message_hash_no_change_but_return_poll_update(client):
             }
         ],
         component_id=component_id,
-        hash=hash,
+        hash=checksum,
     )
 
     # check that the response is JSON and not a 304
@@ -203,7 +203,7 @@ def test_message_hash_no_change_but_return_location_update(client):
         component_name="tests.views.fake_components.FakeComponent",
     )
     rendered_content = component.render()
-    hash = generate_checksum(rendered_content)
+    checksum = generate_checksum(rendered_content)
 
     data = {"method_count": 0}
     response = post_and_get_response(
@@ -217,7 +217,7 @@ def test_message_hash_no_change_but_return_location_update(client):
             }
         ],
         component_id=component_id,
-        hash=hash,
+        hash=checksum,
     )
 
     # check that the response is JSON and not a 304
@@ -232,7 +232,7 @@ def test_message_hash_no_change_but_calls(client):
         component_name="tests.views.message.test_calls.FakeCallsComponent",
     )
     rendered_content = component.render()
-    hash = generate_checksum(rendered_content)
+    checksum = generate_checksum(rendered_content)
 
     data = {}
     response = post_and_get_response(
@@ -246,7 +246,7 @@ def test_message_hash_no_change_but_calls(client):
             }
         ],
         component_id=component_id,
-        hash=hash,
+        hash=checksum,
     )
 
     # check that the response is JSON and not a 304

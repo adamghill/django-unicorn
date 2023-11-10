@@ -72,8 +72,8 @@ def test_get_type_hints_missing_type_hints():
 
 
 def test_sanitize_html():
-    expected = '{"id":"abcd123","name":"text-inputs","key":"asdf","data":{"name":"World","testing_thing":"Whatever \\u003C/script\\u003E \\u003Cscript\\u003Ealert(\'uh oh\')\\u003C/script\\u003E"},"calls":[],"hash":"hjkl"}'
-    data = '{"id":"abcd123","name":"text-inputs","key":"asdf","data":{"name":"World","testing_thing":"Whatever </script> <script>alert(\'uh oh\')</script>"},"calls":[],"hash":"hjkl"}'
+    expected = '{"id":"abcd123","name":"text-inputs","key":"asdf","data":{"name":"World","testing_thing":"Whatever \\u003C/script\\u003E \\u003Cscript\\u003Ealert(\'uh oh\')\\u003C/script\\u003E"},"calls":[],"hash":"hjkl"}'  # noqa: E501
+    data = '{"id":"abcd123","name":"text-inputs","key":"asdf","data":{"name":"World","testing_thing":"Whatever </script> <script>alert(\'uh oh\')</script>"},"calls":[],"hash":"hjkl"}'  # noqa: E501
     actual = sanitize_html(data)
     assert actual == expected
 
@@ -106,12 +106,8 @@ def test_cacheable_component_extra_context_is_none_then_restored():
 
 def test_cacheable_component_parents_have_request_restored():
     component = FakeComponent(component_id="asdf123498", component_name="hello-world")
-    component2 = FakeComponent(
-        component_id="asdf123499", component_name="hello-world", parent=component
-    )
-    component3 = FakeComponent(
-        component_id="asdf123500", component_name="hello-world", parent=component2
-    )
+    component2 = FakeComponent(component_id="asdf123499", component_name="hello-world", parent=component)
+    component3 = FakeComponent(component_id="asdf123500", component_name="hello-world", parent=component2)
     request = MagicMock()
     extra_content = "extra_content"
     for c in [component, component2, component3]:
@@ -214,24 +210,12 @@ def test_caching_components(settings):
     }
     settings.UNICORN["CACHE_ALIAS"] = "default"
     root = ExampleCachingComponent(component_id="rrr", component_name="root")
-    child1 = ExampleCachingComponent(
-        component_id="1111", component_name="child1", parent=root
-    )
-    child2 = ExampleCachingComponent(
-        component_id="2222", component_name="child2", parent=root
-    )
-    child3 = ExampleCachingComponent(
-        component_id="3333", component_name="child3", parent=root
-    )
-    grandchild = ExampleCachingComponent(
-        component_id="4444", component_name="grandchild", parent=child1
-    )
-    grandchild2 = ExampleCachingComponent(
-        component_id="5555", component_name="grandchild2", parent=child1
-    )
-    grandchild3 = ExampleCachingComponent(
-        component_id="6666", component_name="grandchild3", parent=child3
-    )
+    child1 = ExampleCachingComponent(component_id="1111", component_name="child1", parent=root)
+    child2 = ExampleCachingComponent(component_id="2222", component_name="child2", parent=root)
+    child3 = ExampleCachingComponent(component_id="3333", component_name="child3", parent=root)
+    grandchild = ExampleCachingComponent(component_id="4444", component_name="grandchild", parent=child1)
+    grandchild2 = ExampleCachingComponent(component_id="5555", component_name="grandchild2", parent=child1)
+    grandchild3 = ExampleCachingComponent(component_id="6666", component_name="grandchild3", parent=child3)
 
     cache_full_tree(child3)
     request = MagicMock()
@@ -251,6 +235,4 @@ def test_caching_components(settings):
         assert restored_root.children[0].children[i].component_id == child.component_id
     assert not restored_root.children[1].children
     assert 1 == len(restored_root.children[2].children)
-    assert (
-        grandchild3.component_id == restored_root.children[2].children[0].component_id
-    )
+    assert grandchild3.component_id == restored_root.children[2].children[0].component_id

@@ -1,35 +1,30 @@
 {% load static %}
 
+{{ MORPHER|json_script:"unicorn:settings:morpher" }}
+
 <script>
   var useCsrfToken = "{{ USE_CSRF_TOKEN }}" == "True";
 </script>
 {% if MINIFIED %}
-<script src="{% static 'unicorn/js/unicorn.min.js' %}?bust=20230808"></script>
+<script src="{% static 'unicorn/js/unicorn.min.js' %}?bust=20231110"></script>
 
 <script>
-  var url = "{% url 'django_unicorn:message' %}";
-  var reloadScriptElements = false;
+  const url = "{% url 'django_unicorn:message' %}";
+  const morpherSettings = JSON.parse(document.getElementById("unicorn:settings:morpher").textContent);
 
-  if ("{{ RELOAD_SCRIPT_ELEMENTS }}" == "True") {
-    reloadScriptElements = true;
-  }
-
-  Unicorn.init(url, "{{ CSRF_HEADER_NAME }}", "{{ CSRF_COOKIE_NAME }}", reloadScriptElements, useCsrfToken);
+  Unicorn.init(url, "{{ CSRF_HEADER_NAME }}", "{{ CSRF_COOKIE_NAME }}", morpherSettings, useCsrfToken);
 </script>
 {% else %}
 <script type="module">
   import * as Unicorn from "{% static 'unicorn/js/unicorn.js' %}";
+  import { getMorpher } from "{% static 'unicorn/js/morpher.js' %}";
 
-    // Set Unicorn to the global so it can be used by components
-    window.Unicorn = Unicorn;
+  // Set Unicorn to the global, so it can be used by components
+  window.Unicorn = Unicorn;
 
-    var url = "{% url 'django_unicorn:message' %}";
-    var reloadScriptElements = false;
+  const url = "{% url 'django_unicorn:message' %}";
+  const morpherSettings = JSON.parse(document.getElementById("unicorn:settings:morpher").textContent);
 
-    if ("{{ RELOAD_SCRIPT_ELEMENTS }}" == "True") {
-      reloadScriptElements = true;
-    }
-
-    Unicorn.init(url, "{{ CSRF_HEADER_NAME }}", "{{ CSRF_COOKIE_NAME }}", reloadScriptElements, useCsrfToken);
+  Unicorn.init(url, "{{ CSRF_HEADER_NAME }}", "{{ CSRF_COOKIE_NAME }}", morpherSettings, useCsrfToken);
 </script>
 {% endif %}

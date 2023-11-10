@@ -1,4 +1,125 @@
-# Advanced Views
+# Views
+
+Views contain a class that inherits from `UnicornView` for the component's Python code.
+
+To follow typical naming conventions, the view will convert the component's name to be more Pythonic. For example, if the component name is `hello-world`, the template file name will also be `hello-world.html`. However, the view file name will be `hello_world.py` and it will contain one class named `HelloWorldView`.
+
+This allows `Unicorn` to connect the template and view using convention instead of configuration. Using the `startunicorn` management command is the easiest way to make sure that components are created correctly.
+
+## Example view
+
+```python
+# hello_world.py
+from django_unicorn.components import UnicornView
+
+class HelloWorldView(UnicornView):
+    pass
+```
+
+## Class variables
+
+`Unicorn` will serialize/deserialize view class variables to JSON as needed for interactive parts of the component.
+
+Automatically handled field types:
+- `str`
+- `int`
+- `Decimal`
+- `float`
+- `list`
+- `dictionary`
+- [`Django Model`](django-models.md#model)
+- [`Django QuerySet`](django-models.md#queryset)
+- `dataclass`
+- `Pydantic` models
+- [Custom classes](views.md#custom-class)
+
+### A word of caution about mutable class variables
+
+Be careful when using a default mutable class variables, namely `list`, `dictionary`, and objects. As mentioned in [A Word About Names and Objects](https://docs.python.org/3.8/tutorial/classes.html#tut-object) defining a mutable default for a class variable can have subtle and unexpected consequences -- it _will_ cause component instances to share state which is usually not the intention.
+
+```python
+# sentence.py
+from django_unicorn.components import UnicornView
+
+# This will cause unexpected consequences
+class SentenceView(UnicornView):
+    words: list[str] = []  # all SentenceView instances will share a reference to one list in memory
+    word_counts: dict[str, int] = {}  # all SentenceView instances will share a reference to one dictionary in memory
+
+    def add_word(self, word: str):
+        ...
+```
+
+The correct way to initialize a mutable object.
+
+```python
+# sentence.py
+from django_unicorn.components import UnicornView
+
+class SentenceView(UnicornView):
+    words: list[str]  # not setting a default value is valid
+    word_counts: dict[str, int] = None  # using None for the default is valid
+
+    def mount(self):
+        self.words = []  # initialize a new list every time a SentenceView is initialized and mounted
+        self.word_counts = {}  # initialize a new dictionary every time a SentenceView is initialized and mounted
+
+    def add_word(self, word: str):
+        ...
+```
+
+`list`, `dictionaries`, and objects all run into this problem, so be sure to initialize mutable objects in the component's `mount` function.
+
+### Class variable type hints
+
+Type hints on fields help `Unicorn` ensure that the field will always have the appropriate type.
+
+```python
+# rating.py
+from django_unicorn.components import UnicornView
+
+class RatingView(UnicornView):
+    rating: float = 0
+
+    def calculate_percentage(self):
+        assert isinstance(rating, float)
+        print(self.rating / 100.0)
+```
+
+Without the `float` type hint on `rating`, Python will complain that `rating` is a `str`.
+
+### Custom class
+
+Custom classes need to define how they are serialized. If you have access to the object to serialize, you can define a `to_json` method on the object to return a dictionary that can be used to serialize. Inheriting from `unicorn.components.UnicornField` is a quick way to serialize a custom class, but it uses `self.__dict__` under the hood, so it is not doing anything particularly smart.
+
+Another option is to set the `form_class` on the component and utilize [Django's built-in forms and widgets](validation.md) to handle how the class should be deserialized.
+
+```python
+# hello_world.py
+from django_unicorn.components import UnicornView, UnicornField
+
+class Author(UnicornField):
+    def mount(self):
+        self.name = 'Neil Gaiman'
+
+    # Not needed because inherited from `UnicornField`
+    # def to_json(self):
+    #    return {'name': self.name}
+
+    class HelloWorldView(UnicornView):
+        author = Author()
+```
+
+```html
+<!-- hello-world.html -->
+<div>
+  <input unicorn:model="author.name" type="text" id="author_name" />
+</div>
+```
+
+```{danger}
+Never put sensitive data into a public property because that information will publicly available in the HTML source code, unless explicitly prevented with [`javascript_exclude`](views.md#javascript_exclude).
+```
 
 ## Class properties
 
@@ -70,7 +191,7 @@ class HelloWorldView(UnicornView):
 
 ## Custom methods
 
-Defined component instance methods with no arguments are made available to the Django template context and can be called like a property.
+Defined component instance methods with no arguments (other than `self`) are available in the Django template context and can be called like a property.
 
 ```python
 # states.py
@@ -272,7 +393,7 @@ class SafeExampleView(UnicornView):
 ```
 
 ````{note}
-A context variable can be marked as `safe` in the template with the normal Django template filter, as well.
+A context variable can also be marked as `safe` in the template with the normal Django template filter.
 
 ```html
 <!-- safe-example.html -->
@@ -282,58 +403,3 @@ A context variable can be marked as `safe` in the template with the normal Djang
 </div>
 ```
 ````
-
-## JavaScript Integration
-
-### Call JavaScript from View
-
-To integrate with other JavaScript functions, view methods can call an arbitrary JavaScript function after it gets rendered.
-
-```html
-<!-- call-javascript.html -->
-<div>
-  <script>
-    function hello(name) {
-      alert("Hello, " + name);
-    }
-  </script>
-
-  <input type="text" unicorn:model="name" />
-  <button type="submit" unicorn:click="hello">Hello!</button>
-</div>
-```
-
-```python
-# call_javascript.py
-from django_unicorn.components import UnicornView
-
-class CallJavascriptView(UnicornView):
-    name = ""
-
-    def mount(self):
-        self.call("hello", "world")
-
-    def hello(self):
-        self.call("hello", self.name)
-```
-
-### Trigger Model Update
-
-Normally when a model element gets changed by a user it will trigger an event which `Unicorn` listens for (either `input` or `blur` depending on if it has a `lazy` modifier). However, when setting an element with JavaScript those events do not fire. `Unicorn.trigger()` provides a way to trigger that event from JavaScript manually.
-
-The first argument to `trigger` is the component name. The second argument is the value for the element's `unicorn:key`.
-
-```html
-<!-- trigger-model.html -->
-<input
-  id="nameId"
-  unicorn:key="nameKey"
-  unicorn:model="name"
-  value="initial value"
-/>
-
-<script>
-  document.getElementById("nameId").value = "new value";
-  Unicorn.trigger("hello_world", "nameKey");
-</script>
-```

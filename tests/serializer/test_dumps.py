@@ -2,12 +2,12 @@ import json
 import uuid
 from datetime import timedelta
 from decimal import Decimal
+from types import MappingProxyType
 from typing import Dict
 
+import pytest
 from django.db import models
 from django.utils.timezone import now
-
-import pytest
 
 from django_unicorn import serializer
 from django_unicorn.serializer import InvalidFieldAttributeError, InvalidFieldNameError
@@ -100,6 +100,13 @@ def test_decimal():
     assert expected == actual
 
 
+def test_mapping_proxy_type():
+    expected = '{"name":{"id":"123.1"}}'
+    actual = serializer.dumps({"name": MappingProxyType({"id": Decimal("123.1")})})
+
+    assert expected == actual
+
+
 def test_string():
     expected = '{"name":"abc"}'
     actual = serializer.dumps({"name": "abc"})
@@ -133,9 +140,7 @@ def test_simple_model():
 def test_subclass_simple_model():
     expected = {"subclass_name": "def", "pk": 2, "name": "abc"}
 
-    subclass_simple_test_model = SubclassSimpleTestModel(
-        id=2, name="abc", subclass_name="def"
-    )
+    subclass_simple_test_model = SubclassSimpleTestModel(id=2, name="abc", subclass_name="def")
     actual = serializer.dumps(subclass_simple_test_model)
 
     assert_dicts(expected, actual)
@@ -203,7 +208,7 @@ def test_subclass_complicated_model():
     assert_dicts(expected, actual)
 
 
-def test_model_with_timedelta(db):
+def test_model_with_timedelta(db):  # noqa: ARG001
     now_dt = now()
     duration = timedelta(days=-1, seconds=68400)
 
@@ -239,7 +244,7 @@ def test_model_with_timedelta(db):
     assert_dicts(expected, actual)
 
 
-def test_model_with_datetime_as_string(db):
+def test_model_with_datetime_as_string(db):  # noqa: ARG001
     datetime = now().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
     flavor = Flavor(name="name1", datetime=datetime)
 
@@ -266,7 +271,7 @@ def test_model_with_datetime_as_string(db):
     assert_dicts(expected, actual)
 
 
-def test_model_with_time_as_string(db):
+def test_model_with_time_as_string(db):  # noqa: ARG001
     time = now().strftime("%H:%M:%S.%f")[:-3]
     flavor = Flavor(name="name1", time=time)
 
@@ -293,7 +298,7 @@ def test_model_with_time_as_string(db):
     assert_dicts(expected, actual)
 
 
-def test_model_with_duration_as_string(db):
+def test_model_with_duration_as_string(db):  # noqa: ARG001
     duration = "-1 day, 19:00:00"
     flavor = Flavor(name="name1", duration=duration)
 
@@ -332,9 +337,7 @@ def test_model_foreign_key():
 
 def test_model_foreign_key_subclass():
     test_model_one = ForeignKeyTestModel(id=1, name="abc")
-    test_model_two = SubclassForeignKeyTestModel(
-        id=2, name="def", subclass_name="ghi", parent=test_model_one
-    )
+    test_model_two = SubclassForeignKeyTestModel(id=2, name="def", subclass_name="ghi", parent=test_model_one)
     expected = {"name": "def", "parent": 1, "pk": 2, "subclass_name": "ghi"}
 
     actual = serializer.dumps(test_model_two)
@@ -347,9 +350,7 @@ def test_model_inherited_model_with_many_to_many_and_foreign_key():
     flavor_one = Flavor(id=3, name="name0")
     flavor_one.save()
 
-    flavor_two = NewFlavor(
-        id=4, new_name="new_name_1", name="name_1", parent=flavor_one
-    )
+    flavor_two = NewFlavor(id=4, new_name="new_name_1", name="name_1", parent=flavor_one)
     flavor_two.save()
 
     taste1 = Taste(name="Bitter1")
@@ -443,9 +444,7 @@ def test_model_many_to_many_with_excludes(django_assert_num_queries):
     flavor_one.taste_set.add(taste2)
     flavor_one.taste_set.add(taste3)
 
-    flavor_one = Flavor.objects.prefetch_related("taste_set", "origins").get(
-        pk=flavor_one.pk
-    )
+    flavor_one = Flavor.objects.prefetch_related("taste_set", "origins").get(pk=flavor_one.pk)
 
     # This shouldn't make any database calls because of the prefetch_related
     with django_assert_num_queries(0):
@@ -478,7 +477,7 @@ def test_model_many_to_many_with_excludes(django_assert_num_queries):
 
 
 @pytest.mark.django_db
-def test_dumps_queryset(db):
+def test_dumps_queryset(db):  # noqa: ARG001
     flavor_one = Flavor(name="name1", label="label1")
     flavor_one.save()
 
@@ -623,9 +622,7 @@ def test_get_model_dict_many_to_many_is_referenced_prefetched(
         "origins": [],
     }
 
-    flavor_one = (
-        Flavor.objects.prefetch_related("taste_set").filter(id=flavor_one.id).first()
-    )
+    flavor_one = Flavor.objects.prefetch_related("taste_set").filter(id=flavor_one.id).first()
 
     # prefetch_related should reduce the database calls
     with django_assert_num_queries(1):
@@ -740,11 +737,7 @@ def test_exclude_field_attributes_nested():
     expected = '{"classic":{"book":{"title":"The Grapes of Wrath"}}}'
 
     actual = serializer.dumps(
-        {
-            "classic": {
-                "book": {"title": "The Grapes of Wrath", "author": "John Steinbeck"}
-            }
-        },
+        {"classic": {"book": {"title": "The Grapes of Wrath", "author": "John Steinbeck"}}},
         exclude_field_attributes=("classic.book.author",),
     )
 
@@ -791,10 +784,7 @@ def test_exclude_field_attributes_invalid_name():
             exclude_field_attributes=("blob.monster",),
         )
 
-    assert (
-        e.exconly()
-        == "django_unicorn.serializer.InvalidFieldNameError: Cannot resolve 'blob'. Choices are: book"
-    )
+    assert e.exconly() == "django_unicorn.serializer.InvalidFieldNameError: Cannot resolve 'blob'. Choices are: book"
 
 
 def test_exclude_field_attributes_invalid_attribute():
@@ -806,12 +796,12 @@ def test_exclude_field_attributes_invalid_attribute():
 
     assert (
         e.exconly()
-        == "django_unicorn.serializer.InvalidFieldAttributeError: Cannot resolve 'blob'. Choices on 'book' are: title, author"
+        == "django_unicorn.serializer.InvalidFieldAttributeError: Cannot resolve 'blob'. Choices on 'book' are: title, author"  # noqa: E501
     )
 
 
 def test_exclude_field_attributes_invalid_type():
-    with pytest.raises(AssertionError) as e:
+    with pytest.raises(AssertionError):
         serializer.dumps(
             {"book": {"title": "The Grapes of Wrath", "author": "John Steinbeck"}},
             exclude_field_attributes=("book.blob"),

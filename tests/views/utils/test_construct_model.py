@@ -39,9 +39,7 @@ def test_construct_model_foreign_key():
 
 
 @pytest.mark.django_db
-@pytest.mark.skip(
-    "This test isn't all that helpful unless related models get serialized"
-)
+@pytest.mark.skip("This test isn't all that helpful unless related models get serialized")
 def test_construct_model_recursive_foreign_key():
     flavor = Flavor(name="first-flavor")
     flavor.save()

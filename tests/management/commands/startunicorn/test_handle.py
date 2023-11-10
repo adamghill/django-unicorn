@@ -2,9 +2,8 @@ import io
 import os
 import uuid
 
-from django.core.management.base import CommandError
-
 import pytest
+from django.core.management.base import CommandError
 
 from django_unicorn.management.commands.startunicorn import Command
 
@@ -30,7 +29,7 @@ def test_handle_new_app(settings, tmp_path, monkeypatch, capsys):
     # Prevent the `startapp` command from actually creating a new app
     monkeypatch.setattr(
         "django_unicorn.management.commands.startunicorn.call_command",
-        lambda *args, **kwargs: None,
+        lambda *args, **kwargs: None,  # noqa: ARG005
     )
 
     app_name = f"test-{uuid.uuid4()}".replace("-", "_")
@@ -54,7 +53,7 @@ def test_handle_existing_app(settings, tmp_path, monkeypatch, capsys):
 
     monkeypatch.setattr(
         "django_unicorn.management.commands.startunicorn.get_app_path",
-        lambda a: tmp_path / app_name,
+        lambda _: tmp_path / app_name,
     )
 
     # Reply "n" to starring question
@@ -81,7 +80,7 @@ def test_handle_existing_component(settings, tmp_path, monkeypatch, capsys):
 
     monkeypatch.setattr(
         "django_unicorn.management.commands.startunicorn.get_app_path",
-        lambda a: tmp_path / app_name,
+        lambda _: tmp_path / app_name,
     )
 
     (tmp_path / app_name).mkdir()
@@ -107,7 +106,7 @@ def test_handle_existing_templates(settings, tmp_path, monkeypatch, capsys):
 
     monkeypatch.setattr(
         "django_unicorn.management.commands.startunicorn.get_app_path",
-        lambda a: tmp_path / app_name,
+        lambda _: tmp_path / app_name,
     )
 
     (tmp_path / app_name).mkdir()
@@ -134,7 +133,7 @@ def test_handle_existing_unicorn_templates(settings, tmp_path, monkeypatch, caps
 
     monkeypatch.setattr(
         "django_unicorn.management.commands.startunicorn.get_app_path",
-        lambda a: tmp_path / app_name,
+        lambda _: tmp_path / app_name,
     )
 
     (tmp_path / app_name).mkdir()
@@ -209,7 +208,7 @@ def test_handle_reply_yes_star(settings, tmp_path, monkeypatch, capsys):
     monkeypatch.setattr("sys.stdin", io.StringIO("y\ny\n"))
 
     # Patch opening a webbrowser
-    def webbrowser_open(url, **kwargs):
+    def webbrowser_open(url, **kwargs):  # noqa: ARG001
         assert url == "https://github.com/adamghill/django-unicorn"
 
     monkeypatch.setattr("webbrowser.open", webbrowser_open)
@@ -217,7 +216,7 @@ def test_handle_reply_yes_star(settings, tmp_path, monkeypatch, capsys):
     # Prevent the `startapp` command from actually creating a new app
     monkeypatch.setattr(
         "django_unicorn.management.commands.startunicorn.call_command",
-        lambda *args, **kwargs: None,
+        lambda *args, **kwargs: None,  # noqa: ARG005
     )
 
     app_name = f"test-{uuid.uuid4()}".replace("-", "_")

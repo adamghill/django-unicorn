@@ -1,5 +1,3 @@
-import pytest
-
 from django_unicorn.call_method_parser import parse_call_method_name
 
 
@@ -59,7 +57,7 @@ def test_one_arg():
 
 
 def test_kwargs():
-    expected = ("set_name", tuple(), {"kwarg1": "wow"})
+    expected = ("set_name", (), {"kwarg1": "wow"})
     actual = parse_call_method_name("set_name(kwarg1='wow')")
 
     assert actual == expected
@@ -73,14 +71,14 @@ def test_args_and_kwargs():
 
 
 def test_special_method_without_parens():
-    expected = ("$reset", tuple(), {})
+    expected = ("$reset", (), {})
     actual = parse_call_method_name("$reset")
 
     assert actual == expected
 
 
 def test_special_method_with_parens():
-    expected = ("$reset", tuple(), {})
+    expected = ("$reset", (), {})
     actual = parse_call_method_name("$reset()")
 
     assert actual == expected

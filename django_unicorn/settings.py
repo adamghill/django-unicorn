@@ -1,13 +1,19 @@
 import logging
+from warnings import warn
 
 from django.conf import settings
-
 
 logger = logging.getLogger(__name__)
 
 
 SETTINGS_KEY = "UNICORN"
 LEGACY_SETTINGS_KEY = f"DJANGO_{SETTINGS_KEY}"
+
+DEFAULT_MORPHER_NAME = "morphdom"
+MORPHER_NAMES = (
+    "morphdom",
+    "alpine",
+)
 
 
 def get_settings():
@@ -34,6 +40,30 @@ def get_serial_settings():
 
 def get_cache_alias():
     return get_setting("CACHE_ALIAS", "default")
+
+
+def get_morpher_settings():
+    options = get_setting("MORPHER", {"NAME": DEFAULT_MORPHER_NAME})
+
+    # Legacy `RELOAD_SCRIPT_ELEMENTS` setting that needs to go to `MORPHER.RELOAD_SCRIPT_ELEMENTS`
+    reload_script_elements = get_setting("RELOAD_SCRIPT_ELEMENTS")
+
+    if reload_script_elements:
+        msg = 'The `RELOAD_SCRIPT_ELEMENTS` setting is deprecated. Use \
+`MORPHER["RELOAD_SCRIPT_ELEMENTS"]` instead.'
+        warn(msg, DeprecationWarning, stacklevel=1)
+
+        options["RELOAD_SCRIPT_ELEMENTS"] = reload_script_elements
+
+    if not options.get("NAME"):
+        options["NAME"] = DEFAULT_MORPHER_NAME
+
+    morpher_name = options["NAME"]
+
+    if not morpher_name or morpher_name not in MORPHER_NAMES:
+        raise AssertionError(f"Unknown morpher name: {morpher_name}")
+
+    return options
 
 
 def get_script_location():

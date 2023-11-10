@@ -1,8 +1,9 @@
-from django_unicorn.views.action_parsers.call_method import _get_property_value
 from tests.views.fake_components import FakeComponent
 
+from django_unicorn.views.action_parsers.call_method import _get_property_value
 
-def test_get_property_value(client):
+
+def test_get_property_value():
     component = FakeComponent(component_name="test", component_id="asdf")
 
     component.check = False
@@ -15,7 +16,7 @@ def test_get_property_value(client):
     assert check_value is True
 
 
-def test_get_property_value_nested(client):
+def test_get_property_value_nested():
     component = FakeComponent(component_name="test", component_id="asdf")
 
     component.nested["check"] = False

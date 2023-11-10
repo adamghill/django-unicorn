@@ -142,8 +142,9 @@ The changes for the table component where the row child component is added in. V
         <td>Title</td>
       </tr>
     </thead>
-    {% for book in books %} {% unicorn 'row' book=book key=book.id
-    %} {% endfor %}
+    {% for book in books %}
+    {% unicorn 'row' book=book key=book.id %}
+    {% endfor %}
   </table>
 </div>
 ```

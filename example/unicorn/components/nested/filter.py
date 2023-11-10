@@ -8,6 +8,4 @@ class FilterView(UnicornView):
         self.parent.load_table()
 
         if query:
-            self.parent.flavors = list(
-                filter(lambda f: query.lower() in f.name.lower(), self.parent.flavors)
-            )
+            self.parent.flavors = list(filter(lambda f: query.lower() in f.name.lower(), self.parent.flavors))

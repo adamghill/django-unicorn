@@ -17,7 +17,13 @@ export default {
     terser({
       mangle: true,
     }),
-    versionInjector(),
+    versionInjector({
+      injectInComments: {
+        fileRegexp: /\.js$/,
+        tag: "Version: {version}",
+        dateFormat: "mmmm d, yyyy HH:MM:ss",
+      }
+    }),
     commonjs({}),
     babel({ babelHelpers: "bundled" }),
     filesize(),

@@ -1,6 +1,6 @@
 import pytest
 
-from django_unicorn.call_method_parser import InvalidKwarg, parse_kwarg
+from django_unicorn.call_method_parser import InvalidKwargError, parse_kwarg
 
 
 def test_kwargs_string():
@@ -22,38 +22,38 @@ def test_kwargs_int():
 
 
 def test_kwargs_invalid_startswith_doublequote():
-    with pytest.raises(InvalidKwarg) as e:
+    with pytest.raises(InvalidKwargError) as e:
         parse_kwarg('"test"=2')
 
-    assert e.type == InvalidKwarg
+    assert e.type == InvalidKwargError
 
 
 def test_kwargs_invalid_startswith_singlequote():
-    with pytest.raises(InvalidKwarg) as e:
+    with pytest.raises(InvalidKwargError) as e:
         parse_kwarg("'test'=2")
 
-    assert e.type == InvalidKwarg
+    assert e.type == InvalidKwargError
 
 
 def test_kwargs_invalid_no_equal_sign():
-    with pytest.raises(InvalidKwarg) as e:
+    with pytest.raises(InvalidKwargError) as e:
         parse_kwarg("test")
 
-    assert e.type == InvalidKwarg
+    assert e.type == InvalidKwargError
 
 
 def test_kwargs_invalid_internal_doublequote():
-    with pytest.raises(InvalidKwarg) as e:
+    with pytest.raises(InvalidKwargError) as e:
         parse_kwarg('te"st=1')
 
-    assert e.type == InvalidKwarg
+    assert e.type == InvalidKwargError
 
 
 def test_kwargs_invalid_internal_singlequote():
-    with pytest.raises(InvalidKwarg) as e:
+    with pytest.raises(InvalidKwargError) as e:
         parse_kwarg("te'st=1")
 
-    assert e.type == InvalidKwarg
+    assert e.type == InvalidKwargError
 
 
 def test_kwargs_skip_unparseable_value():
