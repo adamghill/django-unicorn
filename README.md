@@ -24,6 +24,10 @@ Available additional settings that can be set to `UNICORN` dict in settings.py w
 
 ## Customization changelog
 
+### 0.57.1.1 - (2023-11-10)
+
+- No customizations, just sync with main package.
+
 ### 0.55.0.1 - (2023-09-15)
 
 - No customizations, just sync with main package.
