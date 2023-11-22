@@ -1,4 +1,6 @@
+{% load unicorn %}
+
 <div>
-    parent
-    {% unicorn 'tests.templatetags.test_unicorn_render.FakeComponentKwargs' parent=view }
+  --parent--
+  {% unicorn 'tests.templatetags.test_unicorn_render.FakeComponentChild' parent=view %}
 </div>

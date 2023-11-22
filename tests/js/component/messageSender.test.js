@@ -3,7 +3,7 @@ import fetchMock from "fetch-mock";
 import { getComponent } from "../utils.js";
 import { send } from "../../../django_unicorn/static/unicorn/js/messageSender.js";
 
-test.cb("call_method redirect", (t) => {
+test("call_method redirect", (t) => {
   const html = `
 <input type="hidden" name="csrfmiddlewaretoken" value="asdf">
 <div unicorn:id="5jypjiyb" unicorn:name="text-inputs" unicorn:checksum="GXzew3Km">
@@ -38,7 +38,6 @@ test.cb("call_method redirect", (t) => {
     t.true(err === null);
     t.is(component.window.location.href, "http://www.google.com");
     fetchMock.reset();
-    t.end();
   });
 });
 
@@ -127,7 +126,7 @@ test.cb("call_method hash", (t) => {
   });
 });
 
-test.cb("call_method forceModelUpdate is true", (t) => {
+test("call_method forceModelUpdate is true", (t) => {
   const html = `
 <input type="hidden" name="csrfmiddlewaretoken" value="asdf">
 <div unicorn:id="5jypjiyb" unicorn:name="text-inputs" unicorn:checksum="GXzew3Km">
@@ -162,11 +161,10 @@ test.cb("call_method forceModelUpdate is true", (t) => {
     t.true(err === null);
     t.true(forceModelUpdates);
     fetchMock.reset();
-    t.end();
   });
 });
 
-test.cb("call_method partial.id", (t) => {
+test("call_method partial.id", (t) => {
   // Annoyingly it appears that $('[unicorn\\:key='something']) doesn't
   // seem to work in JSDom, so this just tests targeting by id
   const html = `
@@ -214,11 +212,10 @@ test.cb("call_method partial.id", (t) => {
     t.is(morphdomMergers.length, 1);
     t.is(morphdomMergers[0], "<span id='clicker-id'>id partial!</span>");
     fetchMock.reset();
-    t.end();
   });
 });
 
-test.cb("call_method partial target", (t) => {
+test("call_method partial target", (t) => {
   // Annoyingly it appears that $('[unicorn\\:key='something']) doesn't
   // seem to work in JSDom, so this just tests targeting by id
   const html = `
@@ -265,6 +262,5 @@ test.cb("call_method partial target", (t) => {
     t.is(morphdomMergers.length, 1);
     t.is(morphdomMergers[0], "<span id='clicker-id'>id partial!</span>");
     fetchMock.reset();
-    t.end();
   });
 });

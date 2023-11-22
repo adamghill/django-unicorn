@@ -1,15 +1,18 @@
 import json
+import uuid
+from datetime import timedelta
 from decimal import Decimal
-
-from django.db import models
-from django.utils.timezone import now
+from types import MappingProxyType
+from typing import Dict
 
 import pytest
+from django.db import models
+from django.utils.timezone import now
 
 from django_unicorn import serializer
 from django_unicorn.serializer import InvalidFieldAttributeError, InvalidFieldNameError
 from django_unicorn.utils import dicts_equal
-from example.coffee.models import Flavor, Taste
+from example.coffee.models import Flavor, NewFlavor, Taste
 
 
 class SimpleTestModel(models.Model):
@@ -19,12 +22,68 @@ class SimpleTestModel(models.Model):
         app_label = "tests"
 
 
+class SubclassSimpleTestModel(SimpleTestModel):
+    subclass_name = models.CharField(max_length=10)
+
+    class Meta:
+        app_label = "tests"
+
+
 class ComplicatedTestModel(models.Model):
+    name = models.CharField(max_length=10)
+    datetime = models.DateTimeField(auto_now=True, auto_now_add=True)
+    float_value = models.FloatField(default=0.583)
+    decimal_value = models.DecimalField(max_digits=10, decimal_places=2, default=0.984)
+    uuid = models.UUIDField(default=uuid.uuid4)
+    date = models.DateField(auto_now=True, auto_now_add=True)
+    time = models.TimeField(auto_now=True, auto_now_add=True)
+    duration = models.DurationField(default="-1 day, 19:00:00")
+
+    class Meta:
+        app_label = "tests"
+
+
+class SubclassComplicatedTestModel(ComplicatedTestModel):
+    subclass_name = models.CharField(max_length=10)
+
+    class Meta:
+        app_label = "tests"
+
+
+class ForeignKeyTestModel(models.Model):
     name = models.CharField(max_length=10)
     parent = models.ForeignKey("self", blank=True, null=True, on_delete=models.SET_NULL)
 
     class Meta:
         app_label = "tests"
+
+
+class SubclassForeignKeyTestModel(ForeignKeyTestModel):
+    subclass_name = models.CharField(max_length=10)
+
+    class Meta:
+        app_label = "tests"
+
+
+class ManyToManyTestModel(models.Model):
+    name = models.CharField(max_length=10)
+    parents = models.ManyToManyField("self")
+
+    class Meta:
+        app_label = "tests"
+
+
+class SubclassManyToManyTestModel(ManyToManyTestModel):
+    subclass_name = models.CharField(max_length=10)
+
+    class Meta:
+        app_label = "tests"
+
+
+def assert_dicts(expected: Dict, serialized_dumps: str) -> None:
+    actual = json.loads(serialized_dumps)
+
+    assert dicts_equal(expected, actual)
 
 
 def test_int():
@@ -37,6 +96,13 @@ def test_int():
 def test_decimal():
     expected = '{"name":"123.1"}'
     actual = serializer.dumps({"name": Decimal("123.1")})
+
+    assert expected == actual
+
+
+def test_mapping_proxy_type():
+    expected = '{"name":{"id":"123.1"}}'
+    actual = serializer.dumps({"name": MappingProxyType({"id": Decimal("123.1")})})
 
     assert expected == actual
 
@@ -63,17 +129,97 @@ def test_list():
 
 
 def test_simple_model():
+    expected = {"name": "abc", "pk": 1}
+
     simple_test_model = SimpleTestModel(id=1, name="abc")
-    expected = '{"simple_test_model":{"name":"abc","pk":1}}'
+    actual = serializer.dumps(simple_test_model)
 
-    actual = serializer.dumps({"simple_test_model": simple_test_model})
-
-    assert expected == actual
+    assert_dicts(expected, actual)
 
 
-def test_model_with_datetime(db):
-    datetime = now()
-    flavor = Flavor(name="name1", datetime=datetime)
+def test_subclass_simple_model():
+    expected = {"subclass_name": "def", "pk": 2, "name": "abc"}
+
+    subclass_simple_test_model = SubclassSimpleTestModel(id=2, name="abc", subclass_name="def")
+    actual = serializer.dumps(subclass_simple_test_model)
+
+    assert_dicts(expected, actual)
+
+
+def test_complicated_model():
+    now_dt = now()
+    duration = timedelta(days=-1, seconds=68400)
+
+    model = ComplicatedTestModel(
+        id=2,
+        name="abc",
+        datetime=now_dt,
+        date=now_dt.date(),
+        time=now_dt.time(),
+        duration=duration,
+    )
+
+    expected = {
+        "date": str(model.date),
+        "datetime": model.datetime.isoformat()[:-3],
+        "decimal_value": "0.984",
+        "duration": "-1 19:00:00",
+        "float_value": "0.583",
+        "name": "abc",
+        "pk": 2,
+        "time": str(model.time)[:-3],
+        "uuid": str(model.uuid),
+    }
+
+    actual = serializer.dumps(model)
+
+    assert_dicts(expected, actual)
+
+
+def test_subclass_complicated_model():
+    now_dt = now()
+    duration = timedelta(days=-1, seconds=68400)
+
+    model = SubclassComplicatedTestModel(
+        id=2,
+        name="abc",
+        subclass_name="def",
+        datetime=now_dt,
+        date=now_dt.date(),
+        time=now_dt.time(),
+        duration=duration,
+    )
+
+    expected = {
+        "subclass_name": "def",
+        "pk": 2,
+        "name": "abc",
+        "datetime": model.datetime.isoformat()[:-3],
+        "float_value": "0.583",
+        "decimal_value": "0.984",
+        "uuid": str(model.uuid),
+        "date": str(model.date),
+        "time": str(model.time)[:-3],
+        "duration": "-1 19:00:00",
+    }
+
+    actual = serializer.dumps(model)
+
+    assert_dicts(expected, actual)
+
+
+def test_model_with_timedelta(db):  # noqa: ARG001
+    now_dt = now()
+    duration = timedelta(days=-1, seconds=68400)
+
+    flavor = Flavor(
+        id=8,
+        name="name1",
+        datetime=now_dt,
+        date=now_dt.date(),
+        time=now_dt.time(),
+        duration=duration,
+    )
 
     expected = {
         "flavor": {
@@ -83,21 +229,22 @@ def test_model_with_datetime(db):
             "float_value": None,
             "decimal_value": None,
             "uuid": str(flavor.uuid),
-            "date": None,
-            "datetime": datetime.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3],
-            "time": None,
-            "duration": None,
-            "pk": None,
+            "date": str(now_dt.date()),
+            "datetime": now_dt.isoformat()[:-3],
+            "time": str(now_dt.time())[:-3],
+            "duration": "-1 19:00:00",
+            "pk": 8,
             "taste_set": [],
             "origins": [],
         }
     }
 
     actual = serializer.dumps({"flavor": flavor})
-    assert dicts_equal(expected, json.loads(actual))
+
+    assert_dicts(expected, actual)
 
 
-def test_model_with_datetime_as_string(db):
+def test_model_with_datetime_as_string(db):  # noqa: ARG001
     datetime = now().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
     flavor = Flavor(name="name1", datetime=datetime)
 
@@ -120,10 +267,11 @@ def test_model_with_datetime_as_string(db):
     }
 
     actual = serializer.dumps({"flavor": flavor})
-    assert dicts_equal(expected, json.loads(actual))
+
+    assert_dicts(expected, actual)
 
 
-def test_model_with_time_as_string(db):
+def test_model_with_time_as_string(db):  # noqa: ARG001
     time = now().strftime("%H:%M:%S.%f")[:-3]
     flavor = Flavor(name="name1", time=time)
 
@@ -146,10 +294,11 @@ def test_model_with_time_as_string(db):
     }
 
     actual = serializer.dumps({"flavor": flavor})
-    assert dicts_equal(expected, json.loads(actual))
+
+    assert_dicts(expected, actual)
 
 
-def test_model_with_duration_as_string(db):
+def test_model_with_duration_as_string(db):  # noqa: ARG001
     duration = "-1 day, 19:00:00"
     flavor = Flavor(name="name1", duration=duration)
 
@@ -172,22 +321,67 @@ def test_model_with_duration_as_string(db):
     }
 
     actual = serializer.dumps({"flavor": flavor})
-    assert dicts_equal(expected, json.loads(actual))
+
+    assert_dicts(expected, actual)
 
 
 def test_model_foreign_key():
-    test_model_one = ComplicatedTestModel(id=1, name="abc")
-    test_model_two = ComplicatedTestModel(id=2, name="def", parent=test_model_one)
-    expected = '{"test_model_two":{"name":"def","parent":1,"pk":2}}'
+    test_model_one = ForeignKeyTestModel(id=1, name="abc")
+    test_model_two = ForeignKeyTestModel(id=2, name="def", parent=test_model_one)
+    expected = {"test_model_two": {"name": "def", "parent": 1, "pk": 2}}
 
     actual = serializer.dumps({"test_model_two": test_model_two})
 
-    assert expected == actual
+    assert_dicts(expected, actual)
+
+
+def test_model_foreign_key_subclass():
+    test_model_one = ForeignKeyTestModel(id=1, name="abc")
+    test_model_two = SubclassForeignKeyTestModel(id=2, name="def", subclass_name="ghi", parent=test_model_one)
+    expected = {"name": "def", "parent": 1, "pk": 2, "subclass_name": "ghi"}
+
+    actual = serializer.dumps(test_model_two)
+
+    assert_dicts(expected, actual)
+
+
+@pytest.mark.django_db
+def test_model_inherited_model_with_many_to_many_and_foreign_key():
+    flavor_one = Flavor(id=3, name="name0")
+    flavor_one.save()
+
+    flavor_two = NewFlavor(id=4, new_name="new_name_1", name="name_1", parent=flavor_one)
+    flavor_two.save()
+
+    taste1 = Taste(name="Bitter1")
+    taste1.save()
+    flavor_two.taste_set.add(taste1)
+
+    expected = {
+        "new_name": "new_name_1",
+        "pk": 4,
+        "taste_set": [1],
+        "origins": [],
+        "name": "name_1",
+        "label": "",
+        "parent": 3,
+        "float_value": "null",
+        "decimal_value": "null",
+        "uuid": str(flavor_two.uuid),
+        "datetime": "null",
+        "date": "null",
+        "time": "null",
+        "duration": "null",
+    }
+
+    actual = serializer.dumps(flavor_two)
+
+    assert_dicts(expected, actual)
 
 
 def test_model_foreign_key_recursive_parent():
-    test_model_one = ComplicatedTestModel(id=1, name="abc")
-    test_model_two = ComplicatedTestModel(id=2, name="def", parent=test_model_one)
+    test_model_one = ForeignKeyTestModel(id=1, name="abc")
+    test_model_two = ForeignKeyTestModel(id=2, name="def", parent=test_model_one)
     test_model_one.parent = test_model_two
     expected = '{"test_model_two":{"name":"def","parent":1,"pk":2}}'
 
@@ -213,7 +407,7 @@ def test_model_many_to_many(django_assert_num_queries):
     flavor_one.taste_set.add(taste3)
 
     with django_assert_num_queries(2):
-        actual = serializer.dumps(flavor_one)
+        actual = json.loads(serializer.dumps(flavor_one))
 
     expected = {
         "name": "name1",
@@ -231,7 +425,7 @@ def test_model_many_to_many(django_assert_num_queries):
         "origins": [],
     }
 
-    assert expected == json.loads(actual)
+    assert dicts_equal(expected, actual)
 
 
 @pytest.mark.django_db
@@ -250,9 +444,7 @@ def test_model_many_to_many_with_excludes(django_assert_num_queries):
     flavor_one.taste_set.add(taste2)
     flavor_one.taste_set.add(taste3)
 
-    flavor_one = Flavor.objects.prefetch_related("taste_set", "origins").get(
-        pk=flavor_one.pk
-    )
+    flavor_one = Flavor.objects.prefetch_related("taste_set", "origins").get(pk=flavor_one.pk)
 
     # This shouldn't make any database calls because of the prefetch_related
     with django_assert_num_queries(0):
@@ -263,6 +455,7 @@ def test_model_many_to_many_with_excludes(django_assert_num_queries):
                 "flavor.origins",
             ),
         )
+        actual = json.loads(actual)
 
     expected = {
         "flavor": {
@@ -280,11 +473,11 @@ def test_model_many_to_many_with_excludes(django_assert_num_queries):
         }
     }
 
-    assert expected == json.loads(actual)
+    assert dicts_equal(expected, actual)
 
 
 @pytest.mark.django_db
-def test_dumps_queryset(db):
+def test_dumps_queryset(db):  # noqa: ARG001
     flavor_one = Flavor(name="name1", label="label1")
     flavor_one.save()
 
@@ -293,7 +486,7 @@ def test_dumps_queryset(db):
 
     flavors = Flavor.objects.all()
 
-    expected_data = {
+    expected = {
         "flavors": [
             {
                 "name": "name1",
@@ -328,8 +521,8 @@ def test_dumps_queryset(db):
         ]
     }
 
-    actual = serializer.dumps({"flavors": flavors})
-    assert expected_data == json.loads(actual)
+    actual = json.loads(serializer.dumps({"flavors": flavors}))
+    assert dicts_equal(expected, actual)
 
 
 def test_get_model_dict():
@@ -352,7 +545,7 @@ def test_get_model_dict():
         "origins": [],
     }
 
-    assert expected == actual
+    assert dicts_equal(expected, actual)
 
 
 @pytest.mark.django_db
@@ -392,7 +585,7 @@ def test_get_model_dict_many_to_many_is_referenced(django_assert_num_queries):
     with django_assert_num_queries(2):
         actual = serializer._get_model_dict(flavor_one)
 
-    assert expected == actual
+    assert dicts_equal(expected, actual)
 
 
 @pytest.mark.django_db
@@ -429,15 +622,13 @@ def test_get_model_dict_many_to_many_is_referenced_prefetched(
         "origins": [],
     }
 
-    flavor_one = (
-        Flavor.objects.prefetch_related("taste_set").filter(id=flavor_one.id).first()
-    )
+    flavor_one = Flavor.objects.prefetch_related("taste_set").filter(id=flavor_one.id).first()
 
     # prefetch_related should reduce the database calls
     with django_assert_num_queries(1):
         actual = serializer._get_model_dict(flavor_one)
 
-    assert expected == actual
+    assert dicts_equal(expected, actual)
 
 
 @pytest.mark.django_db
@@ -451,7 +642,7 @@ def test_get_model_dict_many_to_many_references_model():
 
     expected = {"name": taste.name, "flavor": [flavor_one.pk], "pk": taste.pk}
 
-    assert expected == actual
+    assert dicts_equal(expected, actual)
 
 
 def test_float():
@@ -483,7 +674,7 @@ def test_nested_list_float():
 
 
 def test_nested_list_float_complicated():
-    expected = '{"name":{"blob":[1,2,"0.0"]},"more":["1.9",2,5],"another":[{"great":"1.0","ok":["1.6","0.0",4]}]}'
+    expected = '{"another":[{"great":"1.0","ok":["1.6","0.0",4]}],"more":["1.9",2,5],"name":{"blob":[1,2,"0.0"]}}'
     actual = serializer.dumps(
         {
             "name": {"blob": [1, 2, 0.0]},
@@ -513,7 +704,7 @@ def test_pydantic():
         title = "The Grapes of Wrath"
         author = "John Steinbeck"
 
-    expected = '{"title":"The Grapes of Wrath","author":"John Steinbeck"}'
+    expected = '{"author":"John Steinbeck","title":"The Grapes of Wrath"}'
     actual = serializer.dumps(Book())
 
     assert expected == actual
@@ -546,11 +737,7 @@ def test_exclude_field_attributes_nested():
     expected = '{"classic":{"book":{"title":"The Grapes of Wrath"}}}'
 
     actual = serializer.dumps(
-        {
-            "classic": {
-                "book": {"title": "The Grapes of Wrath", "author": "John Steinbeck"}
-            }
-        },
+        {"classic": {"book": {"title": "The Grapes of Wrath", "author": "John Steinbeck"}}},
         exclude_field_attributes=("classic.book.author",),
     )
 
@@ -558,7 +745,7 @@ def test_exclude_field_attributes_nested():
 
 
 def test_exclude_field_attributes_invalid_field_attribute():
-    expected = '{"book":{"title":"The Grapes of Wrath","author":"John Steinbeck"}}'
+    expected = '{"book":{"author":"John Steinbeck","title":"The Grapes of Wrath"}}'
 
     actual = serializer.dumps(
         {"book": {"title": "The Grapes of Wrath", "author": "John Steinbeck"}},
@@ -569,7 +756,7 @@ def test_exclude_field_attributes_invalid_field_attribute():
 
 
 def test_exclude_field_attributes_empty_string():
-    expected = '{"book":{"title":"The Grapes of Wrath","author":"John Steinbeck"}}'
+    expected = '{"book":{"author":"John Steinbeck","title":"The Grapes of Wrath"}}'
 
     actual = serializer.dumps(
         {"book": {"title": "The Grapes of Wrath", "author": "John Steinbeck"}},
@@ -580,7 +767,7 @@ def test_exclude_field_attributes_empty_string():
 
 
 def test_exclude_field_attributes_none():
-    expected = '{"book":{"title":"The Grapes of Wrath","author":"John Steinbeck"}}'
+    expected = '{"book":{"author":"John Steinbeck","title":"The Grapes of Wrath"}}'
 
     actual = serializer.dumps(
         {"book": {"title": "The Grapes of Wrath", "author": "John Steinbeck"}},
@@ -597,10 +784,7 @@ def test_exclude_field_attributes_invalid_name():
             exclude_field_attributes=("blob.monster",),
         )
 
-    assert (
-        e.exconly()
-        == "django_unicorn.serializer.InvalidFieldNameError: Cannot resolve 'blob'. Choices are: book"
-    )
+    assert e.exconly() == "django_unicorn.serializer.InvalidFieldNameError: Cannot resolve 'blob'. Choices are: book"
 
 
 def test_exclude_field_attributes_invalid_attribute():
@@ -612,13 +796,48 @@ def test_exclude_field_attributes_invalid_attribute():
 
     assert (
         e.exconly()
-        == "django_unicorn.serializer.InvalidFieldAttributeError: Cannot resolve 'blob'. Choices on 'book' are: title, author"
+        == "django_unicorn.serializer.InvalidFieldAttributeError: Cannot resolve 'blob'. Choices on 'book' are: title, author"  # noqa: E501
     )
 
 
 def test_exclude_field_attributes_invalid_type():
-    with pytest.raises(AssertionError) as e:
+    with pytest.raises(AssertionError):
         serializer.dumps(
             {"book": {"title": "The Grapes of Wrath", "author": "John Steinbeck"}},
             exclude_field_attributes=("book.blob"),
         )
+
+
+def test_dictionary_with_int_keys_as_strings():
+    # Browsers will sort a dictionary that has stringified integers as if they the keys
+    # were integers which messes up checksum calculation
+    expected = '{"1":"a","2":"b","4":"c","11":"d","24":"e"}'
+
+    actual = serializer.dumps(
+        {
+            "11": "d",
+            "4": "c",
+            "1": "a",
+            "24": "e",
+            "2": "b",
+        }
+    )
+
+    assert expected == actual
+
+
+def test_dictionary_with_int_keys_as_strings_no_sort():
+    expected = '{"11":"d","4":"c","1":"a","24":"e","2":"b"}'
+
+    actual = serializer.dumps(
+        {
+            "11": "d",
+            "4": "c",
+            "1": "a",
+            "24": "e",
+            "2": "b",
+        },
+        sort_dict=False,
+    )
+
+    assert expected == actual

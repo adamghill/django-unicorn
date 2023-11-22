@@ -1,77 +1,79 @@
 <div>
-    <style>
-        .dirty {
-            border: red 1px solid !important;
-        }
-    </style>
+  <style>
+    .dirty {
+      border: red 1px solid !important;
+    }
+
+  </style>
+
+  <div>
+    <h3>Using unicorn:model with Django models</h3>
 
     <div>
-        <h3>Using unicorn:model with Django models</h3>
+      <div>
+        <label>Name</label>
+        <input type="text" unicorn:model="flavor.name"></input>
+      </div>
 
-        <div>
-            <div>
-                <label>Name</label>
-                <input type="text" unicorn:model="flavor.name"></input>
-            </div>
-            
-            <div>
-                <label>Label</label>
-                <input type="text" unicorn:model="flavor.label"></input>
-            </div>
+      <div>
+        <label>Label</label>
+        <input type="text" unicorn:model="flavor.label"></input>
+      </div>
 
-            <button unicorn:click="save_flavor">save_flavor</button>
+      <button unicorn:click="save_flavor">save_flavor</button>
 
-            {% for flavor in flavors %}
-            <div>
-                <h4>{{ flavor.pk }}</h4>
-                <label>Name</label>
-                <input type="text" unicorn:model="flavors.{{ forloop.counter0 }}.name" u:dirty.class="dirty"></input>
-                {{ flavor.name }}
-                <br />
+      {% for flavor in flavors %}
+      <div>
+        <h4>{{ flavor.pk }}</h4>
+        <label>Name</label>
+        <input type="text" unicorn:model="flavors.{{ forloop.counter0 }}.name" u:dirty.class="dirty"></input>
+        {{ flavor.name }}
+        <br />
 
-                <label>Label</label>
-                <input type="text" unicorn:model="flavors.{{ forloop.counter0 }}.label" u:dirty.class="dirty"></input>
-                {{ flavor.label }}
-                <br />
+        <label>Label</label>
+        <input type="text" unicorn:model="flavors.{{ forloop.counter0 }}.label" u:dirty.class="dirty"></input>
+        {{ flavor.label }}
+        <br />
 
-                <label>Float</label>
-                <input type="text" unicorn:model="flavors.{{ forloop.counter0 }}.float_value"></input>
-                {{ flavor.float_value }}
-                <br />
+        <label>Float</label>
+        <input type="text" unicorn:model="flavors.{{ forloop.counter0 }}.float_value"></input>
+        {{ flavor.float_value }}
+        <br />
 
-                <label>Decimal value</label>
-                <input type="text" unicorn:model="flavors.{{ forloop.counter0 }}.decimal_value"></input>
-                {{ flavor.decimal_value }}
-                <br />
+        <label>Decimal value</label>
+        <input type="text" unicorn:model="flavors.{{ forloop.counter0 }}.decimal_value"></input>
+        {{ flavor.decimal_value }}
+        <br />
 
-                <label>Parent</label>
-                <select unicorn:model="flavors.{{ forloop.counter0 }}.parent">
-                    <option value="">n/a</option>
-                    {% for available_flavor in available_flavors %}
-                    <option value="{{ available_flavor.pk }}">{{ available_flavor.name }}</option>
-                    {% endfor %}
-                </select>
-                {{ flavor.parent.name }}
-                <br />
+        <label>Parent</label>
+        <select unicorn:model="flavors.{{ forloop.counter0 }}.parent">
+          <option value="">n/a</option>
+          {% for available_flavor in available_flavors %}
+          <option value="{{ available_flavor.pk }}">{{ available_flavor.name }}</option>
+          {% endfor %}
+        </select>
+        {{ flavor.parent.name }}
+        <br />
 
-                <label>Taste</label>
-                <select unicorn:model="flavors.{{ forloop.counter0 }}.taste_set" multiple>
-                    {% for available_taste in available_tastes %}
-                    <option value="{{ available_taste.pk }}">{{ available_taste.name }}</option>
-                    {% endfor %}
-                </select>
+        <label>Taste</label>
+        <select unicorn:model="flavors.{{ forloop.counter0 }}.taste_set" multiple>
+          {% for available_taste in available_tastes %}
+          <option value="{{ available_taste.pk }}">{{ available_taste.name }}</option>
+          {% endfor %}
+        </select>
 
-                <ul>
-                {% for taste in flavor.taste_set.all %}
-                    <li>{{ taste.name }}</li>
-                {% endfor %}
-                </ul>
-                <br />
+        <ul>
+          {% for taste in flavor.taste_set.all %}
+          <li>{{ taste.name }}</li>
+          {% endfor %}
+        </ul>
+        <br />
 
-                <button unicorn:click="save({{ forloop.counter0 }})">save(flavor_idx)</button>
-                <button unicorn:click="delete({{ flavor.pk }})">delete(flavor.pk)</button>
-            </div>
-            {% endfor %}
-        </div>
+        <button unicorn:click="save({{ forloop.counter0 }})">save(flavor_idx)</button>
+        <button unicorn:click="delete({{ flavor.pk }})">delete(flavor.pk)</button>
+        <button u:click="model_typehint({{ flavor.pk }})">model_typehint(flavor.pk)</button>
+      </div>
+      {% endfor %}
     </div>
+  </div>
 </div>

@@ -59,30 +59,112 @@ class PassingArgsView(UnicornView):
 
 ### Argument types
 
-Arguments can be most basic Python types, including `string`, `int`, `float`, `list`, `tuple`, `dictionary`, `set`, `datetime`, and `UUID4`.
+Most basic Python types, including `string`, `int`, `float`, `bool`, `list`, `tuple`, `dictionary`, and `set`, are supported by default.
 
 ```html
 <!-- argument-types.html -->
 <div>
   <button unicorn:click="update(99)">Pass int</button>
   <button unicorn:click="update(1.234)">Pass float</button>
+  <button unicorn:click="update(True)">Pass bool</button>
   <button unicorn:click="update({'key': 'value'})">Pass dictionary</button>
   <button unicorn:click="update([1, 2, 3])">Pass list</button>
   <button unicorn:click="update((1, 2, 3))">Pass tuple</button>
   <button unicorn:click="update({1, 2, 3})">Pass set</button>
-  <button unicorn:click="update(2020-09-12T01:01:01)">Pass datetime</button>
-  <button unicorn:click="update(90144cb9-fc47-476d-b124-d543b0cff091)">
-    Pass UUID
-  </button>
 </div>
 ```
 
+#### Coerced types
+
+Arguments with the types of `datetime`, `date`, `time`, `timedelta`, and `UUID` can be coerced by using a type annotation in the action method.
+
 ```{note}
-Strings will be converted to `datetime` if they are successfully parsed by Django's [`parse_datetime`](https://docs.djangoproject.com/en/stable/ref/utils/#django.utils.dateparse.parse_datetime) method.
+[Django's `dateparse` methods](https://docs.djangoproject.com/en/stable/ref/utils/#module-django.utils.dateparse) are used to convert strings to the date-related type.
 ```
 
-````{note}
-Enums themselves cannot be passed as an argument, but the enum _value_ can be since that is a Python primitive. In the component's view, use the enum's constructor to convert the primitive back into the enum if needed.
+```{note}
+Both integer and float epochs can also be coerced into `datetime` or `date` objects.
+```
+
+```python
+# argument_type_hints.py
+from django_unicorn.components import UnicornView
+from datetime import date, datetime
+from uuid import UUID
+
+class ArgumentTypeHintsView(UnicornView):
+    def is_datetime(self, obj: datetime):
+        assert type(obj) is datetime
+    
+    def is_uuid(self, obj: UUID):
+        assert type(obj) is UUID
+
+    def is_date(self, obj: date = None):
+        assert type(obj) is date
+```
+
+```html
+<!-- argument-type-hints.html -->
+<div>
+  <button unicorn:click="is_datetime('2020-09-12T01:01:01')">Check datetime with string</button>
+  <button unicorn:click="is_datetime(1691499534)">Check datetime with epoch</button>
+  <button unicorn:click="is_uuid('90144cb9-fc47-476d-b124-d543b0cff091')">Check UUID</button>
+  <button unicorn:click="is_date(obj='2020-09-12')">Check date</button>
+</div>
+```
+
+#### Django models
+
+Django models can be instantiated as an argument or with a `pk` kwarg and a type annotation.
+
+```python
+# argument_model.py
+from django_unicorn.components import UnicornView
+from django.contrib.auth.models import User
+
+class ArgumentModelView(UnicornView):
+    def is_user_via_arg(self, obj: User):
+        assert type(obj) is User
+    
+    def is_user_via_kwarg(self, pk: User=None):
+        assert type(obj) is User
+```
+
+```html
+<!-- argument-model.html -->
+<div>
+  <button unicorn:click="is_user_via_arg(1)">Gets user with pk of 1</button>
+  <button unicorn:click="is_user_via_kwarg(pk=2)">Gets user with pk of 2</button>
+</div>
+```
+
+#### Custom types
+
+Custom objects can also be used as a type annotation and `Unicorn` will attempt to instantiate the object with the value that is passed in as the argument.
+
+```python
+# argument_custom_type.py
+from django_unicorn.components import UnicornView
+
+class CustomType:
+  def __init__(self, custom_type_id: int):
+    self.custom_type_id = custom_type_id
+
+class ArgumentCustomTypeView(UnicornView):
+    def is_custom_type(self, obj: CustomType):
+        assert type(obj) is CustomType
+```
+
+```html
+<!-- argument-custom-type.html -->
+<div>
+  <button unicorn:click="is_custom_type(1)">Gets custom type</button>
+</div>
+```
+
+#### Enums
+
+Enums themselves cannot be passed as an argument, but the enum _value_ can be since that is a Python primitive. Use the enum as a type annotation to coerce the value into the specified enum.
 
 ```python
 # enum.py
@@ -99,8 +181,8 @@ class EnumView(UnicornView):
     color = Color.RED
     purple_color = Color.PURPLE
 
-    def set_color(self, color_int: int):
-      self.color = Color(color_int)
+    def set_color(self, color: Color):
+      self.color = color
 ```
 
 ```html
@@ -119,8 +201,6 @@ class EnumView(UnicornView):
   Color int: {{ color.value }}
 </div>
 ```
-
-````
 
 ## Set shortcut
 
@@ -288,10 +368,10 @@ Validates the component.
 
 ## Calling methods
 
-Sometimes you need to trigger a method on a component from regular JavaScript. That is possible with `Unicorn.call()`. It can be called from anywhere on the page.
+Sometimes you need to trigger a method on a component from regular JavaScript. That is possible with `Unicorn.call()`. The first argument is the name (or key) of the component and the second argument is the name of the method to call.
 
 ```html
-<!-- index.html -->
+<!-- call-with-component-name.html -->
 {% unicorn 'hello-world' %}
 
 <button onclick="Unicorn.call('hello-world', 'set_name');">
@@ -299,7 +379,16 @@ Sometimes you need to trigger a method on a component from regular JavaScript. T
 </button>
 ```
 
-Passing arguments is also supported.
+```html
+<!-- call-with-component-key.html -->
+{% unicorn 'hello-world' key='hello-universe' %}
+
+<button onclick="Unicorn.call('hello-universe', 'set_name');">
+  Set the name from outside the component
+</button>
+```
+
+Passing arguments to the method call is also supported.
 
 ```html
 <!-- index.html -->

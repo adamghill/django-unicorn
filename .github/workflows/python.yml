@@ -6,7 +6,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.6, 3.7, 3.8, 3.9]
+        python-version: [3.8, 3.9, "3.10", "3.11"]
 
     steps:
       - uses: actions/checkout@v2.3.4
@@ -19,21 +19,22 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install Poetry
-        uses: abatilo/actions-poetry@v2.1.0
+        uses: abatilo/actions-poetry@v2.1.6
+        with:
+          poetry-version: 1.6.1
 
       - name: Set Poetry config
         run: |
-          poetry config virtualenvs.in-project false
           poetry config virtualenvs.path ~/.virtualenvs${{ matrix.python-version }}
 
       - name: Install dependencies
         run: poetry install
 
       - name: black check
-        run: poetry run black . --check --extend-exclude migrations
+        run: poetry run black . --check
 
-      - name: isort check
-        run: poetry run isort --settings pyproject.toml --check .
+      - name: ruff check
+        run: poetry run ruff .
 
       - name: Run all tests
         run: poetry run nox

@@ -7,20 +7,38 @@ class UnicornViewError(Exception):
 
 
 class ComponentLoadError(Exception):
+    def __init__(self, *args, locations=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.locations = locations
+
+
+class ComponentModuleLoadError(ComponentLoadError):
     pass
 
 
-class RenderNotModified(Exception):
+class ComponentClassLoadError(ComponentLoadError):
     pass
 
 
-class MissingComponentElement(Exception):
+class RenderNotModifiedError(Exception):
     pass
 
 
-class MissingComponentViewElement(Exception):
+class MissingComponentElementError(Exception):
     pass
 
 
-class ComponentNotValid(Exception):
+class MissingComponentViewElementError(Exception):
+    pass
+
+
+class NoRootComponentElementError(Exception):
+    pass
+
+
+class MultipleRootComponentElementError(Exception):
+    pass
+
+
+class ComponentNotValidError(Exception):
     pass

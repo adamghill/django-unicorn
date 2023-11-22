@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "django-unicorn"
-version = "0.42.0"
+version = "0.57.1"
 description = "A magical full-stack framework for Django."
 authors = ["Adam Hill <unicorn@adamghill.com>"]
 license = "MIT"
@@ -14,64 +14,120 @@ keywords = ["django", "python", "javascript", "fullstack"]
 "Funding" = "https://github.com/sponsors/adamghill"
 
 [tool.poetry.dependencies]
-python = ">=3.7,<4"
+python = ">=3.8,<4"
 django = ">=2.2"
 beautifulsoup4 = ">=4.8.0"
 orjson = "^3.6.0"
 shortuuid = "^1.0.1"
 cachetools = "^4.1.1"
-dataclasses = {version = "^0.8.0", python = "<3.7"}
 decorator = "^4.4.2"
 htmlmin = { version = "^0.1.12", optional = true }
 
 # docs extras
-Sphinx = { version = "^4.3.2", optional = true }
-linkify-it-py = { version = "^1.0.3", optional = true }
-myst-parser = { version = "^0.16.1", optional = true }
-furo = { version = "^2021.11.23", optional = true }
-sphinx-copybutton = { version = "^0.4.0", optional = true }
-sphinx-autobuild = { version = "^2021.3.14", optional = true }
-rst2pdf = { version = "^0.98", optional = true }
+Sphinx = { version = "^7", optional = true }
+linkify-it-py = { version = "^2", optional = true }
+myst-parser = { version = "^2", optional = true }
+furo = { version = "^2023", optional = true }
+sphinx-copybutton = { version = "^0", optional = true }
+sphinx-autobuild = { version = ">=2021.3.14", optional = true }
+rst2pdf = { version = "^0", optional = true }
+sphinx-autoapi = { version = "^3.0.0", optional = true }
+sphinxext-opengraph = { version = "^0", optional = true }
 
 [tool.poetry.extras]
 minify = ["htmlmin"]
-docs = ["Sphinx", "linkify-it-py", "myst-parser", "furo", "sphinx-copybutton", "sphinx-autobuild", "rst2pdf"]
+docs = ["Sphinx", "linkify-it-py", "myst-parser", "furo", "sphinx-copybutton", "sphinx-autobuild", "rst2pdf", "sphinx-autoapi", "sphinxext-opengraph"]
 
-[tool.poetry.dev-dependencies]
-pytest = "^6.2"
-black = "^21.11b1"
-flake8 = "^3.8.3"
-isort = "^5.0.9"
-mypy = "<0.780"
+[tool.poetry.group.dev.dependencies]
+certifi = "^2023.7.22"  # needed for GitHub Actions
+keyring = "24.2.0"  # needed for GitHub Actions
+pytest = "^6"
+black = "*"
+mypy = "<1"
 django-stubs = "^1.5.0"
-pytest-django = "^3.9.0"
-bpython = "^0.19"
+pytest-django = "^3"
 django-mock-queries = "^2.1.5"
 pydantic = "^1.7.3"
 pywatchman = "^1.4.1"
 django-redis = "^4.12.1"
 nox = "^2020.12.31"
-poethepoet = "^0.10.0"
-coverage = {extras = ["toml"], version = "^6.2"}
-pytest-cov = "^3.0.0"
+poethepoet = "^0"
+coverage = {extras = ["toml"], version = "^6"}
+pytest-cov = "^3"
+pytest-benchmark = "^4.0.0"
+ruff = "^0.0.290"
 
-[build-system]
-requires = ["poetry>=0.12"]
-build-backend = "poetry.masonry.api"
+[tool.black]
+target-version = ["py38", "py39", "py310"]
+line-length = 120
+extend-exclude = "migrations"
 
-[tool.isort]
-default_section = "THIRDPARTY"
-known_first_party = ["django_unicorn", "example"]
-known_django = "django"
-sections = ["FUTURE", "STDLIB", "DJANGO", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
-lines_after_imports = 2
-multi_line_output = 3
-include_trailing_comma = true
-skip_glob = "*/migrations/*.py"
-profile = "black"
+[tool.ruff]
+src = ["django_unicorn"]
+exclude = ["example", "**/migrations/*"]
+target-version = "py38"
+line-length = 120
+select = [
+  "A",
+  "ARG",
+  "B",
+  "C",
+  "DTZ",
+  "E",
+  "EM",
+  "F",
+  "FBT",
+  "I",
+  "ICN",
+  "ISC",
+  "N",
+  "PLC",
+  "PLE",
+  "PLR",
+  "PLW",
+  "Q",
+  "RUF",
+  "S",
+  "T",
+  "TID",
+  "UP",
+  "W",
+  "YTT",
+]
+ignore = [
+  # Allow non-abstract empty methods in abstract base classes
+  "B027",
+  # Allow boolean positional values in function calls, like `dict.get(... True)`
+  "FBT003",
+  # Ignore checks for possible passwords
+  "S105", "S106", "S107",
+  # Ignore complexity
+  "C901", "PLR0911", "PLR0912", "PLR0913", "PLR0915",
+  # Ignore unused variables
+  "F841",
+   # Ignore exception strings
+  "EM101", "EM102",
+]
+unfixable = [
+  # Don't touch unused imports
+  "F401",
+]
+
+[tool.ruff.pydocstyle]
+convention = "google"  # Accepts: "google", "numpy", or "pep257".
+
+[tool.ruff.isort]
+known-first-party = ["django_unicorn", "example"]
+
+[tool.ruff.flake8-tidy-imports]
+ban-relative-imports = "all"
+
+[tool.ruff.per-file-ignores]
+# Tests can use magic values, assertions, and relative imports
+"tests/**/*" = ["PLR2004", "S101", "TID252"]
 
 [tool.pytest.ini_options]
-addopts = "--quiet --failed-first --reuse-db --nomigrations -p no:warnings -m 'not slow'"
+addopts = "--quiet --failed-first --reuse-db --nomigrations -p no:warnings -m 'not slow' --benchmark-skip"
 testpaths = [
     "tests"
 ]
@@ -80,22 +136,30 @@ markers = [
 ]
 
 [tool.poe.tasks]
-r = "example/manage.py runserver 0:8080"
-mm = "example/manage.py makemigrations"
-mi = "example/manage.py migrate"
+r = { cmd = "example/manage.py runserver 0:8080", help = "Run the dev server for the example project" }
+mm = { cmd = "example/manage.py makemigrations", help = "Make migrations for the example project" }
+mi = { cmd = "example/manage.py migrate", help = "Migrate the example project" }
 md = ["mm", "mi"]
-m = "example/manage.py"
-tp = "nox -r"
-tj = "npm run-script test"
+m = { cmd = "example/manage.py", help = "manage.py for the example project" }
+tp = { cmd = "nox -r", help = "Run the entire Python test suite with nox" }
+tj = { cmd = "npm run-script test", help = "Run the JavaScript unit tests" }
 ta = ["tp", "tj"]
-is = "isort --settings pyproject.toml ."
-jb = "npm run build"
-t = "pytest -m 'not slow'"
+jb = { cmd = "npm run build", help = "Build the JavaScript library" }
+ji = { cmd = "npm install", help = "Install JS" }
+t = { cmd = "pytest -m 'not slow'", help = "Run Python unit tests" }
+tb = { cmd = "pytest tests/benchmarks/ --benchmark-autosave --benchmark-only", help = "Run Python unit tests with benchmarks" }
+tbc = { cmd = "pytest tests/benchmarks/ --benchmark-only --benchmark-compare", help = "Run Python unit tests with compared benchmarks" }
 tc = { cmd = "pytest --cov=django_unicorn", help = "Run tests with coverage" }
 cr = { cmd = "coverage report", help = "Show coverage report" }
 my = { cmd = "mypy .", help = "Run mypy" }
-b = { cmd = "black . --check --quiet", help = "Run black" }
-i = { cmd = "isort . --check --quiet", help = "Run isort" }
-tm = ["b", "i", "tc", "my"]
+b = { cmd = "black . --check --quiet --extend-exclude migrations", help = "Run black" }
+rf = { cmd = "ruff .", help = "Run ruff" }
+tm = ["b", "rf", "tc", "my"]
 sa = { cmd = "sphinx-autobuild -W docs/source docs/build", help = "Sphinx autobuild" }
 sb = { cmd = "sphinx-build -W docs/source docs/build", help = "Build documentation" }
+build = ["b", "rf", "tc", "ji", "tj", "jb", "sb"]
+publish = { shell = "poetry publish --build -r test && poetry publish" }
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

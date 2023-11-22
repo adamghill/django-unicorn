@@ -1,10 +1,9 @@
 import time
 
+import pytest
 from django.http import JsonResponse
 
-import pytest
-
-from django_unicorn.errors import ComponentLoadError
+from django_unicorn.errors import ComponentClassLoadError, ComponentModuleLoadError
 from django_unicorn.views import message
 
 
@@ -84,7 +83,7 @@ def test_message_no_epoch(client):
     assert_json_error(response, "Missing epoch")
 
 
-def test_message_component_not_found(client):
+def test_message_component_module_not_loaded(client):
     data = {
         "data": {},
         "checksum": "DVVk97cx",
@@ -92,13 +91,63 @@ def test_message_component_not_found(client):
         "epoch": time.time(),
     }
 
-    with pytest.raises(ComponentLoadError) as e:
+    with pytest.raises(ComponentModuleLoadError) as e:
         post_json(client, data)
 
     assert (
         e.exconly()
-        == "django_unicorn.errors.ComponentLoadError: 'test' component could not be loaded: No module named 'unicorn'"
+        == "django_unicorn.errors.ComponentModuleLoadError: The component module 'test' could not be loaded."
     )
+    assert e.value.locations == [("unicorn.components.test", "TestView")]
+
+
+def test_message_component_class_not_loaded(client):
+    data = {
+        "data": {},
+        "checksum": "DVVk97cx",
+        "id": "asdf",
+        "epoch": time.time(),
+    }
+
+    with pytest.raises(ComponentClassLoadError) as e:
+        post_json(
+            client,
+            data,
+            url="/message/tests.views.fake_components.FakeComponentNotThere",
+        )
+
+    expected_exception_message = "django_unicorn.errors.ComponentClassLoadError: The component class \
+'tests.views.fake_components.FakeComponentNotThere' could not be loaded: module 'tests.views.fake_components' \
+has no attribute 'FakeComponentNotThere'"
+
+    assert e.exconly() == expected_exception_message
+
+    expected_locations = [
+        ("tests.views.fake_components", "FakeComponentNotThere"),
+        (
+            "unicorn.components.tests.views.fake_components.FakeComponentNotThere",
+            "FakecomponentnotthereView",
+        ),
+    ]
+    assert e.value.locations == expected_locations
+
+
+def test_message_component_class_with_attribute_error(client):
+    data = {
+        "data": {},
+        "checksum": "DVVk97cx",
+        "id": "asdf",
+        "epoch": time.time(),
+    }
+
+    with pytest.raises(ComponentClassLoadError) as e:
+        post_json(
+            client,
+            data,
+            url="/message/tests.views.fake_components.FakeComponentWithError",
+        )
+
+    assert e.value.__cause__
 
 
 def test_message_component_with_dash(client):
@@ -109,12 +158,12 @@ def test_message_component_with_dash(client):
         "epoch": time.time(),
     }
 
-    with pytest.raises(ComponentLoadError) as e:
+    with pytest.raises(ComponentModuleLoadError) as e:
         post_json(client, data, url="/message/test-a")
 
     assert (
         e.exconly()
-        == "django_unicorn.errors.ComponentLoadError: 'test-a' component could not be loaded: No module named 'unicorn'"
+        == "django_unicorn.errors.ComponentModuleLoadError: The component module 'test_a' could not be loaded."
     )
 
 
@@ -126,10 +175,11 @@ def test_message_component_with_dot(client):
         "epoch": time.time(),
     }
 
-    with pytest.raises(ComponentLoadError) as e:
+    with pytest.raises(ComponentClassLoadError) as e:
         post_json(client, data, url="/message/test.a")
 
-    assert (
-        e.exconly()
-        == "django_unicorn.errors.ComponentLoadError: 'test.a' component could not be loaded: No module named 'unicorn'"
-    )
+    expected = "django_unicorn.errors.ComponentClassLoadError: The component class 'test.a' could not be loaded: \
+module 'test' has no attribute 'a'"
+    actual = e.exconly()
+
+    assert actual == expected

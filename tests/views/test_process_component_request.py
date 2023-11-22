@@ -1,5 +1,6 @@
-from django_unicorn.components import UnicornView
 from tests.views.message.utils import post_and_get_response
+
+from django_unicorn.components import UnicornView
 
 
 class FakeComponent(UnicornView):

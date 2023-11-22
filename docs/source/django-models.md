@@ -11,7 +11,7 @@ Using this functionality will serialize your entire model by default and expose 
 
 One option is to customize the serialization of the model into a dictionary to only expose the data that should be publicly available.
 
-Another option is to use [Meta.exclude](advanced.md#exclude) or [Meta.javascript_exclude](advanced.md#javascript_exclude) so those fields are not exposed.
+Another option is to use [Meta.exclude](views.md#exclude) or [Meta.javascript_exclude](views.md#javascript_exclude) so those fields are not exposed.
 :::
 
 :::{code} html
@@ -58,30 +58,28 @@ def delete(self, book_to_delete: Book):
 
 ## QuerySet
 
-A Django `QuerySet` can be set to a property on a component just like a regular `list`.
+Django models in a `QuerySet` can be accessed in a `unicorn:model` with "dot notation" similar to a `list`.
 
-:::{code} html
-:force: true
+```python
+# hello_world.py
+from django_unicorn.components import UnicornView
+from book.models import Book
 
-<!-- queryset.html -->
+class HelloWorldView(UnicornView):
+    books = Book.objects.none()
+
+    def mount(self):
+        self.books = Book.objects.all()
+```
+
+```html
+<!-- hello-world.html -->
 <div>
-    {% for book in books %}
-    <div>
-      <div>
-        <input unicorn:model.defer="books.{{ forloop.counter0 }}.title" type="text" id="title" />
-        {{ book.title }}
-      </div>
-      <div>
-        <input unicorn:model.defer="books.{{ forloop.counter0 }}.description" type="text" id="description" />
-        {{ book.description }}
-      </div>
-    </div>
-    {% endfor %}
-
-  </div>
-  <button unicorn:click="save({{ forloop.counter0 }})">Save</button>
+  <input unicorn:model="books.0.title" type="text" id="text" />
 </div>
-:::
+```
+
+An example of looping over all models in a queryset.
 
 ```python
 # queryset.py
@@ -98,18 +96,48 @@ class QuerysetView(UnicornView):
         self.books[book_idx].save()
 ```
 
+:::{code} html
+:force: true
+
+<!-- queryset.html -->
+<div>
+  {% for book in books %}
+  <div>
+    <div>
+      <input unicorn:model.defer="books.{{ forloop.counter0 }}.title" type="text" id="title" />
+      {{ book.title }}
+    </div>
+    <div>
+      <input unicorn:model.defer="books.{{ forloop.counter0 }}.description" type="text" id="description" />
+      {{ book.description }}
+    </div>
+    <div>
+      <button unicorn:click="save({{ forloop.counter0 }})">Save</button>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+:::
+
 :::{warning}
 
 This will expose all of the model values for the `QuerySet` in the HTML source. One way to avoid leaking all model information is to pass the fields that are publicly viewable into `values()` on your `QuerySet`.
 
 ```python
-def mount(self):
-  self.books = Book.objects.all().order_by("-id").values("pk", "title")[:5]
+# queryset.py
+from django_unicorn.components import UnicornView
+from books.models import Book
+
+class QuerysetView(UnicornView):
+    books = Book.objects.none()
+
+    def mount(self):
+      self.books = Book.objects.all().order_by("-id").values("pk", "title")
 ```
 
 :::
 
-A `QuerySetType` type hint can also be used for `QuerySet` to ensure the correct type is used for the component field.
+A `QuerySetType` type hint can be used to ensure the correct `QuerySet` is used for the component field.
 
 ```python
 # queryset.py

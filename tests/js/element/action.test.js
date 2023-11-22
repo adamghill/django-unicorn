@@ -473,3 +473,83 @@ test("event action loading by key", (t) => {
   el.click();
   t.false(loadingEl.el.hidden);
 });
+
+test("event action wildcard loading by id", (t) => {
+  const html = `
+<div unicorn:id="5jypjiyb" unicorn:name="text-inputs" unicorn:checksum="GXzew3Km">
+  <button unicorn:click='test()' id='testId-1' u:key='testKey'></button>
+  <div>
+    <button unicorn:click='test()' id='testId-2' u:key='testKey'></button>
+  </div>
+  <button unicorn:click='test()' id='testId' u:key='testKey'></button>
+  <div u:loading u:target='testId-*'>
+  Loading
+  </div>
+</div>`;
+  const component = getComponent(html);
+
+  t.is(component.attachedEventTypes.length, 1);
+  t.is(component.actionEvents.click.length, 3);
+  t.is(component.loadingEls.length, 1);
+
+  const el1 = component.actionEvents.click[0].element.el;
+  const el2 = component.actionEvents.click[1].element.el;
+  const el3 = component.actionEvents.click[2].element.el;
+  const loadingEl = component.loadingEls[0];
+  t.true(loadingEl.el.hidden);
+
+  el1.click();
+  t.false(loadingEl.el.hidden);
+
+  loadingEl.el.hidden = true;
+  t.true(loadingEl.el.hidden);
+
+  el2.click();
+  t.false(loadingEl.el.hidden);
+
+  loadingEl.el.hidden = true;
+  t.true(loadingEl.el.hidden);
+
+  el3.click();
+  t.true(loadingEl.el.hidden);
+});
+
+test("event action wildcard loading by key", (t) => {
+  const html = `
+<div unicorn:id="5jypjiyb" unicorn:name="text-inputs" unicorn:checksum="GXzew3Km">
+  <button unicorn:click='test()' id='testId' u:key='testKey-1'></button>
+  <div>
+    <button unicorn:click='test()' id='testId' u:key='testKey-2'></button>
+  </div>
+  <button unicorn:click='test()' id='testId' u:key='testKey3'></button>
+  <div u:loading u:target='testKey-*'>
+  Loading
+  </div>
+</div>`;
+  const component = getComponent(html);
+
+  t.is(component.attachedEventTypes.length, 1);
+  t.is(component.actionEvents.click.length, 3);
+  t.is(component.loadingEls.length, 1);
+
+  const el1 = component.actionEvents.click[0].element.el;
+  const el2 = component.actionEvents.click[1].element.el;
+  const el3 = component.actionEvents.click[2].element.el;
+  const loadingEl = component.loadingEls[0];
+  t.true(loadingEl.el.hidden);
+
+  el1.click();
+  t.false(loadingEl.el.hidden);
+
+  loadingEl.el.hidden = true;
+  t.true(loadingEl.el.hidden);
+
+  el2.click();
+  t.false(loadingEl.el.hidden);
+
+  loadingEl.el.hidden = true;
+  t.true(loadingEl.el.hidden);
+
+  el3.click();
+  t.true(loadingEl.el.hidden);
+});

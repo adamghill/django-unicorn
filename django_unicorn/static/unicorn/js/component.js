@@ -6,7 +6,6 @@ import {
 } from "./eventListeners.js";
 import { components, lifecycleEvents } from "./store.js";
 import { send } from "./messageSender.js";
-import morphdom from "./morphdom/2.6.1/morphdom.js";
 import {
   $,
   hasValue,
@@ -26,6 +25,7 @@ export class Component {
     this.key = args.key;
     this.messageUrl = args.messageUrl;
     this.csrfTokenHeaderName = args.csrfTokenHeaderName;
+    this.csrfTokenCookieName = args.csrfTokenCookieName;
     this.hash = args.hash;
     this.data = args.data || {};
     this.syncUrl = `${this.messageUrl}/${this.name}`;
@@ -33,7 +33,7 @@ export class Component {
     this.document = args.document || document;
     this.walker = args.walker || walk;
     this.window = args.window || window;
-    this.morphdom = args.morphdom || morphdom;
+    this.morpher = args.morpher;
 
     this.root = undefined;
     this.modelEls = [];
@@ -258,7 +258,7 @@ export class Component {
       } else {
         // Can hard-code `forceModelUpdate` to `true` since it is always required for
         // `callMethod` actions
-        this.setModelValues(triggeringElements, true);
+        this.setModelValues(triggeringElements, true, true);
       }
     });
   }
@@ -322,6 +322,8 @@ export class Component {
           this.poll.disableData = this.poll.disableData.slice(1);
 
           if (this.data[this.poll.disableData]) {
+            this.poll.disableData = `!${this.poll.disableData}`;
+
             return true;
           }
 
@@ -447,9 +449,10 @@ export class Component {
    * Sets all model values.
    * @param {[Element]} triggeringElements The elements that triggered the event.
    */
-  setModelValues(triggeringElements, forceModelUpdates) {
+  setModelValues(triggeringElements, forceModelUpdates, updateParents) {
     triggeringElements = triggeringElements || [];
     forceModelUpdates = forceModelUpdates || false;
+    updateParents = updateParents || false;
 
     let lastTriggeringElement = null;
 
@@ -489,6 +492,17 @@ export class Component {
         this.setValue(element);
       }
     });
+
+    if (updateParents) {
+      const parent = this.getParentComponent();
+      if (parent) {
+        parent.setModelValues(
+          triggeringElements,
+          forceModelUpdates,
+          updateParents
+        );
+      }
+    }
   }
 
   /**

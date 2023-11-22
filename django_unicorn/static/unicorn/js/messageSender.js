@@ -1,5 +1,4 @@
 import { $, getCsrfToken, hasValue, isFunction } from "./utils.js";
-import { MORPHDOM_OPTIONS } from "./morphdom/2.6.1/options.js";
 
 /**
  * Calls the message endpoint and merges the results into the document.
@@ -109,6 +108,9 @@ export function send(component, callback) {
             );
           } else {
             component.window.location.href = responseJson.redirect.url;
+
+            // Prevent anything else from happening if there is a url redirect
+            return;
           }
         } else if (responseJson.redirect.hash) {
           component.window.location.hash = responseJson.redirect.hash;
@@ -132,8 +134,8 @@ export function send(component, callback) {
       component.return = responseJson.return || {};
       component.hash = responseJson.hash;
 
-      const parent = responseJson.parent || {};
-      const rerenderedComponent = responseJson.dom || {};
+      let parent = responseJson.parent || {};
+      const rerenderedComponent = responseJson.dom || "";
       const partials = responseJson.partials || [];
       const { checksum } = responseJson;
 
@@ -157,7 +159,7 @@ export function send(component, callback) {
       }
 
       // Refresh the parent component if there is one
-      if (hasValue(parent) && hasValue(parent.id)) {
+      while (hasValue(parent) && hasValue(parent.id)) {
         const parentComponent = component.getParentComponent(parent.id);
 
         if (parentComponent && parentComponent.id === parent.id) {
@@ -168,10 +170,9 @@ export function send(component, callback) {
           }
 
           if (parent.dom) {
-            component.morphdom(
+            component.morpher.morph(
               parentComponent.root,
               parent.dom,
-              MORPHDOM_OPTIONS
             );
           }
 
@@ -190,6 +191,7 @@ export function send(component, callback) {
             child.refreshEventListeners();
           });
         }
+        parent = parent.parent || {};
       }
 
       if (partials.length > 0) {
@@ -212,7 +214,10 @@ export function send(component, callback) {
           }
 
           if (targetDom) {
-            component.morphdom(targetDom, partial.dom, MORPHDOM_OPTIONS);
+            component.morpher.morph(
+              targetDom,
+              partial.dom,
+            );
           }
         }
 
@@ -221,10 +226,9 @@ export function send(component, callback) {
           component.refreshChecksum();
         }
       } else {
-        component.morphdom(
+        component.morpher.morph(
           component.root,
           rerenderedComponent,
-          MORPHDOM_OPTIONS
         );
       }
 

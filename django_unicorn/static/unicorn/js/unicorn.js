@@ -1,23 +1,41 @@
 import { Component } from "./component.js";
 import { isEmpty, hasValue } from "./utils.js";
 import { components, lifecycleEvents } from "./store.js";
+import { getMorpher } from "./morpher.js";
 
 let messageUrl = "";
 let csrfTokenHeaderName = "X-CSRFToken";
+let csrfTokenCookieName = "csrftoken";
+let morpher;
 
 /**
  * Initializes the Unicorn object.
+ *
+ * @typedef
  */
-export function init(_messageUrl, _csrfTokenHeaderName) {
+export function init(
+  _messageUrl,
+  _csrfTokenHeaderName,
+  _csrfTokenCookieName,
+  _morpherSettings
+) {
   messageUrl = _messageUrl;
+
+  morpher = getMorpher(_morpherSettings);
 
   if (hasValue(_csrfTokenHeaderName)) {
     csrfTokenHeaderName = _csrfTokenHeaderName;
   }
 
+  if (hasValue(_csrfTokenCookieName)) {
+    csrfTokenCookieName = _csrfTokenCookieName;
+  }
+
   return {
     messageUrl,
     csrfTokenHeaderName,
+    csrfTokenCookieName,
+    morpher,
   };
 }
 
@@ -27,6 +45,8 @@ export function init(_messageUrl, _csrfTokenHeaderName) {
 export function componentInit(args) {
   args.messageUrl = messageUrl;
   args.csrfTokenHeaderName = csrfTokenHeaderName;
+  args.csrfTokenCookieName = csrfTokenCookieName;
+  args.morpher = morpher;
 
   const component = new Component(args);
   components[component.id] = component;

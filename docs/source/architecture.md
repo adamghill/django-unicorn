@@ -10,7 +10,7 @@ Once the component view and template are found, a serialized version of all of t
 
 ## JavaScript initialization
 
-After the template is rendered, the JavaScript library parses the HTML for DOM elements that start with `unicorn:` or `u:` and creates a list of attributes that end with `:model`, `:poll`, or other specific `Unicorn` functionality. For attributes that are let, the assumption is that they are an event type (e.g. `unicorn:click`).
+After the template is rendered, the JavaScript library parses the HTML for DOM elements that start with `unicorn:` or `u:` and creates a list of attributes that end with `:model`, `:poll`, or other specific `Unicorn` functionality. For attributes that are left, the assumption is that they are an event type (e.g. `unicorn:click`).
 
 For anything that is a model, the JavaScript sets the value for the element based on the serialized data of the publicly available attributes from the component view. Event listeners are attached for all event types. Then, other custom functionality is setup (e.g. polling).
 
@@ -26,4 +26,4 @@ Actions follow a similar path as the models above, however there is a different 
 
 ## HTML Diff
 
-After the AJAX endpoint returns its response, the newly rendered DOM is merged into the old DOM with `morphdom` and input values are set again based on the new data in the AJAX response.
+After the AJAX endpoint returns its response, the newly rendered DOM is merged into the old DOM and input values are set again based on the new data in the AJAX response. By default, a library called `morphdom` is used to do the diffing and merging of the DOM. However, this can be overridden by setting the `MORPHER` setting to use a different library.

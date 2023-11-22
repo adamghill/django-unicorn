@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 # This is a temporary solution for the fact that `pip install -e`
 # fails when there is not a `setup.py`.

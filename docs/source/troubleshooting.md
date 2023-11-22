@@ -15,3 +15,34 @@ if DEBUG:
 ```
 
 See this [Windows MIME type detection pitfalls](https://www.taricorp.net/2020/windows-mime-pitfalls/) article, this [StackOverflow answer](https://stackoverflow.com/a/16355034), or [issue #201](https://github.com/adamghill/django-unicorn/issues/201) for more details.
+
+## Missing CSRF token or 403 Forbidden errors
+
+`Unicorn` uses CSRF to protect its endpoint from malicious actors. The two parts that are required for CSRF are `"django.middleware.csrf.CsrfViewMiddleware"` in `MIDDLEWARE` and `{% csrf_token %}` in the template that includes any `Unicorn` components.
+
+```python
+# settings.py
+
+...
+MIDDLEWARE = [
+    ...
+    "django.middleware.csrf.CsrfViewMiddleware",
+    ...
+]
+```
+
+```html
+<!-- template.html -->
+{% load unicorn %}
+
+<html>
+  <head>
+    {% unicorn_scripts %}
+  </head>
+  <body>
+    {% csrf_token %}
+
+    {% unicorn 'hello-world' %}
+  </body>
+</html>
+```

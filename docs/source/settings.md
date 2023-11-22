@@ -13,6 +13,11 @@ UNICORN = {
         "ENABLED": False,
         "TIMEOUT": 60,
     },
+    "SCRIPT_LOCATION": "after",
+    "MORPHER": {
+        "NAME": "morphdom",
+        "RELOAD_SCRIPT_ELEMENTS": False,
+    },
 }
 ```
 
@@ -43,3 +48,23 @@ Whether slow requests to the same component should be queued or not. Defaults to
 ### TIMEOUT
 
 The number of seconds to wait for a request to finish for additional requests to queue behind it. Defaults to `60`.
+
+## SCRIPT_LOCATION
+
+Where the initial JavaScript data is included on initial render. Two values are currently supported: `after` and `append`.
+
+**after** is the default and will render the JavaScript _outside_ of the HTML component, i.e. it will be output in the same hierarchy as the parent of the HTML component.
+
+**append** will render the JavaScript _inside_ of the HTML component.
+
+## MORPHER
+
+Configures the library to use for diffing and merging the DOM. Defaults to `{}`.
+
+### NAME
+
+The name of the morpher to use. Defaults to `"morphdom"`. Specify `"alpine"` to use the [Alpine.js Morph Plugin](https://alpinejs.dev/plugins/morph). See [Custom Morphers](custom-morphers.md) for more information.
+
+### RELOAD_SCRIPT_ELEMENTS
+
+Whether script elements should be reloaded when a component is re-rendered. Defaults to `False`. Only available with the `"morphdom"` morpher.

@@ -13,6 +13,7 @@ class JsView(UnicornView):
     selected_state = ""
     select2_datetime = now()
     scroll_counter = 0
+    load_js = False
 
     def call_javascript(self):
         self.call("callAlert", "world")
