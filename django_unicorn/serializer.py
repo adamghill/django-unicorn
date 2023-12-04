@@ -23,8 +23,8 @@ from django.utils.dateparse import (
     parse_time,
 )
 from django.utils.duration import duration_string
+from transformd import Transformer
 
-from django_unicorn.mergedeep import Strategy, merge
 from django_unicorn.utils import is_int, is_non_string_sequence
 
 try:
@@ -326,17 +326,17 @@ def _exclude_field_attributes(dict_data: Dict[Any, Any], exclude_field_attribute
 
     if exclude_field_attributes:
         for field in exclude_field_attributes:
-            field_splits = field.split(".")
+            field_pieces = field.split(".")
             nested_attribute_split_count = 2
 
-            if len(field_splits) > nested_attribute_split_count:
+            if len(field_pieces) > nested_attribute_split_count:
                 next_attribute_index = field.index(".") + 1
                 remaining_field_attributes = field[next_attribute_index:]
-                remaining_dict_data = dict_data[field_splits[0]]
+                remaining_dict_data = dict_data[field_pieces[0]]
 
                 return _exclude_field_attributes(remaining_dict_data, (remaining_field_attributes,))
-            elif len(field_splits) == nested_attribute_split_count:
-                (field_name, field_attr) = field_splits
+            elif len(field_pieces) == nested_attribute_split_count:
+                (field_name, field_attr) = field_pieces
 
                 if field_name not in dict_data:
                     raise InvalidFieldNameError(field_name=field_name, data=dict_data)
@@ -349,33 +349,39 @@ def _exclude_field_attributes(dict_data: Dict[Any, Any], exclude_field_attribute
 
 
 def _only_field_attributes(dict_data: Dict[Any, Any], only_field_attributes: Optional[Tuple[str]] = None) -> dict:
-    data = {}
+    """
+    Based on the tuple of attributes, get the relevant pieces from `dict_data` and return a new dictionary
+    with only the pieces of data necessary, but keep the same dictionary "shape".
 
-    if dict_data:
-        for field in only_field_attributes:
-            field_dict = {}
+    For example, given the `field_attribute` of `("library.location.street",)` and a `dict_data` of
+    ```
+    {
+    "library": {
+        "location": {
+            "street": "123 Main St",
+            "city": "New York",
+            "state": "NY"
+        },
+        "books": [{
+            "author": "Kurt Vonnegut",
+            "title": "Slaughterhouse-Five"
+        }]
+    }
+    ```
 
-            sub_dict_data = dict_data
-            sub_dict = {}
-            field_splits = field.split(".")
+    The result would be:
+    ```
+    {
+    "library": {
+        "location": {
+            "street": "123 Main St",
+        }
+    }
+    ```
+    """
 
-            if len(field_splits) == 1:
-                field_dict = sub_dict
-
-            for idx, field_split in enumerate(field_splits):
-                if field_split in sub_dict_data:
-                    if idx == len(field_splits) - 1:
-                        sub_dict.update({field_split: sub_dict_data[field_split]})
-                    else:
-                        sub_dict.update({field_split: {}})
-
-                        if field_dict == {}:
-                            field_dict.update(sub_dict)
-
-                        sub_dict = sub_dict[field_split]
-                        sub_dict_data = sub_dict_data[field_split]
-
-            merge(data, field_dict, strategy=Strategy.ADDITIVE)
+    transformer = Transformer(dict_data)
+    data = transformer.transform(spec=only_field_attributes)
 
     return data
 

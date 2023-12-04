@@ -89,7 +89,10 @@ def assert_has_single_wrapper_element(root_element: Tag, component_name: str) ->
 
 
 def get_unicorn_models(root_element: Tag) -> list:
-    # Get all `unicorn:model`s to determine what data is necessary to send
+    """
+    Get all `unicorn:model`s from the HTML to determine what data is necessary to send.
+    """
+
     unicorn_model_elements = root_element.find_all(_has_unicorn_model_attribute)
     unicorn_model_element_values = set()
 

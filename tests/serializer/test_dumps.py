@@ -15,6 +15,10 @@ from django_unicorn.utils import dicts_equal
 from example.coffee.models import Flavor, NewFlavor, Taste
 
 
+def _get_compact_json(d: dict):
+    return json.dumps(d, separators=(",", ":"))
+
+
 class SimpleTestModel(models.Model):
     name = models.CharField(max_length=10)
 
@@ -881,6 +885,125 @@ def test_only_field_attributes_multiple_override_2():
     )
 
     assert actual == expected
+
+
+def test_only_field_attributes_with_list():
+    expected = '{"books":[{"author":"John Steinbeck"},{"author":"Kurt Vonnegut"}]}'
+
+    actual = serializer.dumps(
+        {
+            "books": [
+                {"title": "The Grapes of Wrath", "author": "John Steinbeck"},
+                {"title": "Slaughterhouse-Five", "author": "Kurt Vonnegut"},
+            ]
+        },
+        only_field_attributes=(
+            "books.0.author",
+            "books.1.author",
+        ),
+    )
+
+    assert expected == actual
+
+
+def test_only_field_attributes_nested_with_list():
+    expected = '{"library":{"books":[{"author":"John Steinbeck"},{"author":"Kurt Vonnegut"}]}}'
+
+    actual = serializer.dumps(
+        {
+            "library": {
+                "books": [
+                    {"title": "The Grapes of Wrath", "author": "John Steinbeck"},
+                    {"title": "Slaughterhouse-Five", "author": "Kurt Vonnegut"},
+                ]
+            }
+        },
+        only_field_attributes=(
+            "library.books.0.author",
+            "library.books.1.author",
+        ),
+    )
+
+    assert expected == actual
+
+
+def test_only_field_attributes_nested_with_list_with_nested_attribute():
+    expected = '{"library":{"books":[{"author":{"last_name":"Steinbeck"}},{"author":{"first_name":"Kurt","last_name":"Vonnegut"}}]}}'
+
+    actual = serializer.dumps(
+        {
+            "library": {
+                "books": [
+                    {"title": "The Grapes of Wrath", "author": {"first_name": "John", "last_name": "Steinbeck"}},
+                    {"title": "Slaughterhouse-Five", "author": {"first_name": "Kurt", "last_name": "Vonnegut"}},
+                ]
+            }
+        },
+        only_field_attributes=(
+            "library.books.0.author.last_name",
+            "library.books.1.author",
+        ),
+    )
+
+    assert expected == actual
+
+
+def test_only_field_attributes_with_whole_list():
+    expected = _get_compact_json(
+        {
+            "library": {
+                "books": [
+                    {"title": "The Grapes of Wrath", "author": {"first_name": "John", "last_name": "Steinbeck"}},
+                    {"author": {"first_name": "Kurt", "last_name": "Vonnegut"}},
+                ]
+            }
+        }
+    )
+
+    actual = serializer.dumps(
+        {
+            "library": {
+                "librarians": ["Susie Q", "Billy Lee"],
+                "books": [
+                    {"title": "The Grapes of Wrath", "author": {"first_name": "John", "last_name": "Steinbeck"}},
+                    {"author": {"first_name": "Kurt", "last_name": "Vonnegut"}},
+                ],
+            }
+        },
+        only_field_attributes=("library.books",),
+    )
+
+    assert expected == actual
+
+
+def test_only_field_attributes_with_list_with_index():
+    expected = _get_compact_json(
+        {
+            "library": {
+                "books": [
+                    {"title": "The Grapes of Wrath", "author": {"first_name": "John", "last_name": "Steinbeck"}},
+                    {"author": {"first_name": "Kurt", "last_name": "Vonnegut"}},
+                ]
+            }
+        }
+    )
+
+    actual = serializer.dumps(
+        {
+            "library": {
+                "books": [
+                    {"title": "The Grapes of Wrath", "author": {"first_name": "John", "last_name": "Steinbeck"}},
+                    {"title": "Slaughterhouse-Five", "author": {"first_name": "Kurt", "last_name": "Vonnegut"}},
+                ]
+            }
+        },
+        only_field_attributes=(
+            "library.books.0",
+            "library.books.1.author",
+        ),
+    )
+
+    assert expected == actual
 
 
 def test_dictionary_with_int_keys_as_strings():

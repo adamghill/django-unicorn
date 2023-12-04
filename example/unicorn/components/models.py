@@ -1,7 +1,6 @@
 from django_unicorn.components import QuerySetType, UnicornView
 from example.coffee.models import Flavor, Taste
 
-
 class ModelsView(UnicornView):
     flavor: Flavor = None
     flavors: QuerySetType[Flavor] = Flavor.objects.none()

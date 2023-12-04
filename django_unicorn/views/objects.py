@@ -5,7 +5,7 @@ from django.http.response import HttpResponseRedirect
 from django_unicorn.components import HashUpdate, LocationUpdate, PollUpdate
 from django_unicorn.errors import UnicornViewError
 from django_unicorn.serializer import JSONDecodeError, dumps, loads
-from django_unicorn.utils import generate_checksum
+from django_unicorn.utils import generate_checksum, is_int
 
 logger = logging.getLogger(__name__)
 
@@ -23,15 +23,6 @@ class Action:
 
     def __repr__(self):
         return f"Action(action_type='{self.action_type}' payload={self.payload} partials={self.partials})"
-
-
-def is_int(s):
-    try:
-        int(s)
-    except ValueError:
-        return False
-    else:
-        return True
 
 
 def sort_dict(d):

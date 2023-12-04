@@ -22,6 +22,7 @@ shortuuid = "^1.0.1"
 cachetools = "^4.1.1"
 decorator = "^4.4.2"
 htmlmin = { version = "^0.1.12", optional = true }
+transformd = "^0"
 
 # docs extras
 Sphinx = { version = "^7", optional = true }
@@ -41,7 +42,7 @@ docs = ["Sphinx", "linkify-it-py", "myst-parser", "furo", "sphinx-copybutton", "
 [tool.poetry.group.dev.dependencies]
 certifi = "^2023.7.22"  # needed for GitHub Actions
 keyring = "24.2.0"  # needed for GitHub Actions
-pytest = "^6"
+pytest = "*"
 black = "*"
 mypy = "<1"
 django-stubs = "^1.5.0"
