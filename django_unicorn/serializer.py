@@ -24,6 +24,7 @@ from django.utils.dateparse import (
 )
 from django.utils.duration import duration_string
 from transformd import Transformer
+from transformd.exceptions import InvalidSpecError
 
 from django_unicorn.utils import is_int, is_non_string_sequence
 
@@ -324,28 +325,40 @@ def _exclude_field_attributes(dict_data: Dict[Any, Any], exclude_field_attribute
     _exclude_field_attributes({"1": {"2": {"3": "4"}}}, ("1.2.3",)) == {"1": {"2": {}}}
     """
 
+    # if exclude_field_attributes:
+    #     for field in exclude_field_attributes:
+    #         field_pieces = field.split(".")
+    #         nested_attribute_split_count = 2
+
+    #         if len(field_pieces) > nested_attribute_split_count:
+    #             next_attribute_index = field.index(".") + 1
+    #             remaining_field_attributes = field[next_attribute_index:]
+    #             remaining_dict_data = dict_data[field_pieces[0]]
+
+    #             return _exclude_field_attributes(remaining_dict_data, (remaining_field_attributes,))
+    #         elif len(field_pieces) == nested_attribute_split_count:
+    #             (field_name, field_attr) = field_pieces
+
+    #             if field_name not in dict_data:
+    #                 raise InvalidFieldNameError(field_name=field_name, data=dict_data)
+
+    #             if dict_data[field_name] is not None:
+    #                 if field_attr not in dict_data[field_name]:
+    #                     raise InvalidFieldAttributeError(field_name=field_name, field_attr=field_attr, data=dict_data)
+
+    #                 del dict_data[field_name][field_attr]
+
     if exclude_field_attributes:
-        for field in exclude_field_attributes:
-            field_pieces = field.split(".")
-            nested_attribute_split_count = 2
+        exclude_field_attributes_specs = (f"-{spec}" for spec in exclude_field_attributes)
 
-            if len(field_pieces) > nested_attribute_split_count:
-                next_attribute_index = field.index(".") + 1
-                remaining_field_attributes = field[next_attribute_index:]
-                remaining_dict_data = dict_data[field_pieces[0]]
+        transformer = Transformer(dict_data)
 
-                return _exclude_field_attributes(remaining_dict_data, (remaining_field_attributes,))
-            elif len(field_pieces) == nested_attribute_split_count:
-                (field_name, field_attr) = field_pieces
-
-                if field_name not in dict_data:
-                    raise InvalidFieldNameError(field_name=field_name, data=dict_data)
-
-                if dict_data[field_name] is not None:
-                    if field_attr not in dict_data[field_name]:
-                        raise InvalidFieldAttributeError(field_name=field_name, field_attr=field_attr, data=dict_data)
-
-                    del dict_data[field_name][field_attr]
+        try:
+            dict_data = transformer.transform(spec=exclude_field_attributes_specs)
+        except InvalidSpecError as e:
+            # TODO: Re-raise as specific error
+            print(e)
+            pass
 
 
 def _only_field_attributes(dict_data: Dict[Any, Any], only_field_attributes: Optional[Tuple[str]] = None) -> dict:
