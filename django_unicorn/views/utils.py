@@ -7,8 +7,7 @@ from django.db.models import Model, QuerySet
 from django_unicorn.components import UnicornField, UnicornView
 from django_unicorn.components.typing import QuerySetType
 from django_unicorn.decorators import timed
-from django_unicorn.utils import get_type_hints
-from django_unicorn.views.action_parsers.call_method import cast_value
+from django_unicorn.typer import cast_value, get_type_hints
 
 try:
     from typing import get_args, get_origin
@@ -62,6 +61,7 @@ def set_property_from_data(
         # Use `related_val` to check for many-to-many
         field.set(value)
     else:
+        # TODO: Call django_unicorn.typer.cast_attribute_value?
         type_hints = get_type_hints(component_or_field)
         type_hint = type_hints.get(name)
 

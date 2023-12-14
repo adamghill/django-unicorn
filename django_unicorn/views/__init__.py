@@ -14,12 +14,12 @@ from django.utils.safestring import mark_safe
 from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
 from django.views.decorators.http import require_POST
 
+from django_unicorn.cacher import UnicornCacheError, cache_full_tree
 from django_unicorn.components import UnicornView
 from django_unicorn.components.unicorn_template_response import get_root_element, get_unicorn_models
 from django_unicorn.decorators import timed
 from django_unicorn.errors import (
     RenderNotModifiedError,
-    UnicornCacheError,
     UnicornViewError,
 )
 from django_unicorn.serializer import loads
@@ -28,7 +28,7 @@ from django_unicorn.settings import (
     get_serial_enabled,
     get_serial_timeout,
 )
-from django_unicorn.utils import cache_full_tree, generate_checksum
+from django_unicorn.utils import generate_checksum
 from django_unicorn.views.action_parsers import call_method, sync_input
 from django_unicorn.views.objects import ComponentRequest
 from django_unicorn.views.utils import set_property_from_data

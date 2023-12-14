@@ -17,6 +17,7 @@ from django.utils.decorators import classonlymethod
 from django.views.generic.base import TemplateView
 
 from django_unicorn import serializer
+from django_unicorn.cacher import cache_full_tree, restore_from_cache
 from django_unicorn.components.fields import UnicornField
 from django_unicorn.components.unicorn_template_response import UnicornTemplateResponse
 from django_unicorn.decorators import timed
@@ -26,12 +27,8 @@ from django_unicorn.errors import (
     UnicornCacheError,
 )
 from django_unicorn.settings import get_setting
-from django_unicorn.utils import (
-    cache_full_tree,
-    get_type_hints,
-    is_non_string_sequence,
-    restore_from_cache,
-)
+from django_unicorn.typer import cast_attribute_value, get_type_hints
+from django_unicorn.utils import is_non_string_sequence
 
 try:
     from cachetools.lru import LRUCache
@@ -627,7 +624,10 @@ class UnicornView(TemplateView):
     ) -> None:
         # Get the correct value type by using the form if it is available
         data = self._attributes()
+
+        value = cast_attribute_value(self, name, value)
         data[name] = value
+
         form = self._get_form(data)
 
         if form and name in form.fields and name in form.cleaned_data:
