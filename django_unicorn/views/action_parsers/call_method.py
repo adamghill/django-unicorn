@@ -38,6 +38,10 @@ def handle(component_request: ComponentRequest, component: UnicornView, payload:
     for parent in parents:
         if parent == "$parent":
             parent_component = component.parent
+
+            if parent_component:
+                parent_component.force_render = True
+
             call_method_name = call_method_name[8:]
 
     (method_name, args, kwargs) = parse_call_method_name(call_method_name)

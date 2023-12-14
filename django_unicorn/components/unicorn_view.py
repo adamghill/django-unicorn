@@ -201,6 +201,9 @@ class UnicornView(TemplateView):
         # JavaScript method calls
         self.calls = []
 
+        # Default force render to False
+        self.force_render = False
+
         super().__init__(**kwargs)
 
         if not self.component_name:
@@ -765,6 +768,7 @@ class UnicornView(TemplateView):
             "component_cache_key",
             "component_kwargs",
             "component_args",
+            "force_render",
         )
         excludes = []
 

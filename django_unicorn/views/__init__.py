@@ -333,6 +333,9 @@ def _process_component_request(request: HttpRequest, component_request: Componen
     parent_result = result
 
     while parent_component:
+        if parent_component.force_render is not True:
+            continue
+
         # TODO: Should parent_component.hydrate() be called?
         parent_frontend_context_variables = loads(parent_component.get_frontend_context_variables())
         parent_checksum = generate_checksum(str(parent_frontend_context_variables))
