@@ -846,6 +846,19 @@ class UnicornView(TemplateView):
         if use_cache and cached_component:
             logger.debug(f"Retrieve {component_id} from constructed views cache")
 
+            cached_component.component_args = component_args
+            cached_component.component_kwargs = kwargs
+
+            # TODO: How should args be handled?
+            for key, value in kwargs.items():
+                if hasattr(cached_component, key):
+                    setattr(cached_component, key, value)
+
+            cached_component._cache_component(parent=parent, component_args=component_args, **kwargs)
+
+            # Call hydrate because the component will be re-rendered
+            cached_component.hydrate()
+
             return cached_component
 
         if component_id in views_cache:
