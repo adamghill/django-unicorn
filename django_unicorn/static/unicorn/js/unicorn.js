@@ -63,6 +63,7 @@ export function componentInit(args) {
  */
 export function insertComponentFromDom(node) {
   const nodeId = node.getAttribute("unicorn:id");
+
   if (!components[nodeId]) {
     const args = {
       id: nodeId,
@@ -71,7 +72,7 @@ export function insertComponentFromDom(node) {
       checksum: node.getAttribute("unicorn:checksum"),
       data: JSON.parse(node.getAttribute("unicorn:data")),
       calls: JSON.parse(node.getAttribute("unicorn:calls")),
-    }
+    };
     componentInit(args);
   }
 }
