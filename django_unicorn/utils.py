@@ -61,16 +61,24 @@ CASTERS = {
     UUID: UUID,
 }
 
+def generate_checksum(data: Union[bytes, str, Dict]) -> str:
+    """Generates a checksum for the passed-in data.
 
-def generate_checksum(data: Union[str, bytes]) -> str:
-    """
-    Generates a checksum for the passed-in data.
+    Args:
+        data: The raw input to generate the checksum against.
+
+    Returns:
+        The generated checksum.
     """
 
-    if isinstance(data, str):
+    data_bytes = data
+
+    if isinstance(data, dict):
+        data_bytes = str.encode(str(data))
+    elif isinstance(data, str):
         data_bytes = str.encode(data)
-    else:
-        data_bytes = data
+    elif not isinstance(data, bytes):
+        raise TypeError(f"Invalid type: {type(data)}")
 
     checksum = hmac.new(
         str.encode(settings.SECRET_KEY),

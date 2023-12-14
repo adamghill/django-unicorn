@@ -177,7 +177,7 @@ potentially cause errors in Unicorn."
         # Get all frontend variables to generate the checksum
         frontend_context_variables = self.component.get_frontend_context_variables(only_field_attributes=unicorn_models)
         frontend_context_variables_dict = orjson.loads(frontend_context_variables)
-        checksum = generate_checksum(str(frontend_context_variables_dict))
+        checksum = generate_checksum(frontend_context_variables_dict)
 
         root_element["unicorn:id"] = self.component.component_id
         root_element["unicorn:name"] = self.component.component_name

@@ -276,7 +276,7 @@ def _process_component_request(request: HttpRequest, component_request: Componen
         "data": updated_data,
         "errors": component.errors,
         "calls": component.calls,
-        "checksum": generate_checksum(str(component_request.data)),
+        "checksum": generate_checksum(component_request.data),
     }
 
     render_not_modified = False

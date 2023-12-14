@@ -1,5 +1,7 @@
 from unittest.mock import MagicMock
 
+import pytest
+
 from django_unicorn.components import UnicornView
 from django_unicorn.utils import (
     CacheableComponent,
@@ -29,6 +31,25 @@ def test_generate_checksum_str(settings):
     actual = generate_checksum('{"name": "test"}')
 
     assert expected == actual
+
+
+def test_generate_checksum_dict(settings):
+    settings.SECRET_KEY = "asdf"
+
+    # This is different than the above because `str(dict)` turns `{"name": "test"}` into `"{'name': 'test'}"`
+    expected = "JaV4PeA6"
+    actual = generate_checksum({"name": "test"})
+
+    assert expected == actual
+
+
+def test_generate_checksum_invalid(settings):
+    settings.SECRET_KEY = "asdf"
+
+    with pytest.raises(TypeError) as e:
+        generate_checksum([])
+
+    assert e.exconly() == "TypeError: Invalid type: <class 'list'>"
 
 
 def test_get_method_arguments():
