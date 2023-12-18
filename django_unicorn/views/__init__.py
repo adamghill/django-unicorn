@@ -291,7 +291,7 @@ def _process_component_request(request: HttpRequest, component_request: Componen
             and (not return_data or not return_data.value)
             and not component.calls
         ):
-            if not component.parent:
+            if not component.parent and component.force_render is False:
                 raise RenderNotModifiedError()
             else:
                 render_not_modified = True
