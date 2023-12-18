@@ -14,7 +14,6 @@ from django.utils.safestring import mark_safe
 from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
 from django.views.decorators.http import require_POST
 
-from django_unicorn.cacher import UnicornCacheError, cache_full_tree
 from django_unicorn.components import UnicornView
 from django_unicorn.components.unicorn_template_response import get_root_element, get_unicorn_models
 from django_unicorn.decorators import timed
@@ -222,11 +221,6 @@ def _process_component_request(request: HttpRequest, component_request: Componen
             component.request._messages._queued_messages = request_queued_messages
         except AttributeError as e:
             logger.warning(e)
-
-    # try:
-    #     cache_full_tree(component)
-    # except UnicornCacheError as e:
-    #     logger.warning(e)
 
     partial_doms = []
 
