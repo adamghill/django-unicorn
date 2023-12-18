@@ -427,8 +427,8 @@ def _dumps(
         # handle complex objects
         _exclude_field_attributes(data, exclude_field_attributes)
 
-    if only_field_attributes:
-        data = _only_field_attributes(data, only_field_attributes)
+    # if only_field_attributes:
+    #     data = _only_field_attributes(data, only_field_attributes)
 
     if sort_dict:
         # Sort dictionary manually because stringified integers don't get sorted
