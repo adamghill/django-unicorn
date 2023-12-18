@@ -233,7 +233,7 @@ export function send(component, callback) {
           component.root.setAttribute("unicorn:checksum", checksum);
           component.refreshChecksum();
         }
-      } else {
+      } else if (rerenderedComponent) {
         component.morphRoot(rerenderedComponent);
       }
 
