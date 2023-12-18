@@ -28,7 +28,7 @@ from django_unicorn.errors import (
 )
 from django_unicorn.settings import get_setting
 from django_unicorn.typer import cast_attribute_value, get_type_hints
-from django_unicorn.utils import is_non_string_sequence
+from django_unicorn.utils import generate_checksum, is_non_string_sequence
 
 try:
     from cachetools.lru import LRUCache
@@ -237,6 +237,11 @@ class UnicornView(TemplateView):
         # as instance variables
         custom_kwargs = set(kwargs.keys()) - STANDARD_COMPONENT_KWARG_KEYS
         self.component_kwargs = {k: kwargs[k] for k in list(custom_kwargs)}
+
+        # if self.component_kwargs:
+        #     # Make sure to add kwargs as part of the cache key
+        #     kwargs_cache_key = generate_checksum(self.component_kwargs)
+        #     self.component_cache_key = f"{self.component_cache_key}:{kwargs_cache_key}"
 
         self._init_script: str = ""
         self._validate_called = False
@@ -835,6 +840,12 @@ class UnicornView(TemplateView):
             return component_class
 
         component_cache_key = f"unicorn:component:{component_id}"
+
+        # if kwargs:
+        #     # Add kwargs as part of the cache key so unique kwargs get cached separately
+        #     kwargs_cache_key = generate_checksum(kwargs)
+        #     component_cache_key = f"{component_cache_key}:{kwargs_cache_key}"
+
         cached_component = restore_from_cache(component_cache_key)
 
         if not cached_component:
@@ -854,6 +865,7 @@ class UnicornView(TemplateView):
             cached_component.component_kwargs = kwargs
 
             # TODO: How should args be handled?
+            # Set kwargs onto the cached component
             for key, value in kwargs.items():
                 if hasattr(cached_component, key):
                     setattr(cached_component, key, value)
