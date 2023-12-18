@@ -189,6 +189,7 @@ export function send(component, callback) {
               "unicorn:checksum",
               parent.checksum
             );
+
             parentComponent.refreshChecksum();
           }
 
@@ -196,11 +197,6 @@ export function send(component, callback) {
           parentComponent.hash = parent.hash;
 
           parentComponent.refreshEventListeners();
-
-          parentComponent.getChildrenComponents().forEach((child) => {
-            child.init();
-            child.refreshEventListeners();
-          });
         }
         parent = parent.parent || {};
       }
