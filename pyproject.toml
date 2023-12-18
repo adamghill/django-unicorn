@@ -17,11 +17,11 @@ keywords = ["django", "python", "javascript", "fullstack"]
 python = ">=3.8,<4"
 django = ">=2.2"
 beautifulsoup4 = ">=4.8.0"
-orjson = "^3.6.0"
-shortuuid = "^1.0.1"
-cachetools = "^4.1.1"
-decorator = "^4.4.2"
-htmlmin = { version = "^0.1.12", optional = true }
+orjson = ">=3.6.0"
+shortuuid = ">=1.0.1"
+cachetools = ">=4.1.1"
+decorator = ">=4.4.2"
+htmlmin = { version = "^0", optional = true }
 
 # docs extras
 Sphinx = { version = "*", optional = true }
