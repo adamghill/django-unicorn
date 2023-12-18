@@ -41,21 +41,21 @@ docs = ["Sphinx", "linkify-it-py", "myst-parser", "furo", "sphinx-copybutton", "
 [tool.poetry.group.dev.dependencies]
 certifi = "^2023.7.22"  # needed for GitHub Actions
 keyring = "24.2.0"  # needed for GitHub Actions
-pytest = "^6"
+pytest = "^7"
 black = "*"
 mypy = "<1"
-django-stubs = "^1.5.0"
-pytest-django = "^3"
+django-stubs = "*"
+pytest-django = "*"
 django-mock-queries = "^2.1.5"
-pydantic = "^1.7.3"
-pywatchman = "^1.4.1"
+pydantic = "^1"
+pywatchman = "*"
 django-redis = "^4.12.1"
-nox = "^2020.12.31"
-poethepoet = "^0"
-coverage = {extras = ["toml"], version = "^6"}
-pytest-cov = "^3"
-pytest-benchmark = "^4.0.0"
-ruff = "^0.0.290"
+nox = "*"
+poethepoet = "*"
+coverage = {extras = ["toml"], version = "*"}
+pytest-cov = "*"
+pytest-benchmark = "*"
+ruff = "*"
 
 [tool.black]
 target-version = ["py38", "py39", "py310"]
