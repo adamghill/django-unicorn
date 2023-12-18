@@ -192,6 +192,9 @@ export function send(component, callback) {
             parentComponent.refreshChecksum();
           }
 
+          // Set parent component hash
+          parentComponent.hash = parent.hash;
+
           parentComponent.refreshEventListeners();
 
           parentComponent.getChildrenComponents().forEach((child) => {
