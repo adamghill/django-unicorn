@@ -171,6 +171,17 @@ export function send(component, callback) {
 
           if (parent.dom) {
             parentComponent.morphRoot(parent.dom);
+
+            parentComponent.loadingEls.forEach((loadingElement) => {
+              if (loadingElement.loading.hide) {
+                loadingElement.show();
+              } else if (loadingElement.loading.show) {
+                loadingElement.hide();
+              }
+
+              loadingElement.handleLoading(true);
+              loadingElement.handleDirty(true);
+            });
           }
 
           if (parent.checksum) {
