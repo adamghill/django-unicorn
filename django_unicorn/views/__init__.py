@@ -223,10 +223,10 @@ def _process_component_request(request: HttpRequest, component_request: Componen
         except AttributeError as e:
             logger.warning(e)
 
-    try:
-        cache_full_tree(component)
-    except UnicornCacheError as e:
-        logger.warning(e)
+    # try:
+    #     cache_full_tree(component)
+    # except UnicornCacheError as e:
+    #     logger.warning(e)
 
     partial_doms = []
 
