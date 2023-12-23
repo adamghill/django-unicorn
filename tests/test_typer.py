@@ -1,4 +1,5 @@
-from typing import Optional, get_type_hints
+from typing import Optional
+from typing import get_type_hints as typing_get_type_hints
 
 from django_unicorn.typer import cast_attribute_value, cast_value, get_type_hints
 from example.coffee.models import Flavor
@@ -62,7 +63,7 @@ class ExampleClass:
 
 def test_cast_value_model_none():
     example_class = ExampleClass()
-    type_hints = get_type_hints(example_class)
+    type_hints = typing_get_type_hints(example_class)
     type_hint = type_hints["a_model"]
 
     actual = cast_value(type_hint, None)
@@ -71,7 +72,7 @@ def test_cast_value_model_none():
 
 
 def test_cast_value_optional():
-    type_hints = get_type_hints(ExampleClass())
+    type_hints = typing_get_type_hints(ExampleClass())
     type_hint = type_hints["optional_model"]
 
     actual = cast_value(type_hint, None)
@@ -83,7 +84,7 @@ def test_cast_value_model_int():
     example_class = ExampleClass()
     example_class.a_model = Flavor()
 
-    type_hints = get_type_hints(example_class)
+    type_hints = typing_get_type_hints(example_class)
     type_hint = type_hints["optional_model"]
 
     actual = cast_value(type_hint, 1)
