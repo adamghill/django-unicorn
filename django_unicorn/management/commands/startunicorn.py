@@ -193,3 +193,5 @@ class Command(BaseCommand):
             if is_new_app:
                 msg = f'\nMake sure to add `"{app_name}",` to your INSTALLED_APPS list in your settings file if necessary.'  # noqa: E501
                 self.stdout.write(self.style.WARNING(msg))
+
+            is_first_component = False
