@@ -25,16 +25,6 @@ TEMPLATE_FILE_CONTENT = """<div>
 """
 
 
-def is_first_component(component_base_path: str) -> bool:
-    """
-    Checks if the component is the first component in the app by checking
-    if there are only two files inside directory,
-     __init__.py and the first component itself.
-    """
-
-    return len(list(Path(component_base_path).glob("*.py"))) == 2
-
-
 def get_app_path(app_name: str) -> Path:
     """
     Gets the directory path for an installed application.
@@ -94,6 +84,8 @@ class Command(BaseCommand):
                     f"An app named '{app_name}' does not exist yet. You might need to create it first."
                 ) from e
 
+        is_first_component = False
+
         if not app_directory.exists():
             app_directory.mkdir()
 
@@ -104,6 +96,8 @@ class Command(BaseCommand):
             component_base_path.mkdir()
 
             self.stdout.write(self.style.SUCCESS(f"Created your first component in '{app_name}'! ✨\n"))
+
+            is_first_component = True
 
         (component_base_path / "__init__.py").touch(exist_ok=True)
 
@@ -161,7 +155,7 @@ class Command(BaseCommand):
                 template_path.write_text(TEMPLATE_FILE_CONTENT)
                 self.stdout.write(self.style.SUCCESS(f"Created {template_path}."))
 
-            if is_first_component(component_base_path):
+            if is_first_component:
                 will_star_repo = input(
                     "\nStarring the GitHub repo helps other Django users find Unicorn. Can you star it for me? [y/N] "
                 )
