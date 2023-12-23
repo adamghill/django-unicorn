@@ -28,7 +28,7 @@ from django_unicorn.settings import (
     get_serial_enabled,
     get_serial_timeout,
 )
-from django_unicorn.utils import cache_full_tree, generate_checksum
+from django_unicorn.utils import generate_checksum
 from django_unicorn.views.action_parsers import call_method, sync_input
 from django_unicorn.views.objects import ComponentRequest
 from django_unicorn.views.utils import set_property_from_data
@@ -215,11 +215,6 @@ def _process_component_request(request: HttpRequest, component_request: Componen
             component.request._messages._queued_messages = request_queued_messages
         except AttributeError as e:
             logger.warning(e)
-
-    try:
-        cache_full_tree(component)
-    except UnicornCacheError as e:
-        logger.warning(e)
 
     partial_doms = []
 

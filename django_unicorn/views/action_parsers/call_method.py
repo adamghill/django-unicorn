@@ -9,7 +9,8 @@ from django_unicorn.call_method_parser import (
 )
 from django_unicorn.components import UnicornView
 from django_unicorn.decorators import timed
-from django_unicorn.utils import cast_value, get_method_arguments, get_type_hints
+from django_unicorn.typer import cast_value, get_type_hints
+from django_unicorn.utils import get_method_arguments
 from django_unicorn.views.action_parsers.utils import set_property_value
 from django_unicorn.views.objects import ComponentRequest, Return
 
