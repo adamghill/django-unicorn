@@ -169,7 +169,7 @@ def _call_method_name(component: UnicornView, method_name: str, args: Tuple[Any]
 
                 elif argument in kwargs:
                     parsed_kwargs[argument] = cast_value(type_hint, kwargs[argument])
-                else:
+                elif len(args) > len(parsed_args):
                     parsed_args.append(cast_value(type_hint, args[len(parsed_args)]))
             elif argument in kwargs:
                 parsed_kwargs[argument] = kwargs[argument]
