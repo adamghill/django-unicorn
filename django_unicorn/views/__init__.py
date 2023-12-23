@@ -19,7 +19,6 @@ from django_unicorn.components.unicorn_template_response import get_root_element
 from django_unicorn.decorators import timed
 from django_unicorn.errors import (
     RenderNotModifiedError,
-    UnicornCacheError,
     UnicornViewError,
 )
 from django_unicorn.serializer import loads
@@ -264,7 +263,7 @@ def _process_component_request(request: HttpRequest, component_request: Componen
         "data": updated_data,
         "errors": component.errors,
         "calls": component.calls,
-        "checksum": generate_checksum(str(component_request.data)),
+        "checksum": generate_checksum(component_request.data),
     }
 
     render_not_modified = False

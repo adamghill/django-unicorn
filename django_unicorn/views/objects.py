@@ -97,7 +97,7 @@ class ComponentRequest:
             # TODO: Raise specific exception
             raise AssertionError("Missing checksum")
 
-        generated_checksum = generate_checksum(str(self.data))
+        generated_checksum = generate_checksum(self.data)
 
         if checksum != generated_checksum:
             # TODO: Raise specific exception
