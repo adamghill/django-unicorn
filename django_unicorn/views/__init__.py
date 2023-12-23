@@ -4,7 +4,7 @@ from functools import wraps
 from typing import Dict, Optional, Sequence
 
 import orjson
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 from django.core.cache import caches
 from django.core.exceptions import NON_FIELD_ERRORS
 from django.forms import ValidationError
@@ -267,14 +267,20 @@ def _process_component_request(request: HttpRequest, component_request: Componen
     }
 
     render_not_modified = False
+    soup = None
+    soup_root = None
 
     if partial_doms:
         result.update({"partials": partial_doms})
     else:
-        checksum = generate_checksum(rendered_component)
+        rendered_component_hash = generate_checksum(rendered_component)
 
-        if component_request.hash == checksum and (not return_data or not return_data.value) and not component.calls:
-            if not component.parent:
+        if (
+            component_request.hash == rendered_component_hash
+            and (not return_data or not return_data.value)
+            and not component.calls
+        ):
+            if not component.parent and component.force_render is False:
                 raise RenderNotModifiedError()
             else:
                 render_not_modified = True
@@ -282,12 +288,13 @@ def _process_component_request(request: HttpRequest, component_request: Componen
         # Make sure that partials with comments or blank lines before the root element
         # only return the root element
         soup = BeautifulSoup(rendered_component, features="html.parser")
-        rendered_component = str(get_root_element(soup))
+        soup_root = get_root_element(soup)
+        rendered_component = str(soup_root)
 
         result.update(
             {
                 "dom": rendered_component,
-                "hash": checksum,
+                "hash": rendered_component_hash,
             }
         )
 
@@ -316,41 +323,59 @@ def _process_component_request(request: HttpRequest, component_request: Componen
     parent_result = result
 
     while parent_component:
-        # TODO: Should parent_component.hydrate() be called?
-        parent_frontend_context_variables = loads(parent_component.get_frontend_context_variables())
-        parent_checksum = generate_checksum(str(parent_frontend_context_variables))
+        if parent_component.force_render is True:
+            # TODO: Should parent_component.hydrate() be called?
+            parent_frontend_context_variables = loads(parent_component.get_frontend_context_variables())
+            parent_checksum = generate_checksum(str(parent_frontend_context_variables))
 
-        parent = {
-            "id": parent_component.component_id,
-            "checksum": parent_checksum,
-        }
+            parent = {
+                "id": parent_component.component_id,
+                "checksum": parent_checksum,
+            }
 
-        if not partial_doms:
-            parent_dom = parent_component.render()
-            component.parent_rendered(parent_dom)
+            if not partial_doms:
+                parent_dom = parent_component.render()
+                component.parent_rendered(parent_dom)
 
-            parent.update(
-                {
-                    "dom": parent_dom,
-                    "data": parent_frontend_context_variables,
-                    "errors": parent_component.errors,
-                }
-            )
+                # Get re-generated child checksum and update the child component inside the parent DOM
+                if not soup_root:
+                    raise AssertionError("Missing root element")
 
-        if render_not_modified:
-            # TODO: Determine if all parents have not changed and return a 304 if
-            # that's the case
-            # i.e. render_not_modified = render_not_modified and (parent hash test)
-            pass
+                # TODO: Use minestrone for this
+                child_soup_checksum = soup_root.attrs["unicorn:checksum"]
+                child_soup_unicorn_id = soup_root.attrs["unicorn:id"]
 
-        # If there is a parent dom and a child dom, remove the child dom because it is superfluous
-        if parent.get("dom") and result.get("dom"):
-            del result["dom"]
+                parent_soup = BeautifulSoup(parent_dom, features="html.parser")
 
-        parent_result.update({"parent": parent})
+                for _child in parent_soup.descendants:
+                    if isinstance(_child, Tag) and child_soup_unicorn_id == _child.attrs.get("unicorn:id"):
+                        _child.attrs["unicorn:checksum"] = child_soup_checksum
+
+                parent_dom = str(parent_soup)
+
+                # Remove the child DOM from the payload since the parent DOM supersedes it
+                result["dom"] = None
+
+                parent.update(
+                    {
+                        "dom": parent_dom,
+                        "data": parent_frontend_context_variables,
+                        "errors": parent_component.errors,
+                        "hash": generate_checksum(parent_dom),
+                    }
+                )
+
+            if render_not_modified:
+                # TODO: Determine if all parents have not changed and return a 304 if
+                # that's the case
+                # i.e. render_not_modified = render_not_modified and (parent hash test)
+                pass
+
+            parent_result.update({"parent": parent})
+            parent_result = parent
+
         component = parent_component
         parent_component = parent_component.parent
-        parent_result = parent
 
     return result
 

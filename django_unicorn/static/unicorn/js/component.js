@@ -493,8 +493,18 @@ export class Component {
       }
     });
 
+    // Re-set model values for all children
+    this.getChildrenComponents().forEach((childComponent) => {
+      childComponent.setModelValues(
+        triggeringElements,
+        forceModelUpdates,
+        false
+      );
+    });
+
     if (updateParents) {
       const parent = this.getParentComponent();
+
       if (parent) {
         parent.setModelValues(
           triggeringElements,

@@ -201,6 +201,9 @@ class UnicornView(TemplateView):
         # JavaScript method calls
         self.calls = []
 
+        # Default force render to False
+        self.force_render = False
+
         super().__init__(**kwargs)
 
         if not self.component_name:
@@ -760,6 +763,7 @@ class UnicornView(TemplateView):
             "component_cache_key",
             "component_kwargs",
             "component_args",
+            "force_render",
         )
         excludes = []
 
@@ -840,6 +844,20 @@ class UnicornView(TemplateView):
 
         if use_cache and cached_component:
             logger.debug(f"Retrieve {component_id} from constructed views cache")
+
+            cached_component.component_args = component_args
+            cached_component.component_kwargs = kwargs
+
+            # TODO: How should args be handled?
+            # Set kwargs onto the cached component
+            for key, value in kwargs.items():
+                if hasattr(cached_component, key):
+                    setattr(cached_component, key, value)
+
+            cached_component._cache_component(parent=parent, component_args=component_args, **kwargs)
+
+            # Call hydrate because the component will be re-rendered
+            cached_component.hydrate()
 
             return cached_component
 

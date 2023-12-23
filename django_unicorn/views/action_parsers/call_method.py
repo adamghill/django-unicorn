@@ -28,8 +28,21 @@ def handle(component_request: ComponentRequest, component: UnicornView, payload:
     from django_unicorn.views.utils import set_property_from_data
 
     call_method_name = payload.get("name", "")
+
     if not call_method_name:
         raise AssertionError("Missing 'name' key for callMethod")
+
+    parent_component = None
+    parents = call_method_name.split(".")
+
+    for parent in parents:
+        if parent == "$parent":
+            parent_component = component.parent
+
+            if parent_component:
+                parent_component.force_render = True
+
+            call_method_name = call_method_name[8:]
 
     (method_name, args, kwargs) = parse_call_method_name(call_method_name)
     return_data = Return(method_name, args, kwargs)
@@ -90,9 +103,11 @@ def handle(component_request: ComponentRequest, component: UnicornView, payload:
         # Handle the validate special action
         validate_all_fields = True
     else:
-        component.calling(method_name, args)
-        return_data.value = _call_method_name(component, method_name, args, kwargs)
-        component.called(method_name, args)
+        component_with_method = parent_component or component
+
+        component_with_method.calling(method_name, args)
+        return_data.value = _call_method_name(component_with_method, method_name, args, kwargs)
+        component_with_method.called(method_name, args)
 
     return (
         component,

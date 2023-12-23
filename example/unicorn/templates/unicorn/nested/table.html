@@ -18,7 +18,11 @@
 
   <div>Favorite count: {{ favorite_count }}</div>
 
+  <button u:click="show_filter=True">Show Filter</button>
+
+  {% if show_filter %}
   {% unicorn 'nested.filter' %}
+  {% endif %}
 
   <table>
     <thead>
