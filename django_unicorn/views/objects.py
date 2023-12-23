@@ -81,7 +81,7 @@ class ComponentRequest:
     def __repr__(self):
         return (
             f"ComponentRequest(name='{self.name}' id='{self.id}' key='{self.key}'"
-            f" epoch={self.epoch} data={self.data} action_queue={self.action_queue})"
+            f" epoch={self.epoch} data={self.data} action_queue={self.action_queue} hash={self.hash})"
         )
 
     def validate_checksum(self):
