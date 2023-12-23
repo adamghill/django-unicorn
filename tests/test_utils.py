@@ -25,6 +25,7 @@ def test_generate_checksum_str(settings):
 
     assert expected == actual
 
+
 def test_generate_checksum_dict(settings):
     settings.SECRET_KEY = "asdf"
 
@@ -42,6 +43,7 @@ def test_generate_checksum_invalid(settings):
         generate_checksum([])
 
     assert e.exconly() == "TypeError: Invalid type: <class 'list'>"
+
 
 def test_get_method_arguments():
     def test_func(input_str):
@@ -70,8 +72,6 @@ def test_sanitize_html():
     data = '{"id":"abcd123","name":"text-inputs","key":"asdf","data":{"name":"World","testing_thing":"Whatever </script> <script>alert(\'uh oh\')</script>"},"calls":[],"hash":"hjkl"}'  # noqa: E501
     actual = sanitize_html(data)
     assert actual == expected
-
-
 
 
 def test_is_non_string_sequence_list():

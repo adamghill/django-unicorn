@@ -41,9 +41,9 @@ type_hints_cache = LRUCache(maxsize=100)
 function_signature_cache = LRUCache(maxsize=100)
 
 
-
 def _parse_bool(value):
     return str(value) == "True"
+
 
 # Functions that attempt to convert something that failed while being parsed by
 # `ast.literal_eval`.
@@ -171,6 +171,7 @@ def cast_attribute_value(obj, name, value):
 
     return value
 
+
 def get_method_arguments(func) -> List[str]:
     """
     Gets the arguments for a method.
@@ -193,9 +194,11 @@ def is_queryset(obj, type_hint, value):
     component or the type hint.
     """
 
-    return (isinstance(obj, QuerySet) or (type_hint and get_origin(type_hint) is QuerySetType)) and isinstance(
-        value, list
-    ) or isinstance(value, QuerySet)
+    return (
+        (isinstance(obj, QuerySet) or (type_hint and get_origin(type_hint) is QuerySetType))
+        and isinstance(value, list)
+        or isinstance(value, QuerySet)
+    )
 
 
 def _construct_model(model_type, model_data: Dict):
@@ -221,6 +224,7 @@ def _construct_model(model_type, model_data: Dict):
                 break
 
     return model
+
 
 def create_queryset(obj, type_hint, value) -> QuerySet:
     """

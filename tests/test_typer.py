@@ -54,9 +54,11 @@ def test_cast_attribute_value_bool_invalid():
 
     assert expected == actual
 
+
 class ExampleClass:
     a_model: Flavor
     optional_model: Optional[Flavor]
+
 
 def test_cast_value_model_none():
     example_class = ExampleClass()
