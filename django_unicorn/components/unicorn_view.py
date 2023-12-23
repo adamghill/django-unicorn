@@ -585,6 +585,13 @@ class UnicornView(TemplateView):
         non_callables = [member[0] for member in inspect.getmembers(self, lambda x: not callable(x))]
         attribute_names = [name for name in non_callables if self._is_public(name)]
 
+        # Add type hints for the component to the attribute names since
+        # they won't be returned from `getmembers`
+        for type_hint_attribute_name in get_type_hints(self).keys():
+            if self._is_public(type_hint_attribute_name):
+                if type_hint_attribute_name not in attribute_names:
+                    attribute_names.append(type_hint_attribute_name)
+
         return attribute_names
 
     @timed
@@ -597,7 +604,7 @@ class UnicornView(TemplateView):
         attributes = {}
 
         for attribute_name in attribute_names:
-            attributes[attribute_name] = getattr(self, attribute_name)
+            attributes[attribute_name] = getattr(self, attribute_name, None)
 
         return attributes
 
@@ -612,7 +619,10 @@ class UnicornView(TemplateView):
     ) -> None:
         # Get the correct value type by using the form if it is available
         data = self._attributes()
+
+        value = cast_attribute_value(self, name, value)
         data[name] = value
+
         form = self._get_form(data)
 
         if form and name in form.fields and name in form.cleaned_data:
