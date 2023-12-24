@@ -71,6 +71,16 @@ def test_cast_value_model_none():
     assert actual is None
 
 
+def test_cast_value_model_dict():
+    example_class = ExampleClass()
+    type_hints = typing_get_type_hints(example_class)
+    type_hint = type_hints["a_model"]
+
+    actual = cast_value(type_hint, {"id": 1})
+
+    assert actual == {"id": 1}
+
+
 def test_cast_value_optional():
     type_hints = typing_get_type_hints(ExampleClass())
     type_hint = type_hints["optional_model"]

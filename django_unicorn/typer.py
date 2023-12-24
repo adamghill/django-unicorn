@@ -138,11 +138,7 @@ def cast_value(type_hint, value):
                         pass
         else:
             if issubclass(type_hint, Model):
-                if isinstance(value, dict):
-                    value = type_hint(**value)
-                    break
-                else:
-                    continue
+                continue
 
             value = type_hint(value)
             break
