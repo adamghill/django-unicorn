@@ -1,8 +1,17 @@
 # Changelog
 
-## 0.58.0-dev
+## 0.58.0
+
+This release could not have been made possible without the generous support of https://github.com/winrid and https://github.com/om-proptech. Thank you for sponsoring me and believing in `django-unicorn`! It also includes critical improvements to nested components from https://github.com/imankulov.
 
 - Handle a list of `ValidationError` or just a string instead of requiring a the `dict` version.
+- Better support for type annotations for component fields.
+- Improved nested component support by [imankulov](https://github.com/imankulov).
+- Add [`force_render`](views.md#force_render) and [`$parent`](actions.md#parent).
+
+**Breaking changes**
+
+Child components will not *by default* render the parent component anymore. If this is required for your child component, specify `self.parent.force_render = True` in any action that requires the parent to re-render. This change will reduce network bandwidth and isolates the amount of re-rendering required for nested components.
 
 ## 0.57.1
 
@@ -242,7 +251,7 @@
 
 - Security fix: for CVE-2021-42053 to prevent XSS attacks (reported by [Jeffallan](https://github.com/Jeffallan)).
 
-** Breaking changes **
+**Breaking changes**
 
 - responses will be HTML encoded going forward (to explicitly opt-in to previous behavior use [safe](views.md#safe))
 
@@ -305,7 +314,7 @@
 - Look in all `INSTALLED_APPS` for components instead of only in a `unicorn` app [210](https://github.com/adamghill/django-unicorn/issues/210)
 - Support `settings.APPS_DIR` which is the default for `django-cookiecutter` instead of just `settings.BASE_DIR` [214](https://github.com/adamghill/django-unicorn/issues/214)
 
-** Breaking changes **
+**Breaking changes**
 
 - Require an application name when running the `startunicorn` management command for where the component should be created
 

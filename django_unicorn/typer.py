@@ -58,8 +58,8 @@ CASTERS = {
 
 
 def get_type_hints(obj) -> Dict:
-    """
-    Get type hints from an object. These get cached in a local memory cache for quicker look-up later.
+    """Get type hints from an object. These get cached in a local memory cache for quicker look-up later.
+
     Returns:
         An empty dictionary if no type hints can be retrieved.
     """
@@ -86,9 +86,9 @@ def get_type_hints(obj) -> Dict:
 
 
 def cast_value(type_hint, value):
-    """
-    Try to cast the value based on the type hint and
+    """Try to cast the value based on the type hint and
     `django_unicorn.call_method_parser.CASTERS`.
+
     Additional features:
     - convert `int`/`float` epoch to `datetime` or `date`
     - instantiate the `type_hint` class with passed-in value
@@ -147,9 +147,7 @@ def cast_value(type_hint, value):
 
 
 def cast_attribute_value(obj, name, value):
-    """
-    Try to cast the value of an object's attribute based on the type hint.
-    """
+    """Try to cast the value of an object's attribute based on the type hint."""
 
     type_hints = get_type_hints(obj)
     type_hint = type_hints.get(name)
@@ -169,8 +167,8 @@ def cast_attribute_value(obj, name, value):
 
 
 def get_method_arguments(func) -> List[str]:
-    """
-    Gets the arguments for a method.
+    """Gets the arguments for a method.
+
     Returns:
         A list of strings, one for each argument.
     """
@@ -185,10 +183,8 @@ def get_method_arguments(func) -> List[str]:
 
 
 def is_queryset(obj, type_hint, value):
-    """
-    Determines whether an obj is a `QuerySet` or not based on the current instance of the
-    component or the type hint.
-    """
+    """Determines whether an obj is a `QuerySet` or not based on the current instance of the
+    component or the type hint."""
 
     return (
         (isinstance(obj, QuerySet) or (type_hint and get_origin(type_hint) is QuerySetType))
@@ -198,9 +194,7 @@ def is_queryset(obj, type_hint, value):
 
 
 def _construct_model(model_type, model_data: Dict):
-    """
-    Construct a model based on the type and dictionary data.
-    """
+    """Construct a model based on the type and dictionary data."""
 
     if not model_data:
         return None
@@ -223,18 +217,15 @@ def _construct_model(model_type, model_data: Dict):
 
 
 def create_queryset(obj, type_hint, value) -> QuerySet:
-    """
-    Create a queryset based on the `value`. If needed, the queryset will be created based on the `QuerySetType`.
+    """Create a queryset based on the `value`. If needed, the queryset will be created based on the `QuerySetType`.
 
     For example, all of these ways fields are equivalent:
 
-    ```
     class TestComponent(UnicornView):
         queryset_with_empty_list: QuerySetType[SomeModel] = []
         queryset_with_none: QuerySetType[SomeModel] = None
         queryset_with_empty_queryset: QuerySetType[SomeModel] = SomeModel.objects.none()
         queryset_with_no_typehint = SomeModel.objects.none()
-    ```
 
     Params:
         obj: Object.
