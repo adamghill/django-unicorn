@@ -84,6 +84,7 @@ export class Component {
         // Skip the component root element
         return;
       }
+
       const componentId = el.getAttribute("unicorn:id");
 
       if (componentId) {
@@ -549,5 +550,52 @@ export class Component {
         element.el.dispatchEvent(new Event(eventType));
       }
     });
+  }
+
+  /**
+   * Replace the target DOM with the rerendered component.
+   *
+   * The function updates the DOM, and updates the Unicorn component store by deleting
+   * components that were removed, and adding new components.
+   */
+  morph(targetDom, rerenderedComponent) {
+    if (!rerenderedComponent) {
+      return;
+    }
+
+    // Helper function that returns an array of nodes with an attribute unicorn:id
+    const findUnicorns = () => [
+      ...targetDom.querySelectorAll("[unicorn\\:id]"),
+    ];
+
+    // Find component IDs before morphing
+    const componentIdsBeforeMorph = new Set(
+      findUnicorns().map((el) => el.getAttribute("unicorn:id"))
+    );
+
+    // Morph
+    this.morpher.morph(targetDom, rerenderedComponent);
+
+    // Find all component IDs after morphing
+    const componentIdsAfterMorph = new Set(
+      findUnicorns().map((el) => el.getAttribute("unicorn:id"))
+    );
+
+    // Delete components that were removed
+    const removedComponentIds = [...componentIdsBeforeMorph].filter(
+      (id) => !componentIdsAfterMorph.has(id)
+    );
+    removedComponentIds.forEach((id) => {
+      Unicorn.deleteComponent(id);
+    });
+
+    // Populate Unicorn with new components
+    findUnicorns().forEach((el) => {
+      Unicorn.insertComponentFromDom(el);
+    });
+  }
+
+  morphRoot(rerenderedComponent) {
+    this.morph(this.root, rerenderedComponent);
   }
 }

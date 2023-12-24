@@ -55,6 +55,30 @@ export function componentInit(args) {
 }
 
 /**
+ * Initialize the component from the DOM element if it hasn't been initialized yet.
+ *
+ * Used to populate the components object with fresh components, created by the server.
+ *
+ * @param {Object} node The node to check for initialization.
+ */
+export function insertComponentFromDom(node) {
+  const nodeId = node.getAttribute("unicorn:id");
+
+  if (!components[nodeId]) {
+    const args = {
+      id: nodeId,
+      name: node.getAttribute("unicorn:name"),
+      key: node.getAttribute("unicorn:key"),
+      checksum: node.getAttribute("unicorn:checksum"),
+      data: JSON.parse(node.getAttribute("unicorn:data")),
+      calls: JSON.parse(node.getAttribute("unicorn:calls")),
+    };
+
+    componentInit(args);
+  }
+}
+
+/**
  * Gets the component with the specified name or key.
  * Component keys are searched first, then names.
  *
@@ -90,6 +114,14 @@ export function getComponent(componentNameOrKey) {
   }
 
   return component;
+}
+
+/**
+ * Deletes the component from the component store.
+ * @param {String} componentId.
+ */
+export function deleteComponent(componentId) {
+  delete components[componentId];
 }
 
 /**
