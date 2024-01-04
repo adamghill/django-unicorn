@@ -1,6 +1,8 @@
+import datetime
 from typing import Optional
 from typing import get_type_hints as typing_get_type_hints
 
+from django_unicorn.components import UnicornView
 from django_unicorn.typer import cast_attribute_value, cast_value, get_type_hints
 from example.coffee.models import Flavor
 
@@ -20,6 +22,15 @@ def test_get_type_hints_missing_type_hints():
 
     expected = {}
     actual = get_type_hints(test_func)
+    assert actual == expected
+
+
+def test_get_type_hints_gh_639():
+    class MyComponentView(UnicornView):
+        a_date: datetime.date
+
+    expected = {"a_date": datetime.date}
+    actual = get_type_hints(MyComponentView(component_name="test", component_id="123"))
     assert actual == expected
 
 

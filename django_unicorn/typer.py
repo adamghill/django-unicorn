@@ -78,7 +78,7 @@ def get_type_hints(obj) -> Dict:
         type_hints_cache[obj] = type_hints
 
         return type_hints
-    except TypeError:
+    except (TypeError, NameError):
         # Return an empty dictionary when there is a TypeError. From `get_type_hints`: "TypeError is
         # raised if the argument is not of a type that can contain annotations, and an empty dictionary
         # is returned if no annotations are present"
