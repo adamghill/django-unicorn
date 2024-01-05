@@ -103,6 +103,34 @@ class Command(BaseCommand):
 
             (component_path / "__init__.py").touch(exist_ok=True)
 
+    def create_component_and_template(self, paths: dict[str, Path], nested_path: str, component_name: str) -> None:
+        """
+        Creates the component and template files.
+        """
+
+        snake_case_component_name = convert_to_snake_case(component_name)
+        pascal_case_component_name = convert_to_pascal_case(component_name)
+
+        component_path = paths["components"] / nested_path / f"{snake_case_component_name}.py"
+
+        if component_path.exists():
+            self.stdout.write(
+                self.style.ERROR(f"Skipping creating {snake_case_component_name}.py because it already exists.")
+            )
+        else:
+            component_path.write_text(
+                COMPONENT_FILE_CONTENT.format(**{"pascal_case_component_name": pascal_case_component_name})
+            )
+            self.stdout.write(self.style.SUCCESS(f"Created {component_path}."))
+
+        template_path = paths["templates"] / nested_path / f"{component_name}.html"
+
+        if template_path.exists():
+            self.stdout.write(self.style.ERROR(f"Skipping creating {component_name}.html because it already exists."))
+        else:
+            template_path.write_text(TEMPLATE_FILE_CONTENT)
+            self.stdout.write(self.style.SUCCESS(f"Created {template_path}."))
+
     def handle(self, **options):
         # Default from `django-cookiecutter`
         base_path = getattr(settings, "APPS_DIR", None)
