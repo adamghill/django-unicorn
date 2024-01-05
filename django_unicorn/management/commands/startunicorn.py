@@ -40,6 +40,34 @@ class Command(BaseCommand):
         parser.add_argument("app_name", type=str)
         parser.add_argument("component_names", nargs="+", type=str, help="Names of components")
 
+    def check_initials_directories(self, app_directory: Path) -> (dict[str, Path], bool):
+        """
+        Checks for directories existance and creates them if necessary.
+        Returns a tuple containing a dictonary `components` and `templates`
+        keys, and a boolean indicating if directories were created.
+        """
+
+        paths = {
+            "components": app_directory / "components",
+            "templates": app_directory / "templates" / "unicorn",
+        }
+
+        is_first = False
+
+        if not paths["components"].exists():
+            paths["components"].mkdir()
+            self.stdout.write(self.style.SUCCESS(f"Created your first component in '{app_directory.name}'! ✨\n"))
+            is_first = True
+
+        (paths["components"] / "__init__.py").touch(exist_ok=True)
+
+        if not paths["templates"].exists():
+            paths["templates"].mkdir(parents=True, exist_ok=True)
+            self.stdout.write(self.style.SUCCESS(f"Created your first template in '{app_directory.name}'! ✨\n"))
+            is_first = True
+
+        return paths, is_first
+
     def handle(self, **options):
         # Default from `django-cookiecutter`
         base_path = getattr(settings, "APPS_DIR", None)
