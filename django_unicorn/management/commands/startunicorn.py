@@ -131,6 +131,41 @@ class Command(BaseCommand):
             template_path.write_text(TEMPLATE_FILE_CONTENT)
             self.stdout.write(self.style.SUCCESS(f"Created {template_path}."))
 
+    def ask_for_star_repo(self) -> None:
+        will_star_repo = input(
+            "\nStarring the GitHub repo helps other Django users find Unicorn. Can you star it for me? [y/N] "
+        )
+
+        if will_star_repo.strip().lower() in ("y", "yes"):
+            self.stdout.write(self.style.SUCCESS("Thank you for helping spread the word about Unicorn!"))
+
+            self.stdout.write(
+                """
+                         ,/
+                        //
+                      ,//
+          __    /|   |//
+      `__/\\_ --(/|___/-/
+   \\|\\_-\\___ __-_`- /-/ \\.
+  |\\_-___,-\\_____--/_)' ) \\
+   \\ -_ /     __ \\( `( __`\\|
+   `\\__|      |\\)      (/|
+',--//-|      \\    | '   /
+  /,---|       \\        /
+ `_/ _,'        |      |
+ __/'/          |      |
+ ___/           \\ (  ) /
+                 \\____/\\
+                        \\
+"""
+            )
+
+            webbrowser.open("https://github.com/adamghill/django-unicorn", new=2)
+        else:
+            self.stdout.write(
+                self.style.ERROR("That's a bummer, but I understand. I hope you will star it for me later!")
+            )
+
     def handle(self, **options):
         # Default from `django-cookiecutter`
         base_path = getattr(settings, "APPS_DIR", None)
