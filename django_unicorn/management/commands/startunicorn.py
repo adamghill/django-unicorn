@@ -68,6 +68,19 @@ class Command(BaseCommand):
 
         return paths, is_first
 
+    def obtain_nested_path(self, component_name: str) -> (str, str):
+        """
+        Receives the complete component name and returns a tuple
+        with the nested path and component name itself.
+        """
+
+        nested_paths = []
+
+        if "." in component_name:
+            (*nested_paths, component_name) = component_name.split(".")
+
+        return "/".join(nested_paths), component_name
+
     def handle(self, **options):
         # Default from `django-cookiecutter`
         base_path = getattr(settings, "APPS_DIR", None)
