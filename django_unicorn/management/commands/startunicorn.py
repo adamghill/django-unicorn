@@ -81,6 +81,28 @@ class Command(BaseCommand):
 
         return "/".join(nested_paths), component_name
 
+    def create_nested_directories(self, paths: dict[str, Path], nested_path: str) -> None:
+        """
+        Creates the nested directories for the components and templates.
+        """
+
+        nested_paths = nested_path.split("/")
+
+        component_path = paths["components"]
+        template_path = paths["templates"]
+
+        for nested_path in nested_paths:
+            component_path /= nested_path
+            template_path /= nested_path
+
+            if not component_path.exists():
+                component_path.mkdir()
+
+            if not template_path.exists():
+                template_path.mkdir()
+
+            (component_path / "__init__.py").touch(exist_ok=True)
+
     def handle(self, **options):
         # Default from `django-cookiecutter`
         base_path = getattr(settings, "APPS_DIR", None)
