@@ -85,6 +85,7 @@ def test_handle_existing_component(settings, tmp_path, monkeypatch, capsys):
 
     (tmp_path / app_name).mkdir()
     (tmp_path / app_name / "components").mkdir()
+    (tmp_path / app_name / "templates" / "unicorn").mkdir(parents=True)
 
     component_names = [
         "hello-world",
@@ -111,7 +112,7 @@ def test_handle_existing_templates(settings, tmp_path, monkeypatch, capsys):
 
     (tmp_path / app_name).mkdir()
     (tmp_path / app_name / "components").mkdir()
-    (tmp_path / app_name / "templates").mkdir()
+    (tmp_path / app_name / "templates" / "unicorn").mkdir(parents=True)
 
     component_names = [
         "hello-world",
