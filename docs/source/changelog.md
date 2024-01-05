@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.58.1
+
+- Try to prevent type hints from crashing components. [#639](https://github.com/adamghill/django-unicorn/issues/639)
+
 ## 0.58.0
 
 This release could not have been made possible without the generous support of https://github.com/winrid and https://github.com/om-proptech. Thank you for sponsoring me and believing in `django-unicorn`! It also includes critical improvements to nested components from https://github.com/imankulov.

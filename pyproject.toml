@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "django-unicorn"
-version = "0.58.0"
+version = "0.58.1"
 description = "A magical full-stack framework for Django."
 authors = ["Adam Hill <unicorn@adamghill.com>"]
 license = "MIT"
@@ -33,10 +33,11 @@ sphinx-autobuild = { version = "*", optional = true }
 rst2pdf = { version = "*", optional = true }
 sphinx-autoapi = { version = "*", optional = true }
 sphinxext-opengraph = { version = "*", optional = true }
+toml = { version = "*", optional = true }
 
 [tool.poetry.extras]
 minify = ["htmlmin"]
-docs = ["Sphinx", "linkify-it-py", "myst-parser", "furo", "sphinx-copybutton", "sphinx-autobuild", "rst2pdf", "sphinx-autoapi", "sphinxext-opengraph"]
+docs = ["Sphinx", "linkify-it-py", "myst-parser", "furo", "sphinx-copybutton", "sphinx-autobuild", "rst2pdf", "sphinx-autoapi", "sphinxext-opengraph", "toml"]
 
 [tool.poetry.group.dev.dependencies]
 certifi = "^2023.7.22"  # needed for GitHub Actions
