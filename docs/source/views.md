@@ -189,6 +189,10 @@ class HelloWorldView(UnicornView):
         print("AJAX request that re-renders the component", self.request)
 ```
 
+### force_render
+
+Forces the component to render. This is not normally needed for the current component, but is sometimes needed for a parent component.
+
 ## Custom methods
 
 Defined component instance methods with no arguments (other than `self`) are available in the Django template context and can be called like a property.

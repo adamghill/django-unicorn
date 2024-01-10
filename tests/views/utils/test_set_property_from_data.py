@@ -5,7 +5,8 @@ from typing import List
 import pytest
 from django.db.models import Model, QuerySet
 
-from django_unicorn.components import QuerySetType, UnicornView
+from django_unicorn.components import UnicornView
+from django_unicorn.typing import QuerySetType
 from django_unicorn.views.utils import set_property_from_data
 from example.coffee.models import Flavor
 

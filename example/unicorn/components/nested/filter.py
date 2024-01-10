@@ -9,3 +9,5 @@ class FilterView(UnicornView):
 
         if query:
             self.parent.flavors = list(filter(lambda f: query.lower() in f.name.lower(), self.parent.flavors))
+
+        self.parent.force_render = True

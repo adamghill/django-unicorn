@@ -137,7 +137,7 @@ potentially cause errors in Unicorn."
 
         frontend_context_variables = self.component.get_frontend_context_variables()
         frontend_context_variables_dict = orjson.loads(frontend_context_variables)
-        checksum = generate_checksum(str(frontend_context_variables_dict))
+        checksum = generate_checksum(frontend_context_variables_dict)
 
         # Use `html.parser` and not `lxml` because in testing it was no faster even with `cchardet`
         # despite https://thehftguy.com/2020/07/28/making-beautifulsoup-parsing-10-times-faster/
@@ -153,9 +153,11 @@ potentially cause errors in Unicorn."
         root_element["unicorn:name"] = self.component.component_name
         root_element["unicorn:key"] = self.component.component_key
         root_element["unicorn:checksum"] = checksum
+        root_element["unicorn:data"] = frontend_context_variables
+        root_element["unicorn:calls"] = orjson.dumps(self.component.calls).decode("utf-8")
 
         # Generate the checksum based on the rendered content (without script tag)
-        checksum = generate_checksum(UnicornTemplateResponse._desoupify(soup))
+        content_hash = generate_checksum(UnicornTemplateResponse._desoupify(soup))
 
         if self.init_js:
             init = {
@@ -164,7 +166,7 @@ potentially cause errors in Unicorn."
                 "key": self.component.component_key,
                 "data": orjson.loads(frontend_context_variables),
                 "calls": self.component.calls,
-                "hash": checksum,
+                "hash": content_hash,
             }
             init = orjson.dumps(init).decode("utf-8")
             json_element_id = f"unicorn:data:{self.component.component_id}"

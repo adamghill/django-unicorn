@@ -1,0 +1,20 @@
+<div>
+  <div>Step 2</div>
+
+  <div>
+    <input u:model="address" />
+    <input u:model="city" />
+    <input u:model="state" />
+    <input u:model="zip_code" />
+  </div>
+
+  <div>
+    Address: {{ address }}<br />
+    City: {{ city }}<br />
+    State: {{ state }}<br />
+    Zip code: {{ zip_code }}<br />
+  </div>
+
+  <button unicorn:click="$parent.previous()">Previous</button>
+  <button unicorn:click="$parent.next()">Next</button>
+</div>

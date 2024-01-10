@@ -170,10 +170,18 @@ export function send(component, callback) {
           }
 
           if (parent.dom) {
-            component.morpher.morph(
-              parentComponent.root,
-              parent.dom,
-            );
+            parentComponent.morphRoot(parent.dom);
+
+            parentComponent.loadingEls.forEach((loadingElement) => {
+              if (loadingElement.loading.hide) {
+                loadingElement.show();
+              } else if (loadingElement.loading.show) {
+                loadingElement.hide();
+              }
+
+              loadingElement.handleLoading(true);
+              loadingElement.handleDirty(true);
+            });
           }
 
           if (parent.checksum) {
@@ -181,15 +189,19 @@ export function send(component, callback) {
               "unicorn:checksum",
               parent.checksum
             );
+
             parentComponent.refreshChecksum();
           }
 
+          // Set parent component hash
+          parentComponent.hash = parent.hash;
+
           parentComponent.refreshEventListeners();
 
-          parentComponent.getChildrenComponents().forEach((child) => {
-            child.init();
-            child.refreshEventListeners();
-          });
+          // parentComponent.getChildrenComponents().forEach((child) => {
+          //   child.init();
+          //   child.refreshEventListeners();
+          // });
         }
         parent = parent.parent || {};
       }
@@ -214,10 +226,7 @@ export function send(component, callback) {
           }
 
           if (targetDom) {
-            component.morpher.morph(
-              targetDom,
-              partial.dom,
-            );
+            component.morph(targetDom, partial.dom);
           }
         }
 
@@ -225,17 +234,19 @@ export function send(component, callback) {
           component.root.setAttribute("unicorn:checksum", checksum);
           component.refreshChecksum();
         }
-      } else {
-        component.morpher.morph(
-          component.root,
-          rerenderedComponent,
-        );
+      } else if (rerenderedComponent) {
+        component.morphRoot(rerenderedComponent);
       }
 
       component.triggerLifecycleEvent("updated");
 
-      // Re-init to refresh the root and checksum based on the new data
-      component.init();
+      try {
+        // Re-init to refresh the root and checksum based on the new data
+        component.init();
+      } catch (err) {
+        // No id found error will be thrown here for child components.
+        return;
+      }
 
       // Reset all event listeners
       component.refreshEventListeners();
