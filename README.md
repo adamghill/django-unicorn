@@ -12,7 +12,8 @@ Releasing as an installable package is planned only for a private repo for now, 
 
 Available additional settings that can be set to `UNICORN` dict in settings.py which are not part of official package.
 
-- `USE_CSRF_TOKEN` - default: `True` - If set to `False`, unicorn does not check or send `csrf` token value so `{% csrf_token %}` is not mandatory in the templates. This is added due the fact to additional page caching system like `Varnish` does not operate effective if `Cookie` value is present in `Vary` header. 
+- `USE_CSRF_TOKEN` - default: `True` - If set to `False`, unicorn does not check or send `csrf` token value so `{% csrf_token %}` is not mandatory in the templates. This is added due the fact to additional page caching system like `Varnish` does not operate effective if `Cookie` value is present in `Vary` header.
+- `CHECK_CHECKSUM_MATCH` - default: `True` - If set to `False`, `unicorn` does not perform data checksum check on each request.
 
 ## Deployment
 
@@ -23,6 +24,10 @@ Available additional settings that can be set to `UNICORN` dict in settings.py w
   `poetry publish --build -r myrepo -u <myrepouser> -p <myrepopass>` 
 
 ## Customization changelog
+
+### 0.58.1.2 - (2024-01-10)
+
+- add optional `CHECK_CHECKSUM_MATCH` setting which is set by default to True. If turned off, `unicorn` does not perform data checksum check on each request.
 
 ### 0.58.1.1 - (2024-01-10)
 
