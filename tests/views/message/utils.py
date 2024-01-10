@@ -25,7 +25,7 @@ def post_and_get_response(
     message = {
         "actionQueue": action_queue,
         "data": data,
-        "checksum": generate_checksum(str(data)),
+        "checksum": generate_checksum(data),
         "id": component_id,
         "epoch": time.time(),
         "hash": hash,

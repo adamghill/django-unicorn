@@ -2,7 +2,8 @@ import pytest
 
 from django_unicorn.components import UnicornView
 from django_unicorn.serializer import dumps, loads
-from django_unicorn.views.utils import _construct_model, set_property_from_data
+from django_unicorn.typer import _construct_model
+from django_unicorn.views.utils import set_property_from_data
 from example.coffee.models import Flavor
 
 

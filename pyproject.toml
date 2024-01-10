@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "django-unicorn-loosened"
-version = "0.57.1.1"
+version = "0.58.1.1"
 description = "An alternate version of a magical full-stack framework for Django."
 authors = ["Adam Hill <unicorn@adamghill.com>", "Styria Digital Development <digital.development@styria.dev>"]
 license = "MIT"
@@ -20,45 +20,46 @@ packages = [
 python = ">=3.8,<4"
 django = ">=2.2"
 beautifulsoup4 = ">=4.8.0"
-orjson = "^3.6.0"
-shortuuid = "^1.0.1"
-cachetools = "^4.1.1"
-decorator = "^4.4.2"
-htmlmin = { version = "^0.1.12", optional = true }
+orjson = ">=3.6.0"
+shortuuid = ">=1.0.1"
+cachetools = ">=4.1.1"
+decorator = ">=4.4.2"
+htmlmin = { version = "^0", optional = true }
 
 # docs extras
-Sphinx = { version = "^7", optional = true }
-linkify-it-py = { version = "^2", optional = true }
-myst-parser = { version = "^2", optional = true }
-furo = { version = "^2023", optional = true }
-sphinx-copybutton = { version = "^0", optional = true }
-sphinx-autobuild = { version = ">=2021.3.14", optional = true }
-rst2pdf = { version = "^0", optional = true }
-sphinx-autoapi = { version = "^3.0.0", optional = true }
-sphinxext-opengraph = { version = "^0", optional = true }
+Sphinx = { version = "*", optional = true }
+linkify-it-py = { version = "*", optional = true }
+myst-parser = { version = "*", optional = true }
+furo = { version = "*", optional = true }
+sphinx-copybutton = { version = "*", optional = true }
+sphinx-autobuild = { version = "*", optional = true }
+rst2pdf = { version = "*", optional = true }
+sphinx-autoapi = { version = "*", optional = true }
+sphinxext-opengraph = { version = "*", optional = true }
+toml = { version = "*", optional = true }
 
 [tool.poetry.extras]
 minify = ["htmlmin"]
-docs = ["Sphinx", "linkify-it-py", "myst-parser", "furo", "sphinx-copybutton", "sphinx-autobuild", "rst2pdf", "sphinx-autoapi", "sphinxext-opengraph"]
+docs = ["Sphinx", "linkify-it-py", "myst-parser", "furo", "sphinx-copybutton", "sphinx-autobuild", "rst2pdf", "sphinx-autoapi", "sphinxext-opengraph", "toml"]
 
 [tool.poetry.group.dev.dependencies]
 certifi = "^2023.7.22"  # needed for GitHub Actions
 keyring = "24.2.0"  # needed for GitHub Actions
-pytest = "^6"
+pytest = "^7"
 black = "*"
 mypy = "<1"
-django-stubs = "^1.5.0"
-pytest-django = "^3"
+django-stubs = "*"
+pytest-django = "*"
 django-mock-queries = "^2.1.5"
-pydantic = "^1.7.3"
-pywatchman = "^1.4.1"
+pydantic = "^1"
+pywatchman = "*"
 django-redis = "^4.12.1"
-nox = "^2020.12.31"
-poethepoet = "^0"
-coverage = {extras = ["toml"], version = "^6"}
-pytest-cov = "^3"
-pytest-benchmark = "^4.0.0"
-ruff = "^0.0.290"
+nox = "*"
+poethepoet = "*"
+coverage = {extras = ["toml"], version = "*"}
+pytest-cov = "*"
+pytest-benchmark = "*"
+ruff = "*"
 
 [tool.black]
 target-version = ["py38", "py39", "py310"]

@@ -316,6 +316,10 @@ A reference to the last return value from an action method.
 </div>
 ```
 
+### $parent
+
+A reference to the parent of the current component.
+
 ## Special methods
 
 ### $refresh

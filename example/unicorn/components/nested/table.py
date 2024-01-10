@@ -8,6 +8,7 @@ class TableView(UnicornView):
     flavors = Flavor.objects.none()
     is_editing = False
     favorite_count = 0
+    show_filter = False
 
     def edit(self):
         self.is_editing = True

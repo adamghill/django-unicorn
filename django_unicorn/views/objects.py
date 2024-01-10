@@ -6,7 +6,7 @@ from django_unicorn.components import HashUpdate, LocationUpdate, PollUpdate
 from django_unicorn.errors import UnicornViewError
 from django_unicorn.serializer import JSONDecodeError, dumps, loads
 from django_unicorn.settings import get_setting
-from django_unicorn.utils import generate_checksum
+from django_unicorn.utils import generate_checksum, is_int
 
 logger = logging.getLogger(__name__)
 
@@ -24,15 +24,6 @@ class Action:
 
     def __repr__(self):
         return f"Action(action_type='{self.action_type}' payload={self.payload} partials={self.partials})"
-
-
-def is_int(s):
-    try:
-        int(s)
-    except ValueError:
-        return False
-    else:
-        return True
 
 
 def sort_dict(d):
@@ -91,7 +82,7 @@ class ComponentRequest:
     def __repr__(self):
         return (
             f"ComponentRequest(name='{self.name}' id='{self.id}' key='{self.key}'"
-            f" epoch={self.epoch} data={self.data} action_queue={self.action_queue})"
+            f" epoch={self.epoch} data={self.data} action_queue={self.action_queue} hash={self.hash})"
         )
 
     def validate_checksum(self):
@@ -113,7 +104,7 @@ class ComponentRequest:
         check_checksum_match = get_setting("CHECK_CHECKSUM_MATCH", True)
 
         if check_checksum_match:
-            generated_checksum = generate_checksum(str(self.data))
+            generated_checksum = generate_checksum(self.data)
 
             if checksum != generated_checksum:
                 # TODO: Raise specific exception

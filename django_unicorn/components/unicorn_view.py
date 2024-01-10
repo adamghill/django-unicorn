@@ -17,6 +17,7 @@ from django.utils.decorators import classonlymethod
 from django.views.generic.base import TemplateView
 
 from django_unicorn import serializer
+from django_unicorn.cacher import cache_full_tree, restore_from_cache
 from django_unicorn.components.fields import UnicornField
 from django_unicorn.components.unicorn_template_response import UnicornTemplateResponse
 from django_unicorn.decorators import timed
@@ -26,11 +27,8 @@ from django_unicorn.errors import (
     UnicornCacheError,
 )
 from django_unicorn.settings import get_setting
-from django_unicorn.utils import (
-    cache_full_tree,
-    is_non_string_sequence,
-    restore_from_cache,
-)
+from django_unicorn.typer import cast_attribute_value, get_type_hints
+from django_unicorn.utils import is_non_string_sequence
 
 try:
     from cachetools.lru import LRUCache
@@ -202,6 +200,9 @@ class UnicornView(TemplateView):
 
         # JavaScript method calls
         self.calls = []
+
+        # Default force render to False
+        self.force_render = False
 
         super().__init__(**kwargs)
 
@@ -587,6 +588,13 @@ class UnicornView(TemplateView):
         non_callables = [member[0] for member in inspect.getmembers(self, lambda x: not callable(x))]
         attribute_names = [name for name in non_callables if self._is_public(name)]
 
+        # Add type hints for the component to the attribute names since
+        # they won't be returned from `getmembers`
+        for type_hint_attribute_name in get_type_hints(self).keys():
+            if self._is_public(type_hint_attribute_name):
+                if type_hint_attribute_name not in attribute_names:
+                    attribute_names.append(type_hint_attribute_name)
+
         return attribute_names
 
     @timed
@@ -599,7 +607,7 @@ class UnicornView(TemplateView):
         attributes = {}
 
         for attribute_name in attribute_names:
-            attributes[attribute_name] = getattr(self, attribute_name)
+            attributes[attribute_name] = getattr(self, attribute_name, None)
 
         return attributes
 
@@ -614,7 +622,10 @@ class UnicornView(TemplateView):
     ) -> None:
         # Get the correct value type by using the form if it is available
         data = self._attributes()
+
+        value = cast_attribute_value(self, name, value)
         data[name] = value
+
         form = self._get_form(data)
 
         if form and name in form.fields and name in form.cleaned_data:
@@ -752,6 +763,7 @@ class UnicornView(TemplateView):
             "component_cache_key",
             "component_kwargs",
             "component_args",
+            "force_render",
         )
         excludes = []
 
@@ -832,6 +844,20 @@ class UnicornView(TemplateView):
 
         if use_cache and cached_component:
             logger.debug(f"Retrieve {component_id} from constructed views cache")
+
+            cached_component.component_args = component_args
+            cached_component.component_kwargs = kwargs
+
+            # TODO: How should args be handled?
+            # Set kwargs onto the cached component
+            for key, value in kwargs.items():
+                if hasattr(cached_component, key):
+                    setattr(cached_component, key, value)
+
+            cached_component._cache_component(parent=parent, component_args=component_args, **kwargs)
+
+            # Call hydrate because the component will be re-rendered
+            cached_component.hydrate()
 
             return cached_component
 
