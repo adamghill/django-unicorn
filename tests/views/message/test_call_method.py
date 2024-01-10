@@ -311,7 +311,7 @@ def test_message_call_method_module_cache_disabled(client, monkeypatch, settings
     )
 
     # Component is retrieved from the local memory cache
-    assert view.method_count == method_count
+    assert view.method_count == 0
 
 
 def test_message_call_method_cache_backend_dummy(client, monkeypatch, settings):

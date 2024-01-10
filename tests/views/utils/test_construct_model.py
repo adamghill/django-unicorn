@@ -1,6 +1,6 @@
 import pytest
 
-from django_unicorn.views.utils import _construct_model
+from django_unicorn.typer import _construct_model
 from example.books.models import Author, Book
 from example.coffee.models import Flavor
 

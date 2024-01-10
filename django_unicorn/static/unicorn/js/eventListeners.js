@@ -62,6 +62,7 @@ function handleLoading(component, targetElement) {
       }
     } else {
       loadingElement.handleLoading();
+
       if (loadingElement.loading.hide) {
         loadingElement.hide();
       } else if (loadingElement.loading.show) {

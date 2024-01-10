@@ -13,3 +13,5 @@ class FavoriteView(UnicornView):
         self.model.save()
         self.parent.is_updated_by_child = value
         self.parent.parent.favorite_count += 1 if value else -1
+
+        self.parent.parent.force_render = True
