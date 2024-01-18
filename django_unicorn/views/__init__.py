@@ -256,6 +256,7 @@ def _process_component_request(request: HttpRequest, component_request: Componen
                         partial_found = True
                         break
 
+    # Sort data so it's stable
     component_request.data = {key: component_request.data[key] for key in sorted(component_request.data)}
 
     result = {

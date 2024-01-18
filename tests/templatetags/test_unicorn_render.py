@@ -165,6 +165,18 @@ def test_unicorn_render_kwarg():
     assert "<b>tested!</b>" in actual
 
 
+def test_unicorn_render_invalid_kwarg():
+    token = Token(
+        TokenType.TEXT,
+        "unicorn 'tests.templatetags.test_unicorn_render.FakeComponentKwargs' test_kwarg=tested",
+    )
+    unicorn_node = unicorn(Parser([]), token)
+    context = {}
+    actual = unicorn_node.render(Context(context))
+
+    assert "<b>None</b>" in actual
+
+
 def test_unicorn_render_context_variable():
     token = Token(
         TokenType.TEXT,
