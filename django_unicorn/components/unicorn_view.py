@@ -131,6 +131,9 @@ def get_locations(component_name: str) -> List[Tuple[str, str]]:
         app_module_name = f"{app}.components.{module_name}"
         locations.append((app_module_name, class_name))
 
+    # Add default directory to the end of the list as a fallback
+    locations.append((f"components.{module_name}", class_name))
+
     return locations
 
 
