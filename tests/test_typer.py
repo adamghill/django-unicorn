@@ -126,19 +126,20 @@ class PydanticDataClass(BaseModel):
 
 
 class AnotherExampleClass:
-    test_data: List[TestDataClass]
-    pydantic_list_data: List[PydanticDataClass]
+    data: TestDataClass
+    list_data: List[TestDataClass]
     pydantic_data: PydanticDataClass
+    pydantic_list_data: List[PydanticDataClass]
 
 
-def test_cast_value_list_dataclass():
+def test_cast_value_dataclass():
     example_class = AnotherExampleClass()
     test_data = TestDataClass(name="foo")
-    example_class.test_data = [test_data]
+    example_class.data = test_data
     type_hints = typing_get_type_hints(example_class)
-    type_hint = type_hints["test_data"]
-    actual = cast_value(type_hint, [{"name": "foo"}])
-    assert actual == [test_data]
+    type_hint = type_hints["data"]
+    actual = cast_value(type_hint, {"name": "foo"})
+    assert actual == test_data
 
 
 def test_cast_value_pydantic():
@@ -148,7 +149,7 @@ def test_cast_value_pydantic():
     type_hints = typing_get_type_hints(example_class)
     type_hint = type_hints["pydantic_data"]
     actual = cast_value(type_hint, {"name": "foo"})
-    assert actual == [test_data]
+    assert actual == test_data
 
 
 def test_cast_value_list_dataclass():
@@ -156,7 +157,7 @@ def test_cast_value_list_dataclass():
     test_data = TestDataClass(name="foo")
     example_class.pydantic_list_data = [test_data]
     type_hints = typing_get_type_hints(example_class)
-    type_hint = type_hints["pydantic_list_data"]
+    type_hint = type_hints["list_data"]
     actual = cast_value(type_hint, [{"name": "foo"}])
     assert actual == [test_data]
 
@@ -164,8 +165,8 @@ def test_cast_value_list_dataclass():
 def test_cast_value_list_pydantic():
     example_class = AnotherExampleClass()
     test_data = PydanticDataClass(name="foo")
-    example_class.test_data = [test_data]
+    example_class.pydantic_list_data = [test_data]
     type_hints = typing_get_type_hints(example_class)
-    type_hint = type_hints["pydantic_data"]
+    type_hint = type_hints["pydantic_list_data"]
     actual = cast_value(type_hint, [{"name": "foo"}])
     assert actual == [test_data]
