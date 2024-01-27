@@ -1,6 +1,9 @@
+from dataclasses import dataclass
 import datetime
-from typing import Optional
+from typing import List, Optional
 from typing import get_type_hints as typing_get_type_hints
+
+from pydantic import BaseModel
 
 from django_unicorn.components import UnicornView
 from django_unicorn.typer import cast_attribute_value, cast_value, get_type_hints
@@ -111,3 +114,37 @@ def test_cast_value_model_int():
     actual = cast_value(type_hint, 1)
 
     assert actual == 1
+
+
+@dataclass
+class TestDataClass:
+    name: str
+
+
+class PydanticDataClass(BaseModel):
+    name: str
+
+
+class AnotherExampleClass:
+    test_data: List[TestDataClass]
+    pydantic_data: List[PydanticDataClass]
+
+
+def test_cast_value_dataclass():
+    example_class = AnotherExampleClass()
+    test_data = TestDataClass(name="foo")
+    example_class.test_data = [test_data]
+    type_hints = typing_get_type_hints(example_class)
+    type_hint = type_hints["test_data"]
+    actual = cast_value(type_hint, [{"name": "foo"}])
+    assert actual == [test_data]
+
+
+def test_cast_value_pydantic():
+    example_class = AnotherExampleClass()
+    test_data = PydanticDataClass(name="foo")
+    example_class.test_data = [test_data]
+    type_hints = typing_get_type_hints(example_class)
+    type_hint = type_hints["pydantic_data"]
+    actual = cast_value(type_hint, [{"name": "foo"}])
+    assert actual == [test_data]
