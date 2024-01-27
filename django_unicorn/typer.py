@@ -13,6 +13,7 @@ from django.utils.dateparse import (
     parse_duration,
     parse_time,
 )
+from pydantic import BaseModel
 
 from django_unicorn.typing import QuerySetType
 
@@ -140,6 +141,9 @@ def cast_value(type_hint, value):
             if issubclass(type_hint, Model):
                 continue
 
+            if issubclass(type_hint, BaseModel) or is_dataclass(type_hint):
+                value = type_hint(**value)
+                break
             value = type_hint(value)
             break
 
