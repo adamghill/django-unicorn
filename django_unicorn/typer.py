@@ -96,6 +96,9 @@ def cast_value(type_hint, value):
 
     type_hints = []
 
+    # print("get_origin(type_hint)", get_origin(type_hint))
+    # print("get_args(type_hint)", get_args(type_hint))
+
     if get_origin(type_hint) is Union or get_origin(type_hint) is list:
         for arg in get_args(type_hint):
             type_hints.append(arg)
@@ -111,17 +114,22 @@ def cast_value(type_hint, value):
             # casting each item individually
             return [cast_value(arg, item) for item in value]
 
+    # print("type_hints", type_hints)
+
     # Handle Optional type hint and the value is None
     if type(None) in type_hints and value is None:
+        print("RETURN CAUSE NONE")
         return value
 
     for type_hint in type_hints:
         if type_hint == type(None):
+            print("CONTINUE CAUSE NONE")
             continue
 
         caster = CASTERS.get(type_hint)
 
         if caster:
+            # print("GOT CASTER", caster)
             try:
                 value = caster(value)
                 break
@@ -137,8 +145,28 @@ def cast_value(type_hint, value):
                     except ValueError:
                         pass
         else:
+            # print("no caster", caster)
+
             if issubclass(type_hint, Model):
+                print("is model", value)
+
+                if "pk" in value:
+                    print("has pk")
+                    # TODO: do this or splat the value out?
+                    # value = type_hint.objects.get(value.get("pk"))
+                    value = type_hint(**value)
+                    print("has value", value)
+
+                    break
+
+                # print("V!", value)
+                # m = Model(**value)
+                # print("m", m)
+
                 continue
+            else:
+                # print("not is model")
+                pass
 
             value = type_hint(value)
             break
@@ -152,13 +180,19 @@ def cast_attribute_value(obj, name, value):
     type_hints = get_type_hints(obj)
     type_hint = type_hints.get(name)
 
+    if name == "event":
+        print("type_hint", type_hint)
+
     if type_hint:
         if is_queryset(obj, type_hint, value):
             # Do not try to cast the queryset here
             pass
         elif not is_dataclass(type_hint):
             try:
-                value = cast_value(type_hint, value)
+                if name == "event":
+                    print("try!", type_hint)
+
+                    value = cast_value(type_hint, value)
             except TypeError:
                 # Ignore this exception because some type-hints can't be instantiated like this (e.g. `List[]`)
                 pass
