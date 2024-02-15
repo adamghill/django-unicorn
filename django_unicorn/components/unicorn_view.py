@@ -7,9 +7,7 @@ from functools import lru_cache
 from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Type
 
 import shortuuid
-from django.apps import AppConfig
 from django.apps import apps as django_apps_module
-from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models import Model
 from django.forms.widgets import CheckboxInput, Select

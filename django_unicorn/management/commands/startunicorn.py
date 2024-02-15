@@ -34,7 +34,7 @@ def get_app_path(app_name: str) -> Path:
 
 
 class Command(BaseCommand):
-    help = "Creates a new component for `django-unicorn`"  # noqa: A003
+    help = "Creates a new component for `django-unicorn`"
 
     def add_arguments(self, parser):
         parser.add_argument("app_name", type=str)
