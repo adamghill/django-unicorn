@@ -146,15 +146,6 @@ def test_get_locations_installed_app_with_app_config(settings, clear_apps, cache
 
     assert expected == actual
 
-    # test when the app is in a subdirectory "apps" with Config
-    settings.INSTALLED_APPS[0] = "foo_project.apps.bar_app.apps.Config"
-    expected_location = [
-        ("foo_project.apps.bar_app.components.foo_bar", "FooBarView"),
-        ("components.foo_bar", "FooBarView"),
-    ]
-    actual_location = get_locations("foo-bar")
-    assert expected_location == actual_location
-
 
 def test_get_locations_installed_app_with_apps(settings, clear_apps, cache_clear):  # noqa: ARG001
     # test when the app is in a subdirectory "apps"
