@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.59.0
+
+- Update logic to find components [#655](https://github.com/adamghill/django-unicorn/pull/655) by [jacksund](https://github.com/jacksund).
+- Add fallback location to look for components.
+
 ## 0.58.1
 
 - Try to prevent type hints from crashing components. [#639](https://github.com/adamghill/django-unicorn/issues/639)
