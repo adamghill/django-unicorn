@@ -222,6 +222,7 @@ Thanks to the following wonderful people ([emoji key](https://allcontributors.or
       <td align="center" valign="top" width="14.28%"><a href="https://digitalpinup.art"><img src="https://avatars.githubusercontent.com/u/1392097?v=4?s=100" width="100px;" alt="Pierre"/><br /><sub><b>Pierre</b></sub></a><br /><a href="https://github.com/adamghill/django-unicorn/commits?author=bloodywing" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://roman.pt"><img src="https://avatars.githubusercontent.com/u/75075?v=4?s=100" width="100px;" alt="Roman Imankulov"/><br /><sub><b>Roman Imankulov</b></sub></a><br /><a href="https://github.com/adamghill/django-unicorn/commits?author=imankulov" title="Tests">⚠️</a> <a href="https://github.com/adamghill/django-unicorn/commits?author=imankulov" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/rhymiz"><img src="https://avatars.githubusercontent.com/u/7029352?v=4?s=100" width="100px;" alt="Lemi Boyce"/><br /><sub><b>Lemi Boyce</b></sub></a><br /><a href="https://github.com/adamghill/django-unicorn/commits?author=rhymiz" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="http://jacksund.github.io"><img src="https://avatars.githubusercontent.com/u/47992949?v=4?s=100" width="100px;" alt="Jack Sundberg"/><br /><sub><b>Jack Sundberg</b></sub></a><br /><a href="https://github.com/adamghill/django-unicorn/commits?author=jacksund" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
