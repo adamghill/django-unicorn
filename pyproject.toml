@@ -43,7 +43,6 @@ docs = ["Sphinx", "linkify-it-py", "myst-parser", "furo", "sphinx-copybutton", "
 certifi = "^2023.7.22"  # needed for GitHub Actions
 keyring = "24.2.0"  # needed for GitHub Actions
 pytest = "^7"
-black = "*"
 mypy = "<1"
 django-stubs = "*"
 pytest-django = "*"
@@ -57,11 +56,6 @@ coverage = {extras = ["toml"], version = "*"}
 pytest-cov = "*"
 pytest-benchmark = "*"
 ruff = "*"
-
-[tool.black]
-target-version = ["py38", "py39", "py310"]
-line-length = 120
-extend-exclude = "migrations"
 
 [tool.ruff]
 src = ["django_unicorn"]
@@ -153,12 +147,11 @@ tbc = { cmd = "pytest tests/benchmarks/ --benchmark-only --benchmark-compare", h
 tc = { cmd = "pytest --cov=django_unicorn", help = "Run tests with coverage" }
 cr = { cmd = "coverage report", help = "Show coverage report" }
 my = { cmd = "mypy .", help = "Run mypy" }
-b = { cmd = "black . --check --quiet --extend-exclude migrations", help = "Run black" }
 rf = { cmd = "ruff .", help = "Run ruff" }
-tm = ["b", "rf", "tc", "my"]
+tm = ["rf", "tc", "my"]
 sa = { cmd = "sphinx-autobuild -W docs/source docs/build", help = "Sphinx autobuild" }
 sb = { cmd = "sphinx-build -W docs/source docs/build", help = "Build documentation" }
-build = ["b", "rf", "tc", "ji", "tj", "jb", "sb"]
+build = ["rf", "tc", "ji", "tj", "jb", "sb"]
 publish = { shell = "poetry publish --build -r test && poetry publish" }
 
 [build-system]
