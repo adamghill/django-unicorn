@@ -30,9 +30,6 @@ jobs:
       - name: Install dependencies
         run: poetry install
 
-      - name: black check
-        run: poetry run black . --check
-
       - name: ruff check
         run: poetry run ruff .
 
