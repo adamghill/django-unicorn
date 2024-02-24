@@ -351,6 +351,7 @@ def _process_component_request(request: HttpRequest, component_request: Componen
                     if isinstance(_child, Tag) and child_soup_unicorn_id == _child.attrs.get("unicorn:id"):
                         _child.attrs["unicorn:checksum"] = child_soup_checksum
 
+                parent_soup = get_root_element(parent_soup)
                 parent_dom = str(parent_soup)
 
                 # Remove the child DOM from the payload since the parent DOM supersedes it
