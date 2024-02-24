@@ -1,6 +1,6 @@
 # Direct View
 
-Usually components will be included in a regular Django template, however a component can also be specified in a `urls.py` file in instances where the having an additional template is not necessary.
+Usually components will be included in a regular Django template, however a component can also be specified in a `urls.py` file in instances where having an additional template is not necessary.
 
 ## Template Requirements
 
