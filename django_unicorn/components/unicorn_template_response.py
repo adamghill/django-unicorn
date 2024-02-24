@@ -62,6 +62,10 @@ def is_html_well_formed(html: str) -> bool:
 
 
 def assert_has_single_wrapper_element(root_element: Tag, component_name: str) -> None:
+    """Assert that there is at least one child in the root element. And that there is only
+    one root element.
+    """
+
     # Check that the root element has at least one child
     try:
         next(root_element.descendants)
@@ -70,14 +74,50 @@ def assert_has_single_wrapper_element(root_element: Tag, component_name: str) ->
             f"The '{component_name}' component does not appear to have one root element."
         ) from None
 
+    if "unicorn:view" in root_element.attrs or "u:view" in root_element.attrs:
+        # If the root element is a direct view, skip the check
+        return
+
     # Check that there is not more than one root element
     parent_element = root_element.parent
+
     tag_count = len([c for c in parent_element.children if isinstance(c, Tag)])
 
     if tag_count > 1:
         raise MultipleRootComponentElementError(
             f"The '{component_name}' component appears to have multiple root elements."
         ) from None
+
+
+def _get_direct_view(tag: Tag):
+    return tag.find_next(attrs={"unicorn:view": True}) or tag.find_next(attrs={"u:view": True})
+
+
+def get_root_element(soup: BeautifulSoup) -> Tag:
+    """Gets the first tag element for the component or the first element with a `unicorn:view` attribute for a direct
+    view.
+
+    Returns:
+        BeautifulSoup tag element.
+
+        Raises `Exception` if an element cannot be found.
+    """
+
+    for element in soup.contents:
+        if isinstance(element, Tag) and element.name:
+            if element.name == "html":
+                view_element = _get_direct_view(element)
+
+                if not view_element:
+                    raise MissingComponentViewElementError(
+                        "An element with an `unicorn:view` attribute is required for a direct view"
+                    )
+
+                return view_element
+
+            return element
+
+    raise MissingComponentElementError("No root element for the component was found")
 
 
 class UnsortedAttributes(HTMLFormatter):
@@ -230,32 +270,3 @@ need {{% load unicorn %}} or {{% unicorn_scripts %}}?') }} else {{ {init_script}
     def _desoupify(soup):
         soup.smooth()
         return soup.encode(formatter=UnsortedAttributes()).decode("utf-8")
-
-
-def get_root_element(soup: BeautifulSoup) -> Tag:
-    """
-    Gets the first tag element for the component or the first element with a `unicorn:view` attribute for a direct view.
-
-    Returns:
-        BeautifulSoup tag element.
-
-        Raises `Exception` if an element cannot be found.
-    """
-
-    for element in soup.contents:
-        if isinstance(element, Tag) and element.name:
-            if element.name == "html":
-                view_element = element.find_next(attrs={"unicorn:view": True}) or element.find_next(
-                    attrs={"u:view": True}
-                )
-
-                if not view_element:
-                    raise MissingComponentViewElementError(
-                        "An element with an `unicorn:view` attribute is required for a direct view"
-                    )
-
-                return view_element
-
-            return element
-
-    raise MissingComponentElementError("No root element for the component was found")
