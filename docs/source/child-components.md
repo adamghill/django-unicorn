@@ -2,7 +2,7 @@
 
 `Unicorn` supports nesting components so that one component is a child of another. Since HTML is a tree structure, a component can have multiple children, but each child only has one parent.
 
-We will slowly build a nested component example with three components: table, filter and row. The table is the parent and contains the other two components. The filter will update the parent table component, and the row will contain functionality to edit a row.
+We will slowly build a nested component example with three components: `table`, `filter`, and `row`. The table is the parent and contains the other two components. The filter will update the parent table component, and the row will contain functionality to edit a row.
 
 ## Parent component
 
@@ -68,6 +68,9 @@ class FilterView(UnicornView):
             self.parent.books = list(
                 filter(lambda f: query.lower() in f.title.lower(), self.parent.books)
             )
+        
+        # Forces the parent to re-render instead of just the current component
+        self.parent.force_render = True
 ```
 
 ## Multiple children
