@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.60.0
+
+- Silence warnings about multiple root elements for direct views.
+- Handle `force_render` in nested children for direct views [#663](https://github.com/adamghill/django-unicorn/pull/663).
+- Handle error when manually refreshing direct views.
+- Handle component field type annotations for `dataclasses` and `Pydantic` `BaseModel` [#649](https://github.com/adamghill/django-unicorn/pull/649) by [siliconcow](https://github.com/siliconcow).
+- Update `startunicorn` command to prevent spamming users and handle folder creation for nested components [#642](https://github.com/adamghill/django-unicorn/pull/642) by [felipmartins](https://github.com/felipmartins).
+
+**Breaking changes**
+
+- Unparseable `kwarg` argument passed into a component will be considered `None` instead of being converted to a string.
+
+```html
+<!-- If `abcde` is not a variable in the template context, it will get set to `name` as `None` whereas before it would get set as 'abcde' -->
+{% unicorn 'hello' name=abcde %}
+```
+
 ## 0.59.0
 
 - Update logic to find components [#655](https://github.com/adamghill/django-unicorn/pull/655) by [jacksund](https://github.com/jacksund).
