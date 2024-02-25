@@ -11,6 +11,7 @@ try:
 
     def _check_pydantic(cls) -> bool:
         return issubclass(cls, BaseModel)
+
 except ImportError:
 
     def _check_pydantic(cls) -> bool:  # noqa: ARG001

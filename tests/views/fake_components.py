@@ -84,7 +84,7 @@ class FakeModelFormComponent(UnicornView):
 
     title = None
     date_published = None
-    type = None  # noqa: A003
+    type = None
 
 
 class FakeModelComponent(UnicornView):
