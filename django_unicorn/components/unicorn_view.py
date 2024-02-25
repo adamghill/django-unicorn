@@ -379,8 +379,6 @@ class UnicornView(TemplateView):
         self.mount()
         self.hydrate()
 
-        self._cache_component(**kwargs)
-
         return self.render_to_response(
             context=self.get_context_data(),
             component=self,
