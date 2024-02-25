@@ -249,6 +249,16 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "siliconcow",
+      "name": "siliconcow",
+      "avatar_url": "https://avatars.githubusercontent.com/u/908362?v=4",
+      "profile": "https://github.com/siliconcow",
+      "contributions": [
+        "code",
+        "test"
+      ]
     }
   ],
   "contributorsPerLine": 7,
