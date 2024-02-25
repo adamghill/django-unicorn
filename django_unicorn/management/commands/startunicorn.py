@@ -215,8 +215,8 @@ class Command(BaseCommand):
 
         paths, is_first = self.check_initials_directories(app_directory)
 
-        for name in options["component_names"]:
-            nested_path, name = self.obtain_nested_path(name)
+        for component_name in options["component_names"]:
+            (nested_path, name) = self.obtain_nested_path(component_name)
 
             self.create_nested_directories(paths, nested_path)
 
