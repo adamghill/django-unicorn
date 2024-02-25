@@ -3,7 +3,7 @@ import {
   FilterAny,
   FilterSkipNested,
   walk,
-} from "../../../django_unicorn/static/unicorn/js/utils";
+} from "../../../django_unicorn/static/unicorn/js/utils.js";
 import { getEl, setBrowserMocks } from "../utils.js";
 
 // makes a document and NodeFilter available from a fake DOM

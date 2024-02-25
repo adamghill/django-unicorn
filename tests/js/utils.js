@@ -141,3 +141,17 @@ export function getComponent(html, id, name, data) {
 
   return component;
 }
+
+// https://github.com/avajs/ava/issues/2929
+export const testCbCompat = (test, title, assertions) => {
+  test(title, async (t) => {
+    await new Promise((resolve) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      t.end = () => {
+        resolve(undefined);
+      };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      assertions(t);
+    });
+  });
+};
