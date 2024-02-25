@@ -1,5 +1,5 @@
-from dataclasses import dataclass
 import datetime
+from dataclasses import dataclass
 from typing import List, Optional
 from typing import get_type_hints as typing_get_type_hints
 
@@ -117,24 +117,24 @@ def test_cast_value_model_int():
 
 
 @dataclass
-class TestDataClass:
+class DataClass:
     name: str
 
 
-class PydanticDataClass(BaseModel):
+class PydanticBaseModel(BaseModel):
     name: str
 
 
 class AnotherExampleClass:
-    data: TestDataClass
-    list_data: List[TestDataClass]
-    pydantic_data: PydanticDataClass
-    pydantic_list_data: List[PydanticDataClass]
+    data: DataClass
+    list_data: List[DataClass]
+    pydantic_data: PydanticBaseModel
+    pydantic_list_data: List[PydanticBaseModel]
 
 
 def test_cast_value_dataclass():
     example_class = AnotherExampleClass()
-    test_data = TestDataClass(name="foo")
+    test_data = DataClass(name="foo")
     example_class.data = test_data
     type_hints = typing_get_type_hints(example_class)
     type_hint = type_hints["data"]
@@ -144,7 +144,7 @@ def test_cast_value_dataclass():
 
 def test_cast_value_pydantic():
     example_class = AnotherExampleClass()
-    test_data = PydanticDataClass(name="foo")
+    test_data = PydanticBaseModel(name="foo")
     example_class.pydantic_data = test_data
     type_hints = typing_get_type_hints(example_class)
     type_hint = type_hints["pydantic_data"]
@@ -154,7 +154,7 @@ def test_cast_value_pydantic():
 
 def test_cast_value_list_dataclass():
     example_class = AnotherExampleClass()
-    test_data = TestDataClass(name="foo")
+    test_data = DataClass(name="foo")
     example_class.pydantic_list_data = [test_data]
     type_hints = typing_get_type_hints(example_class)
     type_hint = type_hints["list_data"]
@@ -164,7 +164,7 @@ def test_cast_value_list_dataclass():
 
 def test_cast_value_list_pydantic():
     example_class = AnotherExampleClass()
-    test_data = PydanticDataClass(name="foo")
+    test_data = PydanticBaseModel(name="foo")
     example_class.pydantic_list_data = [test_data]
     type_hints = typing_get_type_hints(example_class)
     type_hint = type_hints["pydantic_list_data"]

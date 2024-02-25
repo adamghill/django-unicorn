@@ -6,6 +6,17 @@ from typing import Dict, List, Union
 from typing import get_type_hints as typing_get_type_hints
 from uuid import UUID
 
+try:
+    from pydantic import BaseModel
+
+    def _check_pydantic(cls) -> bool:
+        return issubclass(cls, BaseModel)
+except ImportError:
+
+    def _check_pydantic(cls) -> bool:  # noqa: ARG001
+        return False
+
+
 from django.db.models import Model, QuerySet
 from django.utils.dateparse import (
     parse_date,
@@ -13,7 +24,6 @@ from django.utils.dateparse import (
     parse_duration,
     parse_time,
 )
-from pydantic import BaseModel
 
 from django_unicorn.typing import QuerySetType
 
@@ -141,9 +151,10 @@ def cast_value(type_hint, value):
             if issubclass(type_hint, Model):
                 continue
 
-            if issubclass(type_hint, BaseModel) or is_dataclass(type_hint):
+            if _check_pydantic(type_hint) or is_dataclass(type_hint):
                 value = type_hint(**value)
                 break
+
             value = type_hint(value)
             break
 
