@@ -147,7 +147,7 @@ tbc = { cmd = "pytest tests/benchmarks/ --benchmark-only --benchmark-compare", h
 tc = { cmd = "pytest --cov=django_unicorn", help = "Run tests with coverage" }
 cr = { cmd = "coverage report", help = "Show coverage report" }
 my = { cmd = "mypy .", help = "Run mypy" }
-rf = { cmd = "ruff .", help = "Run ruff" }
+rf = { cmd = "ruff check .", help = "Run ruff" }
 tm = ["rf", "tc", "my"]
 sa = { cmd = "sphinx-autobuild -W docs/source docs/build", help = "Sphinx autobuild" }
 sb = { cmd = "sphinx-build -W docs/source docs/build", help = "Build documentation" }

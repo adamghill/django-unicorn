@@ -31,7 +31,7 @@ jobs:
         run: poetry install
 
       - name: ruff check
-        run: poetry run ruff .
+        run: poetry run ruff check .
 
       - name: Run all tests
         run: poetry run nox
