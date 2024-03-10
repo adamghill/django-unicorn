@@ -195,7 +195,7 @@ class UnicornView(TemplateView):
         if not self.component_name:
             raise AssertionError("Component name is required")
 
-        if "id" in kwargs and kwargs["id"]:
+        if kwargs.get("id") is not None:
             # Sometimes the component_id is initially in kwargs["id"]
             self.component_id = kwargs["id"]
 
