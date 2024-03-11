@@ -121,8 +121,17 @@ def restore_from_cache(component_cache_key: str, request: HttpRequest = None) ->
         roots[root.component_cache_key] = root
 
         while root.parent:
-            root = cache.get(root.parent.component_cache_key)
-            roots[root.component_cache_key] = root
+            parent_component_cache_key = root.parent.component_cache_key
+
+            # Store the actual parent component for later
+            cached_parent_component = cache.get(parent_component_cache_key)
+            roots[parent_component_cache_key] = cached_parent_component
+
+            # Set the component's parent to the actual component to override the pointer
+            # that will be here when using nested components with a direct view
+            root.parent = cached_parent_component
+
+            root = cached_parent_component
 
         to_traverse: List["django_unicorn.views.UnicornView"] = []
         to_traverse.append(root)
