@@ -1,7 +1,7 @@
 from django_unicorn.components import Component
-from django_unicorn.views.actions.base import Action, ActionResult
+from django_unicorn.actions.base import Action, ActionResult
 
-class Reset(Action):
+class Toggle(Action):
     
     action_type = "callMethod"
     method_name = "$toggle"

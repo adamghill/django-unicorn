@@ -48,10 +48,10 @@ class Action(ABC):
     @classmethod
     def from_dict(cls, data: dict):
         expected_type = data.get("type")
-        if expected_type == cls.action_type:
+        if expected_type != cls.action_type:
             raise ValueError(
-                "Action type mismatch. Type '{expected_type}' "
-                "was provided, but class only accepts '{cls.action_type}'"
+                f"Action type mismatch. Type '{expected_type}' "
+                f"was provided, but class only accepts '{cls.action_type}'"
             )
         return cls(
             payload = data.get("payload", {}),
@@ -79,7 +79,7 @@ class Action(ABC):
                 raise ValueError(f"Unknown Action type: '{action_type}'")
             
             action_class = mappings[action_type]
-            action = action_class.from_config(config)
+            action = action_class.from_dict(config)
             actions.append(action)
         
         return actions

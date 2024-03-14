@@ -1,6 +1,7 @@
 from django_unicorn.components import Component
-from django_unicorn.views.actions.base import Action, ActionResult
+from django_unicorn.actions.base import Action, ActionResult
 
+MIN_VALIDATION_ERROR_ARGS = 2
 
 class CallMethod(Action):
     
@@ -17,6 +18,46 @@ class CallMethod(Action):
     
     def apply(self, component: Component) -> ActionResult:
         raise NotImplementedError()
+        try:
+            # TODO: continue refactor of this method
+            (
+                component,
+                return_data,
+            ) = call_method.handle(self, component, action.payload)
+            self.action_results.append(return_data)
+        except ValidationError as e:
+            if len(e.args) < MIN_VALIDATION_ERROR_ARGS or not e.args[1]:
+                raise AssertionError("Error code must be specified") from e
+
+            if hasattr(e, "error_list"):
+                error_code = e.args[1]
+
+                for error in e.error_list:
+                    if NON_FIELD_ERRORS in component.errors:
+                        component.errors[NON_FIELD_ERRORS].append(
+                            {"code": error_code, "message": error.message}
+                        )
+                    else:
+                        component.errors[NON_FIELD_ERRORS] = [
+                            {"code": error_code, "message": error.message}
+                        ]
+            elif hasattr(e, "message_dict"):
+                for field, message in e.message_dict.items():
+                    if not e.args[1]:
+                        raise AssertionError(
+                            "Error code must be specified"
+                        ) from e
+
+                    error_code = e.args[1]
+
+                    if field in component.errors:
+                        component.errors[field].append(
+                            {"code": error_code, "message": message}
+                        )
+                    else:
+                        component.errors[field] = [
+                            {"code": error_code, "message": message}
+                        ]
 
     @classmethod
     def from_dict(cls, data: dict):
@@ -38,16 +79,16 @@ class CallMethod(Action):
             Validate,
         )
 
-        method_name = data["payload"]["name"]
+        payload_name = data["payload"]["name"]
         
         # Note: all cases return a different Action subclass
         # if "=" in method_name: --> kwargs give with method
         #     return SetAttr.from_dict(data)
-        if method_name == "$reset":
+        if payload_name == "$reset":
             return Reset.from_dict(data)
-        elif method_name == "$refresh":
+        elif payload_name == "$refresh":
             return Refresh.from_dict(data)
-        elif method_name == "$toggle":
+        elif payload_name == "$toggle":
             return Toggle.from_dict(data)
         else:
             # then we indeed have a CallMethod action and can use the normal

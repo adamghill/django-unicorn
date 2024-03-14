@@ -1,4 +1,20 @@
 
+from django_unicorn.errors import UnicornViewError
+from django_unicorn.serializer import JSONDecodeError, loads
+from django_unicorn.utils import generate_checksum
+from django_unicorn.views.utils import set_property_from_data
+from django_unicorn.views.response import ComponentResponse
+from django_unicorn.components import Component
+from django_unicorn.actions import (
+    Action,
+    CallMethod,
+    Refresh,
+    Reset,
+    SyncInput,
+    Toggle,
+    Validate,
+)
+
 
 class ComponentRequest:
     """
@@ -37,10 +53,9 @@ class ComponentRequest:
         self.hash = self.body.get("hash", "")
 
         self.validate_checksum()
-
-        self.action_queue = []
-        for action_data in self.body.get("actionQueue", []):
-            self.action_queue.append(Action(action_data))
+        
+        action_configs = self.body.get("actionQueue", [])
+        self.action_queue = Action.from_many_dicts(action_configs)
 
         # This is populated when `apply_to_component` is called.
         # `UnicornView.update_from_component_request` will also populate it.
@@ -94,114 +109,61 @@ class ComponentRequest:
 
     @property
     def partials(self) -> bool:
-        partials = [
+        return [
             partial for action in self.action_queue for partial in action.partials
         ]
-
-        # --- depreciated --
-        # remove this section when partial is removed
-        for action in self.action_queue:
-            if action.partial:
-                partials.append(action.partial)
-        # --- depreciated ---
-
-        return partials
+    
+    # OPTIMIZE: consider using @cached_property
+    @property
+    def action_types(self) -> list[Action]:
+        return [type(action) for action in self.action_queue]
 
     @property
-    def action_types(self) -> bool:
-        # OPTIMIZE: consider using @cached_property
-        # Also maybe deprec if `Action` subclasses are made
-        return [action.action_type for action in self.action_queue]
+    def includes_refresh(self) -> bool:
+        return Refresh in self.action_types
 
     @property
-    def is_refresh_called(self) -> bool:
-        return "$refresh" in self.action_types
+    def includes_reset(self) -> bool:
+        return Reset in self.action_types
 
     @property
-    def is_reset_called(self) -> bool:
-        return "$reset" in self.action_types
+    def includes_validate(self) -> bool:
+        return Validate in self.action_types
 
     @property
-    def validate_all_fields(self) -> bool:
-        return "$validate" in self.action_types
-
+    def includes_toggle(self) -> bool:
+        return Toggle in self.action_types
+    
     @property
-    def is_toggled(self) -> bool:
-        return "$toggle" in self.action_types
+    def includes_call_method(self) -> bool:
+        return CallMethod in self.action_types
+    
+    @property
+    def includes_sync_input(self) -> bool:
+        return SyncInput in self.action_types
 
-    def apply_to_component(self, component):
-        # OPTIMIZE: you *could* generate the ComponentResponse obj within
-        # this update method. However, intertwining this would lead to less
-        # maintainable code that is much more difficult to follow/understand.
-        # Therefore, we save ComponentRequest for a separate method
-
-        from django.forms import ValidationError
-        from django.core.exceptions import NON_FIELD_ERRORS
-
-        from django_unicorn.views.utils import set_property_from_data
-        from django_unicorn.views.action_parsers import call_method, sync_input
-        from django_unicorn.errors import UnicornViewError
-
-        MIN_VALIDATION_ERROR_ARGS = 2
-
+    def apply_to_component(self, component: Component) -> ComponentResponse:
+        
+        # updates all component properties using data sent by request
         for property_name, property_value in self.data.items():
             set_property_from_data(component, property_name, property_value)
+
         component.hydrate()
-
-        # TODO: This section needs a refactor...
-
-        return_data = None
-
-        for action in self.action_queue:
-            if action.action_type == "syncInput":
-                sync_input.handle(self, component, action.payload)
-            elif action.action_type == "callMethod":
-                try:
-                    # TODO: continue refactor of this method
-                    (
-                        component,
-                        return_data,
-                    ) = call_method.handle(self, component, action.payload)
-                    self.action_results.append(return_data)
-                except ValidationError as e:
-                    if len(e.args) < MIN_VALIDATION_ERROR_ARGS or not e.args[1]:
-                        raise AssertionError("Error code must be specified") from e
-
-                    if hasattr(e, "error_list"):
-                        error_code = e.args[1]
-
-                        for error in e.error_list:
-                            if NON_FIELD_ERRORS in component.errors:
-                                component.errors[NON_FIELD_ERRORS].append(
-                                    {"code": error_code, "message": error.message}
-                                )
-                            else:
-                                component.errors[NON_FIELD_ERRORS] = [
-                                    {"code": error_code, "message": error.message}
-                                ]
-                    elif hasattr(e, "message_dict"):
-                        for field, message in e.message_dict.items():
-                            if not e.args[1]:
-                                raise AssertionError(
-                                    "Error code must be specified"
-                                ) from e
-
-                            error_code = e.args[1]
-
-                            if field in component.errors:
-                                component.errors[field].append(
-                                    {"code": error_code, "message": message}
-                                )
-                            else:
-                                component.errors[field] = [
-                                    {"code": error_code, "message": message}
-                                ]
-            else:
-                raise UnicornViewError(f"Unknown action_type '{action.action_type}'")
+        
+        # Apply all actions AND store the ActionResult objects to this Request
+        # if any are returned
+        self.action_results = [
+            action.apply(component) for action in self.action_queue
+        ]
+        # bug-check
+        assert self.has_been_applied
 
         component.complete()
 
-        # TODO: There should be a better place to call this...
+        # !!! is there a better place to call this?
         component._mark_safe_fields()
 
-        return return_data
+        return ComponentResponse.from_inspection(
+            request=self,
+            component=component,
+        )

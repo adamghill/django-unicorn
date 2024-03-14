@@ -1,5 +1,5 @@
 from django_unicorn.components import Component
-from django_unicorn.views.actions.base import Action, ActionResult
+from django_unicorn.actions.base import Action, ActionResult
 
 class Reset(Action):
     

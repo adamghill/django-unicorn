@@ -4,7 +4,8 @@ from django.views import View
 from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
 from django.views.decorators.http import require_POST
 
-from django_unicorn.views.objects import ComponentRequest, ComponentResponse
+from django_unicorn.views.request import ComponentRequest
+from django_unicorn.views.response import ComponentResponse
 
 from django_unicorn.settings import (
     get_cache_alias,
@@ -39,8 +40,8 @@ class UnicornMessageHandler(View):
         component_request = ComponentRequest(request, component_name)
 
         # check whether we are running things in serial (the default) or queueing
-        serial_enabled = get_serial_enabled()
-        if serial_enabled:
+        use_queue = get_serial_enabled()
+        if not use_queue:
             # handle immediately
             return self._get_response_from_request(component_request)
         else:
@@ -61,16 +62,11 @@ class UnicornMessageHandler(View):
         Given the ComponentRequest, this will generate the necessary JsonResponse
         to return to the frontend
         """
-        component = Component.from_request(component_request)
-
-        # bug-check
-        assert component_request.has_been_applied
-
-        component_response = ComponentResponse.from_inspection(
-            request=component_request,
-            component=component,
+        breakpoint()        
+        component_response = Component.from_request(
+            component_request, 
+            apply_actions_get_response=True,
         )
-
         return component_response.to_json_response()
 
     # -------------------------------------------------------------------------
