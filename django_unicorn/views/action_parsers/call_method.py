@@ -48,10 +48,6 @@ def handle(component_request: ComponentRequest, component: UnicornView, payload:
     return_data = Return(method_name, args, kwargs)
     setter_method = {}
 
-    is_refresh_called = False
-    is_reset_called = False
-    validate_all_fields = False
-
     if "=" in call_method_name:
         try:
             setter_method = parse_kwarg(call_method_name, raise_if_unparseable=True)
@@ -79,8 +75,6 @@ def handle(component_request: ComponentRequest, component: UnicornView, payload:
         ) in component_request.data.items():
             set_property_from_data(component, property_name, property_value)
         component.hydrate()
-
-        is_refresh_called = True
     elif method_name == "$reset":
         # Handle the reset special action
         component = UnicornView.create(
@@ -89,10 +83,8 @@ def handle(component_request: ComponentRequest, component: UnicornView, payload:
             request=component_request.request,
             use_cache=False,
         )
-
         #  Explicitly remove all errors and prevent validation from firing before render()
         component.errors = {}
-        is_reset_called = True
     elif method_name == "$toggle":
         for property_name in args:
             property_value = _get_property_value(component, property_name)
@@ -100,8 +92,7 @@ def handle(component_request: ComponentRequest, component: UnicornView, payload:
 
             set_property_value(component, property_name, property_value)
     elif method_name == "$validate":
-        # Handle the validate special action
-        validate_all_fields = True
+        pass  # validation is handled later
     else:
         component_with_method = parent_component or component
 
@@ -109,13 +100,7 @@ def handle(component_request: ComponentRequest, component: UnicornView, payload:
         return_data.value = _call_method_name(component_with_method, method_name, args, kwargs)
         component_with_method.called(method_name, args)
 
-    return (
-        component,
-        is_refresh_called,
-        is_reset_called,
-        validate_all_fields,
-        return_data,
-    )
+    return component, return_data
 
 
 @timed
