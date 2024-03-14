@@ -163,8 +163,7 @@ def construct_component(
 
     return component
 
-
-class UnicornView(TemplateView):
+class Component(TemplateView):
     # These class variables are required to set these via kwargs
     component_name: str = ""
     component_key: str = ""
@@ -670,6 +669,36 @@ class UnicornView(TemplateView):
             raise
 
     @timed
+    def _get_property(self, property_name: str) -> Any:
+        """
+        Gets property value from the component based on the property name.
+        Handles nested property names.
+
+        Args:
+            param component: Component to get property values from.
+            param property_name: Property name. Can be "dot-notation" to get nested properties.
+        """
+
+        if property_name is None:
+            raise AssertionError("property_name name is required")
+
+        # Handles nested properties
+        property_name_parts = property_name.split(".")
+        component_or_field = self
+
+        for idx, property_name_part in enumerate(property_name_parts):
+            if hasattr(component_or_field, property_name_part):
+                if idx == len(property_name_parts) - 1:
+                    return getattr(component_or_field, property_name_part)
+                else:
+                    component_or_field = getattr(component_or_field, property_name_part)
+            elif isinstance(component_or_field, dict):
+                if idx == len(property_name_parts) - 1:
+                    return component_or_field[property_name_part]
+                else:
+                    component_or_field = component_or_field[property_name_part]
+
+    @timed
     def _methods(self) -> Dict[str, Callable]:
         """
         Get publicly available method names and their functions from the component.
@@ -1034,3 +1063,6 @@ class UnicornView(TemplateView):
             initkwargs["component_name"] = component_name
 
         return super().as_view(**initkwargs)
+
+# to support deprec naming of class
+UnicornView = Component
