@@ -8,3 +8,7 @@ class Validate(Action):
     
     def apply(self, component: Component) -> ActionResult:
         raise NotImplementedError()
+        # Handle the validate special action
+        validate_all_fields = True
+        
+        # !!! where is this actually done...?

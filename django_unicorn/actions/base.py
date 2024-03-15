@@ -1,7 +1,13 @@
-# -*- coding: utf-8 -*-
+import logging
 
 from abc import ABC, abstractmethod
-from django_unicorn.components import Component
+from django.http.response import HttpResponseRedirect
+
+from django_unicorn.components import Component, HashUpdate, LocationUpdate, PollUpdate
+from django_unicorn.serializer import dumps, loads
+
+
+logger = logging.getLogger(__name__)
 
 
 class Action(ABC):
@@ -18,10 +24,14 @@ class Action(ABC):
     """
     
     @abstractmethod
-    def apply(self, component: Component) -> "ActionResult":
+    def apply(
+            self, 
+            component: Component, 
+            request, # : ComponentRequest,
+        ):  # returns either an ActionResult or a new Component
         """
         Applies the update to the component and returns the ActionResult if
-        there is one. Must be defined in all subclasses
+        there is one. Must be defined in all subclasses.
         """
         raise NotImplementedError()
     
@@ -123,43 +133,35 @@ class ActionResult:
     a CallMethodAction or something similar
     """
     
-    def __init__(self, method_name, args=None, kwargs=None):
+    def __init__(self, method_name, args=None, kwargs=None, value=None):
         self.method_name = method_name
         self.args = args or []
         self.kwargs = kwargs or {}
-        self._value = {}
         self.redirect = {}
         self.poll = {}
+        
+        # TODO: Support a tuple/list return_value which could contain 
+        # multiple values
+        self.value = value or {}
+        if isinstance(value, HttpResponseRedirect):
+            self.redirect = {
+                "url": value.url,
+            }
+        elif isinstance(value, HashUpdate):
+            self.redirect = {
+                "hash": value.hash,
+            }
+        elif isinstance(value, LocationUpdate):
+            self.redirect = {
+                "url": value.redirect.url,
+                "refresh": True,
+                "title": value.title,
+            }
+        elif isinstance(value, PollUpdate):
+            self.poll = value.to_json()
 
-    @property
-    def value(self):
-        return self._value
-
-    @value.setter
-    def value(self, value):
-        self._value = value
-        # TODO: Support a tuple/list return_value which could contain multiple values
-
-        if value is not None:
-            if isinstance(value, HttpResponseRedirect):
-                self.redirect = {
-                    "url": value.url,
-                }
-            elif isinstance(value, HashUpdate):
-                self.redirect = {
-                    "hash": value.hash,
-                }
-            elif isinstance(value, LocationUpdate):
-                self.redirect = {
-                    "url": value.redirect.url,
-                    "refresh": True,
-                    "title": value.title,
-                }
-            elif isinstance(value, PollUpdate):
-                self.poll = value.to_json()
-
-            if self.redirect:
-                self._value = self.redirect
+        if self.redirect:
+            self.value = self.redirect
 
     def get_data(self):
         try:

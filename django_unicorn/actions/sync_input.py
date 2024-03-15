@@ -5,5 +5,9 @@ class SyncInput(Action):
     
     action_type = "syncInput"
     
-    def apply(self, component: Component) -> ActionResult:
+    def apply(
+        self, 
+        component: Component, 
+        request, # : ComponentRequest,
+    ) -> ActionResult:
         raise NotImplementedError()

@@ -1,4 +1,5 @@
 
+import copy
 from django_unicorn.errors import UnicornViewError
 from django_unicorn.serializer import JSONDecodeError, loads
 from django_unicorn.utils import generate_checksum
@@ -7,6 +8,7 @@ from django_unicorn.views.response import ComponentResponse
 from django_unicorn.components import Component
 from django_unicorn.actions import (
     Action,
+    ActionResult,
     CallMethod,
     Refresh,
     Reset,
@@ -142,28 +144,64 @@ class ComponentRequest:
     def includes_sync_input(self) -> bool:
         return SyncInput in self.action_types
 
-    def apply_to_component(self, component: Component) -> ComponentResponse:
+    def apply_to_component(
+            self, 
+            component: Component, 
+            inplace: bool = False,
+        ) -> Component:
+        """
+        Updates properties and applies all actions to the component, and
+        then returns the updated component
+        """
+        # bug-check
+        if self.has_been_applied:
+            raise Exception(
+                "This ComponentRequest was already applied to a Component. "
+                "Ensure you are not performing duplicate work."
+            )
+
+        # set our objecto modify in-place below
+        updated_component = component if inplace else copy.deepcopy(component)
+        # OPTIMIZE: having inplace=False might be unnecessary overhead, but it
+        # will help avoid complex bugs in the future
         
         # updates all component properties using data sent by request
         for property_name, property_value in self.data.items():
-            set_property_from_data(component, property_name, property_value)
+            set_property_from_data(
+                updated_component, 
+                property_name, 
+                property_value,
+            )
 
-        component.hydrate()
-        
+        updated_component.hydrate()
+
         # Apply all actions AND store the ActionResult objects to this Request
-        # if any are returned
-        self.action_results = [
-            action.apply(component) for action in self.action_queue
-        ]
-        # bug-check
-        assert self.has_been_applied
+        # if any are returned.
+        for action in self.action_queue: 
+            # Action's apply methods can return several different types,
+            # which tell us how to react. 
+            action_result = action.apply(
+                component=updated_component,
+                request=self,  # only used by Reset & Refresh
+            )
+            if isinstance(action_result, Component):
+                # If a Component is returned, then we've recieved some Action
+                # that *replaces* our Component. This happens with Reset/Refresh
+                updated_component = action_result
+                self.action_results.append(None)
+            elif isinstance(action_result, ActionResult):
+                # These are actions like...
+                #   HttpResponseRedirect, HashUpdate, LocationUpdate, PollUpdate
+                # Which will need to be accessed when generating the response
+                self.action_results.append(action_result)
+            else:
+                raise TypeError(
+                    f"Unknown type returned from 'Action.apply': {type(action_result)}"
+                )
 
-        component.complete()
+        updated_component.complete()
 
         # !!! is there a better place to call this?
-        component._mark_safe_fields()
-
-        return ComponentResponse.from_inspection(
-            request=self,
-            component=component,
-        )
+        updated_component._mark_safe_fields()
+        
+        return updated_component

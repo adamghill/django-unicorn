@@ -840,19 +840,26 @@ class Component(TemplateView):
         )
 
     @classmethod
-    def from_request(cls, request):  # ComponentRequest, NOT HttpRequest!
+    def from_request(
+            cls, 
+            request, # takes ComponentRequest, not HttpRequest
+            apply_actions: bool = True,
+        ):
         """
-        Given a ComponentRequest object, this will create (or load from cache)
-        the proper UnicornView object and then apply all requested
-        updates/actions to the UnicornView object.
+        Given a ComponentRequest object, this will create or load from cache
+        the proper UnicornView object and then (if requested) apply all actions 
+        to the UnicornView object.
         """
         component = cls.create(
             component_id=request.id,
             component_name=request.name,
             request=request.request,  # gives the HttpRequest obj
         )
-        updated_component = request.apply_to_component(component)
-        return updated_component
+
+        if apply_actions:
+            component = request.apply_to_component(component)
+        
+        return component
 
     @staticmethod
     @timed
