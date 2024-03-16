@@ -17,11 +17,21 @@ class Toggle(BackendAction):
         component: Component,
         request, # : ComponentRequest,
     ) -> tuple[Component, FrontendAction]:
+
         for property_name in self.properties_to_toggle:
             property_value = component._get_property(property_name)
+
+            if not isinstance(property_value, bool):
+                raise ValueError("You can only call '$toggle' on boolean attributes")
+
+            # toggle/flip the boolean
             property_value = not property_value
+
             # !!! consider making this util a method of Component
             set_property_value(component, property_name, property_value)
+
+        # no FrontendAction needed
+        return component, None
 
     @property
     def properties_to_toggle(self):

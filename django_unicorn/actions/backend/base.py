@@ -105,7 +105,7 @@ class BackendAction(ABC):
         # support customer user Actions.
 
         # local import to prevent circular deps
-        from django_unicorn.backend.actions import (
+        from django_unicorn.actions.backend import (
             CallMethod,
             SyncInput,
         )

@@ -1,10 +1,15 @@
 
-class LocationUpdate(Update):
+from django.http import HttpResponseRedirect
+
+from .base import FrontendAction
+
+
+class LocationUpdate(FrontendAction):
     """
     Updates the current URL from an action method.
     """
 
-    def __init__(self, redirect: HttpResponseRedirect, title: Optional[str] = None):
+    def __init__(self, redirect: HttpResponseRedirect, title: str | None = None):
         """
         Args:
             param redirect: The redirect that contains the URL to redirect to.

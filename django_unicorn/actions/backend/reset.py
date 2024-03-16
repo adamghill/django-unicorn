@@ -28,4 +28,5 @@ class Reset(BackendAction):
         #  Explicitly remove all errors and prevent validation from firing before render()
         updated_component.errors = {}
 
-        return updated_component
+        # no FrontendAction needed
+        return updated_component, None

@@ -147,7 +147,7 @@ class ComponentRequest:
     def apply_to_component(
             self,
             component: Component,
-            inplace: bool = False,
+            inplace: bool = True,
         ) -> Component:
         """
         Updates properties and applies all actions to the component, and
@@ -163,7 +163,7 @@ class ComponentRequest:
         # set our objecto modify in-place below
         updated_component = component if inplace else copy.deepcopy(component)
         # OPTIMIZE: having inplace=False might be unnecessary overhead, but it
-        # will help avoid complex bugs in the future
+        # will help avoid complex bugs in the future.
 
         # updates all component properties using data sent by request
         for property_name, property_value in self.data.items():

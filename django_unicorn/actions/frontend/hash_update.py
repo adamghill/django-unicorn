@@ -1,5 +1,8 @@
 
-class HashUpdate(Update):
+from .base import FrontendAction
+
+
+class HashUpdate(FrontendAction):
     """
     Updates the current URL hash from an action method.
     """

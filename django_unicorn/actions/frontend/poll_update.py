@@ -1,10 +1,19 @@
 
-class PollUpdate(Update):
+from .base import FrontendAction
+
+
+class PollUpdate(FrontendAction):
     """
     Updates the current poll from an action method.
     """
 
-    def __init__(self, *, timing: Optional[int] = None, method: Optional[str] = None, disable: bool = False):
+    def __init__(
+            self,
+            *,
+            timing: int | None = None,
+            method: str | None = None,
+            disable: bool = False,
+        ):
         """
         Args:
             param timing: The timing that should be used for the poll. Optional. Defaults to `None`

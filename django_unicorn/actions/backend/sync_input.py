@@ -15,3 +15,6 @@ class SyncInput(BackendAction):
         request, # : ComponentRequest,
     ) -> tuple[Component, FrontendAction]:
         raise NotImplementedError()
+
+        # no FrontendAction needed
+        return updated_component, None

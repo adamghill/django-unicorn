@@ -31,4 +31,5 @@ class Refresh(BackendAction):
 
         updated_component.hydrate()
 
-        return updated_component
+        # no FrontendAction needed
+        return updated_component, None
