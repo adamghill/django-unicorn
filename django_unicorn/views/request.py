@@ -1,11 +1,6 @@
 
 import copy
-from django_unicorn.errors import UnicornViewError
-from django_unicorn.serializer import JSONDecodeError, loads
-from django_unicorn.utils import generate_checksum
-from django_unicorn.views.utils import set_property_from_data
-from django_unicorn.views.response import ComponentResponse
-from django_unicorn.components import Component
+
 from django_unicorn.actions import (
     Action,
     ActionResult,
@@ -16,6 +11,12 @@ from django_unicorn.actions import (
     Toggle,
     Validate,
 )
+from django_unicorn.components import Component
+from django_unicorn.errors import UnicornViewError
+from django_unicorn.serializer import JSONDecodeError, loads
+from django_unicorn.utils import generate_checksum
+from django_unicorn.views.response import ComponentResponse
+from django_unicorn.views.utils import set_property_from_data
 
 
 class ComponentRequest:
@@ -55,7 +56,7 @@ class ComponentRequest:
         self.hash = self.body.get("hash", "")
 
         self.validate_checksum()
-        
+
         action_configs = self.body.get("actionQueue", [])
         self.action_queue = Action.from_many_dicts(action_configs)
 
@@ -114,7 +115,7 @@ class ComponentRequest:
         return [
             partial for action in self.action_queue for partial in action.partials
         ]
-    
+
     # OPTIMIZE: consider using @cached_property
     @property
     def action_types(self) -> list[Action]:
@@ -135,18 +136,18 @@ class ComponentRequest:
     @property
     def includes_toggle(self) -> bool:
         return Toggle in self.action_types
-    
+
     @property
     def includes_call_method(self) -> bool:
         return CallMethod in self.action_types
-    
+
     @property
     def includes_sync_input(self) -> bool:
         return SyncInput in self.action_types
 
     def apply_to_component(
-            self, 
-            component: Component, 
+            self,
+            component: Component,
             inplace: bool = False,
         ) -> Component:
         """
@@ -164,12 +165,12 @@ class ComponentRequest:
         updated_component = component if inplace else copy.deepcopy(component)
         # OPTIMIZE: having inplace=False might be unnecessary overhead, but it
         # will help avoid complex bugs in the future
-        
+
         # updates all component properties using data sent by request
         for property_name, property_value in self.data.items():
             set_property_from_data(
-                updated_component, 
-                property_name, 
+                updated_component,
+                property_name,
                 property_value,
             )
 
@@ -177,9 +178,9 @@ class ComponentRequest:
 
         # Apply all actions AND store the ActionResult objects to this Request
         # if any are returned.
-        for action in self.action_queue: 
+        for action in self.action_queue:
             # Action's apply methods can return several different types,
-            # which tell us how to react. 
+            # which tell us how to react.
             action_result = action.apply(
                 component=updated_component,
                 request=self,  # only used by Reset & Refresh
@@ -203,5 +204,5 @@ class ComponentRequest:
 
         # !!! is there a better place to call this?
         updated_component._mark_safe_fields()
-        
+
         return updated_component

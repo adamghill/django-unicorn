@@ -4,19 +4,17 @@ from django.views import View
 from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
 from django.views.decorators.http import require_POST
 
-from django_unicorn.views.request import ComponentRequest
-from django_unicorn.views.response import ComponentResponse
-
+# !!! I think use of "View" and "Component" needs cleaned up accross classes + vars
+# I'd vote for this renaming so that it matches other class names in django_unicorn
+# This is a big change to core so I only demo it here for now.
+from django_unicorn.components import UnicornView as Component
 from django_unicorn.settings import (
     get_cache_alias,
     get_serial_enabled,
     get_serial_timeout,
 )
-
-# !!! I think use of "View" and "Component" needs cleaned up accross classes + vars
-# I'd vote for this renaming so that it matches other class names in django_unicorn
-# This is a big change to core so I only demo it here for now.
-from django_unicorn.components import UnicornView as Component
+from django_unicorn.views.request import ComponentRequest
+from django_unicorn.views.response import ComponentResponse
 
 
 @method_decorator(
@@ -64,13 +62,13 @@ class UnicornMessageHandler(View):
         """
 
         updated_component = Component.from_request(
-            component_request, 
+            component_request,
             apply_actions=True,
         )
         breakpoint()
         # bug-check
         assert component_request.has_been_applied
-        
+
         # Now that we have our updated component and that our request has been
         # applied to it, the comparison of these two will tell us the proper
         # repsonse to give
@@ -78,7 +76,7 @@ class UnicornMessageHandler(View):
             request=component_request,
             component=updated_component,
         )
-        
+
         # returns either Component or ComponentReponse depending on 'return_response'
         return component_response.to_json_response()
 

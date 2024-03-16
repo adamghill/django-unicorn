@@ -203,7 +203,7 @@ class Component(TemplateView):
         if not self.component_name:
             raise AssertionError("Component name is required")
 
-        if "id" in kwargs and kwargs["id"]:
+        if kwargs.get("id"):
             # Sometimes the component_id is initially in kwargs["id"]
             self.component_id = kwargs["id"]
 
@@ -841,7 +841,7 @@ class Component(TemplateView):
 
     @classmethod
     def from_request(
-            cls, 
+            cls,
             request, # takes ComponentRequest, not HttpRequest
             apply_actions: bool = True,
         ):
@@ -858,7 +858,7 @@ class Component(TemplateView):
 
         if apply_actions:
             component = request.apply_to_component(component)
-        
+
         return component
 
     @staticmethod
@@ -1027,11 +1027,11 @@ class Component(TemplateView):
         # Make sure that there is always a request on the parent if needed
         if self.parent is not None and self.parent.request is None:
             self.parent.request = request
-    
-    
+
+
     # !!! this method is not used anywhere as of now
     def _update_from_component_request(
-            self, 
+            self,
             component_request,  # : ComponentRequest
             apply_inplace: bool = False,
     ):
@@ -1054,7 +1054,7 @@ class Component(TemplateView):
         for field_name in safe_fields:
             value = getattr(self, field_name)
             if isinstance(value, str):
-                setattr(self, field_name, mark_safe(value))  # noqa: S308
+                setattr(self, field_name, mark_safe(value))
 
     @classonlymethod
     def as_view(cls, **initkwargs):  # noqa: N805

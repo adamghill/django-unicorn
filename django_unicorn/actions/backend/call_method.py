@@ -1,27 +1,27 @@
-from django_unicorn.components import Component
-from django_unicorn.actions.base import Action, ActionResult
-from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
+from django.core.exceptions import NON_FIELD_ERRORS, ValidationError
 
+from django_unicorn.actions.base import Action, ActionResult
 from django_unicorn.call_method_parser import parse_call_method_name
+from django_unicorn.components import Component
 
 MIN_VALIDATION_ERROR_ARGS = 2
 
 class CallMethod(Action):
-    
+
     action_type = "callMethod"
-    
+
     def apply(
-        self, 
+        self,
         component: Component,
         request, # : ComponentRequest,
     ) -> ActionResult:
-        
+
         method_name, args, kwargs = self.method_config
-        
+
         # return_data
         action_result = ActionResult(
-            self.method_name, 
-            self.method_args, 
+            self.method_name,
+            self.method_args,
             self.method_kwargs,
         )
 
@@ -35,26 +35,26 @@ class CallMethod(Action):
     @property
     def method_str(self):
         return self.payload["name"]
-    
+
     # OPTIMIZE: consider caching because it's used repeatedly
     @property
     def method_config(self):
-        
-        # The "replace" handles the special case where 
+
+        # The "replace" handles the special case where
         # "$parent.some_method" is given in the method_str, which we ignore for
         # now (it is handled in _get_component_with_method)
         method_str = self.method_str.replace("$parent.", "")
-        
+
         # returns a tuple of (method_name, args, kwargs)
         # !!! This is the only place this util is used... Consider refactor
         # and pulling it in here.
         return parse_call_method_name(method_str)
 
     def _get_component_with_method(self, component):
-        
+
         if "$parent" in self.method_str:
             return component
-        
+
         else:
             parent_component = component.parent
             if not parent_component:
@@ -63,15 +63,15 @@ class CallMethod(Action):
                 )
             parent_component.force_render = True
             return parent_component
-    
+
     @property
     def method_name(self):
         return self.method_config[0]
-    
+
     @property
     def method_args(self):
         return self.method_config[1]
-    
+
     @property
     def method_kwargs(self):
         return self.method_config[2]
@@ -113,16 +113,16 @@ class CallMethod(Action):
 
     @classmethod
     def from_dict(cls, data: dict):
-        
+
         # Ideally, we could utilize the `Action.get_action_type_mappings` to
-        # determine all Action types. However, callMethod can lead to various 
+        # determine all Action types. However, callMethod can lead to various
         # subclasses like Refresh/Reset/Toggle.
         # It'd be nice if these subclasses return a different action_type from
         # the frontend but I'm not sure if that's easily achieved.
         # If that's ever added, then this from_dict method can be removed.
         # For now we need to create a CallMethod class and inspect it to
         # decide whether to "punt" it to another Action type.
-        
+
         # local import to prevent circular deps
         from django_unicorn.actions import (
             Refresh,
@@ -132,7 +132,7 @@ class CallMethod(Action):
         )
 
         payload_name = data["payload"]["name"]
-        
+
         # Note: all cases return a different Action subclass
         # if "=" in method_name: --> kwargs give with method
         #     return SetAttr.from_dict(data)
@@ -265,7 +265,7 @@ class CallMethod(Action):
 #                     pass
 
 #                 if is_model:
-#                     DbModel = type_hint  # noqa: N806
+#                     DbModel = type_hint
 #                     key = "pk"
 #                     value = None
 

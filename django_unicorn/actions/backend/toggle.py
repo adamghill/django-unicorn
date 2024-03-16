@@ -1,16 +1,17 @@
-from django_unicorn.components import Component
 from django_unicorn.actions.base import Action, ActionResult
-from django_unicorn.call_method_parser import parse_call_method_name
 from django_unicorn.actions.utils import set_property_value
+from django_unicorn.call_method_parser import parse_call_method_name
+from django_unicorn.components import Component
+
 
 class Toggle(Action):
-    
+
     action_type = "callMethod"
     method_name = "$toggle"
-    
+
     def apply(
-        self, 
-        component: Component, 
+        self,
+        component: Component,
         request, # : ComponentRequest,
     ) -> ActionResult:
         for property_name in self.properties_to_toggle:
