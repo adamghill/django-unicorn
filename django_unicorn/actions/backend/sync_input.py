@@ -1,8 +1,11 @@
-from django_unicorn.actions.base import Action, ActionResult
+
+from django_unicorn.actions.frontend import FrontendAction
 from django_unicorn.components import Component
 
+from .base import BackendAction
 
-class SyncInput(Action):
+
+class SyncInput(BackendAction):
 
     action_type = "syncInput"
 
@@ -10,5 +13,5 @@ class SyncInput(Action):
         self,
         component: Component,
         request, # : ComponentRequest,
-    ) -> ActionResult:
+    ) -> tuple[Component, FrontendAction]:
         raise NotImplementedError()

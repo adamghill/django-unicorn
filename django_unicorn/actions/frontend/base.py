@@ -1,9 +1,6 @@
 import logging
 from abc import ABC, abstractmethod
 
-from django.http.response import HttpResponseRedirect
-
-from django_unicorn.components import HashUpdate, LocationUpdate, PollUpdate
 from django_unicorn.serializer import dumps, loads
 
 logger = logging.getLogger(__name__)
@@ -20,6 +17,11 @@ class FrontendAction(ABC):
     """
 
     def __init__(self, method_name, args=None, kwargs=None, value=None):
+
+        from django.http.response import HttpResponseRedirect
+
+        from django_unicorn.components import HashUpdate, LocationUpdate, PollUpdate
+
         self.method_name = method_name
         self.args = args or []
         self.kwargs = kwargs or {}

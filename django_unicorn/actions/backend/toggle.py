@@ -1,10 +1,13 @@
-from django_unicorn.actions.base import Action, ActionResult
-from django_unicorn.actions.utils import set_property_value
+
+from django_unicorn.actions.frontend import FrontendAction
 from django_unicorn.call_method_parser import parse_call_method_name
 from django_unicorn.components import Component
 
+from .base import BackendAction
+from .utils import set_property_value
 
-class Toggle(Action):
+
+class Toggle(BackendAction):
 
     action_type = "callMethod"
     method_name = "$toggle"
@@ -13,7 +16,7 @@ class Toggle(Action):
         self,
         component: Component,
         request, # : ComponentRequest,
-    ) -> ActionResult:
+    ) -> tuple[Component, FrontendAction]:
         for property_name in self.properties_to_toggle:
             property_value = component._get_property(property_name)
             property_value = not property_value

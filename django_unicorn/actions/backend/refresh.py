@@ -1,9 +1,12 @@
-from django_unicorn.actions.base import Action, ActionResult
+
+from django_unicorn.actions.frontend import FrontendAction
 from django_unicorn.components import Component
 from django_unicorn.views.utils import set_property_from_data
 
+from .base import BackendAction
 
-class Refresh(Action):
+
+class Refresh(BackendAction):
 
     action_type = "callMethod"
     method_name = "$refresh"
@@ -12,7 +15,7 @@ class Refresh(Action):
         self,
         component: Component,
         request, # : ComponentRequest,
-    ) -> Component:
+    ) -> tuple[Component, FrontendAction]:
 
         # grab a clean object - can be from cache
         updated_component = Component.create(

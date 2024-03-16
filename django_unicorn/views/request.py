@@ -1,9 +1,8 @@
 
 import copy
 
-from django_unicorn.actions import (
-    Action,
-    ActionResult,
+from django_unicorn.actions.backend import (
+    BackendAction,
     CallMethod,
     Refresh,
     Reset,
@@ -11,11 +10,11 @@ from django_unicorn.actions import (
     Toggle,
     Validate,
 )
+from django_unicorn.actions.frontend import FrontendAction
 from django_unicorn.components import Component
 from django_unicorn.errors import UnicornViewError
 from django_unicorn.serializer import JSONDecodeError, loads
 from django_unicorn.utils import generate_checksum
-from django_unicorn.views.response import ComponentResponse
 from django_unicorn.views.utils import set_property_from_data
 
 
@@ -58,7 +57,7 @@ class ComponentRequest:
         self.validate_checksum()
 
         action_configs = self.body.get("actionQueue", [])
-        self.action_queue = Action.from_many_dicts(action_configs)
+        self.action_queue = BackendAction.from_many_dicts(action_configs)
 
         # This is populated when `apply_to_component` is called.
         # `UnicornView.update_from_component_request` will also populate it.
@@ -118,7 +117,7 @@ class ComponentRequest:
 
     # OPTIMIZE: consider using @cached_property
     @property
-    def action_types(self) -> list[Action]:
+    def action_types(self) -> list:
         return [type(action) for action in self.action_queue]
 
     @property
@@ -190,7 +189,7 @@ class ComponentRequest:
                 # that *replaces* our Component. This happens with Reset/Refresh
                 updated_component = action_result
                 self.action_results.append(None)
-            elif isinstance(action_result, ActionResult):
+            elif isinstance(action_result, FrontendAction):
                 # These are actions like...
                 #   HttpResponseRedirect, HashUpdate, LocationUpdate, PollUpdate
                 # Which will need to be accessed when generating the response

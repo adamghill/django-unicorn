@@ -1,12 +1,14 @@
 from django.core.exceptions import NON_FIELD_ERRORS, ValidationError
 
-from django_unicorn.actions.base import Action, ActionResult
+from django_unicorn.actions.frontend import FrontendAction
 from django_unicorn.call_method_parser import parse_call_method_name
 from django_unicorn.components import Component
 
+from .base import BackendAction
+
 MIN_VALIDATION_ERROR_ARGS = 2
 
-class CallMethod(Action):
+class CallMethod(BackendAction):
 
     action_type = "callMethod"
 
@@ -14,7 +16,7 @@ class CallMethod(Action):
         self,
         component: Component,
         request, # : ComponentRequest,
-    ) -> ActionResult:
+    ) -> tuple[Component, FrontendAction]:
 
         method_name, args, kwargs = self.method_config
 
@@ -124,7 +126,7 @@ class CallMethod(Action):
         # decide whether to "punt" it to another Action type.
 
         # local import to prevent circular deps
-        from django_unicorn.actions import (
+        from django_unicorn.actions.backend import (
             Refresh,
             Reset,
             Toggle,
@@ -164,7 +166,7 @@ class CallMethod(Action):
 # from django_unicorn.decorators import timed
 # from django_unicorn.typer import cast_value, get_type_hints
 # from django_unicorn.utils import get_method_arguments
-# from django_unicorn.actions.utils import set_property_value
+# from django_unicorn.actions.backend.utils import set_property_value
 # from django_unicorn.views.objects import ComponentRequest, Return
 
 # try:

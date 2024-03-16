@@ -1,6 +1,7 @@
 
 from abc import ABC, abstractmethod
 
+from django_unicorn.actions.frontend import FrontendAction
 from django_unicorn.components import Component
 
 
@@ -25,7 +26,7 @@ class BackendAction(ABC):
             self,
             component: Component,
             request, # : ComponentRequest,
-        ) -> tuple:  # returns a tuple of an FrontendAction + a new Component w. updates
+        ) -> tuple[Component, FrontendAction]:
         """
         Applies the update to the component and returns the ActionResult if
         there is one. Must be defined in all subclasses.
@@ -98,13 +99,13 @@ class BackendAction(ABC):
     def get_action_type_mappings() -> dict:
         """
         Gives a mapping of action_type to the Action subclass that should be
-        used. For example: {"callMethod": django_unicorn.actions.CallMethod}
+        used. For example: {"callMethod": django_unicorn.actions.backend.CallMethod}
         """
         # TODO: We assume only internal Actions for now, but we may want to
         # support customer user Actions.
 
         # local import to prevent circular deps
-        from django_unicorn.actions import (
+        from django_unicorn.backend.actions import (
             CallMethod,
             SyncInput,
         )

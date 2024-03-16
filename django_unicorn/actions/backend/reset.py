@@ -1,8 +1,11 @@
-from django_unicorn.actions.base import Action, ActionResult
+
+from django_unicorn.actions.frontend import FrontendAction
 from django_unicorn.components import Component
 
+from .base import BackendAction
 
-class Reset(Action):
+
+class Reset(BackendAction):
 
     action_type = "callMethod"
     method_name = "$reset"
@@ -11,7 +14,7 @@ class Reset(Action):
         self,
         component: Component,
         request, # : ComponentRequest,
-    ) -> ActionResult:
+    ) -> tuple[Component, FrontendAction]:
 
         # create a clean object
         updated_component = Component.create(
