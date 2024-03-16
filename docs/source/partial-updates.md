@@ -57,7 +57,7 @@ To only target an element `unicorn:key` add the `key` modifier to `unicorn:parti
 :::
 
 ```{note}
-Multiple partials can be targetted by adding multiple attributes to the element.
+Multiple partials can be targeted by adding multiple attributes to the element.
 
 :::{code} html
 :force: true

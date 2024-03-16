@@ -13,7 +13,7 @@ export function setBrowserMocks() {
 }
 
 /**
- * Gets a fake DOM document based on the passed-in HTML fragement.
+ * Gets a fake DOM document based on the passed-in HTML fragment.
  * @param {String} html HTML fragment.
  */
 export function getDocument(html) {
@@ -23,7 +23,7 @@ export function getDocument(html) {
 }
 
 /**
- * Gets a HTMLElement based on the passed-in HTML fragement.
+ * Gets a HTMLElement based on the passed-in HTML fragment.
  * @param {String} html HTML fragment.
  * @param {String} querySelector Selector to use to get the element. Uses the `firstElementChild` if undefined.
  */
@@ -38,7 +38,7 @@ export function getEl(html, querySelector) {
 }
 
 /**
- * Gets a constructed `Element` based on the passed-in HTML fragement.
+ * Gets a constructed `Element` based on the passed-in HTML fragment.
  * @param {String} html HTML fragment.
  * @param {String} querySelector Selector to use to get the element. Uses the `firstElementChild` if undefined.
  */
@@ -74,7 +74,7 @@ function morphdom(initial, merge, options) {
 }
 
 /**
- * Gets a constructed `Component` based on the passed-in HTML fragement.
+ * Gets a constructed `Component` based on the passed-in HTML fragment.
  * @param {String} html THe HTML fragment for the component.
  */
 export function getComponent(html, id, name, data) {

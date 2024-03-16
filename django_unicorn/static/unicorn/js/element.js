@@ -349,7 +349,7 @@ export class Element {
    * Whether the element is a root node or not.
    */
   isRoot() {
-    // A litte hacky, but assume that an element with `unicorn:checksum` is a component root
+    // A little hacky, but assume that an element with `unicorn:checksum` is a component root
     return hasValue(this.el.getAttribute("unicorn:checksum"));
   }
 }

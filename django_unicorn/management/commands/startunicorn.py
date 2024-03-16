@@ -43,8 +43,8 @@ class Command(BaseCommand):
 
     def check_initials_directories(self, app_directory: Path) -> (Dict[str, Path], bool):
         """
-        Checks for directories existance and creates them if necessary.
-        Returns a tuple containing a dictonary `components` and `templates`
+        Checks for directories existence and creates them if necessary.
+        Returns a tuple containing a dictionary `components` and `templates`
         keys, and a boolean indicating if directories were created.
         """
 

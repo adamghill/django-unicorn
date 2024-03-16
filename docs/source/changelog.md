@@ -10,7 +10,7 @@
 
 **Breaking changes**
 
-- Unparseable `kwarg` argument passed into a component will be considered `None` instead of being converted to a string.
+- Unparsable `kwarg` argument passed into a component will be considered `None` instead of being converted to a string.
 
 ```html
 <!-- If `abcde` is not a variable in the template context, it will get set to `name` as `None` whereas before it would get set as 'abcde' -->
@@ -603,7 +603,7 @@ Child components will not *by default* render the parent component anymore. If t
 - [Loading states](loading-states.md) for improved UX.
 - `$event` [special argument](actions.md#events) for `actions`.
 - `u` [unicorn attribute](templates.md#unicorn-attributes).
-- `APPS` [setting](settings.md#apps) for determing where to look for components.
+- `APPS` [setting](settings.md#apps) for determining where to look for components.
 - Add support for parent elements for non-db models.
 - Fix: Handle if `Meta` doesn't exist for db models.
 

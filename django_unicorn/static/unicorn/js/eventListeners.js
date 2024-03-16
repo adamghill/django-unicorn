@@ -4,7 +4,7 @@ import { Element } from "./element.js";
 /**
  * Handles loading elements in the component.
  * @param {Component} component Component.
- * @param {Element} targetElement Targetted element.
+ * @param {Element} targetElement Targeted element.
  */
 function handleLoading(component, targetElement) {
   targetElement.handleLoading();
