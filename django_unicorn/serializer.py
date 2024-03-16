@@ -117,7 +117,7 @@ def _get_m2m_field_serialized(model: Model, field_name) -> List:
     try:
         related_descriptor = getattr(model, field_name)
 
-        # Get `pk` from `all` because it will re-use the cached data if the m-2-m field is prefetched
+        # Get `pk` from `all` because it will reuse the cached data if the m-2-m field is prefetched
         # Using `values_list("pk", flat=True)` or `only()` won't use the cached prefetched values
         pks = [m.pk for m in related_descriptor.all()]
     except ValueError:

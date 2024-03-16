@@ -22,7 +22,7 @@ Once a model event is fired it is sent over the wire to the defined AJAX endpoin
 
 ## Actions
 
-Actions follow a similar path as the models above, however there is a different JSON stucture. Also, the method, arguments, and kwargs that are passed from the front-end get parsed with a mix of `ast.parse` and `ast.literal_eval` to convert the strings into the appropriate Python types (i.e. change the string "1" to the integer `1`). After the component is re-initialized, the method is called with the passed-in arguments and kwargs. Once all of the actions have been called, the component view is re-rendered and the HTML is returned in the response.
+Actions follow a similar path as the models above, however there is a different JSON structure. Also, the method, arguments, and kwargs that are passed from the front-end get parsed with a mix of `ast.parse` and `ast.literal_eval` to convert the strings into the appropriate Python types (i.e. change the string "1" to the integer `1`). After the component is re-initialized, the method is called with the passed-in arguments and kwargs. Once all of the actions have been called, the component view is re-rendered and the HTML is returned in the response.
 
 ## HTML Diff
 
