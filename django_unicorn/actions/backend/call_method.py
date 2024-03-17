@@ -3,6 +3,8 @@ from django.core.exceptions import NON_FIELD_ERRORS, ValidationError
 from django_unicorn.actions.frontend import FrontendAction
 from django_unicorn.call_method_parser import parse_call_method_name
 from django_unicorn.components import Component
+from django_unicorn.typer import cast_value, get_type_hints
+from django_unicorn.utils import get_method_arguments
 
 from .base import BackendAction
 
@@ -138,9 +140,6 @@ class CallMethod(BackendAction):
     def _get_component_with_method(self, component):
 
         if "$parent" in self.method_str:
-            return component
-
-        else:
             parent_component = component.parent
             if not parent_component:
                 raise Exception(
@@ -148,6 +147,9 @@ class CallMethod(BackendAction):
                 )
             parent_component.force_render = True
             return parent_component
+
+        else:
+            return component
 
     @property
     def method_name(self):

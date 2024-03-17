@@ -68,15 +68,13 @@ class UnicornMessageHandler(View):
 
         # bug-check
         assert component_request.has_been_applied
-        
-        breakpoint()  # current place in refactor
 
         # Now that we have our updated component and that our request has been
         # applied to it, the comparison of these two will tell us the proper
-        # repsonse to give
+        # repsonse to give.
         component_response = ComponentResponse.from_inspection(
-            request=component_request,
             component=updated_component,
+            request=component_request,
         )
 
         # returns either Component or ComponentReponse depending on 'return_response'

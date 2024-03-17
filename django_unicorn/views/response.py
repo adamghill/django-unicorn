@@ -1,40 +1,51 @@
 
+import copy
+
+from bs4 import BeautifulSoup, Tag
+from django.http import JsonResponse
+
+from django_unicorn.actions.frontend import FrontendAction
+from django_unicorn.components import Component
+from django_unicorn.components.unicorn_template_response import get_root_element
+from django_unicorn.errors import RenderNotModifiedError
+from django_unicorn.serializer import loads
+from django_unicorn.utils import generate_checksum
+from django_unicorn.views.request import ComponentRequest
+
+
 class ComponentResponse:
     """
     Contains the result of changes made to a Component after a
     ComponentRequest (and its actions) have been applied to it
     """
 
-    def __init__(self, result: dict):
-        breakpoint()
-        # Sort data so it's stable
-        self.data = {key: result["data"][key] for key in sorted(result["data"])}
+    def __init__(self, response_data: dict):
+        self.response_data = response_data
 
     @classmethod
-    def from_inspection(cls, request, component, return_data):
-        # typing: objs of ComponentRequest, Component, Return
+    def from_inspection(cls, component: Component, request: ComponentRequest):
+        # typing: objs of ComponentRequest, Component
 
-        breakpoint()
-
-        original_context = request.data.items()
+        original_context = request.data
         new_context = component.get_frontend_context()
 
+
+        if request.includes_refresh:
+            updated_data = copy(new_context.deepcopy())
         # inspect for special actions & pull out updated_data
-        if not request.is_refresh_called:
-            if not request.is_reset_called:
+        else:
+            if not request.includes_reset:
                 # Get the context that only includes updated data
                 updated_data = {
                     key: value
-                    for key, value in original_context.items()
-                    if new_context.get(key) != value
+                    for key, value in new_context.items()
+                    if original_context.get(key) != value
                 }
 
-            if request.validate_all_fields:
+            if request.includes_validate_all:
                 component.validate()
             else:
                 component.validate(model_names=list(updated_data.keys()))
-        else:
-            updated_data = copy(new_context.deepcopy())
 
         # TODO: Handle redirects and messages by patching request obj...?
         # I'm not sure what's going on here yet
@@ -57,12 +68,10 @@ class ComponentResponse:
 
         # generate the html using the current request
         component_html = component.render(
-            request=request,  # gives the original HttpRequest
+            request=request.request,  # gives the original HttpRequest
         )
 
-        # !!! might want to rename this hook to "post_render"... confused me at first
-        # Also is there an example of when this would be used? And why it takes
-        # the html as input?
+        # hook
         component.rendered(component_html)
 
         # Check if there are partials, and if so, we only want specific
@@ -71,9 +80,10 @@ class ComponentResponse:
             html=component_html,
             partials=request.partials,
         )
+        # !!! why is this separated from the partials section below?
 
-        # base results. we add to & update this below
-        result = {
+        # base response to return. we add to & update this below
+        response_data = {
             "id": request.id,
             "data": updated_data,
             "errors": component.errors,
@@ -82,30 +92,31 @@ class ComponentResponse:
             "checksum": generate_checksum(request.data),
         }
 
-        # add result from the Return object
-        if return_data:
-            result["return"] = return_data.get_data()
-            if return_data.redirect:
-                result["redirect"] = return_data.redirect
-            if return_data.poll:
-                result["poll"] = return_data.poll
-
-        # --------------
-
-        # !!! Code below needs more refactoring
+        # check if the BackendActions returned any FrontendActions, and if so,
+        # make sure these are added
+        if any(request.action_results):
+            # BUG: what if more than FrontendAction is returned? Could this ever
+            # happen? Maybe parallel messages?
+            # For now, we assume there is only one (and the rest are None values).
+            # So we search and break as soon as we find that one
+            for primary_frontend_action in request.action_results:
+                if isinstance(primary_frontend_action, FrontendAction):
+                    break
+            action_data = primary_frontend_action.get_response_data()
+            response_data.update(action_data)
 
         # Grab the relevant html changes in order to set "partials" or "dom"
         # and check if the html has changed at all.
         render_not_modified = False  # until proven otherwise
         if partial_doms:
             soup_root = None
-            result["partials"] = partial_doms
+            response_data["partials"] = partial_doms
         else:
             component_html_hash = generate_checksum(component_html)
 
             if (
                 request.hash == component_html_hash
-                and (not return_data or not return_data.value)
+                and (not any(request.action_results) or not response_data.get("return", {}).get("value", None))
                 and not component.calls
             ):
                 if not component.parent and component.force_render is False:
@@ -121,17 +132,12 @@ class ComponentResponse:
             component_html_cleaned = str(soup_root)
             # !!! Should this be moved to the component.render method?
 
-            result["dom"] = component_html_cleaned
-            result["hash"] = component_html_hash
-
-        # --------------
-
-        # !!! Code below is a big shift from single to child/parent components
+            response_data["dom"] = component_html_cleaned
+            response_data["hash"] = component_html_hash
 
         # Iteratively check parent objects in can we need to update its dom instead
-        # !!! what about iteratively checking children...?
         parent_component = component.parent
-        parent_result = result
+        parent_result = response_data
         while parent_component:
             if parent_component.force_render is True:
                 # TODO: Should parent_component.hydrate() be called?
@@ -171,7 +177,7 @@ class ComponentResponse:
                     parent_dom = str(parent_soup)
 
                     # Remove the child DOM from the payload since the parent DOM supersedes it
-                    result["dom"] = None
+                    response_data["dom"] = None
 
                     parent.update(
                         {
@@ -182,24 +188,26 @@ class ComponentResponse:
                         }
                     )
 
-            if render_not_modified:
-                # TODO: Determine if all parents have not changed and return a 304 if
-                # that's the case
-                # i.e. render_not_modified = render_not_modified and (parent hash test)
-                pass
+                if render_not_modified:
+                    # TODO: Determine if all parents have not changed and return a 304 if
+                    # that's the case
+                    # i.e. render_not_modified = render_not_modified and (parent hash test)
+                    pass
 
-            parent_result.update({"parent": parent})
-            parent_result = parent
+                parent_result.update({"parent": parent})
+                parent_result = parent
 
-        component = parent_component
-        parent_component = parent_component.parent
+            component = parent_component
+            parent_component = parent_component.parent
 
-        return cls(result)
+        # Sort data keys so it's stable
+        response_data["data"] = dict(sorted(response_data["data"].items()))
+
+        return cls(response_data)
 
     def to_json_response(self):
-        breakpoint()
         return JsonResponse(
-            data=self.updates,
+            data=self.response_data,
             json_dumps_params={"separators": (",", ":")},
         )
 

@@ -14,6 +14,7 @@ from django.db.models import Model
 from django.forms.widgets import CheckboxInput, Select
 from django.http import HttpRequest
 from django.utils.decorators import classonlymethod
+from django.utils.safestring import mark_safe
 from django.views.generic.base import TemplateView
 
 from django_unicorn import serializer

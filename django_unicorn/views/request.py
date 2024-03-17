@@ -129,7 +129,7 @@ class ComponentRequest:
         return Reset in self.action_types
 
     @property
-    def includes_validate(self) -> bool:
+    def includes_validate_all(self) -> bool:
         return Validate in self.action_types
 
     @property
@@ -185,7 +185,7 @@ class ComponentRequest:
                 component=updated_component,
                 request=self,  # only used by Reset & Refresh
             )
-            
+
             # OPTIMIZE: consider type check
             # if (
             #         not isinstance(updated_component, Component)

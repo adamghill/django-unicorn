@@ -87,3 +87,13 @@ class FrontendAction(ABC):
             logger.exception(e)
 
         return {}
+
+    def get_response_data(self):
+        """
+        Builds on top of to_dict to format the ComponentResponse. This is needed
+        because sometimes the response data for this frontend action is needed
+        in multiple places (see PollUpdate as an example).
+        
+        By default it only updates the "return" value
+        """
+        return {"return": self.to_dict()}
