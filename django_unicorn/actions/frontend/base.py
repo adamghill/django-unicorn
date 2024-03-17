@@ -1,9 +1,8 @@
-import logging
+
 from abc import ABC, abstractmethod
 
-from django_unicorn.serializer import dumps, loads
+from django_unicorn.serializer import JSONDecodeError, dumps, loads
 
-logger = logging.getLogger(__name__)
 
 class FrontendAction(ABC):
     """
@@ -16,46 +15,65 @@ class FrontendAction(ABC):
     process is managed by a ComponentRequest.
     """
 
-    def __init__(self, method_name, args=None, kwargs=None, value=None):
+    method_name: str = None
+    """
+    Name of the Component method that provided this FrontendAction
+    """
 
-        from django.http.response import HttpResponseRedirect
+    method_args: list[str] = None
+    """
+    List of args that were used in creating this FrontendAction
+    """
 
-        from django_unicorn.components import HashUpdate, LocationUpdate, PollUpdate
+    method_kwargs: list[str] = None
+    """
+    List of kwargs that were used in creating this FrontendAction
+    """
 
+    @property
+    def is_metadata_set(self) -> bool:
+        if None in (self.method_name, self.method_args, self.method_kwargs):
+            return False
+        else:
+            return True
+
+    def set_metadata(self, method_name, args: list = None, kwargs: dict=None):
+        """
+        The frontend often needs to know where this FrontendAction came from.
+        This is method is often used in 
+        """
         self.method_name = method_name
-        self.args = args or []
-        self.kwargs = kwargs or {}
-        self.redirect = {}
-        self.poll = {}
+        self.method_args = args if args is not None else []
+        self.method_kwargs = kwargs if kwargs is not None else {}
 
-        # TODO: Support a tuple/list return_value which could contain
-        # multiple values
-        self.value = value or {}
-        if isinstance(value, HttpResponseRedirect):
-            self.redirect = {
-                "url": value.url,
-            }
-        elif isinstance(value, HashUpdate):
-            self.redirect = {
-                "hash": value.hash,
-            }
-        elif isinstance(value, LocationUpdate):
-            self.redirect = {
-                "url": value.redirect.url,
-                "refresh": True,
-                "title": value.title,
-            }
-        elif isinstance(value, PollUpdate):
-            self.poll = value.to_json()
+    @abstractmethod
+    def get_payload_value() -> any:
+        """
+        Sets what should be returned with the 'value' key in the final dict
+        
+        This can be treated as an abstractmethod and overwritten in subclasses.
+        By default the __dict__ of the class will be returned
+        """
+        return self.value
 
-        if self.redirect:
-            self.value = self.redirect
 
-    def get_data(self, raise_errors: bool = False):
+    def to_dict(self) -> dict:
+        """
+        Converts this action to dictionary for the frontend to use.
+        All values in the {key: value} output must be json-serialized or as 
+        basic python types (str, int, float, boolean).
+        """
+        # bug-check
+        assert self.is_metadata_set
+
         try:
-            serialized_value = loads(dumps(self.value))
-            serialized_args = loads(dumps(self.args))
-            serialized_kwargs = loads(dumps(self.kwargs))
+
+            value = self.get_payload_value()
+
+            # json-serialize
+            serialized_value = loads(dumps(value))
+            serialized_args = loads(dumps(self.method_args))
+            serialized_kwargs = loads(dumps(self.method_kwargs))
 
             return {
                 "method": self.method_name,
@@ -63,10 +81,9 @@ class FrontendAction(ABC):
                 "kwargs": serialized_kwargs,
                 "value": serialized_value,
             }
+
         except Exception as e:
-            if raise_errors:
-                raise e
-            else:
-                logger.exception(e)
+            # !!! Why do we fail silently here? - @jacksund
+            logger.exception(e)
 
         return {}

@@ -13,3 +13,9 @@ class HashUpdate(FrontendAction):
             param url_hash: The URL hash to change. Example: `#model-123`.
         """
         self.hash = url_hash
+
+
+    # elif isinstance(value, HashUpdate):
+    #     self.redirect = {
+    #         "hash": value.hash,
+    #     }

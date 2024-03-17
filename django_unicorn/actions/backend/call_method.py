@@ -63,6 +63,9 @@ class CallMethod(BackendAction):
         request, # : ComponentRequest,
     ) -> tuple[Component, FrontendAction]:
 
+        # local import to prevent circular dep
+        from django_unicorn.actions.frontend import MethodResult
+
         # Get all information needed for us to apply the method
         component_with_method = self._get_component_with_method(component)
         method_name = self.method_name
@@ -87,16 +90,25 @@ class CallMethod(BackendAction):
             # call post-method hook
             component_with_method.called(method_name, method_args)
 
-            breakpoint()  # works up to here
-            # generate the output to use in the ComponentResponse
-            action_result = FrontendAction(
+            # ------------- TODO: improve this section's refactor -------------
+            # This should not be handled within callMethod but instead at a
+            # higher level. Or maybe `set_metadata` only needs to be called
+            # with CallMethod actions...?
+
+            # if its not already a subclass object, then we wrap it in a MethodResult,
+            # which also subclasses FrontendAction
+            if not isinstance(method_return_value, FrontendAction):
+                method_return_value = MethodResult(value=method_return_value)
+
+            # Unicorn frontend needs to know where this FrontendAction came from
+            method_return_value.set_metadata(
                 method_name,
                 method_args,
                 method_kwargs,
-                value = method_return_value,
             )
+            # -----------------------------------------------------------------
 
-            return component, return_data
+            return component, method_return_value
 
         except ValidationError as e:
             self._apply_validation_error(component, e)

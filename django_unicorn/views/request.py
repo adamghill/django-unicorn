@@ -173,6 +173,7 @@ class ComponentRequest:
                 property_value,
             )
 
+        # hook
         updated_component.hydrate()
 
         # Apply all actions AND store the ActionResult objects to this Request
@@ -180,25 +181,25 @@ class ComponentRequest:
         for action in self.action_queue:
             # Action's apply methods can return several different types,
             # which tell us how to react.
-            action_result = action.apply(
+            updated_component, frontend_action = action.apply(
                 component=updated_component,
                 request=self,  # only used by Reset & Refresh
             )
-            if isinstance(action_result, Component):
-                # If a Component is returned, then we've recieved some Action
-                # that *replaces* our Component. This happens with Reset/Refresh
-                updated_component = action_result
-                self.action_results.append(None)
-            elif isinstance(action_result, FrontendAction):
-                # These are actions like...
-                #   HttpResponseRedirect, HashUpdate, LocationUpdate, PollUpdate
-                # Which will need to be accessed when generating the response
-                self.action_results.append(action_result)
-            else:
-                raise TypeError(
-                    f"Unknown type returned from 'Action.apply': {type(action_result)}"
-                )
+            
+            # OPTIMIZE: consider type check
+            # if (
+            #         not isinstance(updated_component, Component)
+            #         or not isinstance(frontend_action, FrontendAction)
+            #     ):
+            #     raise TypeError(
+            #         "Unknown type(s) returned from 'Action.apply'. "
+            #         "Expected types Component and FrontendAction, but recieved "
+            #         f"{type(updated_component)} and {type(frontend_action)}"
+            #     )
 
+            self.action_results.append(frontend_action)
+
+        # hook
         updated_component.complete()
 
         # !!! is there a better place to call this?

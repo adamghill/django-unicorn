@@ -17,3 +17,10 @@ class LocationUpdate(FrontendAction):
         """
         self.redirect = redirect
         self.title = title
+
+    # elif isinstance(value, LocationUpdate):
+    #     self.redirect = {
+    #         "url": value.redirect.url,
+    #         "refresh": True,
+    #         "title": value.title,
+    #     }

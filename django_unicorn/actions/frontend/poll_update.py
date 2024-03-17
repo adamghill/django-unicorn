@@ -25,3 +25,10 @@ class PollUpdate(FrontendAction):
         self.timing = timing
         self.method = method
         self.disable = disable
+
+    def get_payload_value(self):
+        return {
+            "timing": self.timing,
+            "method": self.method,
+            "disable": self.disable,
+        }
