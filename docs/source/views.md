@@ -325,7 +325,7 @@ Classes that derive from `UnicornView` can include a `Meta` class that provides 
 
 ### exclude
 
-By default, all public attributes of the component are included in the context of the Django template and available to JavaScript. One way to protect internal-only data is to prefix the atteibute name with `_` to indicate it should stay private.
+By default, all public attributes of the component are included in the context of the Django template and available to JavaScript. One way to protect internal-only data is to prefix the attribute name with `_` to indicate it should stay private.
 
 ```python
 # hello_state.py
