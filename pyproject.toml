@@ -21,6 +21,9 @@ orjson = ">=3.6.0"
 shortuuid = ">=1.0.1"
 cachetools = ">=4.1.1"
 decorator = ">=4.4.2"
+transformd = ">=0.3.0"
+
+# htmlmin extras
 htmlmin = { version = "^0", optional = true }
 
 # docs extras
