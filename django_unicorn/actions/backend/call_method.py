@@ -1,4 +1,7 @@
+from typing import Union
+
 from django.core.exceptions import NON_FIELD_ERRORS, ValidationError
+from django.db.models import Model
 
 from django_unicorn.actions.frontend import FrontendAction
 from django_unicorn.call_method_parser import parse_call_method_name
@@ -7,6 +10,14 @@ from django_unicorn.typer import cast_value, get_type_hints
 from django_unicorn.utils import get_method_arguments
 
 from .base import BackendAction
+
+try:
+    from typing import get_origin
+except ImportError:
+
+    def get_origin(type_hint):
+        if hasattr(type_hint, "__origin__"):
+            return type_hint.__origin__
 
 MIN_VALIDATION_ERROR_ARGS = 2
 
