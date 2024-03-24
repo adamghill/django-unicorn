@@ -110,7 +110,7 @@ class ComponentRequest:
             raise AssertionError("Checksum does not match")
 
     @property
-    def partials(self) -> bool:
+    def partials(self) -> list:
         return [
             partial for action in self.action_queue for partial in action.partials
         ]

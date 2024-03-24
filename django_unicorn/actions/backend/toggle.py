@@ -17,7 +17,6 @@ class Toggle(BackendAction):
         component: Component,
         request, # : ComponentRequest,
     ) -> tuple[Component, FrontendAction]:
-
         for property_name in self.properties_to_toggle:
             property_value = component._get_property(property_name)
 
@@ -37,5 +36,5 @@ class Toggle(BackendAction):
     def properties_to_toggle(self):
         # !!! Code is pretty much copy/pasted from CallMethod's method_config
         # so I need to continue the refactor here.
-        method_str = self.method_str.replace("$parent.", "")
+        method_str = self.payload["name"].replace("$parent.", "")
         return parse_call_method_name(method_str)[1]  # 2nd element in tuple is "args"

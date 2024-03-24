@@ -36,8 +36,8 @@ class BackendAction(ABC):
     # --- Built-in methods ---
 
     def __init__(self, payload: dict, partials: list):
-        self.payload = payload
-        self.partials = partials
+        self.payload = payload if payload is not None else {}
+        self.partials = partials if partials is not None else []
 
     def __repr__(self):
         return (

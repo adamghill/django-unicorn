@@ -10,9 +10,11 @@ class Validate(BackendAction):
     action_type = "callMethod"
     method_name = "$validate"
 
-    def apply(self, component: Component) -> tuple[Component, FrontendAction]:
-        raise NotImplementedError()
-        # Handle the validate special action
-        validate_all_fields = True
-
-        # !!! where is this actually done...?
+    def apply(
+        self,
+        component: Component,
+        request, # : ComponentRequest,
+    ) -> tuple[Component, FrontendAction]:
+        # !!! This duplicates work done in ComponentResponse.from_context
+        component.validate()
+        return component, None

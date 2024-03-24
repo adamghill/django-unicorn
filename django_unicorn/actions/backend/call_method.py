@@ -57,10 +57,10 @@ class CallMethod(BackendAction):
             return Reset.from_dict(data)
         elif method_str == "$refresh":
             return Refresh.from_dict(data)
-        elif method_str == "$toggle":
-            return Toggle.from_dict(data)
         elif method_str == "$validate":
             return Validate.from_dict(data)
+        elif method_str.startswith("$toggle"):
+            return Toggle.from_dict(data)
         elif "=" in method_str and "(" not in method_str:
             # e.g. 'some_attribute=123'
             # but NOT something like 'some_method(key=123)'

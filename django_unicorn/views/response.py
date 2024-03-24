@@ -29,22 +29,21 @@ class ComponentResponse:
         original_context = request.data
         new_context = component.get_frontend_context()
 
-
-        if request.includes_refresh:
-            updated_data = copy(new_context.deepcopy())
-        # inspect for special actions & pull out updated_data
+        if request.includes_reset:
+            # provide all fields on reset
+            updated_data = copy.deepcopy(new_context)
         else:
-            if not request.includes_reset:
-                # Get the context that only includes updated data
-                updated_data = {
-                    key: value
-                    for key, value in new_context.items()
-                    if original_context.get(key) != value
-                }
+            # provide only updated fields on non-reset
+            updated_data = {
+                key: value
+                for key, value in new_context.items()
+                if original_context.get(key) != value
+            }
 
-            if request.includes_validate_all:
-                component.validate()
-            else:
+            # Validation is only needed on non-reset calls.
+            # Also, $validate is handled within the Validate BackendAction, so
+            # if it was called, we don't need to re-validate things here
+            if not request.includes_validate_all:
                 component.validate(model_names=list(updated_data.keys()))
 
         # TODO: Handle redirects and messages by patching request obj...?
