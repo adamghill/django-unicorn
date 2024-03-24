@@ -2,6 +2,7 @@ from typing import Union
 
 from django.core.exceptions import NON_FIELD_ERRORS, ValidationError
 from django.db.models import Model
+from django.http.response import HttpResponseRedirect
 
 from django_unicorn.actions.frontend import FrontendAction
 from django_unicorn.call_method_parser import parse_call_method_name
@@ -76,9 +77,6 @@ class CallMethod(BackendAction):
         request, # : ComponentRequest,
     ) -> tuple[Component, FrontendAction]:
 
-        # local import to prevent circular dep
-        from django_unicorn.actions.frontend import MethodResult
-
         # Get all information needed for us to apply the method
         component_with_method = self._get_component_with_method(component)
         method_name = self.method_name
@@ -111,7 +109,15 @@ class CallMethod(BackendAction):
             # if its not already a subclass object, then we wrap it in a MethodResult,
             # which also subclasses FrontendAction
             if not isinstance(method_return_value, FrontendAction):
-                method_return_value = MethodResult(value=method_return_value)
+
+                # local import to prevent circular deps
+                from django_unicorn.actions.frontend import MethodResult, Redirect
+
+                # special case: redirect objects need are converted to Redirect
+                if isinstance(method_return_value, HttpResponseRedirect):
+                    method_return_value = Redirect.from_django(method_return_value)
+                else:
+                    method_return_value = MethodResult(value=method_return_value)
 
             # Unicorn frontend needs to know where this FrontendAction came from
             method_return_value.set_metadata(

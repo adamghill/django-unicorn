@@ -1,8 +1,10 @@
 
+import logging
 from abc import ABC, abstractmethod
 
-from django_unicorn.serializer import JSONDecodeError, dumps, loads
+from django_unicorn.serializer import dumps, loads
 
+logger = logging.getLogger(__name__)
 
 class FrontendAction(ABC):
     """
@@ -47,7 +49,7 @@ class FrontendAction(ABC):
         self.method_kwargs = kwargs if kwargs is not None else {}
 
     @abstractmethod
-    def get_payload_value() -> any:
+    def get_payload_value(self) -> any:
         """
         Sets what should be returned with the 'value' key in the final dict
         
