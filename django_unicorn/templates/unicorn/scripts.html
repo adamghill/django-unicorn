@@ -6,7 +6,7 @@
   var useCsrfToken = "{{ USE_CSRF_TOKEN }}" == "True";
 </script>
 {% if MINIFIED %}
-<script src="{% static 'unicorn/js/unicorn.min.js' %}?bust=20231110"></script>
+<script src="{% static 'unicorn/js/unicorn.min.js' %}?bust=20240329"></script>
 
 <script>
   const url = "{% url 'django_unicorn:message' %}";
