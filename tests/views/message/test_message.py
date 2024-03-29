@@ -98,7 +98,7 @@ def test_message_component_module_not_loaded(client):
         e.exconly()
         == "django_unicorn.errors.ComponentModuleLoadError: The component module 'test' could not be loaded."
     )
-    assert e.value.locations == [("unicorn.components.test", "TestView")]
+    assert e.value.locations == [("unicorn.components.test", "TestView"), ("components.test", "TestView")]
 
 
 def test_message_component_class_not_loaded(client):
@@ -126,6 +126,10 @@ has no attribute 'FakeComponentNotThere'"
         ("tests.views.fake_components", "FakeComponentNotThere"),
         (
             "unicorn.components.tests.views.fake_components.FakeComponentNotThere",
+            "FakecomponentnotthereView",
+        ),
+        (
+            "components.tests.views.fake_components.FakeComponentNotThere",
             "FakecomponentnotthereView",
         ),
     ]

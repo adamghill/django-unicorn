@@ -7,8 +7,7 @@ from functools import lru_cache
 from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Type
 
 import shortuuid
-from django.apps import AppConfig
-from django.conf import settings
+from django.apps import apps as django_apps_module
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models import Model
 from django.forms.widgets import CheckboxInput, Select
@@ -106,30 +105,17 @@ def get_locations(component_name: str) -> List[Tuple[str, str]]:
     class_name = f"{class_name}View"
     module_name = convert_to_snake_case(component_name)
 
-    unicorn_apps = get_setting("APPS", settings.INSTALLED_APPS)
+    # note - app_config.name gives the python path
+    all_django_apps = [app_config.name for app_config in django_apps_module.get_app_configs()]
+    unicorn_apps = get_setting("APPS", all_django_apps)
 
     if not is_non_string_sequence(unicorn_apps):
         raise AssertionError("APPS is expected to be a list, tuple or set")
 
-    for app in unicorn_apps:
-        # Handle an installed app that actually points to an app config
-        if ".apps." in app:
-            is_app_config = True  # default to True for backwards compatibility
-            app_config_idx = app.rindex(".apps.")
+    locations += [(f"{app}.components.{module_name}", class_name) for app in unicorn_apps]
 
-            try:
-                app_config_module_name = app[: app_config_idx + 5]
-                app_config_class_name = app[app_config_idx + 6 :]
-                app_config_module = importlib.import_module(app_config_module_name)
-                is_app_config = type(getattr(app_config_module, app_config_class_name)) == type(AppConfig)
-            except ModuleNotFoundError:
-                pass
-
-            if is_app_config:
-                app = app[:app_config_idx]  # noqa: PLW2901
-
-        app_module_name = f"{app}.components.{module_name}"
-        locations.append((app_module_name, class_name))
+    # Add default directory to the end of the list as a fallback
+    locations.append((f"components.{module_name}", class_name))
 
     return locations
 
@@ -392,8 +378,6 @@ class UnicornView(TemplateView):
 
         self.mount()
         self.hydrate()
-
-        self._cache_component(**kwargs)
 
         return self.render_to_response(
             context=self.get_context_data(),

@@ -191,7 +191,24 @@ class HelloWorldView(UnicornView):
 
 ### force_render
 
-Forces the component to render. This is not normally needed for the current component, but is sometimes needed for a parent component.
+Forces the component to render. This is not normally needed for the current component, but is sometimes needed when a child component needs a parent to re-render.
+
+```python
+# filter.py
+from django_unicorn.components import UnicornView
+
+class FilterView(UnicornView):
+    search = ""
+
+    def updated_search(self, query):
+        self.parent.load_table()
+
+        if query:
+            self.parent.books = list(filter(lambda f: query.lower() in f.name.lower(), self.parent.books))
+
+        # Forces the parent to re-render instead of just the current child component
+        self.parent.force_render = True
+```
 
 ## Custom methods
 

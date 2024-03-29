@@ -78,6 +78,28 @@ def test_get_root_element_direct_view_u():
     assert str(actual) == expected
 
 
+def test_get_root_element_as_direct_view_unicorn():
+    # Annoyingly beautifulsoup adds a blank string on the attribute
+    expected = '<div unicorn:view="">test</div>'
+
+    component_html = "<div unicorn:view>test</div>"
+    soup = BeautifulSoup(component_html, features="html.parser")
+    actual = get_root_element(soup)
+
+    assert str(actual) == expected
+
+
+def test_get_root_element_as_direct_view_u():
+    # Annoyingly beautifulsoup adds a blank string on the attribute
+    expected = '<div u:view="">test</div>'
+
+    component_html = "<div u:view>test</div>"
+    soup = BeautifulSoup(component_html, features="html.parser")
+    actual = get_root_element(soup)
+
+    assert str(actual) == expected
+
+
 def test_get_root_element_direct_view_no_view():
     component_html = "<html><head></head>≤body><div>test</div></body></html>"
     soup = BeautifulSoup(component_html, features="html.parser")
