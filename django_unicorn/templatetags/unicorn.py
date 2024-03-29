@@ -53,17 +53,21 @@ def unicorn(parser, token):
 
     args = []
     kwargs = {}
+    unparseable_kwargs = {}
 
     for arg in contents[2:]:
         try:
-            parsed_kwarg = parse_kwarg(arg)
+            parsed_kwarg = parse_kwarg(arg, raise_if_unparseable=True)
             kwargs.update(parsed_kwarg)
         except InvalidKwargError:
             # Assume it's an arg if invalid kwarg and kwargs is empty
             if not kwargs:
                 args.append(arg)
+        except ValueError:
+            parsed_kwarg = parse_kwarg(arg, raise_if_unparseable=False)
+            unparseable_kwargs.update(parsed_kwarg)
 
-    return UnicornNode(component_name, args, kwargs)
+    return UnicornNode(component_name, args, kwargs, unparseable_kwargs)
 
 
 class UnicornNode(template.Node):
@@ -72,10 +76,12 @@ class UnicornNode(template.Node):
         component_name: FilterExpression,
         args: Optional[List] = None,
         kwargs: Optional[Dict] = None,
+        unparseable_kwargs: Optional[Dict] = None,
     ):
         self.component_name = component_name
         self.args = args if args is not None else []
         self.kwargs = kwargs if kwargs is not None else {}
+        self.unparseable_kwargs = unparseable_kwargs if unparseable_kwargs is not None else {}
         self.component_key = ""
         self.parent = None
 
@@ -93,9 +99,9 @@ class UnicornNode(template.Node):
             resolved_arg = template.Variable(value).resolve(context)
             resolved_args.append(resolved_arg)
 
-        resolved_kwargs = {}
+        resolved_kwargs = self.kwargs.copy()
 
-        for key, value in self.kwargs.items():
+        for key, value in self.unparseable_kwargs.items():
             try:
                 resolved_value = template.Variable(value).resolve(context)
 
@@ -114,8 +120,6 @@ class UnicornNode(template.Node):
             except TypeError:
                 resolved_kwargs.update({key: value})
             except template.VariableDoesNotExist:
-                resolved_kwargs.update({key: value})
-
                 if value.endswith(".id"):
                     pk_val = value.replace(".id", ".pk")
 
@@ -124,7 +128,7 @@ class UnicornNode(template.Node):
                     except TypeError:
                         resolved_kwargs.update({key: value})
                     except template.VariableDoesNotExist:
-                        resolved_kwargs.update({key: value})
+                        pass
 
         if "key" in resolved_kwargs:
             self.component_key = resolved_kwargs.pop("key")

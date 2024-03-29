@@ -25,6 +25,10 @@ Available additional settings that can be set to `UNICORN` dict in settings.py w
 
 ## Customization changelog
 
+### 0.60.0.1 - (2024-03-29)
+
+- No customizations, just sync with main package.
+
 ### 0.58.1.2 - (2024-01-10)
 
 - add optional `CHECK_CHECKSUM_MATCH` setting which is set by default to True. If turned off, `unicorn` does not perform data checksum check on each request.
@@ -291,6 +295,8 @@ Thanks to the following wonderful people ([emoji key](https://allcontributors.or
       <td align="center" valign="top" width="14.28%"><a href="https://digitalpinup.art"><img src="https://avatars.githubusercontent.com/u/1392097?v=4?s=100" width="100px;" alt="Pierre"/><br /><sub><b>Pierre</b></sub></a><br /><a href="https://github.com/adamghill/django-unicorn/commits?author=bloodywing" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://roman.pt"><img src="https://avatars.githubusercontent.com/u/75075?v=4?s=100" width="100px;" alt="Roman Imankulov"/><br /><sub><b>Roman Imankulov</b></sub></a><br /><a href="https://github.com/adamghill/django-unicorn/commits?author=imankulov" title="Tests">⚠️</a> <a href="https://github.com/adamghill/django-unicorn/commits?author=imankulov" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/rhymiz"><img src="https://avatars.githubusercontent.com/u/7029352?v=4?s=100" width="100px;" alt="Lemi Boyce"/><br /><sub><b>Lemi Boyce</b></sub></a><br /><a href="https://github.com/adamghill/django-unicorn/commits?author=rhymiz" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="http://jacksund.github.io"><img src="https://avatars.githubusercontent.com/u/47992949?v=4?s=100" width="100px;" alt="Jack Sundberg"/><br /><sub><b>Jack Sundberg</b></sub></a><br /><a href="https://github.com/adamghill/django-unicorn/commits?author=jacksund" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/siliconcow"><img src="https://avatars.githubusercontent.com/u/908362?v=4?s=100" width="100px;" alt="siliconcow"/><br /><sub><b>siliconcow</b></sub></a><br /><a href="https://github.com/adamghill/django-unicorn/commits?author=siliconcow" title="Code">💻</a> <a href="https://github.com/adamghill/django-unicorn/commits?author=siliconcow" title="Tests">⚠️</a></td>
     </tr>
   </tbody>
 </table>

@@ -240,6 +240,25 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "jacksund",
+      "name": "Jack Sundberg",
+      "avatar_url": "https://avatars.githubusercontent.com/u/47992949?v=4",
+      "profile": "http://jacksund.github.io",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "siliconcow",
+      "name": "siliconcow",
+      "avatar_url": "https://avatars.githubusercontent.com/u/908362?v=4",
+      "profile": "https://github.com/siliconcow",
+      "contributions": [
+        "code",
+        "test"
+      ]
     }
   ],
   "contributorsPerLine": 7,

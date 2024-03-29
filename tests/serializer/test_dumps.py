@@ -8,6 +8,7 @@ from typing import Dict
 import pytest
 from django.db import models
 from django.utils.timezone import now
+from pydantic import BaseModel
 
 from django_unicorn import serializer
 from django_unicorn.serializer import InvalidFieldAttributeError, InvalidFieldNameError
@@ -698,8 +699,6 @@ def test_nested_list_float_less_complicated():
 
 
 def test_pydantic():
-    from pydantic import BaseModel
-
     class Book(BaseModel):
         title = "The Grapes of Wrath"
         author = "John Steinbeck"

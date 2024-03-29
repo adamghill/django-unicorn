@@ -5,10 +5,15 @@
 
 <h2>Index</h2>
 
-<button onclick="Unicorn.call('unicorn.components.hello_world.HelloWorldView', 'set_name');">Method call from outside of the component</button>
+<button onclick="Unicorn.call('unicorn.components.hello_world.HelloWorldView', 'set_name');">
+  Method call from outside of the component
+</button>
 
-<button onclick="alert(Unicorn.getReturnValue('unicorn.components.hello_world.HelloWorldView'));">Last return value from component</button>
+<button onclick="alert(Unicorn.getReturnValue('unicorn.components.hello_world.HelloWorldView'));">
+  Last return value from component
+</button>
 
-{% unicorn 'unicorn.components.hello_world.HelloWorldView' %}
+<!-- abcdf should be ignored and name will be None -->
+{% unicorn 'unicorn.components.hello_world.HelloWorldView' name=abcdf %}
 
 {% endblock content %}
