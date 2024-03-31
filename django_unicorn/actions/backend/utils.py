@@ -5,6 +5,13 @@ from django.db.models import QuerySet
 from django_unicorn.components import UnicornView
 from django_unicorn.decorators import timed
 
+# BUG: request data should never be updated. Making it immutible
+# lets us look backwards and see the original request data and run checks along
+# the way. So I remove passing the 'data'  kwarg in calls to this util
+# (such as in SyncInput). I don't see any other areas this is used, but to be
+# safe, I leave the data kwarg here for now - @jacksund
+
+# TODO: convert set_property_value util to a Component method
 
 @timed
 def set_property_value(

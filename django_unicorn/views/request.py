@@ -97,8 +97,8 @@ class ComponentRequest:
         Returns:
             Raises `AssertionError` if the checksums don't match.
         """
-        checksum = self.body.get("checksum")
 
+        checksum = self.body.get("checksum")
         if not checksum:
             # TODO: Raise specific exception
             raise AssertionError("Missing checksum")

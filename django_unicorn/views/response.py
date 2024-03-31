@@ -87,8 +87,8 @@ class ComponentResponse:
             "data": updated_data,
             "errors": component.errors,
             "calls": component.calls,
-            # !!! should I checksum the request or the response data?
-            "checksum": generate_checksum(request.data),
+            # use full context to generate the checksum, even if there are partials
+            "checksum": generate_checksum(new_context),
         }
 
         # check if the BackendActions returned any FrontendActions, and if so,

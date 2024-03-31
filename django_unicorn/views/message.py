@@ -36,7 +36,6 @@ class UnicornMessageHandler(View):
         # ComponentRequest input/subclass, rather than an HttpRequest.
         # (django-htmx can be used by example on how to do this)
         component_request = ComponentRequest(request, component_name)
-        print(component_request.action_queue)
 
         # check whether we are running things in serial (the default) or queueing
         use_queue = get_serial_enabled()

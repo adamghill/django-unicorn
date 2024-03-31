@@ -17,7 +17,6 @@ class SetAttribute(BackendAction):
         request, # : ComponentRequest,
     ) -> tuple[Component, FrontendAction]:
 
-        # TODO: convert set_property_value to a Component method
         set_property_value(
             component,
             self.attribute_to_set,

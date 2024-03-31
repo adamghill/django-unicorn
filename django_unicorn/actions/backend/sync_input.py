@@ -1,4 +1,5 @@
 
+from django_unicorn.actions.backend.utils import set_property_value
 from django_unicorn.actions.frontend import FrontendAction
 from django_unicorn.components import Component
 
@@ -14,7 +15,14 @@ class SyncInput(BackendAction):
         component: Component,
         request, # : ComponentRequest,
     ) -> tuple[Component, FrontendAction]:
-        raise NotImplementedError()
+
+        property_name = self.payload["name"]
+        property_value = self.payload["value"]
+        set_property_value(
+            component,
+            property_name,
+            property_value,
+        )
 
         # no FrontendAction needed
-        return updated_component, None
+        return component, None

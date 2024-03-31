@@ -18,10 +18,6 @@ class LocationUpdate(FrontendAction):
         self.url = redirect.url
         self.title = title
 
-    # @classmethod
-    # def from_django(cls, redirect: HttpResponseRedirect):
-    #     return cls(url=redirect.url)
-
     def get_payload_value(self):
         return {
             "refresh": True,
