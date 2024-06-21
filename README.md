@@ -9,6 +9,7 @@
 
 ![PyPI](https://img.shields.io/pypi/v/django-unicorn?color=blue&style=flat-square)
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/django-unicorn?color=blue&style=flat-square)
+![coverage](badges/coverage.svg)
 ![GitHub Sponsors](https://img.shields.io/github/sponsors/adamghill?color=blue&style=flat-square)
 [![All Contributors](https://img.shields.io/badge/all_contributors-17-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE - Do not remove or modify above line -->
