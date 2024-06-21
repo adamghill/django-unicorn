@@ -48,7 +48,7 @@ django-stubs = "*"
 pytest-django = "*"
 django-mock-queries = "^2.1.5"
 pydantic = "^1"
-pywatchman = "*"
+#pywatchman = "*"
 django-redis = "^4.12.1"
 nox = "*"
 poethepoet = "*"
@@ -56,6 +56,7 @@ coverage = {extras = ["toml"], version = "*"}
 pytest-cov = "*"
 pytest-benchmark = "*"
 ruff = "*"
+genbadge = "*"
 
 [tool.ruff]
 src = ["django_unicorn"]
