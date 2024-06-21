@@ -56,7 +56,7 @@ coverage = {extras = ["toml"], version = "*"}
 pytest-cov = "*"
 pytest-benchmark = "*"
 ruff = "*"
-genbadge = "*"
+genbadge = {extras = ["all"], version = "^1.1.1"}
 
 [tool.ruff]
 src = ["django_unicorn"]
