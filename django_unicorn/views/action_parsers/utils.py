@@ -12,6 +12,7 @@ def set_property_value(
     property_name: str,
     property_value: Any,
     data: Optional[Dict] = None,
+    call_updated_method=True,
 ) -> None:
     """
     Sets properties on the component.
@@ -59,8 +60,8 @@ def set_property_value(
                     component_or_field._set_property(
                         property_name_part,
                         property_value,
-                        call_updating_method=False,
-                        call_updated_method=True,
+                        call_updating_method=False,  # the updating method has already been called above
+                        call_updated_method=call_updated_method,
                     )
                 else:
                     # Handle calling the updating/updated method for nested properties
@@ -101,7 +102,7 @@ def set_property_value(
                     if not is_relation_field:
                         setattr(component_or_field, property_name_part, property_value)
 
-                    if hasattr(component, updated_function_name):
+                    if hasattr(component, updated_function_name) and call_updated_method:
                         getattr(component, updated_function_name)(property_value)
 
                 data_or_dict[property_name_part] = property_value
@@ -128,4 +129,5 @@ def set_property_value(
         else:
             break
 
-    component.updated(property_name, property_value)
+    if call_updated_method:
+        component.updated(property_name, property_value)
