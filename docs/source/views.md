@@ -305,21 +305,29 @@ class HelloWorldView(UnicornView):
         self.name = "hydrated"
 ```
 
-### updating(name, value)
+### updating(property_name, property_value)
 
-Gets called before each property that will get set.
+Gets called before each property that will get set. This can be called multiple times in certain instances, e.g. during a debounce.
 
-### updated(name, value)
+### updated(property_name, property_value)
 
-Gets called after each property gets set.
+Gets called after each property gets set. This can be called multiple times in certain instances, e.g. during a debounce.
 
-### updating\_{property_name}(value)
+### resolved(property_name, property_value)
 
-Gets called before the specified property gets set.
+Gets called after the specified property gets set. This will only get called once.
 
-### updated\_{property_name}(value)
+### updating\_{property_name}(property_value)
 
-Gets called after the specified property gets set.
+Gets called before the specified property gets set. This can be called multiple times in certain instances, e.g. during a debounce.
+
+### updated\_{property_name}(property_value)
+
+Gets called after the specified property gets set. This can be called multiple times in certain instances, e.g. during a debounce.
+
+### resolved\_{property_name}(property_value)
+
+Gets called after the specified property gets set. This will only get called once.
 
 ### calling(name, args)
 

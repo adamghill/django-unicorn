@@ -174,9 +174,28 @@ class FakeComponentWithUpdateMethods(UnicornView):
         if count_updating >= 2:
             raise Exception("updating_count called more than once")
 
+        assert count_updating == 1
+
     def updated_count(self, _):
         global count_updated  # noqa: PLW0603
         count_updated += 1
 
         if count_updated >= 2:
             raise Exception("count_updated called more than once")
+
+        assert count_updated == 1
+
+
+count_resolved = 0
+
+
+class FakeComponentWithResolveMethods(UnicornView):
+    template_name = "templates/test_component.html"
+
+    count = 0
+
+    def resolved_count(self, _):
+        global count_resolved  # noqa: PLW0603
+        count_resolved += 1
+
+        assert count_resolved == 1, "count_resolved called more than once"

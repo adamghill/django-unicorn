@@ -36,7 +36,7 @@ def test_setter(client):
 
 
 def test_setter_updated(client):
-    data = {"count": 1, "count_updating": 0, "count_updated": 0}
+    data = {"count": 1}
     message = {
         "actionQueue": [
             {"type": "callMethod", "payload": {"name": "count=2"}},
@@ -58,6 +58,32 @@ def test_setter_updated(client):
 
     # If updating_count or updated_count is called more than once
     # `FakeComponentWithUpdateMethods` will raise an exception
+
+
+def test_setter_resolved(client):
+    data = {"count": 1}
+    action_queue = [
+        {"type": "syncInput", "payload": {"name": "count", "value": 2}, "partials": []},
+        {"type": "syncInput", "payload": {"name": "count", "value": 3}, "partials": []},
+    ]
+    message = {
+        "actionQueue": action_queue,
+        "data": data,
+        "checksum": generate_checksum(str(data)),
+        "id": shortuuid.uuid()[:8],
+        "epoch": time.time(),
+    }
+
+    body = _post_message_and_get_body(
+        client,
+        message,
+        url="/message/tests.views.fake_components.FakeComponentWithResolveMethods",
+    )
+
+    assert not body["errors"]
+    assert body["data"]["count"] == 3
+
+    # If resolved_count is called more than once `FakeComponentWithResolveMethods` will raise an exception
 
 
 def test_nested_setter(client):

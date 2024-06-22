@@ -333,6 +333,12 @@ class UnicornView(TemplateView):
         """
         pass
 
+    def resolved(self, name, value):
+        """
+        Hook that gets called when a component's data is resolved.
+        """
+        pass
+
     def calling(self, name, args):
         """
         Hook that gets called when a component's method is about to get called.
@@ -611,6 +617,7 @@ class UnicornView(TemplateView):
         *,
         call_updating_method: bool = False,
         call_updated_method: bool = False,
+        call_resolved_method: bool = False,
     ) -> None:
         # Get the correct value type by using the form if it is available
         data = self._attributes()
@@ -642,6 +649,12 @@ class UnicornView(TemplateView):
 
                 if hasattr(self, updated_function_name):
                     getattr(self, updated_function_name)(value)
+
+            if call_resolved_method:
+                resolved_function_name = f"resolved_{name}"
+
+                if hasattr(self, resolved_function_name):
+                    getattr(self, resolved_function_name)(value)
         except AttributeError:
             raise
 
@@ -749,6 +762,7 @@ class UnicornView(TemplateView):
             "get_frontend_context_variables",
             "errors",
             "updated",
+            "resolved",
             "parent",
             "children",
             "call",
