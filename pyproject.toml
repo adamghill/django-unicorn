@@ -56,7 +56,11 @@ coverage = {extras = ["toml"], version = "*"}
 pytest-cov = "*"
 pytest-benchmark = "*"
 ruff = "*"
+<<<<<<< HEAD
 genbadge = {extras = ["all"], version = "^1.1.1"}
+=======
+genbadge = "*"
+>>>>>>> 32a1e60 (generated coverage xml with genbadge)
 
 [tool.ruff]
 src = ["django_unicorn"]
