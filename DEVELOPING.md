@@ -1,5 +1,7 @@
 # Developing
 
+## Local Development
+
 1. `git clone git@github.com:adamghill/django-unicorn.git`
 1. `cd django-unicorn`
 1. `poetry install -E minify -E docs`
@@ -7,26 +9,26 @@
 1. `poetry run python example/manage.py runserver localhost:8000`
 1. Go to `localhost:8000` in your browser
 
-## To install in another project
+## To Install in Another Project
 
 - `pip install -e ../django-unicorn`
 - add something like `django-unicorn = { path="../django-unicorn", develop=true }` to other project's `pyproject.toml`
 
-# See docs
+## Build Sphinx Documentation
 
 1. `poetry run sphinx-autobuild -W docs/source docs/build`
 
-# Run unittests
+## Run Unittests
 
-1. `poetry run pytest`
-1. `npm run test`
+1. Python: `poetry run pytest`
+1. JavaScript: `npm run test`
 
 # Minify JavaScript
 
 1. `npm install`
 1. `npm run build`
 
-# Bump version
+## Bump Version
 
 1. Update changelog.md
 1. Update package.json

@@ -45,6 +45,8 @@ Unicorn has adopted a Code of Conduct that we expect project participants to adh
 
 We use GitHub to host code, to track issues and feature requests, as well as accept pull requests.
 
+See more details about developing `django-unicorn` locally in [DEVELOPING.md](developing.md).
+
 ## Issues
 
 [Open an issue](https://github.com/adamghill/django-unicorn/issues/new) **only** if you want to report a bug or a feature. Don't open issues for questions or support, instead create a [discussion](https://github.com/adamghill/django-unicorn/discussions/new) and ask there.
