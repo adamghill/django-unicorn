@@ -69,4 +69,4 @@ def test_kwargs_raise_unparseable_value():
     with pytest.raises(ValueError) as e:
         parse_kwarg("test=some_context_variable", raise_if_unparseable=True)
 
-    assert e.type == ValueError
+    assert e.type is ValueError

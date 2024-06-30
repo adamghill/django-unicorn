@@ -129,7 +129,7 @@ def test_get_locations_apps_setting_invalid(settings, cache_clear):  # noqa: ARG
     with pytest.raises(AssertionError) as e:
         get_locations("hello-world")
 
-    assert e.type == AssertionError
+    assert e.type is AssertionError
     settings.UNICORN["APPS"] = ("unicorn",)
 
 

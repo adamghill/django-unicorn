@@ -127,36 +127,36 @@ def cast_value(type_hint, value):
     if type(None) in type_hints and value is None:
         return value
 
-    for type_hint in type_hints:
-        if type_hint == type(None):
+    for _type_hint in type_hints:
+        if _type_hint == type(None):
             continue
 
-        caster = CASTERS.get(type_hint)
+        caster = CASTERS.get(_type_hint)
 
         if caster:
             try:
                 value = caster(value)
                 break
             except TypeError:
-                if (type_hint is datetime or type_hint is date) and (isinstance(value, (float, int))):
+                if (_type_hint is datetime or _type_hint is date) and (isinstance(value, (float, int))):
                     try:
                         value = datetime.fromtimestamp(value, tz=timezone.utc)
 
-                        if type_hint is date:
+                        if _type_hint is date:
                             value = value.date()
 
                         break
                     except ValueError:
                         pass
         else:
-            if issubclass(type_hint, Model):
+            if issubclass(_type_hint, Model):
                 continue
 
-            if _check_pydantic(type_hint) or is_dataclass(type_hint):
-                value = type_hint(**value)
+            if _check_pydantic(_type_hint) or is_dataclass(_type_hint):
+                value = _type_hint(**value)
                 break
 
-            value = type_hint(value)
+            value = _type_hint(value)
             break
 
     return value

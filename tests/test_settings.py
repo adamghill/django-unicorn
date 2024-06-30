@@ -77,7 +77,7 @@ def test_get_morpher_settings(settings):
     with pytest.raises(AssertionError) as e:
         get_morpher_settings()
 
-    assert e.type == AssertionError
+    assert e.type is AssertionError
     assert e.exconly() == "AssertionError: Unknown morpher name: blob"
 
     del settings.UNICORN["MORPHER"]

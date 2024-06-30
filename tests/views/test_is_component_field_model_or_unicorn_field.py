@@ -18,7 +18,7 @@ def test_type_hint():
 
     assert actual
     assert component.model is not None
-    assert type(component.model) == Flavor
+    assert type(component.model) is Flavor
 
 
 def test_model_instance():
@@ -28,4 +28,4 @@ def test_model_instance():
 
     assert actual
     assert component.model is not None
-    assert type(component.model) == Flavor
+    assert type(component.model) is Flavor
