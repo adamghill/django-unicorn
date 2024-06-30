@@ -92,9 +92,9 @@ class Command(BaseCommand):
         component_path = paths["components"]
         template_path = paths["templates"]
 
-        for nested_path in nested_paths:
-            component_path /= nested_path
-            template_path /= nested_path
+        for _nested_path in nested_paths:
+            component_path /= _nested_path
+            template_path /= _nested_path
 
             if not component_path.exists():
                 component_path.mkdir()

@@ -158,10 +158,7 @@ class FakeComponentWithError(UnicornView):
         print(self.not_a_valid_attribute)  # noqa: T201
 
 
-global count_updating
 count_updating = 0
-
-global count_updated
 count_updated = 0
 
 

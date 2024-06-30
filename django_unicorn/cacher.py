@@ -102,8 +102,8 @@ def cache_full_tree(component: "django_unicorn.views.UnicornView"):
     cache = caches[get_cache_alias()]
 
     with CacheableComponent(root) as caching:
-        for component in caching.components():
-            cache.set(component.component_cache_key, component)
+        for _component in caching.components():
+            cache.set(_component.component_cache_key, _component)
 
 
 def restore_from_cache(component_cache_key: str, request: HttpRequest = None) -> "django_unicorn.views.UnicornView":
@@ -117,14 +117,14 @@ def restore_from_cache(component_cache_key: str, request: HttpRequest = None) ->
 
     if cached_component:
         roots = {}
-        root: "django_unicorn.views.UnicornView" = cached_component
+        root: django_unicorn.views.UnicornView = cached_component
         roots[root.component_cache_key] = root
 
         while root.parent:
             root = cache.get(root.parent.component_cache_key)
             roots[root.component_cache_key] = root
 
-        to_traverse: List["django_unicorn.views.UnicornView"] = []
+        to_traverse: List[django_unicorn.views.UnicornView] = []
         to_traverse.append(root)
 
         while to_traverse:
