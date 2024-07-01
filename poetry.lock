@@ -733,8 +733,11 @@ files = [
 
 [package.dependencies]
 click = ">7.0"
+<<<<<<< HEAD
 defusedxml = {version = "*", optional = true, markers = "extra == \"all\""}
 flake8-html = {version = "*", optional = true, markers = "extra == \"all\""}
+=======
+>>>>>>> 32a1e60 (generated coverage xml with genbadge)
 pillow = "*"
 requests = "*"
 setuptools = "*"
@@ -1025,6 +1028,7 @@ files = [
     {file = "MarkupSafe-2.1.5-cp39-cp39-win32.whl", hash = "sha256:00e046b6dd71aa03a41079792f8473dc494d564611a8f89bbbd7cb93295ebdcf"},
     {file = "MarkupSafe-2.1.5-cp39-cp39-win_amd64.whl", hash = "sha256:fa173ec60341d6bb97a89f5ea19c85c5643c1e7dedebc22f5181eb73573142c5"},
     {file = "MarkupSafe-2.1.5.tar.gz", hash = "sha256:d283d37a890ba4c1ae73ffadf8046435c76e7bc2247bbb63c00bd1a709c6544b"},
+<<<<<<< HEAD
 ]
 
 [[package]]
@@ -1036,6 +1040,8 @@ python-versions = ">=3.6"
 files = [
     {file = "mccabe-0.7.0-py2.py3-none-any.whl", hash = "sha256:6c2d30ab6be0e4a46919781807b4f0d834ebdd6c6e3dca0bda5a15f863427b6e"},
     {file = "mccabe-0.7.0.tar.gz", hash = "sha256:348e0240c33b60bbdf4e523192ef919f28cb2c3d7d5c7794f74009290f236325"},
+=======
+>>>>>>> 32a1e60 (generated coverage xml with genbadge)
 ]
 
 [[package]]
@@ -1511,6 +1517,7 @@ dotenv = ["python-dotenv (>=0.10.4)"]
 email = ["email-validator (>=1.0.3)"]
 
 [[package]]
+<<<<<<< HEAD
 name = "pyflakes"
 version = "2.5.0"
 description = "passive checker of Python programs"
@@ -1528,6 +1535,14 @@ description = "Pygments is a syntax highlighting package written in Python."
 optional = false
 python-versions = ">=3.8"
 files = [
+=======
+name = "pygments"
+version = "2.18.0"
+description = "Pygments is a syntax highlighting package written in Python."
+optional = false
+python-versions = ">=3.8"
+files = [
+>>>>>>> 32a1e60 (generated coverage xml with genbadge)
     {file = "pygments-2.18.0-py3-none-any.whl", hash = "sha256:b8e6aca0523f3ab76fee51799c488e38782ac06eafcf95e7ba832985c8e7b13a"},
     {file = "pygments-2.18.0.tar.gz", hash = "sha256:786ff802f32e91311bff3889f6e9a86e81505fe99f2735bb6d60ae0c5004f199"},
 ]
@@ -1622,6 +1637,7 @@ python-versions = "*"
 files = [
     {file = "pytz-2024.1-py2.py3-none-any.whl", hash = "sha256:328171f4e3623139da4983451950b28e95ac706e13f3f2630a879749e7a8b319"},
     {file = "pytz-2024.1.tar.gz", hash = "sha256:2a29735ea9c18baf14b448846bde5a48030ed267578472d8955cd0e7443a9812"},
+<<<<<<< HEAD
 ]
 
 [[package]]
@@ -1637,6 +1653,8 @@ files = [
     {file = "pywatchman-2.0.0-cp38-cp38-macosx_14_0_arm64.whl", hash = "sha256:ed905338952db01f6506104295a3176adf0d8c2575e4f00505cb123ae09a2755"},
     {file = "pywatchman-2.0.0-cp39-cp39-macosx_14_0_arm64.whl", hash = "sha256:4183ea206be46cb45d48f59ef7540b849582798ccd51ce54e1e400237b7dbf43"},
     {file = "pywatchman-2.0.0.tar.gz", hash = "sha256:25354d9e3647f94411a4c13e510c83a1ceecc17977b0525ba41b16e7019c7b0c"},
+=======
+>>>>>>> 32a1e60 (generated coverage xml with genbadge)
 ]
 
 [[package]]
@@ -2287,4 +2305,8 @@ minify = ["htmlmin"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4"
+<<<<<<< HEAD
 content-hash = "b9036760f85a9b0d088f5b01013a0c61a5c3b337c20a62093d958bc6d654aa67"
+=======
+content-hash = "990bcc76c6feb6b8d247cb2468c831c83bc273f4d0f00edbac94125ec5f9dfae"
+>>>>>>> 32a1e60 (generated coverage xml with genbadge)
