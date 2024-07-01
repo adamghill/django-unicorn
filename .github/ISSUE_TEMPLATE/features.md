@@ -25,16 +25,16 @@ Note: Please search to see if an issue already exists for the feature.
 
 ### Breaking changes:
 <!-- Will this be a breaking change? -->
-- ([ ]) Yes
-- ([ ]) No
+- [ ] Yes
+- [ ] No
 
 ### Have you read the Contributing guidelines?
-- ([ ]) I have read the [Contributing guidelines](https://github.com/adamghill/django-unicorn/blob/main/DEVELOPING.md)
+- [ ] I have read the [Contributing guidelines](https://github.com/adamghill/django-unicorn/blob/main/DEVELOPING.md)
 
 ### Are you willing to work on this issue?
 <!-- This is absolutely not required, but we are happy to guide you in the contribution process. -->
-- ([ ]) Yes I am willing to submit a PR!
-- ([ ]) No, someone else can work on it.
+- [ ] Yes I am willing to submit a PR!
+- [ ] No, someone else can work on it.
 
 ### Anything else:
 <!--
