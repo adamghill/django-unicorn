@@ -14,16 +14,16 @@ Note: Please search to see if an issue already exists for the feature.
 ### Why do we need this improvement?
 <!-- Why do we need this improvement? -->
 
-### Reason for change:
+### How will this change help?
 <!-- How will this change help? -->
 
-### Screenshots:
+### Please add screenshots if applicable
 <!-- Please add screenshots if applicable -->
 
 ### How could it be implemented/designed?
 <!-- How will it be implemented/designed? -->
 
-### Breaking changes:
+### Will this be a breaking change?
 <!-- Will this be a breaking change? -->
 - [ ] Yes
 - [ ] No
