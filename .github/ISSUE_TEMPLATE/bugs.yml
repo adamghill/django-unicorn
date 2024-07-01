@@ -23,15 +23,16 @@ body:
   - type: textarea
     id: screenshots
     attributes:
-      label: Screenshots
+      label: Screenshots / Screenrecords
       description: Please add a screenshot/ short video of the bug you faced.
     validations:
       required: true
 
-  - type: markdown
+  - type: textarea
+    id: steps
     attributes:
-      value: |
-        Add all steps/share a github gist that can help anyone reproduce the bug
+      label: Steps to reproduce
+      placeholder: Add all steps/share a github gist that can help anyone reproduce the bug
 
   - type: dropdown
     id: browsers
