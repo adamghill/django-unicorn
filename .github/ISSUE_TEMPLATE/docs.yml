@@ -2,12 +2,12 @@ name: 📑 Docs
 description: Propose changes and improvements to Django Unicorn Docs.
 labels: "📑 docs"
 title: "[📑 Docs]: "
-  - 
+
 body:
   - type: markdown
     attributes:
       value: |
-        Thank you for contributing to Django Unicorn Docs! 📑 👩🏻‍💻 We appreciate your feedback, ideas, and contributions. 
+        Thank you for contributing to Django Unicorn! 📑 👩🏻‍💻 We appreciate your feedback, ideas, and contributions. 
         
         Before filing this issue, please make sure to check if there's already a similar issue opened.
   
@@ -15,10 +15,11 @@ body:
     id: reason-context
     attributes:
       label: What Dev Docs changes are you proposing?
-      description: Why do the Docs need this improvement? What is the motivation for this change? How will this change benefit our Open-Source community?
-      placeholder: "I would like to contribute to Django Unicorn Docs 📑 by..."
+      description: Why do the Docs need this improvement? What is the motivation for this change?
+      placeholder: "I would like to contribute to Django Unicorn 📑 by..."
     validations:
       required: true
+
   - type: checkboxes
     id: terms
     attributes:
@@ -27,4 +28,3 @@ body:
       options:
         - label: I agree to follow this project's Code of Conduct
           required: true
-
