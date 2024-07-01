@@ -42,4 +42,4 @@ Links? References? Anything that will give us more context about the feature you
 -->
 
 ### References:
-<!-- This document was adapted from the open-source issue templates for Async API -->
+This document was adapted from the open-source issue templates for Async API
