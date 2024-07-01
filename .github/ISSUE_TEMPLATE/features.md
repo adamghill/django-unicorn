@@ -7,9 +7,9 @@ assignees: ''
 
 ---
 
-<!--
-Note: Please search to see if an issue already exists for the feature.
--->
+
+**Note: Please search to see if an issue already exists for the feature.**
+
 
 ### Why do we need this improvement?
 <!-- Why do we need this improvement? -->
