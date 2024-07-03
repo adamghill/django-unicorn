@@ -2,7 +2,8 @@
 
 ## Local Development
 
-1. `git clone git@github.com:adamghill/django-unicorn.git`
+1. Fork https://github.com/adamghill/django-unicorn`
+1. `git clone` your forked repository
 1. `cd django-unicorn`
 1. `poetry install -E minify -E docs`
 1. `poetry run python example/manage.py migrate`
@@ -11,8 +12,8 @@
 
 ## To Install in Another Project
 
-- `pip install -e ../django-unicorn`
-- add something like `django-unicorn = { path="../django-unicorn", develop=true }` to other project's `pyproject.toml`
+1. Download the repo to your local
+1. `pip install -e ../django-unicorn` from inside the other project's virtualenv _or_ add `django-unicorn = { path="../django-unicorn", develop=true }` to the other project's `pyproject.toml`
 
 ## Build Sphinx Documentation
 
