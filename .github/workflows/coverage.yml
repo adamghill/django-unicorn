@@ -35,14 +35,15 @@ jobs:
 
       - name: Generate coverage badge
         run: |
-            chmod +x generate_badge.sh
-            ./generate_badge.sh
+          chmod +x generate_badge.sh
+          ./generate_badge.sh
       - name: Commit and push coverage badge
+        continue-on-error: true
         env:
-              GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-              git config --global user.name "github-actions[bot]"
-              git config --global user.email "github-actions[bot]@users.noreply.github.com"
-              git add badges/coverage.svg
-              git commit -m "Update coverage badge"
-              git push
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add badges/coverage.svg
+          git commit -m "Update coverage badge"
+          git push
