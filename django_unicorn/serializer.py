@@ -352,7 +352,7 @@ def _dumps(
     serialized_data: bytes,
     *,
     fix_floats: bool = True,
-    exclude_field_attributes: Optional[Tuple[str]] = None,
+    exclude_field_attributes: Optional[Tuple[str, ...]] = None,
     sort_dict: bool = True,
 ) -> Dict:
     """
@@ -387,7 +387,7 @@ def dumps(
     data: Dict,
     *,
     fix_floats: bool = True,
-    exclude_field_attributes: Optional[Tuple[str]] = None,
+    exclude_field_attributes: Optional[Tuple[str, ...]] = None,
     sort_dict: bool = True,
 ) -> str:
     """
