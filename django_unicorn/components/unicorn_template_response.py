@@ -48,7 +48,7 @@ def is_html_well_formed(html: str) -> bool:
     """
 
     tag_list = re.split("(<[^>!]*>)", html)[1::2]
-    stack = deque()
+    stack: deque[str] = deque()
 
     for tag in tag_list:
         if "/" not in tag:

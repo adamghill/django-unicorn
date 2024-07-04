@@ -160,8 +160,8 @@ class UnicornView(TemplateView):
     component_name: str = ""
     component_key: str = ""
     component_id: str = ""
-    component_args: List = None
-    component_kwargs: Dict = None
+    component_args: Optional[List] = None
+    component_kwargs: Optional[Dict] = None
 
     def __init__(self, component_args: Optional[List] = None, **kwargs):
         self.response_class = UnicornTemplateResponse
@@ -172,8 +172,8 @@ class UnicornView(TemplateView):
 
         # Without these instance variables calling UnicornView() outside the
         # Django view/template logic (i.e. in unit tests) results in odd results.
-        self.request: HttpRequest = None
-        self.parent: UnicornView = None
+        self.request: HttpRequest = HttpRequest()
+        self.parent: Optional[UnicornView] = None
         self.children: List[UnicornView] = []
 
         # Caches to reduce the amount of time introspecting the class
@@ -185,7 +185,7 @@ class UnicornView(TemplateView):
         self._resettable_attributes_cache: Dict[str, Any] = {}
 
         # JavaScript method calls
-        self.calls = []
+        self.calls: List[Any] = []
 
         # Default force render to False
         self.force_render = False
@@ -226,7 +226,7 @@ class UnicornView(TemplateView):
 
         self._init_script: str = ""
         self._validate_called = False
-        self.errors = {}
+        self.errors: Dict[Any, Any] = {}
         self._set_default_template_name()
         self._set_caches()
 
@@ -428,7 +428,7 @@ class UnicornView(TemplateView):
         attributes = self._attributes()
         frontend_context_variables.update(attributes)
 
-        exclude_field_attributes = []
+        exclude_field_attributes: List[str] = []
 
         # Remove any field in `javascript_exclude` from `frontend_context_variables`
         if hasattr(self, "Meta") and hasattr(self.Meta, "javascript_exclude"):
@@ -781,8 +781,8 @@ class UnicornView(TemplateView):
         component_id: str,
         component_name: str,
         component_key: str = "",
-        parent: "UnicornView" = None,
-        request: HttpRequest = None,
+        parent: Optional["UnicornView"] = None,
+        request: Optional[HttpRequest] = None,
         use_cache=True,
         component_args: Optional[List] = None,
         kwargs: Optional[Dict[str, Any]] = None,
