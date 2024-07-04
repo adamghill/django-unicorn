@@ -2,7 +2,7 @@ import nox
 
 
 @nox.session()
-@nox.parametrize("django", ["3.2", "4.1", "4.2"])
+@nox.parametrize("django", ["4.1", "4.2"])
 def tests(session, django):
     session.install("poetry")
     session.run("poetry", "install", "-E", "minify")
