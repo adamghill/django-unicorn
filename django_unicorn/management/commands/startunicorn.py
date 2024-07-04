@@ -1,7 +1,7 @@
 import os
 import webbrowser
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Tuple
 
 from django.apps import apps
 from django.conf import settings
@@ -41,7 +41,7 @@ class Command(BaseCommand):
         parser.add_argument("app_name", type=str)
         parser.add_argument("component_names", nargs="+", type=str, help="Names of components")
 
-    def check_initials_directories(self, app_directory: Path) -> (Dict[str, Path], bool):
+    def check_initials_directories(self, app_directory: Path) -> Tuple[Dict[str, Path], bool]:
         """
         Checks for directories existance and creates them if necessary.
         Returns a tuple containing a dictonary `components` and `templates`
@@ -69,7 +69,7 @@ class Command(BaseCommand):
 
         return paths, is_first
 
-    def obtain_nested_path(self, component_name: str) -> (str, str):
+    def obtain_nested_path(self, component_name: str) -> Tuple[str, str]:
         """
         Receives the complete component name and returns a tuple
         with the nested path and component name itself.
