@@ -7,19 +7,16 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: [3.8, 3.9, "3.10", "3.11"]
 
     steps:
       - uses: actions/checkout@v2.3.4
         with:
           fetch-depth: 1
 
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Set up Python 3.11
         uses: actions/setup-python@v2.1.4
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: "3.11"
 
       - name: Install Poetry
         uses: abatilo/actions-poetry@v2.1.6
@@ -28,7 +25,7 @@ jobs:
 
       - name: Set Poetry config
         run: |
-          poetry config virtualenvs.path ~/.virtualenvs${{ matrix.python-version }}
+          poetry config virtualenvs.path ~/.virtualenvs3.11
 
       - name: Install dependencies
         run: poetry install
@@ -37,10 +34,10 @@ jobs:
         run: |
           chmod +x generate_badge.sh
           ./generate_badge.sh
+
       - name: Commit and push coverage badge
         continue-on-error: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        env: GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
