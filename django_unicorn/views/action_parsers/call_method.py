@@ -1,4 +1,4 @@
-from typing import Any, Dict, Tuple, Union, List, Optional
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from django.db.models import Model
 
