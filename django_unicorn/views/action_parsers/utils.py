@@ -120,10 +120,10 @@ def set_property_value(
             property_name_part_int = int(property_name_part)
 
             if idx == len(property_name_parts) - 1:
-                component_or_field[property_name_part_int] = property_value
+                component_or_field[property_name_part_int] = property_value # type: ignore[index]
                 data_or_dict[property_name_part_int] = property_value
             else:
-                component_or_field = component_or_field[property_name_part_int]
+                component_or_field = component_or_field[property_name_part_int] # type: ignore[index]
                 data_or_dict = data_or_dict[property_name_part_int]
         else:
             break

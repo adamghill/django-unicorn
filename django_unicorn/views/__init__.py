@@ -1,7 +1,7 @@
 import copy
 import logging
 from functools import wraps
-from typing import Dict, Optional, Sequence
+from typing import Dict, Optional, Sequence, cast
 
 import orjson
 from bs4 import BeautifulSoup, Tag
@@ -516,7 +516,7 @@ def _handle_queued_component_requests(request: HttpRequest, queue_cache_key) -> 
                 timeout=get_serial_timeout(),
             )
 
-        merged_json_result = _handle_component_request(request, merged_component_request)
+        merged_json_result = _handle_component_request(request, cast(ComponentRequest, merged_component_request))
 
         return merged_json_result
 
