@@ -1,47 +1,25 @@
 name: Coverage
+
 on:
-  push:
-    branches:
-      - main
+  workflow_run:
+    workflows: ["CI"]
+    types:
+      - completed
 
 jobs:
-  generate-coverage:
+  coverage:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v3
+
+      - name: Download coverage report
+        uses: actions/download-artifact@v3
         with:
-          fetch-depth: 1
+          name: coverage-report
 
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v2.1.4
+      - name: Comment Coverage
+        uses: py-cov-action/python-coverage-comment-action@v3
         with:
-          python-version: "3.11"
+          test-command: poetry run pytest --cov=your_module --cov-report=xml
 
-      - name: Install Poetry
-        uses: abatilo/actions-poetry@v2.1.6
-        with:
-          poetry-version: 1.6.1
-
-      - name: Set Poetry config
-        run: |
-          poetry config virtualenvs.path ~/.virtualenvs3.11
-
-      - name: Install dependencies
-        run: poetry install -E minify
-
-      - name: Generate coverage badge
-        run: |
-          chmod +x generate_badge.sh
-          ./generate_badge.sh
-
-      - name: Commit and push coverage badge
-        continue-on-error: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add badges/coverage.svg
-          git commit -m "Update coverage badge"
-          git push
