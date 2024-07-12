@@ -1,4 +1,3 @@
-# .github/workflows/ci.yml
 name: CI
 
 on:
@@ -15,14 +14,9 @@ jobs:
       matrix:
         python-version: [ 3.8, 3.9, "3.10", "3.11" ]
     permissions:
-      # Gives the action the necessary permissions for publishing new
-      # comments in pull requests.
       pull-requests: write
-      # Gives the action the necessary permissions for pushing data to the
-      # python-coverage-comment-action branch, and for editing existing
-      # comments (to avoid publishing multiple comments in the same PR)
       contents: write
-    uses:
+
     steps:
       - uses: actions/checkout@v3
         with:
@@ -43,7 +37,7 @@ jobs:
           poetry config virtualenvs.path ~/.virtualenvs3.11
 
       - name: Install dependencies
-        run: poetry install -E minify
+        run: poetry install
 
       - name: Launch tests & generate report
         run: poetry run coverage run -m pytest
@@ -58,7 +52,5 @@ jobs:
         uses: actions/upload-artifact@v4
         if: steps.coverage_comment.outputs.COMMENT_FILE_WRITTEN == 'true'
         with:
-          # If you use a different name, update COMMENT_ARTIFACT_NAME accordingly
           name: python-coverage-comment-action
-          # If you use a different name, update COMMENT_FILENAME accordingly
           path: python-coverage-comment-action.txt

@@ -9,17 +9,15 @@ on:
 jobs:
   coverage:
     runs-on: ubuntu-latest
-
+    if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion == 'success'
+    permissions:
+      pull-requests: write
+      contents: write
+      actions: read
     steps:
-      - uses: actions/checkout@v3
 
-      - name: Download coverage report
-        uses: actions/download-artifact@v3
-        with:
-          name: coverage-report
-
-      - name: Comment Coverage
+      - name: Post comment
         uses: py-cov-action/python-coverage-comment-action@v3
         with:
-          test-command: poetry run pytest --cov=your_module --cov-report=xml
-
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_PR_RUN_ID: ${{ github.event.workflow_run.id }}
