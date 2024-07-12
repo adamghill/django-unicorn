@@ -542,6 +542,26 @@ argon2 = ["argon2-cffi (>=19.1.0)"]
 bcrypt = ["bcrypt"]
 
 [[package]]
+name = "django"
+version = "5.0.7"
+description = "A high-level Python web framework that encourages rapid development and clean, pragmatic design."
+optional = false
+python-versions = ">=3.10"
+files = [
+    {file = "Django-5.0.7-py3-none-any.whl", hash = "sha256:f216510ace3de5de01329463a315a629f33480e893a9024fc93d8c32c22913da"},
+    {file = "Django-5.0.7.tar.gz", hash = "sha256:bd4505cae0b9bd642313e8fb71810893df5dc2ffcacaa67a33af2d5cd61888f2"},
+]
+
+[package.dependencies]
+asgiref = ">=3.7.0,<4"
+sqlparse = ">=0.3.1"
+tzdata = {version = "*", markers = "sys_platform == \"win32\""}
+
+[package.extras]
+argon2 = ["argon2-cffi (>=19.1.0)"]
+bcrypt = ["bcrypt"]
+
+[[package]]
 name = "django-mock-queries"
 version = "2.2.0"
 description = "A django library for mocking queryset functions in memory for testing"
@@ -573,37 +593,37 @@ redis = ">=3.0.0"
 
 [[package]]
 name = "django-stubs"
-version = "5.0.2"
+version = "5.0.3"
 description = "Mypy stubs for Django"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "django_stubs-5.0.2-py3-none-any.whl", hash = "sha256:cb0c506cb5c54c64612e4a2ee8d6b913c6178560ec168009fe847c09747c304b"},
-    {file = "django_stubs-5.0.2.tar.gz", hash = "sha256:236bc5606e5607cb968f92b648471f9edaa461a774bc013bf9e6bff8730f6bdf"},
+    {file = "django_stubs-5.0.3-py3-none-any.whl", hash = "sha256:323edab16884d58612e4aaf8664513e4eaa14ec76bb30a77e3affd48ccb1e832"},
+    {file = "django_stubs-5.0.3.tar.gz", hash = "sha256:f12d26a8f60d07398d4f160daef153cdb5f6e30b31ad3a6a15d04fbda86f10dc"},
 ]
 
 [package.dependencies]
 asgiref = "*"
 django = "*"
-django-stubs-ext = ">=5.0.2"
+django-stubs-ext = ">=5.0.3"
 tomli = {version = "*", markers = "python_version < \"3.11\""}
 types-PyYAML = "*"
 typing-extensions = ">=4.11.0"
 
 [package.extras]
-compatible-mypy = ["mypy (>=1.10.0,<1.11.0)"]
+compatible-mypy = ["mypy (>=1.11.0,<1.12.0)"]
 oracle = ["oracledb"]
 redis = ["redis"]
 
 [[package]]
 name = "django-stubs-ext"
-version = "5.0.2"
+version = "5.0.3"
 description = "Monkey-patching and extensions for django-stubs"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "django_stubs_ext-5.0.2-py3-none-any.whl", hash = "sha256:8d8efec5a86241266bec94a528fe21258ad90d78c67307f3ae5f36e81de97f12"},
-    {file = "django_stubs_ext-5.0.2.tar.gz", hash = "sha256:409c62585d7f996cef5c760e6e27ea3ff29f961c943747e67519c837422cad32"},
+    {file = "django_stubs_ext-5.0.3-py3-none-any.whl", hash = "sha256:cc7a0026367baa5cdfc72cf8855e2e14d75dd5a35bd11e7d3086dc9d7f94d169"},
+    {file = "django_stubs_ext-5.0.3.tar.gz", hash = "sha256:cd361f5b951c6abdf867c55d247541f0609d1e8334ccb09c7a12910111425234"},
 ]
 
 [package.dependencies]
@@ -2311,4 +2331,4 @@ minify = ["htmlmin"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4"
-content-hash = "605550a183b7e07848a28d4f364d6842c58114dc2ef4aed2bfa1033846b31f36"
+content-hash = "a6920c09db6f46b000f344edb003e598a925c24c167a7580a97cc3a8da0eeba4"

@@ -162,7 +162,7 @@ def test_complicated_model():
 
     expected = {
         "date": str(model.date),
-        "datetime": model.datetime.isoformat()[:-3],
+        "datetime": model.datetime.isoformat(timespec="milliseconds").replace("+00:00", "Z"),
         "decimal_value": "0.984",
         "duration": "-1 19:00:00",
         "float_value": "0.583",
@@ -195,7 +195,7 @@ def test_subclass_complicated_model():
         "subclass_name": "def",
         "pk": 2,
         "name": "abc",
-        "datetime": model.datetime.isoformat()[:-3],
+        "datetime": model.datetime.isoformat(timespec="milliseconds").replace("+00:00", "Z"),
         "float_value": "0.583",
         "decimal_value": "0.984",
         "uuid": str(model.uuid),
@@ -231,7 +231,7 @@ def test_model_with_timedelta(db):  # noqa: ARG001
             "decimal_value": None,
             "uuid": str(flavor.uuid),
             "date": str(now_dt.date()),
-            "datetime": now_dt.isoformat()[:-3],
+            "datetime": now_dt.isoformat(timespec="milliseconds").replace("+00:00", "Z"),
             "time": str(now_dt.time())[:-3],
             "duration": "-1 19:00:00",
             "pk": 8,
