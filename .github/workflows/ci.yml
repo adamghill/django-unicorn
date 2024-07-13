@@ -55,5 +55,5 @@ jobs:
         uses: actions/upload-artifact@v4
         if: steps.coverage_comment.outputs.COMMENT_FILE_WRITTEN == 'true'
         with:
-          name: python-coverage-comment-action
+          name: python-coverage-comment-action-${{ matrix.python-version }}
           path: python-coverage-comment-action.txt
