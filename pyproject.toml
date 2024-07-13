@@ -122,7 +122,7 @@ ban-relative-imports = "all"
 "tests/**/*" = ["PLR2004", "S101", "TID252"]
 
 [tool.pytest.ini_options]
-addopts = "--quiet --failed-first --reuse-db --nomigrations -p no:warnings -m 'not slow' --benchmark-skip --cov --cov-report=term-missing --cov-report xml --cov-branch"
+addopts = "--quiet --failed-first --reuse-db --nomigrations -p no:warnings -m 'not slow' --benchmark-skip --cov=django_unicorn --cov-report=term-missing --cov-report xml --cov-branch"
 testpaths = [
     "tests"
 ]
@@ -159,5 +159,4 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.coverage.run]
-source = ["django-unicorn"]
 relative_files = true
