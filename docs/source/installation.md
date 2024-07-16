@@ -4,16 +4,15 @@
 
 Install `Unicorn` the same as any other Python package (preferably into a [virtual environment](https://docs.python.org/3/tutorial/venv.html)).
 
-````{tab-set}
-```{tab-item} pip
-```shell
-pip install django-unicorn
-```
+````{tab-set-code}
+```pip
+python -m pip install django-unicorn
 ```
 
-```{tab-item} poetry
+```poetry
 poetry add django-unicorn
 ```
+
 ````
 
 
@@ -45,6 +44,10 @@ urlpatterns = (
 ```
 
 3\. Add `{% load unicorn %}` to the top of the Django HTML template.
+
+```{note}
+Generally, your Django HTML templates are typically created in the `myapp/templates/myapp` directory. You will need to add `{% load unicorn %}` at the top of each of the templates utilizing a `Unicorn` component. Alternatively, you can create one "base" template that is extended by other templates, in which case, you would only need to add `{% load unicorn %}` to the top of your base template.
+```
 
 4\. Add `{% unicorn_scripts %}` into the Django HTML template and make sure there is a `{% csrf_token %}` in the template as well.
 

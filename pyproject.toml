@@ -38,7 +38,7 @@ sphinx-design = { version = "*", optional = true }
 
 [tool.poetry.extras]
 minify = ["htmlmin"]
-docs = ["Sphinx", "linkify-it-py", "myst-parser", "furo", "sphinx-copybutton", "sphinx-autobuild", "rst2pdf", "sphinx-autoapi", "sphinxext-opengraph", "toml", "sphinx-design"]
+docs = ["Sphinx", "linkify-it-py", "myst-parser", "furo", "sphinx-copybutton", "sphinx-autobuild", "rst2pdf", "sphinx-autoapi", "sphinxext-opengraph", "toml", "sphinx-design", "colon_fence"]
 
 [tool.poetry.group.dev.dependencies]
 certifi = "^2023.7.22"  # needed for GitHub Actions
