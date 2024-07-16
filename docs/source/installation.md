@@ -4,15 +4,18 @@
 
 Install `Unicorn` the same as any other Python package (preferably into a [virtual environment](https://docs.python.org/3/tutorial/venv.html)).
 
+````{tab-set}
+```{tab-item} pip
 ```shell
 pip install django-unicorn
 ```
+```
 
-OR
-
-```shell
+```{tab-item} poetry
 poetry add django-unicorn
 ```
+````
+
 
 ```{note}
 If attempting to install `django-unicorn` and `orjson` is preventing the installation from succeeding, check whether it is using 32-bit Python. Unfortunately, `orjson` is only supported on 64-bit Python. More details in [issue #105](https://github.com/adamghill/django-unicorn/issues/105).

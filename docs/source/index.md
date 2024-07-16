@@ -6,6 +6,7 @@
 :hidden:
 
 self
+getting-started
 installation
 components
 ```
