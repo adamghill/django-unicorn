@@ -162,6 +162,18 @@ ignore_missing_imports = true
 module="cachetools.*"
 ignore_missing_imports = true
 
+[[tool.mypy.overrides]]
+module = "django_unicorn.cacher"
+disable_error_code = ["name-defined"]
+
+[[tool.mypy.overrides]]
+module = "django_unicorn.typing"
+disable_error_code = ["empty-body"]
+
+[[tool.mypy.overrides]]
+module = "decorator"
+ignore_missing_imports = true
+
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"

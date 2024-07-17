@@ -1,6 +1,6 @@
 import logging
 import pickle
-from typing import List
+from typing import Dict, List, Optional
 
 from django.core.cache import caches
 from django.http import HttpRequest
@@ -28,7 +28,7 @@ class CacheableComponent:
     """
 
     def __init__(self, component: "django_unicorn.views.UnicornView"):
-        self._state = {}
+        self._state: Dict = {}
         self.cacheable_component = component
 
     def __enter__(self):
@@ -120,7 +120,10 @@ def cache_full_tree(component: "django_unicorn.views.UnicornView"):
             cache.set(_component.component_cache_key, _component)
 
 
-def restore_from_cache(component_cache_key: str, request: HttpRequest = None) -> "django_unicorn.views.UnicornView":
+def restore_from_cache(
+        component_cache_key: str,
+        request: Optional[HttpRequest] = None
+    ) -> "django_unicorn.views.UnicornView":
     """
     Gets a cached unicorn view by key, restoring and getting cached parents and children
     and setting the request.
