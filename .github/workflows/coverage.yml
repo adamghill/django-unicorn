@@ -1,4 +1,4 @@
-name: Coverage
+name: Post coverage comment
 
 on:
   workflow_run:
@@ -7,7 +7,8 @@ on:
       - completed
 
 jobs:
-  coverage:
+  test:
+    name: Run tests & display coverage
     runs-on: ubuntu-latest
     if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion == 'success'
     permissions:
@@ -15,7 +16,6 @@ jobs:
       contents: write
       actions: read
     steps:
-
       - name: Post comment
         uses: py-cov-action/python-coverage-comment-action@v3
         with:
