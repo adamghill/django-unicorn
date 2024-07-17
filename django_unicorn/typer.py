@@ -2,7 +2,7 @@ import logging
 from dataclasses import is_dataclass
 from datetime import date, datetime, time, timedelta, timezone
 from inspect import signature
-from typing import Dict, List, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 from typing import get_type_hints as typing_get_type_hints
 from uuid import UUID
 
@@ -32,13 +32,15 @@ try:
     from typing import get_args, get_origin
 except ImportError:
     # Fallback to dunder methods for older versions of Python
-    def get_args(type_hint):
-        if hasattr(type_hint, "__args__"):
-            return type_hint.__args__
+    def get_args(tp: Any) -> Tuple[Any, ...]:
+        if hasattr(tp, "__args__"):
+            return tp.__args__
+        return ()
 
-    def get_origin(type_hint):
-        if hasattr(type_hint, "__origin__"):
-            return type_hint.__origin__
+    def get_origin(tp: Any) -> Optional[Any]:
+        if hasattr(tp, "__origin__"):
+            return tp.__origin__
+        return None
 
 
 try:

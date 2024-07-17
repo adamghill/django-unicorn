@@ -9,7 +9,7 @@ import shortuuid
 from django.conf import settings
 from django.template import engines
 from django.template.backends.django import Template
-from django.utils.html import _json_script_escapes
+from django.utils.html import _json_script_escapes  # type: ignore
 from django.utils.safestring import SafeText, mark_safe
 
 try:
@@ -33,13 +33,15 @@ def generate_checksum(data: Union[bytes, str, Dict]) -> str:
         The generated checksum.
     """
 
-    data_bytes = data
+    data_bytes: Optional[bytes] = None
 
-    if isinstance(data, dict):
+    if isinstance(data, bytes):
+        data_bytes = data
+    elif isinstance(data, dict):
         data_bytes = str.encode(str(data))
     elif isinstance(data, str):
         data_bytes = str.encode(data)
-    elif not isinstance(data, bytes):
+    else:
         raise TypeError(f"Invalid type: {type(data)}")
 
     checksum = hmac.new(
