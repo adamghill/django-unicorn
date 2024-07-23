@@ -38,10 +38,11 @@ jobs:
       - name: Commit and push coverage badge
         continue-on-error: true
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b py-code-coverage || git checkout py-code-coverage
           git add badges/coverage.svg
           git commit -m "Update coverage badge"
-          git push
+          git push origin py-code-coverage
