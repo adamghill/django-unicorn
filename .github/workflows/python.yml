@@ -26,7 +26,10 @@ jobs:
           cache: "poetry"
 
       - name: Install dependencies
-        run: poetry install
+        run: |
+          poetry add python==${{ matrix.python-version }}
+          poetry add django==${{ matrix.django-version }}
+          poetry install
 
       - name: ruff check
         run: poetry run ruff check .

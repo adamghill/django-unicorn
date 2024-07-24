@@ -15,8 +15,7 @@ keywords = ["django", "python", "javascript", "fullstack"]
 
 [tool.poetry.dependencies]
 python = ">=3.8,<4"
-django = [{version = "<=5.0", python = "<3.10"},
-          {version = "^5.0", python=">=3.10"}]
+django = ">=2.2"
 beautifulsoup4 = ">=4.8.0"
 orjson = ">=3.6.0"
 shortuuid = ">=1.0.1"
