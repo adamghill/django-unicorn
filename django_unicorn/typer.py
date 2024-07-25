@@ -128,7 +128,7 @@ def cast_value(type_hint, value):
         return value
 
     for _type_hint in type_hints:
-        if _type_hint == type(None):
+        if _type_hint == type(None):  # noqa: E721
             continue
 
         caster = CASTERS.get(_type_hint)

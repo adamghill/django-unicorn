@@ -195,7 +195,8 @@ def test_caching_components_with_template_html(create_template):
     # manually set template_name to None which happens outside of this code normally
     component.template_name = None
 
-    # Caching will pop the `Template` instance from component.template_name when it enters, adn re-create it when it exits
+    # Caching will pop the `Template` instance from component.template_name when it enters,
+    # and re-create it when it exits
     cache_full_tree(component)
 
     assert component.template_html

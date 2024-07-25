@@ -131,14 +131,14 @@ def restore_from_cache(component_cache_key: str, request: HttpRequest = None) ->
 
     if cached_component:
         roots = {}
-        root: "django_unicorn.views.UnicornView" = cached_component
+        root: django_unicorn.views.UnicornView = cached_component
         roots[root.component_cache_key] = root
 
         while root.parent:
             root = cache.get(root.parent.component_cache_key)
             roots[root.component_cache_key] = root
 
-        to_traverse: List["django_unicorn.views.UnicornView"] = []
+        to_traverse: List[django_unicorn.views.UnicornView] = []
         to_traverse.append(root)
 
         while to_traverse:

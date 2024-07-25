@@ -10,7 +10,7 @@ def test_no_component():
 
     assert (
         e.exconly()
-        == "django_unicorn.errors.ComponentModuleLoadError: The component module 'create_no_component' could not be loaded."
+        == "django_unicorn.errors.ComponentModuleLoadError: The component module 'create_no_component' could not be loaded."  # noqa: E501
     )
 
 
