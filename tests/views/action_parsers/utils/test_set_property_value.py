@@ -19,7 +19,7 @@ class FakeComponent(UnicornView):
 
 
 def test_set_property_value_str():
-    component = FakeComponent(component_name="test", component_id="12345678")
+    component = FakeComponent(component_name="test", component_id="test_set_property_value_str")
     assert "property_view" == component.string
 
     string = "property_view_updated"
@@ -37,7 +37,7 @@ def test_set_property_value_str():
 
 
 def test_set_property_value_int():
-    component = FakeComponent(component_name="test", component_id="12345678")
+    component = FakeComponent(component_name="test", component_id="test_set_property_value_int")
     assert 99 == component.integer
 
     integer = 100
@@ -50,7 +50,7 @@ def test_set_property_value_int():
 
 
 def test_set_property_value_datetime():
-    component = FakeComponent(component_name="test", component_id="12345678")
+    component = FakeComponent(component_name="test", component_id="test_set_property_value_datetime")
     assert datetime(2020, 1, 1) == component.datetime  # noqa: DTZ001
 
     dt = datetime(2020, 1, 2)  # noqa: DTZ001
@@ -63,7 +63,7 @@ def test_set_property_value_datetime():
 
 
 def test_set_property_value_model():
-    component = FakeComponent(component_name="test", component_id="12345678")
+    component = FakeComponent(component_name="test", component_id="test_set_property_value_model")
     assert "initial-flavor" == component.model.name
 
     model = Flavor(name="test-flavor")
@@ -82,7 +82,7 @@ def test_set_property_value_model():
 
 @pytest.mark.django_db
 def test_set_property_value_queryset():
-    component = FakeComponent(component_name="test", component_id="12345678")
+    component = FakeComponent(component_name="test", component_id="test_set_property_value_queryset")
     assert len(component.queryset) == 0
 
     flavor_one = Flavor(name="test-flavor-one")
@@ -105,7 +105,7 @@ def test_set_property_value_queryset():
 
 @pytest.mark.django_db
 def test_set_property_value_many_to_many_is_referenced():
-    component = FakeComponent(component_name="test", component_id="12345678")
+    component = FakeComponent(component_name="test", component_id="test_set_property_value_many_to_many_is_referenced")
     component.model.save()
     assert component.model.taste_set.count() == 0
 
@@ -130,7 +130,9 @@ def test_set_property_value_many_to_many_is_referenced():
 
 @pytest.mark.django_db
 def test_set_property_value_many_to_many_references_model():
-    component = FakeComponent(component_name="test", component_id="12345678")
+    component = FakeComponent(
+        component_name="test", component_id="test_set_property_value_many_to_many_references_model"
+    )
     component.taste.save()
     assert component.taste.flavor.count() == 0
 

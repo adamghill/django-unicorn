@@ -52,7 +52,7 @@ def test_model_foreign_key():
 
 @pytest.mark.django_db
 def test_queryset():
-    test_component = FakeComponent(component_name="test", component_id="asdf")
+    test_component = FakeComponent(component_name="test", component_id="model_lifecycle_test_queryset")
     assert test_component.flavors.count() == 0
 
     flavor = Flavor(name="qs-first-flavor")
@@ -72,7 +72,7 @@ def test_queryset():
 
 @pytest.mark.django_db
 def test_queryset_values():
-    test_component = FakeComponent(component_name="test", component_id="asdf")
+    test_component = FakeComponent(component_name="test", component_id="model_lifecycle_test_queryset_values")
     assert test_component.flavors.count() == 0
 
     flavor = Flavor(name="values-first-flavor")

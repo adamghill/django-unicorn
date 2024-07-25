@@ -17,7 +17,7 @@ class ModelPropertyView(UnicornView):
 
 
 def test_set_property_from_data_model():
-    component = ModelPropertyView(component_name="test", component_id="12345678")
+    component = ModelPropertyView(component_name="test", component_id="test_set_property_from_data_model")
     assert "fake_model" == component.model.name
 
     set_property_from_data(component, "model", {"name": "fake_model_updated"})

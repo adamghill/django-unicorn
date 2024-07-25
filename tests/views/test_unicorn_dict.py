@@ -8,7 +8,7 @@ class DictPropertyView(UnicornView):
 
 
 def test_set_property_from_data_dict():
-    component = DictPropertyView(component_name="test", component_id="12345678")
+    component = DictPropertyView(component_name="test", component_id="test_set_property_from_data_dict")
     assert "dictionary" == component.dictionary.get("name")
 
     set_property_from_data(component, "dictionary", {"name": "dictionary_updated"})
@@ -17,7 +17,7 @@ def test_set_property_from_data_dict():
 
 
 def test_set_property_from_data_nested_dict():
-    component = DictPropertyView(component_name="test", component_id="12345678")
+    component = DictPropertyView(component_name="test", component_id="test_set_property_from_data_nested_dict")
     assert "nested_dictionary" == component.nested_dictionary.get("nested").get("name")
 
     set_property_from_data(
