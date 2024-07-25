@@ -97,7 +97,7 @@ def test_message_component_module_not_loaded(client):
 
     assert (
         e.exconly()
-        == "django_unicorn.errors.ComponentModuleLoadError: The component module 'test_message_module_not_loaded' could not be loaded."
+        == "django_unicorn.errors.ComponentModuleLoadError: The component module 'test_message_module_not_loaded' could not be loaded."  # noqa: E501
     )
     assert e.value.locations == [
         ("unicorn.components.test_message_module_not_loaded", "TestMessageModuleNotLoadedView"),
