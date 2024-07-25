@@ -135,6 +135,28 @@ class HelloWorldView(UnicornView):
     template_name = "unicorn/hello-world.html"
 ```
 
+### template_html
+
+Template HTML can be defined inline on the component instead of using an external HTML file.
+
+```python
+# hello_world.py
+from django_unicorn.components import UnicornView
+
+class HelloWorldView(UnicornView):
+    template_html = """<div>
+    <div>
+        Count: {{ count }}
+    </div>
+
+    <button unicorn:click="increment">+</button>
+    <button unicorn:click="decrement">-</button>
+</div>
+"""
+
+    ...
+```
+
 ## Instance properties
 
 ### component_args
