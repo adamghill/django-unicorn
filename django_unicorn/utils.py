@@ -137,7 +137,7 @@ def create_template(template_html: Union[str, Callable], engine_name: Optional[s
     for engine in engines.all():
         if engine_name is None or engine_name == engine.name:
             try:
-                return engine.from_string(template_html)
+                return engine.from_string(template_html)  # type: ignore
             except NotImplementedError:
                 pass
 

@@ -239,7 +239,7 @@ class UnicornView(TemplateView):
 
         if hasattr(self, "template_html"):
             try:
-                self.template_name = create_template(self.template_html)
+                self.template_name = create_template(self.template_html)  # type: ignore
             except AssertionError:
                 pass
 
@@ -866,7 +866,7 @@ class UnicornView(TemplateView):
                 request=request,
                 component_args=component_args,
                 **kwargs,
-            )
+            )  # type: ignore
             logger.debug(f"Retrieve {component_id} from views cache")
 
             return component
