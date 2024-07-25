@@ -85,7 +85,7 @@ Want to add some component-based magic to your front-end, but don't need the ove
 
 `Unicorn` is a reactive component framework that enhances your Django views by seamlessly making AJAX calls in the background and dynamically updates the HTML DOM. It's like magic, but better! `Unicorn` is leading the charge in bringing a component-based developer experience to Django. Join the `Unicorn` community today and unlock the power of reactivity!
 
-<p>
+<p style="align: center; padding: 0 10px 10px 0;">
   <a href="https://m.do.co/c/617d629f56c0">
     <img src="https://opensource.nyc3.cdn.digitaloceanspaces.com/attribution/assets/PoweredByDO/DO_Powered_by_Badge_blue.svg" width="201px">
   </a>
