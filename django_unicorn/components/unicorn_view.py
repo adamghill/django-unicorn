@@ -871,6 +871,26 @@ class UnicornView(TemplateView):
 
             return component
 
+        # Check for explicitly defined component
+        components_setting = get_setting("COMPONENTS", {})
+        component_class_from_setting = components_setting.get(component_name)
+
+        if component_class_from_setting:
+            component_from_setting = construct_component(
+                component_class=component_class_from_setting,
+                component_id=component_id,
+                component_name=component_name,
+                component_key=component_key,
+                parent=parent,
+                request=request,
+                component_args=component_args,
+                **kwargs,
+            )
+
+            component_from_setting._cache_component(parent=parent, component_args=component_args, **kwargs)
+
+            return component_from_setting
+
         locations = []
 
         if component_name in location_cache:
