@@ -5,11 +5,11 @@
 Install `Unicorn` the same as any other Python package (preferably into a [virtual environment](https://docs.python.org/3/tutorial/venv.html)).
 
 ````{tab-set-code}
-```pip
+```sh
 python -m pip install django-unicorn
 ```
 
-```poetry
+```sh
 poetry add django-unicorn
 ```
 
