@@ -2311,4 +2311,4 @@ minify = ["htmlmin"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4"
-content-hash = "91eb85de048532a3396ef0361ab26a4e4a13d8516d1db7d06a8b231b65ab344e"
+content-hash = "605550a183b7e07848a28d4f364d6842c58114dc2ef4aed2bfa1033846b31f36"
