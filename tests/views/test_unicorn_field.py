@@ -17,7 +17,7 @@ class NestedPropertyView(UnicornView):
 
 
 def test_set_property_from_data_unicorn_field():
-    component = NestedPropertyView(component_name="test", component_id="12345678")
+    component = NestedPropertyView(component_name="test", component_id="test_set_property_from_data_unicorn_field")
     assert "property_one" == component.property_one.name
 
     data = {"name": "property_one_updated"}
@@ -27,7 +27,9 @@ def test_set_property_from_data_unicorn_field():
 
 
 def test_set_property_from_data_nested_unicorn_field():
-    component = NestedPropertyView(component_name="test", component_id="12345678")
+    component = NestedPropertyView(
+        component_name="test", component_id="test_set_property_from_data_nested_unicorn_field"
+    )
     assert "nested_property_one" == component.property_one.nested_property_one.name
 
     data = {"nested_property_one": {"name": "nested_property_one_updated"}}

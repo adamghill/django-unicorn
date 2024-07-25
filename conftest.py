@@ -48,6 +48,7 @@ def pytest_configure():
     }
 
     settings.configure(
+        DEBUG=True,
         SECRET_KEY="this-is-a-secret",
         TEMPLATES=templates,
         MIDDLEWARE=[
