@@ -27,7 +27,7 @@ from django_unicorn.errors import (
 )
 from django_unicorn.settings import get_setting
 from django_unicorn.typer import cast_attribute_value, get_type_hints
-from django_unicorn.utils import is_non_string_sequence
+from django_unicorn.utils import create_template, is_non_string_sequence
 
 try:
     from cachetools.lru import LRUCache
@@ -232,9 +232,17 @@ class UnicornView(TemplateView):
 
     @timed
     def _set_default_template_name(self) -> None:
+        """Sets a default template name based on component's name if necessary.
+
+        Also handles `template_html` if it is set on the component which overrides `template_name`.
         """
-        Sets a default template name based on component's name if necessary.
-        """
+
+        if hasattr(self, "template_html"):
+            try:
+                self.template_name = create_template(self.template_html)
+            except AssertionError:
+                pass
+
         get_template_names_is_valid = False
 
         try:
@@ -710,6 +718,7 @@ class UnicornView(TemplateView):
             "http_method_names",
             "template_engine",
             "template_name",
+            "template_html",
             "dispatch",
             "id",
             "get",

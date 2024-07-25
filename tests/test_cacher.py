@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 from django_unicorn.cacher import (
     CacheableComponent,
@@ -12,8 +12,17 @@ class FakeComponent(UnicornView):
     pass
 
 
+class FakeComponentWithTemplateHtml(UnicornView):
+    template_html = """<div>
+    testing
+</div>
+"""
+
+
 def test_cacheable_component_request_is_none_then_restored():
-    component = FakeComponent(component_id="asdf123498", component_name="hello-world")
+    component = FakeComponent(
+        component_id="test_cacheable_component_request_is_none_then_restored", component_name="hello-world"
+    )
     request = component.request = MagicMock()
     assert component.request
 
@@ -24,7 +33,9 @@ def test_cacheable_component_request_is_none_then_restored():
 
 
 def test_cacheable_component_extra_context_is_none_then_restored():
-    component = FakeComponent(component_id="asdf123499", component_name="hello-world")
+    component = FakeComponent(
+        component_id="test_cacheable_component_extra_context_is_none_then_restored", component_name="hello-world"
+    )
     extra_context = component.extra_context = MagicMock()
     assert component.extra_context
 
@@ -35,9 +46,19 @@ def test_cacheable_component_extra_context_is_none_then_restored():
 
 
 def test_cacheable_component_parents_have_request_restored():
-    component = FakeComponent(component_id="asdf123498", component_name="hello-world")
-    component2 = FakeComponent(component_id="asdf123499", component_name="hello-world", parent=component)
-    component3 = FakeComponent(component_id="asdf123500", component_name="hello-world", parent=component2)
+    component = FakeComponent(
+        component_id="test_cacheable_component_parents_have_request_restored_1", component_name="hello-world"
+    )
+    component2 = FakeComponent(
+        component_id="test_cacheable_component_parents_have_request_restored_2",
+        component_name="hello-world",
+        parent=component,
+    )
+    component3 = FakeComponent(
+        component_id="test_cacheable_component_parents_have_request_restored_3",
+        component_name="hello-world",
+        parent=component2,
+    )
     request = MagicMock()
     extra_content = "extra_content"
     for c in [component, component2, component3]:
@@ -61,10 +82,18 @@ def test_cacheable_component_parents_have_request_restored():
 
 
 def test_restore_cached_component_children_have_request_set():
-    component = FakeComponent(component_id="asdf123498", component_name="hello-world")
-    component2 = FakeComponent(component_id="asdf123499", component_name="hello-world")
-    component3 = FakeComponent(component_id="asdf123500", component_name="hello-world")
-    component4 = FakeComponent(component_id="asdf123501", component_name="hello-world")
+    component = FakeComponent(
+        component_id="test_restore_cached_component_children_have_request_set_1", component_name="hello-world"
+    )
+    component2 = FakeComponent(
+        component_id="test_restore_cached_component_children_have_request_set_2", component_name="hello-world"
+    )
+    component3 = FakeComponent(
+        component_id="test_restore_cached_component_children_have_request_set_3", component_name="hello-world"
+    )
+    component4 = FakeComponent(
+        component_id="test_restore_cached_component_children_have_request_set_4", component_name="hello-world"
+    )
     component3.children.append(component4)
     component.children.extend([component2, component3])
     request = MagicMock()
@@ -111,13 +140,25 @@ def test_caching_components(settings):
         }
     }
     settings.UNICORN["CACHE_ALIAS"] = "default"
-    root = ExampleCachingComponent(component_id="rrr", component_name="root")
-    child1 = ExampleCachingComponent(component_id="1111", component_name="child1", parent=root)
-    child2 = ExampleCachingComponent(component_id="2222", component_name="child2", parent=root)
-    child3 = ExampleCachingComponent(component_id="3333", component_name="child3", parent=root)
-    grandchild = ExampleCachingComponent(component_id="4444", component_name="grandchild", parent=child1)
-    grandchild2 = ExampleCachingComponent(component_id="5555", component_name="grandchild2", parent=child1)
-    grandchild3 = ExampleCachingComponent(component_id="6666", component_name="grandchild3", parent=child3)
+    root = ExampleCachingComponent(component_id="test_caching_components_1", component_name="root")
+    child1 = ExampleCachingComponent(
+        component_id="test_caching_components_child_1", component_name="child1", parent=root
+    )
+    child2 = ExampleCachingComponent(
+        component_id="test_caching_components_child_2", component_name="child2", parent=root
+    )
+    child3 = ExampleCachingComponent(
+        component_id="test_caching_components_child_3", component_name="child3", parent=root
+    )
+    grandchild = ExampleCachingComponent(
+        component_id="test_caching_components_grandchild_1", component_name="grandchild", parent=child1
+    )
+    grandchild2 = ExampleCachingComponent(
+        component_id="test_caching_components_grandchild_2", component_name="grandchild2", parent=child1
+    )
+    grandchild3 = ExampleCachingComponent(
+        component_id="test_caching_components_grandchild_3", component_name="grandchild3", parent=child3
+    )
 
     cache_full_tree(child3)
     request = MagicMock()
@@ -130,11 +171,35 @@ def test_caching_components(settings):
 
     assert root.component_id == restored_root.component_id
     assert 3 == len(restored_root.children)
+
     for i, child in enumerate([child1, child2, child3]):
         assert restored_root.children[i].component_id == child.component_id
+
     assert 2 == len(restored_root.children[0].children)
+
     for i, child in enumerate([grandchild, grandchild2]):
         assert restored_root.children[0].children[i].component_id == child.component_id
+
     assert not restored_root.children[1].children
     assert 1 == len(restored_root.children[2].children)
     assert grandchild3.component_id == restored_root.children[2].children[0].component_id
+
+
+@patch("django_unicorn.cacher.create_template")
+def test_caching_components_with_template_html(create_template):
+    component = FakeComponentWithTemplateHtml(
+        component_id="test_caching_components_with_template_html", component_name="template-html-test"
+    )
+    assert component.template_html
+
+    # manually set template_name to None which happens outside of this code normally
+    component.template_name = None
+
+    # Caching will pop the `Template` instance from component.template_name when it enters, adn re-create it when it exits
+    cache_full_tree(component)
+
+    assert component.template_html
+    assert isinstance(component.template_html, str)
+
+    # check that template_name will re-create a Template based on `template_html`
+    create_template.assert_called_once_with(component.template_html)

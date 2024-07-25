@@ -1,12 +1,14 @@
-import collections.abc
 import hmac
 import logging
+from collections.abc import Callable, Sequence, Set
 from inspect import signature
 from pprint import pprint
-from typing import Dict, List, Union
+from typing import Dict, List, Optional, Union
 
 import shortuuid
 from django.conf import settings
+from django.template import engines
+from django.template.backends.django import Template
 from django.utils.html import _json_script_escapes
 from django.utils.safestring import SafeText, mark_safe
 
@@ -105,9 +107,7 @@ def is_non_string_sequence(obj):
     Helpful when you expect to loop over `obj`, but explicitly don't want to allow `str`.
     """
 
-    if (isinstance(obj, (collections.abc.Sequence, collections.abc.Set))) and not isinstance(
-        obj, (str, bytes, bytearray)
-    ):
+    if (isinstance(obj, (Sequence, Set))) and not isinstance(obj, (str, bytes, bytearray)):
         return True
 
     return False
@@ -124,3 +124,19 @@ def is_int(s: str) -> bool:
         return False
     else:
         return True
+
+
+def create_template(template_html: Union[str, Callable], engine_name: Optional[str] = None) -> Template:
+    """Create a `Template` from a string or callable."""
+
+    if callable(template_html):
+        template_html = str(template_html())
+
+    for engine in engines.all():
+        if engine_name is None or engine_name == engine.name:
+            try:
+                return engine.from_string(template_html)
+            except NotImplementedError:
+                pass
+
+    raise AssertionError("Template could not be created based on configured template engines")

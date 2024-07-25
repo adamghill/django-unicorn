@@ -45,6 +45,15 @@ def test_init_snake_component_name_valid_template_name():
     assert component.template_name == "unicorn/hello_world.html"
 
 
+class TemplateHtmlView(UnicornView):
+    template_html = "<div>test</div>"
+
+
+def test_init_template_html():
+    component = TemplateHtmlView(component_id="test_init_template_html", component_name="hello_world")
+    assert isinstance(component.template_name, Template)
+
+
 def test_init_caches():
     component = UnicornView(component_id="asdf1234", component_name="hello_world")
     assert len(component._methods_cache) == 0

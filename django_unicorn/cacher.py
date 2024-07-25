@@ -8,6 +8,7 @@ from django.http import HttpRequest
 import django_unicorn
 from django_unicorn.errors import UnicornCacheError
 from django_unicorn.settings import get_cache_alias
+from django_unicorn.utils import create_template
 
 logger = logging.getLogger(__name__)
 
@@ -46,8 +47,15 @@ class CacheableComponent:
             else:
                 extra_context = None
 
+            # Pop the request off for pickling
             request = component.request
             component.request = None
+
+            template_name = component.template_name
+
+            # Pop the template_name off for pickling, but only if it's not a string, aka it's a `Template`
+            if not isinstance(component.template_name, str):
+                component.template_name = None
 
             self._state[component.component_id] = (
                 component,
@@ -55,6 +63,7 @@ class CacheableComponent:
                 extra_context,
                 component.parent,
                 component.children.copy(),
+                template_name,
             )
 
             if component.parent:
@@ -81,10 +90,15 @@ class CacheableComponent:
         return self
 
     def __exit__(self, *args):
-        for component, request, extra_context, parent, children in self._state.values():
+        for component, request, extra_context, parent, children, template_name in self._state.values():
             component.request = request
             component.parent = parent
             component.children = children
+            component.template_name = template_name
+
+            # Re-create the template_name `Template` object if it is `None`
+            if component.template_name is None and hasattr(component, "template_html"):
+                component.template_name = create_template(component.template_html)
 
             if extra_context:
                 component.extra_context = extra_context
@@ -117,14 +131,14 @@ def restore_from_cache(component_cache_key: str, request: HttpRequest = None) ->
 
     if cached_component:
         roots = {}
-        root: django_unicorn.views.UnicornView = cached_component
+        root: "django_unicorn.views.UnicornView" = cached_component
         roots[root.component_cache_key] = root
 
         while root.parent:
             root = cache.get(root.parent.component_cache_key)
             roots[root.component_cache_key] = root
 
-        to_traverse: List[django_unicorn.views.UnicornView] = []
+        to_traverse: List["django_unicorn.views.UnicornView"] = []
         to_traverse.append(root)
 
         while to_traverse:
