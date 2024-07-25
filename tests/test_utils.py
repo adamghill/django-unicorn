@@ -1,6 +1,8 @@
 import pytest
+from django.template.backends.django import Template
 
 from django_unicorn.utils import (
+    create_template,
     generate_checksum,
     get_method_arguments,
     is_non_string_sequence,
@@ -100,3 +102,20 @@ def test_is_non_string_sequence_string():
 
 def test_is_non_string_sequence_bytes():
     assert not is_non_string_sequence(b"")
+
+
+def test_create_template_str():
+    actual = create_template("<div>test string template</div>")
+
+    assert actual
+    assert isinstance(actual, Template)
+
+
+def test_create_template_callable():
+    def _get_template():
+        return "<div>test callable template</div>"
+
+    actual = create_template(_get_template)
+
+    assert actual
+    assert isinstance(actual, Template)
