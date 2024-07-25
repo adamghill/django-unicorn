@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.61.0
+
+- Add [`template_html`](views.md#template_html) to specify inline template HTML on the component.
+
 ## 0.60.0
 
 - Silence warnings about multiple root elements for direct views.
