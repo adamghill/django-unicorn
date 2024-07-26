@@ -18,6 +18,24 @@ poetry add django-unicorn
 ```
 ````
 
+````{tab-item} pdm
+```sh
+pdm add django-unicorn
+```
+````
+
+````{tab-item} rye
+```sh
+rye add django-unicorn
+```
+````
+
+````{tab-item} pipenv
+```sh
+pipenv install django-unicorn
+```
+````
+
 `````
 
 ```{note}
