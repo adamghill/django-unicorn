@@ -3,7 +3,7 @@
 ## 0.61.0
 
 - Add [`template_html`](views.md#template_html) to specify inline template HTML on the component.
-- Add [`resolved`](views.md#resolved) method which only fires once even when there are multiple actions, e.g. during a debounce.
+- Add `resolved` method which only fires once even when there are multiple actions, e.g. during a debounce.
 
 ## 0.60.0
 
