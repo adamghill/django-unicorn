@@ -174,6 +174,10 @@ disable_error_code = ["empty-body"]
 module = "decorator"
 ignore_missing_imports = true
 
+[tool.coverage.run]
+branch = true
+relative_files = true
+
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
