@@ -43,9 +43,8 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git config pull.ff only
           git checkout -b py-code-coverage || git checkout py-code-coverage
           git pull origin py-code-coverage
           git add .
           git commit -m "Update coverage badge"
-          git push origin py-code-coverage
+          git push --force origin py-code-coverage
