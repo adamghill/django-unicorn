@@ -268,6 +268,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "tataraba",
+      "name": "Mario Munoz",
+      "avatar_url": "https://avatars.githubusercontent.com/u/46942991?v=4",
+      "profile": "https://www.pythonbynight.com",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
