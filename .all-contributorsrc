@@ -286,6 +286,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "JeremyLWright",
+      "name": "Jeremy Wright",
+      "avatar_url": "https://avatars.githubusercontent.com/u/2302957?v=4",
+      "profile": "https://quiescent.us",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
