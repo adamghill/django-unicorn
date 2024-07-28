@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.62.0-dev
+
+**Breaking changes**
+
+- Remove support for Python 3.8 and 3.9 because Django 5.0 has dropped support.
+
 ## 0.61.0
 
 - Add [`template_html`](views.md#template_html) to specify inline template HTML on the component.
