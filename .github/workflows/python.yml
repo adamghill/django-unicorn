@@ -4,30 +4,26 @@ on:
   workflow_dispatch:
 
 jobs:
-  test:
+  lint:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: [3.8, 3.9, "3.10", "3.11"]
 
     steps:
-      - uses: actions/checkout@v2.3.4
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 1
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2.1.4
-        with:
-          python-version: ${{ matrix.python-version }}
-
       - name: Install Poetry
-        uses: abatilo/actions-poetry@v2.1.6
-        with:
-          poetry-version: 1.6.1
+        run: pipx install poetry
 
       - name: Set Poetry config
         run: |
-          poetry config virtualenvs.path ~/.virtualenvs${{ matrix.python-version }}
+          poetry config virtualenvs.path ~/.virtualenvs3.11
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: 3.11
+          cache: "poetry"
 
       - name: Install dependencies
         run: poetry install
@@ -35,8 +31,35 @@ jobs:
       - name: ruff check
         run: poetry run ruff check .
 
-      - name: mypy
+      - name: mypy check
         run: poetry run mypy django_unicorn
+
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.8, 3.9, "3.10", "3.11"]
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+
+      - name: Install Poetry
+        run: pipx install poetry
+
+      - name: Set Poetry config
+        run: |
+          poetry config virtualenvs.path ~/.virtualenvs${{ matrix.python-version }}
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "poetry"
+
+      - name: Install dependencies
+        run: poetry install -E minify
 
       - name: Run all tests
         run: poetry run nox
