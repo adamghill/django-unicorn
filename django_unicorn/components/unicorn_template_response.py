@@ -1,6 +1,7 @@
 import logging
 import re
 from collections import deque
+from typing import Deque
 
 import orjson
 from bs4 import BeautifulSoup
@@ -48,7 +49,7 @@ def is_html_well_formed(html: str) -> bool:
     """
 
     tag_list = re.split("(<[^>!]*>)", html)[1::2]
-    stack: deque[str] = deque()
+    stack: Deque[str] = deque()
 
     for tag in tag_list:
         if "/" not in tag:
