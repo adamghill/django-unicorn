@@ -14,7 +14,7 @@ keywords = ["django", "python", "javascript", "fullstack"]
 "Funding" = "https://github.com/sponsors/adamghill"
 
 [tool.poetry.dependencies]
-python = ">=3.8,<4"
+python = ">=3.10"
 django = ">=2.2"
 beautifulsoup4 = ">=4.8.0"
 orjson = ">=3.6.0"
