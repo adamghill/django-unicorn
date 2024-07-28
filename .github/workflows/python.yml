@@ -35,5 +35,8 @@ jobs:
       - name: ruff check
         run: poetry run ruff check .
 
+      - name: mypy
+        run: poetry run mypy django_unicorn
+
       - name: Run all tests
         run: poetry run nox
