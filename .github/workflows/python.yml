@@ -27,8 +27,6 @@ jobs:
 
       - name: Install dependencies
         run: |
-          poetry add python==${{ matrix.python-version }}
-          poetry add django==${{ matrix.django-version }}
           poetry install
 
       - name: ruff check
@@ -64,5 +62,8 @@ jobs:
       - name: Install dependencies
         run: poetry install -E minify
 
-      - name: Run all tests
-        run: poetry run nox
+       - name: Fast tests
+        run: poetry run pytest -m 'not slow'
+
+      - name: Slow tests
+        run: poetry run pytest -m 'slow'
