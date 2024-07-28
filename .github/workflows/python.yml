@@ -1,7 +1,11 @@
 name: Python
+
 on:
   push:
   workflow_dispatch:
+
+env:
+  LINT_PYTHON_VERSION: 3.11
 
 jobs:
   lint:
@@ -13,16 +17,14 @@ jobs:
           fetch-depth: 1
 
       - name: Install Poetry
-        run: pipx install poetry
-
-      - name: Set Poetry config
         run: |
-          poetry config virtualenvs.path ~/.virtualenvs3.11
+          pipx install poetry
+          poetry config virtualenvs.path ~/.virtualenvs${{ env.LINT_PYTHON_VERSION }}
 
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Set up Python ${{ env.LINT_PYTHON_VERSION }}
         uses: actions/setup-python@v3
         with:
-          python-version: 3.11
+          python-version: ${{ env.LINT_PYTHON_VERSION }}
           cache: "poetry"
 
       - name: Install dependencies
@@ -48,10 +50,8 @@ jobs:
           fetch-depth: 1
 
       - name: Install Poetry
-        run: pipx install poetry
-
-      - name: Set Poetry config
         run: |
+          pipx install poetry
           poetry config virtualenvs.path ~/.virtualenvs${{ matrix.python-version }}
 
       - name: Set up Python ${{ matrix.python-version }}
@@ -61,9 +61,12 @@ jobs:
           cache: "poetry"
 
       - name: Install dependencies
-        run: poetry install -E minify
+        run: |
+          poetry env use ${{ matrix.python-version }}
+          poetry add django==${{ matrix.django-version }}
+          poetry install -E minify
 
-       - name: Fast tests
+      - name: Fast tests
         run: poetry run pytest -m 'not slow'
 
       - name: Slow tests
