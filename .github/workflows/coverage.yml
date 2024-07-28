@@ -1,9 +1,13 @@
 name: Coverage
+
 on:
   push:
     branches:
       - main
   workflow_dispatch:
+
+env:
+  PYTHON_VERSION: 3.11
 
 jobs:
   generate-coverage:
@@ -14,19 +18,16 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v2.1.4
-        with:
-          python-version: "3.11"
-
       - name: Install Poetry
-        uses: abatilo/actions-poetry@v2.1.6
-        with:
-          poetry-version: 1.6.1
-
-      - name: Set Poetry config
         run: |
-          poetry config virtualenvs.path ~/.virtualenvs3.11
+          pipx install poetry
+          poetry config virtualenvs.path ~/.virtualenvs${{ env.PYTHON_VERSION }}
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: "poetry"
 
       - name: Install dependencies
         run: poetry install -E minify
