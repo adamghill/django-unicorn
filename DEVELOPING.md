@@ -27,7 +27,7 @@
 ## Run Python/Django matrix unit tests
 
 1. Install [`act`](https://nektosact.com)
-1. `act -q -j test -W .github/workflows/python.yml`
+1. `act -W .github/workflows/python.yml -j test`
 
 # Minify JavaScript
 

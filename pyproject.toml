@@ -137,7 +137,7 @@ mm = { cmd = "example/manage.py makemigrations", help = "Make migrations for the
 mi = { cmd = "example/manage.py migrate", help = "Migrate the example project" }
 md = ["mm", "mi"]
 m = { cmd = "example/manage.py", help = "manage.py for the example project" }
-tp = { cmd = "act -q -j test -W .github/workflows/python.yml", help = "Run the Python matrix test suite" }
+tp = { cmd = "act -W .github/workflows/python.yml -j test", help = "Run the Python matrix test suite" }
 tj = { cmd = "npm run-script test", help = "Run the JavaScript unit tests" }
 ta = ["tp", "tj"]
 jb = { cmd = "npm run build", help = "Build the JavaScript library" }
