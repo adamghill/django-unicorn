@@ -25,9 +25,10 @@ Available additional settings that can be set to `UNICORN` dict in settings.py w
 
 ## Customization changelog
 
-### 0.60.0.2 - (2024-07-16)
+### 0.61.0.1 - (2024-07-16)
 
 - Avoid recursion upon caching parent/child complex components with `pickle.dumps`
+- Sync with main package, version `0.61.0`
 
 ### 0.60.0.1 - (2024-03-29)
 
