@@ -9,6 +9,7 @@
 
 ![PyPI](https://img.shields.io/pypi/v/django-unicorn?color=blue&style=flat-square)
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/django-unicorn?color=blue&style=flat-square)
+![coverage](https://raw.githubusercontent.com/adamghill/django-unicorn/python-coverage-comment-action-data/badge.svg)
 ![GitHub Sponsors](https://img.shields.io/github/sponsors/adamghill?color=blue&style=flat-square)
 [![All Contributors](https://img.shields.io/badge/all_contributors-17-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE - Do not remove or modify above line -->
@@ -224,6 +225,12 @@ Thanks to the following wonderful people ([emoji key](https://allcontributors.or
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/rhymiz"><img src="https://avatars.githubusercontent.com/u/7029352?v=4?s=100" width="100px;" alt="Lemi Boyce"/><br /><sub><b>Lemi Boyce</b></sub></a><br /><a href="https://github.com/adamghill/django-unicorn/commits?author=rhymiz" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="http://jacksund.github.io"><img src="https://avatars.githubusercontent.com/u/47992949?v=4?s=100" width="100px;" alt="Jack Sundberg"/><br /><sub><b>Jack Sundberg</b></sub></a><br /><a href="https://github.com/adamghill/django-unicorn/commits?author=jacksund" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/siliconcow"><img src="https://avatars.githubusercontent.com/u/908362?v=4?s=100" width="100px;" alt="siliconcow"/><br /><sub><b>siliconcow</b></sub></a><br /><a href="https://github.com/adamghill/django-unicorn/commits?author=siliconcow" title="Code">💻</a> <a href="https://github.com/adamghill/django-unicorn/commits?author=siliconcow" title="Tests">⚠️</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://rahma.hashnode.dev/"><img src="https://avatars.githubusercontent.com/u/35562131?v=4?s=100" width="100px;" alt="Akintola Rahmat"/><br /><sub><b>Akintola Rahmat</b></sub></a><br /><a href="https://github.com/adamghill/django-unicorn/commits?author=mihrab34" title="Code">💻</a></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://www.pythonbynight.com"><img src="https://avatars.githubusercontent.com/u/46942991?v=4?s=100" width="100px;" alt="Mario Munoz"/><br /><sub><b>Mario Munoz</b></sub></a><br /><a href="https://github.com/adamghill/django-unicorn/commits?author=tataraba" title="Documentation">📖</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/epw1624"><img src="https://avatars.githubusercontent.com/u/112768709?v=4?s=100" width="100px;" alt="Emily Wood"/><br /><sub><b>Emily Wood</b></sub></a><br /><a href="https://github.com/adamghill/django-unicorn/commits?author=epw1624" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://quiescent.us"><img src="https://avatars.githubusercontent.com/u/2302957?v=4?s=100" width="100px;" alt="Jeremy Wright"/><br /><sub><b>Jeremy Wright</b></sub></a><br /><a href="https://github.com/adamghill/django-unicorn/commits?author=JeremyLWright" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>

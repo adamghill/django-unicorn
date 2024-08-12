@@ -2,7 +2,7 @@ import logging
 from dataclasses import is_dataclass
 from datetime import date, datetime, time, timedelta, timezone
 from inspect import signature
-from typing import Dict, List, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 from typing import get_type_hints as typing_get_type_hints
 from uuid import UUID
 
@@ -32,13 +32,15 @@ try:
     from typing import get_args, get_origin
 except ImportError:
     # Fallback to dunder methods for older versions of Python
-    def get_args(type_hint):
-        if hasattr(type_hint, "__args__"):
-            return type_hint.__args__
+    def get_args(tp: Any) -> Tuple[Any, ...]:
+        if hasattr(tp, "__args__"):
+            return tp.__args__
+        return ()
 
-    def get_origin(type_hint):
-        if hasattr(type_hint, "__origin__"):
-            return type_hint.__origin__
+    def get_origin(tp: Any) -> Optional[Any]:
+        if hasattr(tp, "__origin__"):
+            return tp.__origin__
+        return None
 
 
 try:
@@ -127,36 +129,36 @@ def cast_value(type_hint, value):
     if type(None) in type_hints and value is None:
         return value
 
-    for type_hint in type_hints:
-        if type_hint == type(None):
+    for _type_hint in type_hints:
+        if _type_hint == type(None):  # noqa: E721
             continue
 
-        caster = CASTERS.get(type_hint)
+        caster = CASTERS.get(_type_hint)
 
         if caster:
             try:
                 value = caster(value)
                 break
             except TypeError:
-                if (type_hint is datetime or type_hint is date) and (isinstance(value, (float, int))):
+                if (_type_hint is datetime or _type_hint is date) and (isinstance(value, (float, int))):
                     try:
                         value = datetime.fromtimestamp(value, tz=timezone.utc)
 
-                        if type_hint is date:
+                        if _type_hint is date:
                             value = value.date()
 
                         break
                     except ValueError:
                         pass
         else:
-            if issubclass(type_hint, Model):
+            if issubclass(_type_hint, Model):
                 continue
 
-            if _check_pydantic(type_hint) or is_dataclass(type_hint):
-                value = type_hint(**value)
+            if _check_pydantic(_type_hint) or is_dataclass(_type_hint):
+                value = _type_hint(**value)
                 break
 
-            value = type_hint(value)
+            value = _type_hint(value)
             break
 
     return value

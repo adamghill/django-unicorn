@@ -70,7 +70,7 @@ class FakeComponent(UnicornView):
 
 
 def test_call_method_name_missing():
-    component = FakeComponent(component_name="test", component_id="asdf")
+    component = FakeComponent(component_name="test", component_id="test_call_method_name_missing")
     actual = _call_method_name(component, "save_missing", args=(), kwargs={})
 
     assert actual is None
@@ -79,7 +79,7 @@ def test_call_method_name_missing():
 def test_call_method_name_no_params():
     expected = 1
 
-    component = FakeComponent(component_name="test", component_id="asdf")
+    component = FakeComponent(component_name="test", component_id="test_call_method_name_no_params")
     actual = _call_method_name(component, "save", args=(), kwargs={})
 
     assert actual == expected
@@ -88,7 +88,7 @@ def test_call_method_name_no_params():
 def test_call_method_name_with_arg():
     expected = 2
 
-    component = FakeComponent(component_name="test", component_id="asdf")
+    component = FakeComponent(component_name="test", component_id="test_call_method_name_with_arg")
     actual = _call_method_name(component, "save_with_arg", args=(1,), kwargs={})
 
     assert actual == expected
@@ -97,7 +97,7 @@ def test_call_method_name_with_arg():
 def test_call_method_name_with_kwarg():
     expected = 3
 
-    component = FakeComponent(component_name="test", component_id="asdf")
+    component = FakeComponent(component_name="test", component_id="test_call_method_name_with_kwarg")
     actual = _call_method_name(component, "save_with_kwarg", args=(), kwargs=MappingProxyType({"id": 2}))
 
     assert actual == expected
@@ -108,7 +108,9 @@ def test_call_method_name_arg_with_model_type_annotation():
     flavor = Flavor()
     flavor.save()
 
-    component = FakeComponent(component_name="test", component_id="asdf")
+    component = FakeComponent(
+        component_name="test", component_id="test_call_method_name_arg_with_model_type_annotation"
+    )
     actual = _call_method_name(component, "save_with_model", args=(flavor.pk,), kwargs={})
 
     assert actual == flavor.pk
@@ -124,7 +126,9 @@ def test_call_method_name_arg_with_model_type_annotation_multiple():
 
     assert flavor_one.pk != flavor_two.pk
 
-    component = FakeComponent(component_name="test", component_id="asdf")
+    component = FakeComponent(
+        component_name="test", component_id="test_call_method_name_arg_with_model_type_annotation_multiple"
+    )
     actual = _call_method_name(component, "save_with_model", args=(flavor_one.pk,), kwargs={})
     assert actual == flavor_one.pk
 
@@ -142,7 +146,7 @@ def test_call_method_name_arg_with_model_type_annotation_multiple():
 
 
 def _get_actual(method_name: str, args=None, kwargs=None):
-    component = FakeComponent(component_name="test", component_id="asdf")
+    component = FakeComponent(component_name="test", component_id="test-call-method-name-tests")
 
     if args is None:
         args = ()

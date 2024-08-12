@@ -1,6 +1,9 @@
 # Developing
 
-1. `git clone git@github.com:adamghill/django-unicorn.git`
+## Local development
+
+1. Fork https://github.com/adamghill/django-unicorn`
+1. `git clone` your forked repository
 1. `cd django-unicorn`
 1. `poetry install -E minify -E docs`
 1. `poetry run python example/manage.py migrate`
@@ -9,24 +12,29 @@
 
 ## To install in another project
 
-- `pip install -e ../django-unicorn`
-- add something like `django-unicorn = { path="../django-unicorn", develop=true }` to other project's `pyproject.toml`
+1. Download the repo to your local
+1. `pip install -e ../django-unicorn` from inside the other project's virtualenv _or_ add `django-unicorn = { path="../django-unicorn", develop=true }` to the other project's `pyproject.toml`
 
-# See docs
+## Build Sphinx documentation
 
 1. `poetry run sphinx-autobuild -W docs/source docs/build`
 
-# Run unittests
+## Run unit tests on local environment
 
-1. `poetry run pytest`
-1. `npm run test`
+1. Python: `poetry run pytest`
+1. JavaScript: `npm run test`
+
+## Run Python/Django matrix unit tests
+
+1. Install [`act`](https://nektosact.com)
+1. `act -W .github/workflows/python.yml -j test`
 
 # Minify JavaScript
 
 1. `npm install`
 1. `npm run build`
 
-# Bump version
+## Bump version
 
 1. Update changelog.md
 1. Update package.json

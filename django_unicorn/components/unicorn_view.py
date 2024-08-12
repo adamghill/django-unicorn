@@ -27,7 +27,7 @@ from django_unicorn.errors import (
 )
 from django_unicorn.settings import get_setting
 from django_unicorn.typer import cast_attribute_value, get_type_hints
-from django_unicorn.utils import is_non_string_sequence
+from django_unicorn.utils import create_template, is_non_string_sequence
 
 try:
     from cachetools.lru import LRUCache
@@ -160,8 +160,8 @@ class UnicornView(TemplateView):
     component_name: str = ""
     component_key: str = ""
     component_id: str = ""
-    component_args: List = None
-    component_kwargs: Dict = None
+    component_args: Optional[List] = None
+    component_kwargs: Optional[Dict] = None
 
     def __init__(self, component_args: Optional[List] = None, **kwargs):
         self.response_class = UnicornTemplateResponse
@@ -172,8 +172,8 @@ class UnicornView(TemplateView):
 
         # Without these instance variables calling UnicornView() outside the
         # Django view/template logic (i.e. in unit tests) results in odd results.
-        self.request: HttpRequest = None
-        self.parent: UnicornView = None
+        self.request: HttpRequest = HttpRequest()
+        self.parent: Optional[UnicornView] = None
         self.children: List[UnicornView] = []
 
         # Caches to reduce the amount of time introspecting the class
@@ -185,7 +185,7 @@ class UnicornView(TemplateView):
         self._resettable_attributes_cache: Dict[str, Any] = {}
 
         # JavaScript method calls
-        self.calls = []
+        self.calls: List[Any] = []
 
         # Default force render to False
         self.force_render = False
@@ -195,7 +195,7 @@ class UnicornView(TemplateView):
         if not self.component_name:
             raise AssertionError("Component name is required")
 
-        if "id" in kwargs and kwargs["id"]:
+        if kwargs.get("id"):
             # Sometimes the component_id is initially in kwargs["id"]
             self.component_id = kwargs["id"]
 
@@ -226,15 +226,23 @@ class UnicornView(TemplateView):
 
         self._init_script: str = ""
         self._validate_called = False
-        self.errors = {}
+        self.errors: Dict[Any, Any] = {}
         self._set_default_template_name()
         self._set_caches()
 
     @timed
     def _set_default_template_name(self) -> None:
+        """Sets a default template name based on component's name if necessary.
+
+        Also handles `template_html` if it is set on the component which overrides `template_name`.
         """
-        Sets a default template name based on component's name if necessary.
-        """
+
+        if hasattr(self, "template_html"):
+            try:
+                self.template_name = create_template(self.template_html)  # type: ignore
+            except AssertionError:
+                pass
+
         get_template_names_is_valid = False
 
         try:
@@ -322,6 +330,12 @@ class UnicornView(TemplateView):
     def updated(self, name, value):
         """
         Hook that gets called when a component's data is updated.
+        """
+        pass
+
+    def resolved(self, name, value):
+        """
+        Hook that gets called when a component's data is resolved.
         """
         pass
 
@@ -420,7 +434,7 @@ class UnicornView(TemplateView):
         attributes = self._attributes()
         frontend_context_variables.update(attributes)
 
-        exclude_field_attributes = []
+        exclude_field_attributes: List[str] = []
 
         # Remove any field in `javascript_exclude` from `frontend_context_variables`
         if hasattr(self, "Meta") and hasattr(self.Meta, "javascript_exclude"):
@@ -603,6 +617,7 @@ class UnicornView(TemplateView):
         *,
         call_updating_method: bool = False,
         call_updated_method: bool = False,
+        call_resolved_method: bool = False,
     ) -> None:
         # Get the correct value type by using the form if it is available
         data = self._attributes()
@@ -634,6 +649,12 @@ class UnicornView(TemplateView):
 
                 if hasattr(self, updated_function_name):
                     getattr(self, updated_function_name)(value)
+
+            if call_resolved_method:
+                resolved_function_name = f"resolved_{name}"
+
+                if hasattr(self, resolved_function_name):
+                    getattr(self, resolved_function_name)(value)
         except AttributeError:
             raise
 
@@ -710,6 +731,7 @@ class UnicornView(TemplateView):
             "http_method_names",
             "template_engine",
             "template_name",
+            "template_html",
             "dispatch",
             "id",
             "get",
@@ -740,6 +762,7 @@ class UnicornView(TemplateView):
             "get_frontend_context_variables",
             "errors",
             "updated",
+            "resolved",
             "parent",
             "children",
             "call",
@@ -772,8 +795,8 @@ class UnicornView(TemplateView):
         component_id: str,
         component_name: str,
         component_key: str = "",
-        parent: "UnicornView" = None,
-        request: HttpRequest = None,
+        parent: Optional["UnicornView"] = None,
+        request: Optional[HttpRequest] = None,
         use_cache=True,
         component_args: Optional[List] = None,
         kwargs: Optional[Dict[str, Any]] = None,
@@ -857,10 +880,30 @@ class UnicornView(TemplateView):
                 request=request,
                 component_args=component_args,
                 **kwargs,
-            )
+            )  # type: ignore
             logger.debug(f"Retrieve {component_id} from views cache")
 
             return component
+
+        # Check for explicitly defined component
+        components_setting = get_setting("COMPONENTS", {})
+        component_class_from_setting = components_setting.get(component_name)
+
+        if component_class_from_setting:
+            component_from_setting = construct_component(
+                component_class=component_class_from_setting,
+                component_id=component_id,
+                component_name=component_name,
+                component_key=component_key,
+                parent=parent,
+                request=request,
+                component_args=component_args,
+                **kwargs,
+            )
+
+            component_from_setting._cache_component(parent=parent, component_args=component_args, **kwargs)
+
+            return component_from_setting
 
         locations = []
 

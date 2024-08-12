@@ -1,37 +1,73 @@
 name: Python
-on: [push]
+
+on:
+  push:
+  workflow_dispatch:
+
+env:
+  LINT_PYTHON_VERSION: 3.11
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+
+      - name: Install Poetry
+        run: |
+          pipx install poetry
+          poetry config virtualenvs.path ~/.virtualenvs${{ env.LINT_PYTHON_VERSION }}
+
+      - name: Set up Python ${{ env.LINT_PYTHON_VERSION }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ env.LINT_PYTHON_VERSION }}
+          cache: "poetry"
+
+      - name: Install dependencies
+        run: |
+          poetry install
+
+      - name: ruff check
+        run: poetry run ruff check .
+
+      - name: mypy check
+        run: poetry run mypy django_unicorn
+
   test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.8, 3.9, "3.10", "3.11"]
+        python-version: ["3.10", "3.11", "3.12"]
+        django-version: ["4.1", "4.2", "5.0"]
 
     steps:
-      - uses: actions/checkout@v2.3.4
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 1
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2.1.4
-        with:
-          python-version: ${{ matrix.python-version }}
-
       - name: Install Poetry
-        uses: abatilo/actions-poetry@v2.1.6
-        with:
-          poetry-version: 1.6.1
-
-      - name: Set Poetry config
         run: |
+          pipx install poetry
           poetry config virtualenvs.path ~/.virtualenvs${{ matrix.python-version }}
 
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "poetry"
+
       - name: Install dependencies
-        run: poetry install
+        run: |
+          poetry env use ${{ matrix.python-version }}
+          poetry add django==${{ matrix.django-version }}
+          poetry install -E minify
 
-      - name: ruff check
-        run: poetry run ruff .
+      - name: Fast tests
+        run: poetry run pytest -m 'not slow'
 
-      - name: Run all tests
-        run: poetry run nox
+      - name: Slow tests
+        run: poetry run pytest -m 'slow'

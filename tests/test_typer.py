@@ -33,7 +33,7 @@ def test_get_type_hints_gh_639():
         a_date: datetime.date
 
     expected = {"a_date": datetime.date}
-    actual = get_type_hints(MyComponentView(component_name="test", component_id="123"))
+    actual = get_type_hints(MyComponentView(component_name="test", component_id="test_get_type_hints_gh_639"))
     assert actual == expected
 
 
