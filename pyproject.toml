@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "django-unicorn-loosened"
-version = "0.60.0.1"
+version = "0.60.0.2rc"
 description = "An alternate version of a magical full-stack framework for Django."
 authors = ["Adam Hill <unicorn@adamghill.com>", "Styria Digital Development <digital.development@styria.dev>"]
 license = "MIT"
