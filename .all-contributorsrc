@@ -259,6 +259,42 @@
         "code",
         "test"
       ]
+    },
+    {
+      "login": "mihrab34",
+      "name": "Akintola Rahmat",
+      "avatar_url": "https://avatars.githubusercontent.com/u/35562131?v=4",
+      "profile": "https://rahma.hashnode.dev/",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "tataraba",
+      "name": "Mario Munoz",
+      "avatar_url": "https://avatars.githubusercontent.com/u/46942991?v=4",
+      "profile": "https://www.pythonbynight.com",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "epw1624",
+      "name": "Emily Wood",
+      "avatar_url": "https://avatars.githubusercontent.com/u/112768709?v=4",
+      "profile": "https://github.com/epw1624",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "JeremyLWright",
+      "name": "Jeremy Wright",
+      "avatar_url": "https://avatars.githubusercontent.com/u/2302957?v=4",
+      "profile": "https://quiescent.us",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,

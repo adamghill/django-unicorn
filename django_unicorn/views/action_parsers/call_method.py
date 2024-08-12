@@ -1,4 +1,4 @@
-from typing import Any, Dict, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from django.db.models import Model
 
@@ -18,10 +18,10 @@ try:
     from typing import get_origin
 except ImportError:
 
-    def get_origin(type_hint):
-        if hasattr(type_hint, "__origin__"):
-            return type_hint.__origin__
-
+    def get_origin(tp: Any) -> Optional[Any]:
+        if hasattr(tp, "__origin__"):
+            return tp.__origin__
+        return None
 
 def handle(component_request: ComponentRequest, component: UnicornView, payload: Dict):
     # Import here to prevent cyclic import
@@ -133,7 +133,7 @@ def _call_method_name(component: UnicornView, method_name: str, args: Tuple[Any]
     if method_name is not None and hasattr(component, method_name):
         func = getattr(component, method_name)
 
-        parsed_args = []
+        parsed_args: List[Any] = []
         parsed_kwargs = {}
         arguments = get_method_arguments(func)
         type_hints = get_type_hints(func)

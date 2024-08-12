@@ -208,12 +208,15 @@ def test_unicorn_render_parent(settings):
         "unicorn 'tests.templatetags.test_unicorn_render.FakeComponentKwargs' parent=view",
     )
     unicorn_node = unicorn(Parser([]), token)
-    view = FakeComponentParent(component_name="test", component_id="asdf")
+    view = FakeComponentParent(component_name="test", component_id="test_unicorn_render_parent")
     context = {"view": view}
     unicorn_node.render(Context(context))
 
     assert unicorn_node.parent
-    assert unicorn_node.component_id == "asdf:tests.templatetags.test_unicorn_render.FakeComponentKwargs"
+    assert (
+        unicorn_node.component_id
+        == "test_unicorn_render_parent:tests.templatetags.test_unicorn_render.FakeComponentKwargs"
+    )
 
 
 def test_unicorn_render_parent_with_key(settings):
@@ -223,11 +226,14 @@ def test_unicorn_render_parent_with_key(settings):
         "unicorn 'tests.templatetags.test_unicorn_render.FakeComponentKwargs' parent=view key='blob'",
     )
     unicorn_node = unicorn(Parser([]), token)
-    view = FakeComponentParent(component_name="test", component_id="asdf")
+    view = FakeComponentParent(component_name="test", component_id="test_unicorn_render_parent_with_key")
     context = {"view": view}
     unicorn_node.render(Context(context))
 
-    assert unicorn_node.component_id == "asdf:tests.templatetags.test_unicorn_render.FakeComponentKwargs:blob"
+    assert (
+        unicorn_node.component_id
+        == "test_unicorn_render_parent_with_key:tests.templatetags.test_unicorn_render.FakeComponentKwargs:blob"
+    )
 
 
 def test_unicorn_render_parent_with_id(settings):
@@ -237,11 +243,14 @@ def test_unicorn_render_parent_with_id(settings):
         "unicorn 'tests.templatetags.test_unicorn_render.FakeComponentKwargs' parent=view id='flob'",
     )
     unicorn_node = unicorn(Parser([]), token)
-    view = FakeComponentParent(component_name="test", component_id="asdf")
+    view = FakeComponentParent(component_name="test", component_id="test_unicorn_render_parent_with_id")
     context = {"view": view}
     unicorn_node.render(Context(context))
 
-    assert unicorn_node.component_id == "asdf:tests.templatetags.test_unicorn_render.FakeComponentKwargs:flob"
+    assert (
+        unicorn_node.component_id
+        == "test_unicorn_render_parent_with_id:tests.templatetags.test_unicorn_render.FakeComponentKwargs:flob"
+    )
 
 
 def test_unicorn_render_parent_with_pk(settings):
@@ -251,11 +260,14 @@ def test_unicorn_render_parent_with_pk(settings):
         "unicorn 'tests.templatetags.test_unicorn_render.FakeComponentKwargs' parent=view pk=99",
     )
     unicorn_node = unicorn(Parser([]), token)
-    view = FakeComponentParent(component_name="test", component_id="asdf")
+    view = FakeComponentParent(component_name="test", component_id="test_unicorn_render_parent_with_pk")
     context = {"view": view}
     unicorn_node.render(Context(context))
 
-    assert unicorn_node.component_id == "asdf:tests.templatetags.test_unicorn_render.FakeComponentKwargs:99"
+    assert (
+        unicorn_node.component_id
+        == "test_unicorn_render_parent_with_pk:tests.templatetags.test_unicorn_render.FakeComponentKwargs:99"
+    )
 
 
 def test_unicorn_render_parent_with_model_id(settings):
@@ -265,12 +277,15 @@ def test_unicorn_render_parent_with_model_id(settings):
         "unicorn 'tests.templatetags.test_unicorn_render.FakeComponentKwargs' parent=view model=model",
     )
     unicorn_node = unicorn(Parser([]), token)
-    view = FakeComponentParent(component_name="test", component_id="asdf")
+    view = FakeComponentParent(component_name="test", component_id="test_unicorn_render_parent_with_model_id")
 
     context = {"view": view, "model": FakeModel()}
     unicorn_node.render(Context(context))
 
-    assert unicorn_node.component_id == "asdf:tests.templatetags.test_unicorn_render.FakeComponentKwargs:178"
+    assert (
+        unicorn_node.component_id
+        == "test_unicorn_render_parent_with_model_id:tests.templatetags.test_unicorn_render.FakeComponentKwargs:178"
+    )
 
 
 @pytest.mark.django_db
@@ -281,14 +296,17 @@ def test_unicorn_render_parent_with_model_pk(settings):
         "unicorn 'tests.templatetags.test_unicorn_render.FakeComponentKwargs' parent=view model=model",
     )
     unicorn_node = unicorn(Parser([]), token)
-    view = FakeComponentParent(component_name="test", component_id="asdf")
+    view = FakeComponentParent(component_name="test", component_id="test_unicorn_render_parent_with_model_pk")
 
     flavor = Flavor(pk=187)
 
     context = {"view": view, "model": flavor}
     unicorn_node.render(Context(context))
 
-    assert unicorn_node.component_id == "asdf:tests.templatetags.test_unicorn_render.FakeComponentKwargs:187"
+    assert (
+        unicorn_node.component_id
+        == "test_unicorn_render_parent_with_model_pk:tests.templatetags.test_unicorn_render.FakeComponentKwargs:187"
+    )
 
 
 def test_unicorn_render_id_use_pk():
@@ -341,7 +359,9 @@ def test_unicorn_render_child_component_no_script_tag(settings):
         "unicorn 'tests.templatetags.test_unicorn_render.FakeComponentKwargs' parent=view",
     )
     unicorn_node = unicorn(Parser([]), token)
-    view = FakeComponentParent(component_name="test", component_id="asdf")
+    view = FakeComponentParent(
+        component_name="test-no-script", component_id="test_unicorn_render_child_component_no_script_tag"
+    )
     context = {"view": view}
     html = unicorn_node.render(Context(context))
 

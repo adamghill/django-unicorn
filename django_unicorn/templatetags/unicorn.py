@@ -47,7 +47,8 @@ def unicorn(parser, token):
     contents = token.split_contents()
 
     if len(contents) < MINIMUM_ARGUMENT_COUNT:
-        raise template.TemplateSyntaxError("%r tag requires at least a single argument" % token.contents.split()[0])
+        first_arg = token.contents.split()[0]
+        raise template.TemplateSyntaxError(f"{first_arg} tag requires at least a single argument")
 
     component_name = parser.compile_filter(contents[1])
 

@@ -1,0 +1,74 @@
+name:  🐛 Bug Report
+description: Report bugs to fix and improve.
+title: "[Bug] <description>:"
+labels: ["bug"]
+
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: Please provide as much detail as possible.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behaviour
+      description: A clear and concise description of what you expected to happen.
+    validations:
+      required: true
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots / Screenrecords
+      description: Please add a screenshot/ short video of the bug you faced.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: Add all steps/share a github gist that can help anyone reproduce the bug
+
+  - type: dropdown
+    id: browsers
+    attributes:
+      label: What browsers are you seeing the problem on?
+      multiple: true
+      options:
+        - Firefox
+        - Chrome
+        - Safari
+        - Microsoft Edge
+        - Brave
+        - Others
+
+  - type: checkboxes
+    id: no-duplicate-issues
+    attributes:
+      label: "👀 Have you checked for similar open issues?"
+      options:
+        - label: "I checked and didn't find similar issue"
+          required: true
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Code of Conduct
+      description: By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/adamghill/django-unicorn/blob/main/DEVELOPING.md).
+#      the description can be changed to the contributing.md once it's available
+      options:
+        - label: I agree to follow this project's Code of Conduct
+          required: true
+
+  - type: dropdown
+    attributes:
+      label: Are you willing to work on this issue ?
+      description: This is absolutely not required, but we are happy to guide you in the contribution process.
+      options:
+          - "Yes I am willing to submit a PR!"
+          - "No, someone else can work on it"

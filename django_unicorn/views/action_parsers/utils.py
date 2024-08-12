@@ -9,9 +9,10 @@ from django_unicorn.decorators import timed
 @timed
 def set_property_value(
     component: UnicornView,
-    property_name: str,
+    property_name: Optional[str],
     property_value: Any,
     data: Optional[Dict] = None,
+    call_resolved_method=True,  # noqa: FBT002
 ) -> None:
     """
     Sets properties on the component.
@@ -22,6 +23,7 @@ def set_property_value(
         param property_name: Name of the property.
         param property_value: Value to set on the property.
         param data: Dictionary that gets sent back with the response. Defaults to {}.
+        call_resolved_method: Whether or not to call the resolved method. Defaults to True.
     """
 
     if property_name is None:
@@ -59,14 +61,16 @@ def set_property_value(
                     component_or_field._set_property(
                         property_name_part,
                         property_value,
-                        call_updating_method=False,
+                        call_updating_method=False,  # the updating method has already been called above
                         call_updated_method=True,
+                        call_resolved_method=call_resolved_method,
                     )
                 else:
                     # Handle calling the updating/updated method for nested properties
                     property_name_snake_case = property_name.replace(".", "_")
                     updating_function_name = f"updating_{property_name_snake_case}"
                     updated_function_name = f"updated_{property_name_snake_case}"
+                    resolved_function_name = f"resolved_{property_name_snake_case}"
 
                     if hasattr(component, updating_function_name):
                         getattr(component, updating_function_name)(property_value)
@@ -104,6 +108,9 @@ def set_property_value(
                     if hasattr(component, updated_function_name):
                         getattr(component, updated_function_name)(property_value)
 
+                    if call_resolved_method and hasattr(component, resolved_function_name):
+                        getattr(component, resolved_function_name)(property_value)
+
                 data_or_dict[property_name_part] = property_value
             else:
                 component_or_field = getattr(component_or_field, property_name_part)
@@ -120,12 +127,15 @@ def set_property_value(
             property_name_part_int = int(property_name_part)
 
             if idx == len(property_name_parts) - 1:
-                component_or_field[property_name_part_int] = property_value
+                component_or_field[property_name_part_int] = property_value  # type: ignore[index]
                 data_or_dict[property_name_part_int] = property_value
             else:
-                component_or_field = component_or_field[property_name_part_int]
+                component_or_field = component_or_field[property_name_part_int]  # type: ignore[index]
                 data_or_dict = data_or_dict[property_name_part_int]
         else:
             break
 
     component.updated(property_name, property_value)
+
+    if call_resolved_method:
+        component.resolved(property_name, property_value)

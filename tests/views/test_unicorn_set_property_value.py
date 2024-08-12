@@ -30,7 +30,7 @@ class FakeComponent(UnicornView):
 
 
 def test_set_property_value_dataclass():
-    component = PropertyView(component_name="test", component_id="12345678")
+    component = PropertyView(component_name="test", component_id="test_set_property_value_dataclass")
     assert InventoryItem("Hammer", 20) == component.inventory
 
     set_property_value(
@@ -49,7 +49,7 @@ def test_set_property_value_array():
     flavor_one.save()
     flavor_two = Flavor(name="initial 2")
     flavor_two.save()
-    component = FakeComponent(component_name="test", component_id="12345678")
+    component = FakeComponent(component_name="test", component_id="test_set_property_value_array")
 
     set_property_value(
         component,
@@ -67,7 +67,7 @@ def test_set_property_value_foreign_key():
     flavor.save()
     parent = Flavor(name="initial 2")
     parent.save()
-    component = FakeComponent(component_name="test", component_id="12345678")
+    component = FakeComponent(component_name="test", component_id="test_set_property_value_foreign_key")
 
     set_property_value(
         component,

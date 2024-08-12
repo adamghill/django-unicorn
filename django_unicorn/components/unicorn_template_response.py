@@ -1,12 +1,14 @@
 import logging
 import re
 from collections import deque
+from typing import Deque
 
 import orjson
 from bs4 import BeautifulSoup
 from bs4.dammit import EntitySubstitution
 from bs4.element import Tag
 from bs4.formatter import HTMLFormatter
+from django.template.backends.django import Template
 from django.template.response import TemplateResponse
 
 from django_unicorn.decorators import timed
@@ -47,7 +49,7 @@ def is_html_well_formed(html: str) -> bool:
     """
 
     tag_list = re.split("(<[^>!]*>)", html)[1::2]
-    stack = deque()
+    stack: Deque[str] = deque()
 
     for tag in tag_list:
         if "/" not in tag:
@@ -159,6 +161,19 @@ class UnicornTemplateResponse(TemplateResponse):
 
         self.component = component
         self.init_js = init_js
+
+    def resolve_template(self, template):
+        """Override the TemplateResponseMixin to resolve a list of Templates.
+
+        Calls the super which accepts a template object, path-to-template, or list of paths if the first
+        object in the sequence is not a Template.
+        """
+
+        if isinstance(template, (list, tuple)):
+            if isinstance(template[0], Template):
+                return template[0]
+
+        return super().resolve_template(template)
 
     @timed
     def render(self):

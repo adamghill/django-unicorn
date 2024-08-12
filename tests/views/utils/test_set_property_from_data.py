@@ -60,7 +60,7 @@ def component_queryset_field_asserts(component, field_name):
 
 
 def test_set_property_from_data_str():
-    component = FakeComponent(component_name="test", component_id="12345678")
+    component = FakeComponent(component_name="test", component_id="test_set_property_from_data_str")
     assert "property_view" == component.string
 
     set_property_from_data(component, "string", "property_view_updated")
@@ -69,7 +69,7 @@ def test_set_property_from_data_str():
 
 
 def test_set_property_from_data_int():
-    component = FakeComponent(component_name="test", component_id="12345678")
+    component = FakeComponent(component_name="test", component_id="test_set_property_from_data_int")
     assert 99 == component.integer
 
     set_property_from_data(component, "integer", 100)
@@ -78,7 +78,7 @@ def test_set_property_from_data_int():
 
 
 def test_set_property_from_data_datetime():
-    component = FakeComponent(component_name="test", component_id="12345678")
+    component = FakeComponent(component_name="test", component_id="test_set_property_from_data_datetime")
     assert datetime(2020, 1, 1, tzinfo=timezone.utc) == component.datetime_without_typehint
 
     set_property_from_data(
@@ -91,7 +91,7 @@ def test_set_property_from_data_datetime():
 
 
 def test_set_property_from_data_datetime_with_typehint():
-    component = FakeComponent(component_name="test", component_id="12345678")
+    component = FakeComponent(component_name="test", component_id="test_set_property_from_data_datetime_with_typehint")
     assert datetime(2020, 2, 1, tzinfo=timezone.utc) == component.datetime_with_typehint
 
     set_property_from_data(
@@ -107,7 +107,7 @@ def test_set_property_from_data_list():
     """
     Prevent attempting to instantiate `List[]` type-hint doesn't throw TypeError
     """
-    component = FakeComponent(component_name="test", component_id="12345678")
+    component = FakeComponent(component_name="test", component_id="test_set_property_from_data_list")
     assert component.array == []
 
     set_property_from_data(component, "array", ["string"])
@@ -116,7 +116,7 @@ def test_set_property_from_data_list():
 
 
 def test_set_property_from_data_list_datetimes():
-    component = FakeComponent(component_name="test", component_id="12345678")
+    component = FakeComponent(component_name="test", component_id="test_set_property_from_data_list_datetimes")
     assert [datetime(2020, 3, 1, tzinfo=timezone.utc)] == component.datetimes
 
     set_property_from_data(component, "datetimes", [str(datetime(2020, 3, 2, tzinfo=timezone.utc))])
@@ -125,7 +125,9 @@ def test_set_property_from_data_list_datetimes():
 
 
 def test_set_property_from_data_list_datetimes_with_old_typehint():
-    component = FakeComponent(component_name="test", component_id="12345678")
+    component = FakeComponent(
+        component_name="test", component_id="test_set_property_from_data_list_datetimes_with_old_typehint"
+    )
     assert [datetime(2020, 4, 1, tzinfo=timezone.utc)] == component.datetimes_with_old_typehint
 
     set_property_from_data(
@@ -142,7 +144,9 @@ def test_set_property_from_data_list_datetimes_with_old_typehint():
     reason="Skip new type hints for Python 3.8 or less",
 )
 def test_set_property_from_data_list_datetimes_with_new_typehint():
-    component = FakeComponent(component_name="test", component_id="12345678")
+    component = FakeComponent(
+        component_name="test", component_id="test_set_property_from_data_list_datetimes_with_new_typehint"
+    )
     assert [datetime(2020, 5, 1, tzinfo=timezone.utc)] == component.datetimes_with_new_typehint
 
     set_property_from_data(
@@ -155,7 +159,9 @@ def test_set_property_from_data_list_datetimes_with_new_typehint():
 
 
 def test_set_property_from_data_list_datetimes_with_list_typehint():
-    component = FakeComponent(component_name="test", component_id="12345678")
+    component = FakeComponent(
+        component_name="test", component_id="test_set_property_from_data_list_datetimes_with_list_typehint"
+    )
     assert [datetime(2020, 6, 1, tzinfo=timezone.utc)] == component.datetimes_with_list_typehint
 
     set_property_from_data(
@@ -168,7 +174,7 @@ def test_set_property_from_data_list_datetimes_with_list_typehint():
 
 
 def test_set_property_from_data_model():
-    component = FakeComponent(component_name="test", component_id="12345678")
+    component = FakeComponent(component_name="test", component_id="test_set_property_from_data_model")
     assert component.model.name == "test-initial"
 
     set_property_from_data(component, "model", {"name": "test-test"})
@@ -179,7 +185,7 @@ def test_set_property_from_data_model():
 
 
 def test_set_property_from_data_empty_queryset():
-    component = FakeComponent(component_name="test", component_id="12345678")
+    component = FakeComponent(component_name="test", component_id="test_set_property_from_data_empty_queryset")
     assert len(component.queryset) == 0
 
     set_property_from_data(component, "queryset", [{"name": "test-qs"}])
@@ -189,7 +195,7 @@ def test_set_property_from_data_empty_queryset():
 
 @pytest.mark.django_db
 def test_set_property_from_data_queryset():
-    component = FakeDbComponent(component_name="test", component_id="12345678")
+    component = FakeDbComponent(component_name="test", component_id="test_set_property_from_data_queryset")
     assert len(component.queryset_with_data) == 1
 
     set_property_from_data(component, "queryset_with_data", [{"pk": 1, "name": "test-qs"}])
@@ -198,7 +204,9 @@ def test_set_property_from_data_queryset():
 
 
 def test_set_property_from_data_queryset_list_with_typehint():
-    component = FakeComponent(component_name="test", component_id="12345678")
+    component = FakeComponent(
+        component_name="test", component_id="test_set_property_from_data_queryset_list_with_typehint"
+    )
     assert len(component.queryset_with_typehint) == 0
 
     set_property_from_data(component, "queryset_with_typehint", [{"name": "test-qs"}])
@@ -207,7 +215,9 @@ def test_set_property_from_data_queryset_list_with_typehint():
 
 
 def test_set_property_from_data_queryset_none_with_typehint():
-    component = FakeQuerySetComponent(component_name="test", component_id="12345678")
+    component = FakeQuerySetComponent(
+        component_name="test", component_id="test_set_property_from_data_queryset_none_with_typehint"
+    )
     assert component.queryset_with_typehint is None
 
     set_property_from_data(component, "queryset_with_typehint", [{"name": "test-qs"}])
@@ -216,7 +226,7 @@ def test_set_property_from_data_queryset_none_with_typehint():
 
 
 def test_set_property_from_data_queryset_parent():
-    component = FakeQuerySetComponent(component_name="test", component_id="12345678")
+    component = FakeQuerySetComponent(component_name="test", component_id="test_set_property_from_data_queryset_parent")
     assert component.queryset_with_typehint is None
 
     set_property_from_data(component, "queryset_with_typehint", [{"name": "test-qs"}])
@@ -225,7 +235,9 @@ def test_set_property_from_data_queryset_parent():
 
 
 def test_set_property_from_data_all_querysets():
-    component = FakeAllQuerySetComponent(component_name="test", component_id="12345678")
+    component = FakeAllQuerySetComponent(
+        component_name="test", component_id="test_set_property_from_data_all_querysets"
+    )
 
     set_property_from_data(component, "queryset_with_empty_list", [{"name": "test-qs"}])
     set_property_from_data(component, "queryset_with_none", [{"name": "test-qs"}])
@@ -240,7 +252,7 @@ def test_set_property_from_data_all_querysets():
 
 @pytest.mark.django_db
 def test_set_property_from_data_many_to_many():
-    component = FakeComponent(component_name="test", component_id="12345678")
+    component = FakeComponent(component_name="test", component_id="test_set_property_from_data_many_to_many")
     component.model.pk = 1
 
     # No `TypeError: Direct assignment to the reverse side of a many-to-many set is prohibited.` error gets raised

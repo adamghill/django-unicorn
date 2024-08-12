@@ -29,7 +29,7 @@ from django_unicorn.utils import is_int, is_non_string_sequence
 try:
     from pydantic import BaseModel as PydanticBaseModel
 except ImportError:
-    PydanticBaseModel = None
+    PydanticBaseModel = None # type: ignore
 
 
 logger = logging.getLogger(__name__)
@@ -188,7 +188,7 @@ def _get_model_dict(model: Model) -> dict:
 
     # Set `pk` for models that subclass another model which only have `id` set
     if not model_pk:
-        model_json["pk"] = model.pk or model.id
+        model_json["pk"] = model.pk or model.id #type: ignore
 
     # Add in m2m fields
     m2m_field_names = _get_many_to_many_field_related_names(model)
@@ -235,7 +235,7 @@ def _json_serializer(obj):
                 queryset_json.append(model_json)
 
             return queryset_json
-        elif PydanticBaseModel and isinstance(obj, PydanticBaseModel):
+        elif PydanticBaseModel and isinstance(obj, PydanticBaseModel): #type: ignore
             return obj.dict()
         elif isinstance(obj, Decimal):
             return str(obj)
@@ -387,7 +387,7 @@ def dumps(
     data: Dict,
     *,
     fix_floats: bool = True,
-    exclude_field_attributes: Optional[Tuple[str]] = None,
+    exclude_field_attributes: Optional[Tuple[str, ...]] = None,
     sort_dict: bool = True,
 ) -> str:
     """

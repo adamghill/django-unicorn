@@ -135,6 +135,28 @@ class HelloWorldView(UnicornView):
     template_name = "unicorn/hello-world.html"
 ```
 
+### template_html
+
+Template HTML can be defined inline on the component instead of using an external HTML file.
+
+```python
+# hello_world.py
+from django_unicorn.components import UnicornView
+
+class HelloWorldView(UnicornView):
+    template_html = """<div>
+    <div>
+        Count: {{ count }}
+    </div>
+
+    <button unicorn:click="increment">+</button>
+    <button unicorn:click="decrement">-</button>
+</div>
+"""
+
+    ...
+```
+
 ## Instance properties
 
 ### component_args
@@ -283,21 +305,29 @@ class HelloWorldView(UnicornView):
         self.name = "hydrated"
 ```
 
-### updating(name, value)
+### updating(property_name, property_value)
 
-Gets called before each property that will get set.
+Gets called before each property that will get set. This can be called multiple times in certain instances, e.g. during a debounce.
 
-### updated(name, value)
+### updated(property_name, property_value)
 
-Gets called after each property gets set.
+Gets called after each property gets set. This can be called multiple times in certain instances, e.g. during a debounce.
 
-### updating\_{property_name}(value)
+### resolved(property_name, property_value)
 
-Gets called before the specified property gets set.
+Gets called after the specified property gets set. This will only get called once.
 
-### updated\_{property_name}(value)
+### updating\_{property_name}(property_value)
 
-Gets called after the specified property gets set.
+Gets called before the specified property gets set. This can be called multiple times in certain instances, e.g. during a debounce.
+
+### updated\_{property_name}(property_value)
+
+Gets called after the specified property gets set. This can be called multiple times in certain instances, e.g. during a debounce.
+
+### resolved\_{property_name}(property_value)
+
+Gets called after the specified property gets set. This will only get called once.
 
 ### calling(name, args)
 
@@ -325,7 +355,7 @@ Classes that derive from `UnicornView` can include a `Meta` class that provides 
 
 ### exclude
 
-By default, all public attributes of the component are included in the context of the Django template and available to JavaScript. One way to protect internal-only data is to prefix the atteibute name with `_` to indicate it should stay private.
+By default, all public attributes of the component are included in the context of the Django template and available to JavaScript. One way to protect internal-only data is to prefix the attribute name with `_` to indicate it should stay private.
 
 ```python
 # hello_state.py
