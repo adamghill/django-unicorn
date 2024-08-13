@@ -2,20 +2,22 @@
 
 ```{toctree}
 :caption: Basics
-:maxdepth: 3
+:maxdepth: 2
 :hidden:
 
 self
 getting-started
 installation
-components
+tutorials/beginner-tutorial
+
 ```
 
 ```{toctree}
-:caption: Components
+:caption: Overview
 :maxdepth: 3
 :hidden:
 
+components
 views
 templates
 actions
