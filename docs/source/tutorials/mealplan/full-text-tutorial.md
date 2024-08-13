@@ -275,7 +275,8 @@ mealplan/
 
 Django templates allow you to insert Python into your HTML. Let's build a quick template that will show us a list of all our meals (hint: we don't have any saved yet!)
 
-```html
+:::{code} html
+:force: true
 <!-- mealplan/templates/mealplan/meals.html -->
 
 <!DOCTYPE html>
@@ -301,7 +302,7 @@ Django templates allow you to insert Python into your HTML. Let's build a quick 
 </body>
 </html>
 
-```
+:::
 
 A couple things to note.
 
@@ -313,7 +314,8 @@ Let's add some logic in the template that will look for a `meals` object (which 
 
 Change the `<div>` section to look like this:
 
-```html
+:::{code} html
+:force: true
 <!-- mealplan/templates/mealplan/meals.html -->
 
 ...
@@ -333,7 +335,7 @@ Change the `<div>` section to look like this:
 
 ...
 
-```
+:::
 
 The _something_ we are doing is iterating over the `meals` object and creating a new list item (`<li>`) for every meal that we find, and then displaying the name of that meal.
 
@@ -433,18 +435,20 @@ In order to use components within your regular Django templates, you need to "in
 
 Let's go back to `index.html` and add that.
 
-```html
+:::{code} html
+:force: true
 <!-- mealplan/templates/mealplan/meals.html -->
 
 {% load unicorn %}   
 <!DOCTYPE html>
 <html lang="en">
 ...
-```
+:::
 
 There are two more items that you need to add to your templates to ensure Django Unicorn functions properly. The first is a `{% unicorn_scripts %}` tag. You can place that in the `<head>` element in your HTML.
 
-```html
+:::{code} html
+:force: true
 <!-- mealplan/templates/mealplan/meals.html -->
 
 ...
@@ -454,11 +458,12 @@ There are two more items that you need to add to your templates to ensure Django
     {% unicorn_scripts %}
 </head>
 ...
-```
+:::
 
 And secondly, a `{% csrf_token %}` tag within the body of your HTML. We can include it near the end.
 
-```html
+:::{code} html
+:force: true
 <!-- mealplan/templates/mealplan/meals.html -->
  
 ...
@@ -466,8 +471,7 @@ And secondly, a `{% csrf_token %}` tag within the body of your HTML. We can incl
     {% csrf_token %}
 </body>
 </html>
-
-```
+:::
 
 Note: In case you missed it earlier and if you haven't already done so, make sure that `django_unicorn` is listed within your `INSTALLED_APPS` in your `settings.py` file.
 
@@ -479,7 +483,8 @@ The interaction between the component and the tutorial is unique to this pairing
 
 For example, to load the component we created earlier, we would add this template tag to our `meal.html` template. (Here, it is included within then `<div>` element).
 
-```html
+:::{code} html
+:force: true
 <!-- mealplan/templates/mealplan/meals.html -->
 
 ...
@@ -500,11 +505,12 @@ For example, to load the component we created earlier, we would add this templat
     </main>
 </body>
 ...
-```
+:::
 
 Now we can define what actually goes in the `create-meal.html` template.
 
-```html
+:::{code} html
+:force: true
 <!-- mealplan/templates/unicorn/create-meal.html -->
 
 {% load unicorn %}
@@ -519,7 +525,7 @@ Now we can define what actually goes in the `create-meal.html` template.
         {% endif %}
     </div>
 </div>
-```
+:::
 
 Notice the `unicorn:model` attribute on the `<div>` element. This is what "binds" this element to the logic we will write next in the `create_meal.py` component.
 
@@ -576,7 +582,8 @@ class CreateMealView(UnicornView):
 
 The value of `state` will be sent over to our template. So now we can create a condition in our template to look for that value.
 
-```html
+:::{code} html
+:force: true
 <!-- mealplan/templates/unicorn/create-meal.html -->
 
 <div>
@@ -590,7 +597,7 @@ The value of `state` will be sent over to our template. So now we can create a c
 	<button unicorn:click.discard="cancel">Cancel</button>
 	<hr />
 </div>
-```
+:::
 
 The line `{% if state == "Add" %}` compares the `state` field in the component to its value.
 
@@ -627,7 +634,8 @@ Similarly, to change the button back, you follow a similar logic. The only diffe
 
 However, we still need to display the form to users so that they can input a meal. I'm going to provide the entire `create-meal.html` file here and then we can build out the component in the next section.
 
-```html
+:::{code} html
+:force: true
 <!-- mealplan/templates/unicorn/create-meal.html -->
 
 {% load unicorn %}
@@ -685,7 +693,7 @@ However, we still need to display the form to users so that they can input a mea
     </p>
         {% endif %}
 </div>
-```
+:::
 
 You'll notice that after the `{% else %}` statement that includes the "Cancel" button, we are also including `<input>` fields that are linked to the `unicorn:model`. Remember, this is _not_ directly the `Meal` model that is connected to our database. Rather, it is what is _binding_ the template to our component. 
 

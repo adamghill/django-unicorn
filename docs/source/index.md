@@ -2,14 +2,20 @@
 
 ```{toctree}
 :caption: Basics
-:maxdepth: 2
+:maxdepth: 3
 :hidden:
 
 self
 getting-started
 installation
-tutorials/beginner-tutorial
+```
 
+```{toctree}
+:caption: Tutorials
+:maxdepth: 3
+:hidden:
+
+tutorials/intro
 ```
 
 ```{toctree}
