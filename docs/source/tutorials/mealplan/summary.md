@@ -8,4 +8,4 @@ You learned how to create a component/template combo that allows for highly reac
 
 And there's much more to uncover with Django Unicorn. Take a look at the documentation to see what else you can discover!
 
-You can see the [finished code for this tutorial](https://github.com/tataraba/django-unicorn-tutorial-app) on Github.
+You can see the [finished code for this tutorial](https://github.com/tataraba/django-unicorn-tutorial-app) on GitHub.

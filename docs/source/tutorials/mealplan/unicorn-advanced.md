@@ -13,10 +13,10 @@ In our `CreateMealView`, we are going to create a field called `state` which wil
 
 ...
 class CreateMealView(UnicornView):
+    state: str = "Add"
     meals: list[Meal] = None
 
     def mount(self):
-	    state: str = "Add"
         self.meals = Meal.objects.all()
 ```
 
@@ -139,7 +139,7 @@ You'll notice that after the `{% else %}` statement that includes the "Cancel" b
 
 Each input is linked to a field in the component that matches the assignment. In other words, the `<input unicorn:model.defer="name" ...>` line is looking for a field called `name` in our component. (Hint: we haven't created that field yet.)
 
-Also, you'll notice the `defer` directive on these inputs. This is is done to store and save model changes until the next action gets triggered (in our case, clicking the "Save" button).
+Also, you'll notice the `defer` directive on these inputs. This is is done in order to store and save model changes, but not until the next action gets triggered (in our case, clicking the "Save" button).
 
 ## Backend Logic
 

@@ -2,7 +2,9 @@
 
 ## Installation
 
-Note: You must have Python installed before starting.
+```{note}
+You must have Python installed before starting.
+```
 
 To start with, create a new directory in your terminal where you will build your project. Once you are in this new directory, create a virtual environment and then activate it.
 
@@ -22,6 +24,10 @@ Now install Django and Django Unicorn.
 
 # This installs Django Unicorn
 > python -m pip install django-unicorn
+```
+
+```{note}
+You can [use other package managers](../../installation.md) for installation as well. 
 ```
 
 Now you're ready to create a new Django project. This command will populate your directory with your Django project files and directories.
@@ -129,7 +135,7 @@ Running migrations:
   Applying sessions.0001_initial... OK
 ```
 
-So let's create a model for our meals.
+Next, let's navigate to the `mealplan/models.py` file and create a model.
 
 ```python
 # mealplan/models.py
@@ -165,13 +171,15 @@ And then, to apply those changes to the database:
 python manage.py migrate mealplan
 ```
 
-Note: Any time you add or make changes to your models, you need to run these commands to make sure the changes apply to the database.
+```{note}
+Any time you add or make changes to your models, you need to run these commands to make sure the changes apply to the database.
+```
 
 ## URLs
 
 Before we create a page that we can actually _see_, we need to configure the URLs that will lead to our (eventual) content.
 
-Django automatically creates a URL leading to an "Admin" section (you can read more about that in the official Django tutorial).
+Django automatically creates a URL leading to an "Admin" section (you can [read more about that in the official Django tutorial](https://docs.djangoproject.com/en/5.1/intro/tutorial02/#introducing-the-django-admin)).
 
 ```python
 # app/urls.py
@@ -184,7 +192,7 @@ urlpatterns = [
 ]
 ```
 
-We want to go ahead and add a pattern that will lead to any URLs defined in your `mealplan` app. Also, Django Unicorn utilizes its own pattern which needs to be added also.
+We want to go ahead and add a pattern that will lead to any URLs defined in your `mealplan` app. Also, Django Unicorn utilizes its own pattern which needs to be added.
 
 ```python
 # app/urls.py
@@ -249,7 +257,7 @@ Here, we're trying to render a template called `meals.html` (it doesn't exist ye
 
 ## Templates
 
-In Django, there is a naming convention that organizes how _views_ link up to templates, and it relies on a certain directory structure. To create this first template, we need to add two directories and a file like so:
+Django organizes how _views_ link up to templates based on a certain directory structure and naming convention. To accommodate for this, we need to add two directories and a file like so:
 
 ```
 mealplan/  
@@ -266,7 +274,7 @@ mealplan/
 ┗ __init__.py
 ```
 
-Django templates allow you to insert Python into your HTML. Let's build a quick template that will show us a list of all our meals (hint: we don't have any saved yet!)
+Django templates allow you to insert Python into your HTML. Let's build a quick HTML file that will show us a list of all our meals (hint: we don't have any saved yet!)
 
 :::{code} html
 :force: true
@@ -313,7 +321,7 @@ Change the `<div>` section to look like this:
 
 ...
 
-<main>
+<div>
 	{% if not meals %}
 		<p>No meals have been prepared yet!</p>
 	{% else %}
@@ -324,7 +332,7 @@ Change the `<div>` section to look like this:
 	</ul>
 	{% endif %}
 	<button>Add a meal</button>
-</main>
+</div>
 
 ...
 

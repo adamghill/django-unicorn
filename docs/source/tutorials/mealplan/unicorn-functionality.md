@@ -2,7 +2,7 @@
 
 ## Setup
 
-Django Unicorn uses the term "[Component](https://www.django-unicorn.com/docs/components/)" to refer to a set (or a block) of interactive functionality. Similar to how your Django _views_ connect to your _templates_, `Unicorn` uses a special [view class](https://www.django-unicorn.com/docs/views/) (`UnicornView`) residing within a special `components` directory linking to a specific _template_ with the _same name_ as the `component` module.
+Django Unicorn uses the term "[Component](../../components.md)" to refer to a set (or a block) of interactive functionality. Similar to how your Django _views_ connect to your _templates_, `Unicorn` uses a special [view class](../../views.md) (`UnicornView`) residing within a special `components` directory linking to a specific _template_ with the _same name_ as the `component` module.
 
 Phew. That's a lot of words. Perhaps it's easier if you see it.
 
@@ -45,7 +45,7 @@ If you build additional components, you would create new files in the `component
 
 In order to use components within your regular Django templates, you need to "include" them within your HTML file.
 
-Let's go back to `index.html` and add that.
+Let's go back to `index.html` and add it at the very top of the file.
 
 :::{code} html
 :force: true
@@ -85,13 +85,15 @@ And secondly, a `{% csrf_token %}` tag within the body of your HTML. We can incl
 </html>
 :::
 
-Note: In case you missed it earlier and if you haven't already done so, make sure that `django_unicorn` is listed within your `INSTALLED_APPS` in your `settings.py` file.
+```{note}
+In case you missed it earlier and if you haven't already done so, make sure that `django_unicorn` is listed within your `INSTALLED_APPS` in your `settings.py` file.
+```
 
 ## Components
 
 Components are where much of the Django Unicorn heavy lifting occurs. Here, we will define a `UnicornView`, which in turn contains the back end logic which will be passed to the corresponding `template`.
 
-The interaction between the component and the tutorial is unique to this pairing, and it is "included" in your Django templates with a special template tag. The tag contains the name `unicorn`, followed by the name of the template, which in turn corresponds to the component.
+The interaction between the component and the template is unique to this pairing, and it is "included" in your Django templates with a special template tag. The tag contains the name `unicorn`, followed by the name of the template, which in turn corresponds to the matching component.
 
 For example, to load the component we created earlier, we would add this template tag to our `meal.html` template. (Here, it is included within then `<div>` element).
 
@@ -141,7 +143,9 @@ Now we can define what actually goes in the `create-meal.html` template.
 
 Notice the `unicorn:model` attribute on the `<div>` element. This is what "binds" this element to the logic we will write next in the `create_meal.py` component.
 
-Note: The term `model` in this particular context _does not_ correlate to a Django `Model`. In other words, `unicorn:model` is what enables reactivity. Django Unicorn holds the fields from the component (`create_model.py`) in a special context. Then, when the element with `unicorn:model` triggers a change (whether on load, click, submit, blur, etc...), then it sends an AJAX request to a specific Unicorn endpoint, and the response is rendered in place. You don't necessarily have to understand all of that, but it's worth noting that `unicorn:model` is _not_ referring to your Django `Model` directly.
+```{warning}
+The term `model` in this particular context _does not_ correlate to a Django `Model`. In other words, `unicorn:model` is what enables reactivity. Django Unicorn holds the fields from the component (`create_model.py`) in a special context. Then, when the element with `unicorn:model` triggers a change (whether on load, click, submit, blur, etc...), then it sends an AJAX request to a specific Unicorn endpoint, and the response is rendered in place. You don't necessarily have to understand all of that, but it's worth noting that `unicorn:model` is _not_ referring to your Django `Model` directly.
+```
 
 Our last piece here is to actually write some logic in the component.
 
