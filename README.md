@@ -25,6 +25,10 @@ Available additional settings that can be set to `UNICORN` dict in settings.py w
 
 ## Customization changelog
 
+### 0.61.0.2 - (2024-10-22)
+
+- Delete `json_tag` from child components as it could cause `RecursionError`
+
 ### 0.61.0.1 - (2024-07-16)
 
 - Avoid recursion upon caching parent/child complex components with `pickle.dumps`
