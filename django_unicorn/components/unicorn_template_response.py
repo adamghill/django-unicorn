@@ -247,6 +247,11 @@ potentially cause errors in Unicorn."
                     for child in descendant.children:
                         init_script = f"{init_script} {child._init_script}"
                         json_tags.append(child._json_tag)
+                        # We need to delete this property here as it can cause RecursionError
+                        # when pickling child component. Tag element has previous_sibling
+                        # and next_sibling which would also be pickled and if they are big,
+                        # cause RecursionError
+                        del child._json_tag
                         descendants.append(child)
 
                 script_tag = soup.new_tag("script")
