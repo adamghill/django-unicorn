@@ -112,3 +112,7 @@ def get_minify_html_enabled():
             return False
 
     return minify_html_enabled
+
+
+def get_component_cache_timeout():
+    return get_setting("COMPONENT_CACHE_TIMEOUT", 900)  # 15 min

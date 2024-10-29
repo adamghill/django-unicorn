@@ -7,7 +7,7 @@ from django.http import HttpRequest
 
 import django_unicorn
 from django_unicorn.errors import UnicornCacheError
-from django_unicorn.settings import get_cache_alias
+from django_unicorn.settings import get_cache_alias, get_component_cache_timeout
 from django_unicorn.utils import create_template
 
 logger = logging.getLogger(__name__)
@@ -117,13 +117,12 @@ def cache_full_tree(component: "django_unicorn.views.UnicornView"):
 
     with CacheableComponent(root) as caching:
         for _component in caching.components():
-            cache.set(_component.component_cache_key, _component)
+            cache.set(_component.component_cache_key, _component, timeout=get_component_cache_timeout())
 
 
 def restore_from_cache(
-        component_cache_key: str,
-        request: Optional[HttpRequest] = None
-    ) -> "django_unicorn.views.UnicornView":
+    component_cache_key: str, request: Optional[HttpRequest] = None
+) -> "django_unicorn.views.UnicornView":
     """
     Gets a cached unicorn view by key, restoring and getting cached parents and children
     and setting the request.
