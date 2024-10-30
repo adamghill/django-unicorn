@@ -14,6 +14,7 @@ Available additional settings that can be set to `UNICORN` dict in settings.py w
 
 - `USE_CSRF_TOKEN` - default: `True` - If set to `False`, unicorn does not check or send `csrf` token value so `{% csrf_token %}` is not mandatory in the templates. This is added due the fact to additional page caching system like `Varnish` does not operate effective if `Cookie` value is present in `Vary` header.
 - `CHECK_CHECKSUM_MATCH` - default: `True` - If set to `False`, `unicorn` does not perform data checksum check on each request.
+- `COMPONENT_CACHE_TIMEOUT` - default: `600` - Time in seconds used to cache components.
 
 ## Deployment
 
