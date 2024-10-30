@@ -1,3 +1,85 @@
+# 💉✅ Django Unicorn Loosened
+
+This is a repository of a customized version of [Django Unicorn](https://github.com/adamghill/django-unicorn) package.
+
+_Loosened_ version of package is by default functionally the same as the official package. Extended stuff that were added are controllable with settings/feature flags.
+
+This repository is intended to sync periodically with `adamghill` repository in order to be up to date with the latest changes.
+
+Releasing as an installable package is planned only for a private repo for now, and version numbers will follow an official one with one extra dotted number. In the example, if there is an official version of `0.50.0`, the tag that follows this version here will be `0.50.0.1`.
+
+## Additional settings
+
+Available additional settings that can be set to `UNICORN` dict in settings.py which are not part of official package.
+
+- `USE_CSRF_TOKEN` - default: `True` - If set to `False`, unicorn does not check or send `csrf` token value so `{% csrf_token %}` is not mandatory in the templates. This is added due the fact to additional page caching system like `Varnish` does not operate effective if `Cookie` value is present in `Vary` header.
+- `CHECK_CHECKSUM_MATCH` - default: `True` - If set to `False`, `unicorn` does not perform data checksum check on each request.
+
+## Deployment
+
+1. Add your repository to poetry.config:
+  `poetry config repositories.myrepo http://to.my.repo`
+
+2. Publish package to your repository with `--build` flag
+  `poetry publish --build -r myrepo -u <myrepouser> -p <myrepopass>` 
+
+## Customization changelog
+
+### 0.61.0.2 - (2024-10-22)
+
+- Delete `json_tag` from child components as it could cause `RecursionError`
+
+### 0.61.0.1 - (2024-07-16)
+
+- Avoid recursion upon caching parent/child complex components with `pickle.dumps`
+- Sync with main package, version `0.61.0`
+
+### 0.60.0.1 - (2024-03-29)
+
+- No customizations, just sync with main package.
+
+### 0.58.1.2 - (2024-01-10)
+
+- add optional `CHECK_CHECKSUM_MATCH` setting which is set by default to True. If turned off, `unicorn` does not perform data checksum check on each request.
+
+### 0.58.1.1 - (2024-01-10)
+
+- No customizations, just sync with main package.
+
+### 0.57.1.1 - (2023-11-10)
+
+- No customizations, just sync with main package.
+
+### 0.55.0.1 - (2023-09-15)
+
+- No customizations, just sync with main package.
+
+### 0.54.0.1 - (2023-08-31)
+
+- No customizations, just sync with main package.
+
+### 0.53.0.1 - (2023-08-08)
+
+- No customizations, just sync with main package.
+
+### 0.50.1.1 - (2023-05-23)
+
+- No customizations, just sync with main package.
+
+### 0.50.0.1 - (2023-05-11)
+
+- Add `USE_CSRF_TOKEN` (`useCsrfToken`) setting that if set to `False` (`false`) avoids CSRF token check. By default  `USE_CSRF_TOKEN` is set to `True`.
+- [views.__init__.py:message] - Added decorator `csrf_handle` that checks `USE_CSRF_TOKEN` setting and based on boolean applies `csrf_protect` or `csrf_exempt` decorator.
+- [templatetags/unicorn.py:unicorn_scripts] - Added `USE_CSRF_TOKEN` to return in order to use in templates
+- [templates/unicorn/scripts.html] - Translate `USE_CSRF_TOKEN` value into `useCsrfToken` javascript variable and pass it to `Unicorn.init`
+- [static/unicorn/js/unicorn.js:init] - apply `useCsrfToken` to `args` that are used latter in component.
+- [static/unicorn/js/component.js:Component] - add `useCsrfToken` to class instance in constructor
+- [static/unicorn/js/messageSender.js:send] - set `csrf` token to headers only if `useCsrfToken` is set to `true`.
+
+--------------------------------
+## Official documentation below
+--------------------------------
+
 <p align="center">
   <a href="https://www.django-unicorn.com/"><img src="https://github.com/adamghill/django-unicorn/raw/a98539b6e4b1123705559116a77e63eea7e2b8d0/img/unicorn-logo.png" alt="django-unicorn logo" height="200"/></a>
 </p>

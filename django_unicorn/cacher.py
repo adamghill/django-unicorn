@@ -86,6 +86,10 @@ class CacheableComponent:
                 raise UnicornCacheError(
                     f"Cannot cache component '{type(component)}' because it is not picklable: {type(e)}: {e}"
                 ) from e
+            except RecursionError as e:
+                logger.warning(
+                    f"Cannot cache component '{type(component)}' because it is not picklable: {type(e)}: {e}"
+                )
 
         return self
 

@@ -25,6 +25,7 @@ export class Component {
     this.key = args.key;
     this.messageUrl = args.messageUrl;
     this.csrfTokenHeaderName = args.csrfTokenHeaderName;
+    this.useCsrfToken = args.useCsrfToken;
     this.csrfTokenCookieName = args.csrfTokenCookieName;
     this.hash = args.hash;
     this.data = args.data || {};

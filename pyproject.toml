@@ -1,20 +1,23 @@
 [tool.poetry]
-name = "django-unicorn"
-version = "0.61.0"
-description = "A magical full-stack framework for Django."
-authors = ["Adam Hill <unicorn@adamghill.com>"]
+name = "django-unicorn-loosened"
+version = "0.61.0.2"
+description = "An alternate version of a magical full-stack framework for Django."
+authors = ["Adam Hill <unicorn@adamghill.com>", "Styria Digital Development <digital.development@styria.dev>"]
 license = "MIT"
 readme = "README.md"
-repository = "https://github.com/adamghill/django-unicorn/"
+repository = "https://github.com/Styria-Digital/django-unicorn"
 homepage = "https://www.django-unicorn.com"
 documentation = "https://www.django-unicorn.com/docs/"
 keywords = ["django", "python", "javascript", "fullstack"]
+packages = [
+    { include = "django_unicorn" }
+]
 
 [tool.poetry.urls]
 "Funding" = "https://github.com/sponsors/adamghill"
 
 [tool.poetry.dependencies]
-python = ">=3.10"
+python = ">=3.9"
 django = ">=2.2"
 beautifulsoup4 = ">=4.8.0"
 orjson = ">=3.6.0"

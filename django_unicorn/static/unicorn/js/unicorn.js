@@ -5,6 +5,7 @@ import { getMorpher } from "./morpher.js";
 
 let messageUrl = "";
 let csrfTokenHeaderName = "X-CSRFToken";
+let useCsrfToken = true;
 let csrfTokenCookieName = "csrftoken";
 let morpher;
 
@@ -17,7 +18,8 @@ export function init(
   _messageUrl,
   _csrfTokenHeaderName,
   _csrfTokenCookieName,
-  _morpherSettings
+  _morpherSettings,
+  _useCsrfToken
 ) {
   messageUrl = _messageUrl;
 
@@ -26,6 +28,13 @@ export function init(
   if (hasValue(_csrfTokenHeaderName)) {
     csrfTokenHeaderName = _csrfTokenHeaderName;
   }
+
+  /**
+   * Extend Reason: 
+      Optionally ignore `CSRF` check for effective varnish caching 
+      remove `Cookie` from `Vary` header by setting `useCsrfToken` to false
+   */
+  if (_useCsrfToken !== undefined) useCsrfToken = _useCsrfToken;
 
   if (hasValue(_csrfTokenCookieName)) {
     csrfTokenCookieName = _csrfTokenCookieName;
@@ -36,6 +45,7 @@ export function init(
     csrfTokenHeaderName,
     csrfTokenCookieName,
     morpher,
+    useCsrfToken
   };
 }
 
@@ -47,6 +57,7 @@ export function componentInit(args) {
   args.csrfTokenHeaderName = csrfTokenHeaderName;
   args.csrfTokenCookieName = csrfTokenCookieName;
   args.morpher = morpher;
+  args.useCsrfToken = useCsrfToken;
 
   const component = new Component(args);
   components[component.id] = component;

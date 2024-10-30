@@ -2,16 +2,17 @@
 
 {{ MORPHER|json_script:"unicorn:settings:morpher" }}
 
+<script>
+  var useCsrfToken = "{{ USE_CSRF_TOKEN }}" == "True";
+</script>
 {% if MINIFIED %}
-<script src="{% static 'unicorn/js/unicorn.min.js' %}"></script>
-{% comment %} <script src="../static/unicorn/js/unicorn.min.js"></script> {% endcomment %}
+<script src="{% static 'unicorn/js/unicorn.min.js' %}?bust=20240329"></script>
 
 <script>
   const url = "{% url 'django_unicorn:message' %}";
   const morpherSettings = JSON.parse(document.getElementById("unicorn:settings:morpher").textContent);
 
-  Unicorn.init(url, "{{ CSRF_HEADER_NAME }}", "{{ CSRF_COOKIE_NAME }}", morpherSettings);
-
+  Unicorn.init(url, "{{ CSRF_HEADER_NAME }}", "{{ CSRF_COOKIE_NAME }}", morpherSettings, useCsrfToken);
 </script>
 {% else %}
 <script type="module">
@@ -24,6 +25,6 @@
   const url = "{% url 'django_unicorn:message' %}";
   const morpherSettings = JSON.parse(document.getElementById("unicorn:settings:morpher").textContent);
 
-  Unicorn.init(url, "{{ CSRF_HEADER_NAME }}", "{{ CSRF_COOKIE_NAME }}", morpherSettings);
+  Unicorn.init(url, "{{ CSRF_HEADER_NAME }}", "{{ CSRF_COOKIE_NAME }}", morpherSettings, useCsrfToken);
 </script>
 {% endif %}

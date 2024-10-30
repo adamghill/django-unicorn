@@ -31,6 +31,7 @@ def unicorn_scripts():
 
     return {
         "MINIFIED": get_setting("MINIFIED", not settings.DEBUG),
+        "USE_CSRF_TOKEN": get_setting("USE_CSRF_TOKEN", True),
         "CSRF_HEADER_NAME": csrf_header_name,
         "CSRF_COOKIE_NAME": csrf_cookie_name,
         "MORPHER": get_morpher_settings(),

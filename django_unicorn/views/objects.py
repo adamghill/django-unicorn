@@ -5,6 +5,7 @@ from django.http.response import HttpResponseRedirect
 from django_unicorn.components import HashUpdate, LocationUpdate, PollUpdate
 from django_unicorn.errors import UnicornViewError
 from django_unicorn.serializer import JSONDecodeError, dumps, loads
+from django_unicorn.settings import get_setting
 from django_unicorn.utils import generate_checksum, is_int
 
 logger = logging.getLogger(__name__)
@@ -88,6 +89,9 @@ class ComponentRequest:
         """
         Validates that the checksum in the request matches the data.
 
+        If `CHECK_CHECKSUM_MATCH` is set to False,
+        checking of matching checksum is avoided.
+
         Returns:
             Raises `AssertionError` if the checksums don't match.
         """
@@ -97,11 +101,14 @@ class ComponentRequest:
             # TODO: Raise specific exception
             raise AssertionError("Missing checksum")
 
-        generated_checksum = generate_checksum(self.data)
+        check_checksum_match = get_setting("CHECK_CHECKSUM_MATCH", True)
 
-        if checksum != generated_checksum:
-            # TODO: Raise specific exception
-            raise AssertionError("Checksum does not match")
+        if check_checksum_match:
+            generated_checksum = generate_checksum(self.data)
+
+            if checksum != generated_checksum:
+                # TODO: Raise specific exception
+                raise AssertionError("Checksum does not match")
 
 
 class Return:
