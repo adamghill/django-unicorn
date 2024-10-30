@@ -26,6 +26,10 @@ Available additional settings that can be set to `UNICORN` dict in settings.py w
 
 ## Customization changelog
 
+### 0.61.0.3 - (2024-10-30)
+
+- Components are now cached with timeout. Added `COMPONENT_CACHE_TIMEOUT` (Default: `600`) setting that is used as component cache timeout. 
+
 ### 0.61.0.2 - (2024-10-22)
 
 - Delete `json_tag` from child components as it could cause `RecursionError`
