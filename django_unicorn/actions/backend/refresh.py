@@ -18,11 +18,12 @@ class Refresh(BackendAction):
     ) -> tuple[Component, FrontendAction]:
 
         # grab a clean object - can be from cache
-        updated_component = Component.create(
+        updated_component = Component.get_or_create(
             # we keep the original component's id and name
             component_id=component.component_id,
             component_name=component.component_name,
             request=request.request,
+            use_cache=True,
         )
 
         # Set component properties based on request data

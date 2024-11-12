@@ -171,23 +171,20 @@ class UnicornNode(template.Node):
                 elif hasattr(model, "id"):
                     component_id = f"{component_id}:{model.id}"
 
-        if component_id:
-            if not settings.DEBUG:
-                component_id = shortuuid.uuid(name=component_id)[:8]
-        else:
-            component_id = shortuuid.uuid()[:8]
+        
+        component_id = shortuuid.uuid(name=component_id)[:8] if component_id else shortuuid.uuid()[:8]
 
         # Useful for unit test
         self.component_id = component_id
 
-        self.view = UnicornView.create(
+        self.view = UnicornView.get_or_create(
             component_id=component_id,
             component_name=component_name,
             component_key=self.component_key,
             parent=self.parent,
             request=request,
             component_args=resolved_args,
-            kwargs=resolved_kwargs,
+            component_kwargs=resolved_kwargs,
         )
 
         extra_context = {}

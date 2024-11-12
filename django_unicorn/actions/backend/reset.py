@@ -16,13 +16,12 @@ class Reset(BackendAction):
         request, # : ComponentRequest,
     ) -> tuple[Component, FrontendAction]:
 
-        # create a clean object
+        # create a clean object -- ignore cache
         updated_component = Component.create(
             # we keep the original component's id and name
             component_id=component.component_id,
             component_name=component.component_name,
             request=request.request,
-            use_cache=False,
         )
 
         #  Explicitly remove all errors and prevent validation from firing before render()

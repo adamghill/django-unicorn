@@ -2,14 +2,13 @@ import importlib
 import inspect
 import logging
 import pickle
-import sys
-from functools import lru_cache
-from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Type
+from functools import cache, cached_property
+import re
+from inspect import getmembers, isclass
 
 import orjson
 import shortuuid
 from django.apps import apps as django_apps_module
-from django.core.exceptions import ImproperlyConfigured
 from django.db.models import Model
 from django.forms.widgets import CheckboxInput, Select
 from django.http import HttpRequest
@@ -22,18 +21,8 @@ from django_unicorn.cacher import cache_full_tree, restore_from_cache
 from django_unicorn.components.fields import UnicornField
 from django_unicorn.components.unicorn_template_response import UnicornTemplateResponse
 from django_unicorn.decorators import timed
-from django_unicorn.errors import (
-    ComponentClassLoadError,
-    ComponentModuleLoadError,
-    UnicornCacheError,
-)
-from django_unicorn.settings import get_setting
 from django_unicorn.typer import cast_attribute_value, get_type_hints
 from django_unicorn.utils import is_non_string_sequence
-
-# # circular imports
-# from django_unicorn.views.objects import ComponentRequest
-# from django_unicorn.views.utils import set_property_from_data
 
 try:
     from cachetools.lru import LRUCache
@@ -43,239 +32,106 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
-
-# TODO: Make maxsize configurable
-location_cache = LRUCache(maxsize=100)
-
-# Module cache to store the found component class by id
-views_cache = LRUCache(maxsize=100)
-
 # Module cache for constructed component classes
 # This can create a subtle race condition so a more long-term solution needs to be found
 constructed_views_cache = LRUCache(maxsize=100)
-COMPONENTS_MODULE_CACHE_ENABLED = "pytest" not in sys.modules
 
-STANDARD_COMPONENT_KWARG_KEYS = {
-    "id",
-    "component_id",
-    "component_name",
-    "component_key",
-    "parent",
-    "request",
-}
-
-
-def convert_to_snake_case(s: str) -> str:
-    # TODO: Better handling of dash->snake
-    return s.replace("-", "_")
-
-
-def convert_to_dash_case(s: str) -> str:
-    # TODO: Better handling of snake->dash
-    return s.replace("_", "-")
-
-
-def convert_to_pascal_case(s: str) -> str:
-    # TODO: Better handling of dash/snake->pascal-case
-    s = convert_to_snake_case(s)
-    return "".join(word.title() for word in s.split("_"))
-
-
-@lru_cache(maxsize=128, typed=True)
-def get_locations(component_name: str) -> List[Tuple[str, str]]:
-    locations = []
-
-    if "." in component_name:
-        # Handle component names that specify a folder structure
-        component_name = component_name.replace("/", ".")
-
-        # Handle fully-qualified component names (e.g. `project.unicorn.HelloWorldView`)
-        class_name = component_name.split(".")[-1:][0]
-        module_name = component_name.replace(f".{class_name}", "")
-        locations.append((module_name, class_name))
-
-        # Assume if it ends with "View", then we don't need to add other
-        if component_name.endswith("View") or component_name.endswith("Component"):
-            return locations
-
-    # Handle component names that specify a folder structure
-    component_name = component_name.replace("/", ".")
-
-    # Use conventions to find the component class
-    class_name = convert_to_pascal_case(component_name)
-
-    if "." in class_name:
-        if class_name.split(".")[-1:]:
-            class_name = class_name.split(".")[-1:][0]
-
-    class_name = f"{class_name}View"
-    module_name = convert_to_snake_case(component_name)
-
-    # note - app_config.name gives the python path
-    all_django_apps = [
-        app_config.name for app_config in django_apps_module.get_app_configs()
-    ]
-    unicorn_apps = get_setting("APPS", all_django_apps)
-
-    if not is_non_string_sequence(unicorn_apps):
-        raise AssertionError("APPS is expected to be a list, tuple or set")
-
-    locations += [
-        (f"{app}.components.{module_name}", class_name) for app in unicorn_apps
-    ]
-
-    # Add default directory to the end of the list as a fallback
-    locations.append((f"components.{module_name}", class_name))
-
-    return locations
-
-
-@timed
-def construct_component(
-    component_class,
-    component_id,
-    component_name,
-    component_key,
-    parent,
-    request,
-    component_args,
-    **kwargs,
-):
-    """
-    Constructs a class instance.
-    """
-    component = component_class(
-        component_id=component_id,
-        component_name=component_name,
-        component_key=component_key,
-        parent=parent,
-        request=request,
-        component_args=component_args,
-        **kwargs,
-    )
-
-    component.calls = []
-    component.children = []
-
-    component.mount()
-    component.hydrate()
-    component.complete()
-    component._validate_called = False
-
-    return component
 
 class Component(TemplateView):
-    # These class variables are required to set these via kwargs
-    component_name: str = ""
+
     component_key: str = ""
     component_id: str = ""
-    component_args: List = None
-    component_kwargs: Dict = None
+    component_args: list = None
+    component_kwargs: dict = None
+    
+    response_class = UnicornTemplateResponse
+    
+    request: HttpRequest = None
+    
+    parent: "Component" = None
+    
+    children: list["Component"] = []
+    
+    force_render: bool = False
+    
+    # JavaScript method calls
+    calls: list = []
+    
+    errors: dict = {}
+    
+    _validate_called: bool = False
+    _init_script: str = ""
+    
+    component_args: list = []
+    component_kwargs: dict = {}
 
-    def __init__(self, component_args: Optional[List] = None, **kwargs):
-        self.response_class = UnicornTemplateResponse
+    def __init__(self, **kwargs):
+        breakpoint()
 
-        self.component_name: str = ""
-        self.component_key: str = ""
-        self.component_id: str = ""
-
-        # Without these instance variables calling UnicornView() outside the
-        # Django view/template logic (i.e. in unit tests) results in odd results.
-        self.request: HttpRequest = None
-        self.parent: UnicornView = None
-        self.children: List[UnicornView] = []
-
-        # Caches to reduce the amount of time introspecting the class
-        self._methods_cache: Dict[str, Callable] = {}
-        self._attribute_names_cache: List[str] = []
-        self._hook_methods_cache: List[str] = []
-
-        # Dictionary with key: attribute name; value: pickled attribute value
-        self._resettable_attributes_cache: Dict[str, Any] = {}
-
-        # JavaScript method calls
-        self.calls = []
-
-        # Default force render to False
-        self.force_render = False
-
-        super().__init__(**kwargs)
-
-        if not self.component_name:
-            raise AssertionError("Component name is required")
+        # super().__init__(**kwargs) --> same as below
+        for key, value in kwargs.items():
+            setattr(self, key, value)
 
         if kwargs.get("id"):
             # Sometimes the component_id is initially in kwargs["id"]
             self.component_id = kwargs["id"]
 
-        if not hasattr(self, "component_id"):
-            raise AssertionError("Component id is required")
-
         if not self.component_id:
             raise AssertionError("Component id is required")
 
-        self.component_cache_key = f"unicorn:component:{self.component_id}"
-
-        if "request" in kwargs:
-            self.setup(kwargs["request"])
-
-        if "parent" in kwargs:
-            self.parent = kwargs["parent"]
-
-            if self.parent and self not in self.parent.children:
-                self.parent.children.append(self)
-
-        # Set component args
-        self.component_args = component_args if component_args is not None else []
+        if self.parent and self not in self.parent.children:
+            self.parent.children.append(self)
 
         # Only include custom kwargs since the standard kwargs are available
         # as instance variables
-        custom_kwargs = set(kwargs.keys()) - STANDARD_COMPONENT_KWARG_KEYS
+        custom_kwargs = set(kwargs.keys()) - {
+            # STANDARD_COMPONENT_KWARG_KEYS
+            "id",
+            "component_id",
+            "component_name",
+            "component_key",
+            "parent",
+            "request",
+        }
         self.component_kwargs = {k: kwargs[k] for k in list(custom_kwargs)}
+        
+        # Make sure that there is always a request on the parent if needed
+        # if self.parent is not None and self.parent.request is None:
+        #     self.parent.request = self.request
+        
+        # self.mount()
+        # component.hydrate()
+        # component.complete()
+        # component._validate_called = False
 
-        self._init_script: str = ""
-        self._validate_called = False
-        self.errors = {}
-        self._set_default_template_name()
-        self._set_caches()
+        # component._cache_component()
 
-    @timed
-    def _set_default_template_name(self) -> None:
+        # component._set_request(request)
+
+    @classmethod
+    @property
+    def component_name(cls):
+        # Switch from class name to unicorn convent (ExampleNameView --> example-name)
+        # adds a hyphen between each capital letter
+        # copied from https://stackoverflow.com/questions/199059/
+        # -4 is to remove "View" at end
+        return re.sub(r"(\w)([A-Z])", r"\1-\2", cls.__name__[:-4]).lower()
+
+    @classmethod
+    @property
+    def template_name(self) -> str:
         """
         Sets a default template name based on component's name if necessary.
         """
-        get_template_names_is_valid = False
+        # Convert component name with a dot to a folder structure
+        template_name = self.component_name.replace(".", "/")
+        self.template_name = f"unicorn/{template_name}.html"
 
-        try:
-            # Check for get_template_names by explicitly calling it since it
-            # is defined in TemplateResponseMixin, but can throw ImproperlyConfigured.
-            self.get_template_names()
-            get_template_names_is_valid = True
-        except ImproperlyConfigured:
-            pass
-
-        if not self.template_name and not get_template_names_is_valid:
-            # Convert component name with a dot to a folder structure
-            template_name = self.component_name.replace(".", "/")
-            self.template_name = f"unicorn/{template_name}.html"
-
-    @timed
-    def _set_caches(self) -> None:
-        """
-        Setup some initial "caches" to prevent Python from having to introspect
-        a component UnicornView for methods and properties multiple times.
-        """
-        self._attribute_names_cache = self._attribute_names()
-        self._set_hook_methods_cache()
-        self._methods_cache = self._methods()
-        self._set_resettable_attributes_cache()
-
-    @timed
     def reset(self):
         for (
             attribute_name,
             pickled_value,
-        ) in self._resettable_attributes_cache.items():
+        ) in self._resettable_attributes.items():
             try:
                 attribute_value = pickle.loads(pickled_value)  # noqa: S301
                 self._set_property(attribute_name, attribute_value)
@@ -398,38 +254,12 @@ class Component(TemplateView):
             init_js=True,
         )
 
-    def _cache_component(self, *, parent=None, component_args=None, **kwargs):
-        """
-        Cache the component in the module and the Django cache.
-        """
-
-        # Put the location for the component name in a module cache
-        location_cache[self.component_name] = (self.__module__, self.__class__.__name__)
-
-        # Put the component's class in a module cache
-        views_cache[self.component_id] = (
-            self.__class__,
-            parent,
-            component_args,
-            kwargs,
-        )
-
-        # Put the instantiated component into a module cache and the Django cache
-        try:
-            if COMPONENTS_MODULE_CACHE_ENABLED:
-                constructed_views_cache[self.component_id] = self
-
-            cache_full_tree(self)
-        except UnicornCacheError as e:
-            logger.warning(e)
-
     # Ideally, this would be named get_frontend_context_json
-    @timed
     def get_frontend_context_variables(self) -> str:
         """
         Get publicly available properties and output them in a string-encoded JSON object.
         """
-
+        breakpoint()
         frontend_context_variables = {}
         attributes = self._attributes()
         frontend_context_variables.update(attributes)
@@ -438,7 +268,7 @@ class Component(TemplateView):
 
         # Remove any field in `javascript_exclude` from `frontend_context_variables`
         if hasattr(self, "Meta") and hasattr(self.Meta, "javascript_exclude"):
-            if isinstance(self.Meta.javascript_exclude, Sequence):
+            if type(self.Meta.javascript_exclude) in (list, tuple):
                 for field_name in self.Meta.javascript_exclude:
                     if "." in field_name:
                         # Because the dictionary value could be an object, we can't just remove the attribute, so
@@ -543,12 +373,11 @@ class Component(TemplateView):
 
         return context
 
-    @timed
-    def is_valid(self, model_names: Optional[List] = None) -> bool:
+
+    def is_valid(self, model_names: list = None) -> bool:
         return len(self.validate(model_names).keys()) == 0
 
-    @timed
-    def validate(self, model_names: Optional[List] = None) -> Dict:
+    def validate(self, model_names: list = None) -> dict:
         """
         Validates the data using the `form_class` set on the component.
 
@@ -593,11 +422,72 @@ class Component(TemplateView):
                 self.errors.update(form_errors)
 
         return self.errors
+    
+    # -------------------------------------------------------------------------
 
-    @timed
-    def _attribute_names(self) -> List[str]:
+    @cached_property
+    def _methods(self) -> dict[str, callable]:
         """
-        Gets publicly available attribute names. Cached in `_attribute_names_cache`.
+        Get publicly available method names and their functions from the component.
+        Cached in `_methods_cache`.
+        """
+        member_methods = inspect.getmembers(self, inspect.ismethod)
+        public_methods = [
+            method for method in member_methods if self._is_public(method[0])
+        ]
+        methods = dict(public_methods)
+        return methods
+
+    @cached_property
+    def _hook_methods(self) -> list:
+        """
+        Caches the updating/updated attribute function names defined on the component.
+        """
+        hook_methods = []
+        for attribute_name in self._attribute_names:
+            updating_function_name = f"updating_{attribute_name}"
+            updated_function_name = f"updated_{attribute_name}"
+            hook_function_names = [updating_function_name, updated_function_name]
+
+            for function_name in hook_function_names:
+                if hasattr(self, function_name):
+                    hook_methods.append(function_name)
+        return hook_methods
+
+    @cached_property
+    def _resettable_attributes(self) -> dict:
+        """
+        attributes that are "resettable"
+        a dictionary with key: attribute name; value: pickled attribute value
+
+        Examples:
+            - `UnicornField`
+            - Django Models without a defined pk
+        """
+        resettable_attributes = {}
+        for attribute_name, attribute_value in self._attributes().items():
+            if isinstance(attribute_value, UnicornField):
+                resettable_attributes[attribute_name] = pickle.dumps(
+                    attribute_value
+                )
+            elif isinstance(attribute_value, Model):
+                if not attribute_value.pk:
+                    if attribute_name not in resettable_attributes:
+                        try:
+                            resettable_attributes[
+                                attribute_name
+                            ] = pickle.dumps(attribute_value)
+                        except pickle.PickleError:
+                            logger.warn(
+                                f"Caching '{attribute_name}' failed because it could not be pickled."
+                            )
+                            pass
+        return resettable_attributes
+
+    @cached_property
+    def _attribute_names(self) -> list[str]:
+        """
+        Gets publicly available attribute names.
         """
         non_callables = [
             member[0] for member in inspect.getmembers(self, lambda x: not callable(x))
@@ -613,25 +503,20 @@ class Component(TemplateView):
 
         return attribute_names
 
-    @timed
-    def _attributes(self) -> Dict[str, Any]:
+    # @cached_property <-- why was this cached in the original...?
+    def _attributes(self) -> dict[str, any]:
         """
         Get publicly available attributes and their values from the component.
         """
-
-        attribute_names = self._attribute_names_cache
-        attributes = {}
-
-        for attribute_name in attribute_names:
-            attributes[attribute_name] = getattr(self, attribute_name, None)
-
-        return attributes
-
+        return {attribute_name: getattr(self, attribute_name, None) for attribute_name in self._attribute_names}
+    
+    # -------------------------------------------------------------------------
+    
     @timed
     def _set_property(
         self,
         name: str,
-        value: Any,
+        value: any,
         *,
         call_updating_method: bool = False,
         call_updated_method: bool = False,
@@ -670,7 +555,7 @@ class Component(TemplateView):
             raise
 
     @timed
-    def _get_property(self, property_name: str) -> Any:
+    def _get_property(self, property_name: str) -> any:
         """
         Gets property value from the component based on the property name.
         Handles nested property names.
@@ -698,71 +583,8 @@ class Component(TemplateView):
                     return component_or_field[property_name_part]
                 else:
                     component_or_field = component_or_field[property_name_part]
-
-    @timed
-    def _methods(self) -> Dict[str, Callable]:
-        """
-        Get publicly available method names and their functions from the component.
-        Cached in `_methods_cache`.
-        """
-
-        if self._methods_cache:
-            return self._methods_cache
-
-        member_methods = inspect.getmembers(self, inspect.ismethod)
-        public_methods = [
-            method for method in member_methods if self._is_public(method[0])
-        ]
-        methods = dict(public_methods)
-        self._methods_cache = methods
-
-        return methods
-
-    @timed
-    def _set_hook_methods_cache(self) -> None:
-        """
-        Caches the updating/updated attribute function names defined on the component.
-        """
-        self._hook_methods_cache = []
-
-        for attribute_name in self._attribute_names_cache:
-            updating_function_name = f"updating_{attribute_name}"
-            updated_function_name = f"updated_{attribute_name}"
-            hook_function_names = [updating_function_name, updated_function_name]
-
-            for function_name in hook_function_names:
-                if hasattr(self, function_name):
-                    self._hook_methods_cache.append(function_name)
-
-    @timed
-    def _set_resettable_attributes_cache(self) -> None:
-        """
-        Caches the attributes that are "resettable" in `_resettable_attributes_cache`.
-        Cache is a dictionary with key: attribute name; value: pickled attribute value
-
-        Examples:
-            - `UnicornField`
-            - Django Models without a defined pk
-        """
-        self._resettable_attributes_cache = {}
-
-        for attribute_name, attribute_value in self._attributes().items():
-            if isinstance(attribute_value, UnicornField):
-                self._resettable_attributes_cache[attribute_name] = pickle.dumps(
-                    attribute_value
-                )
-            elif isinstance(attribute_value, Model):
-                if not attribute_value.pk:
-                    if attribute_name not in self._resettable_attributes_cache:
-                        try:
-                            self._resettable_attributes_cache[
-                                attribute_name
-                            ] = pickle.dumps(attribute_value)
-                        except pickle.PickleError:
-                            logger.warn(
-                                f"Caching '{attribute_name}' failed because it could not be pickled."
-                            )
-                            pass
+    
+    # -------------------------------------------------------------------------
 
     def _is_public(self, name: str) -> bool:
         """
@@ -836,9 +658,27 @@ class Component(TemplateView):
         return not (
             name.startswith("_")
             or name in protected_names
-            or name in self._hook_methods_cache
+            or name in self._hook_methods
             or name in excludes
         )
+    
+    def _mark_safe_fields(self):
+        # Get set of attributes that should be marked as `safe`
+        safe_fields = []
+        if hasattr(self, "Meta") and hasattr(self.Meta, "safe"):
+            breakpoint()
+            if isinstance(self.Meta.safe, Sequence):
+                for field_name in self.Meta.safe:
+                    if field_name in self._attributes().keys():
+                        safe_fields.append(field_name)
+
+        # Mark safe attributes as such before rendering
+        for field_name in safe_fields:
+            value = getattr(self, field_name)
+            if isinstance(value, str):
+                setattr(self, field_name, mark_safe(value))
+    
+    # -------------------------------------------------------------------------
 
     @classmethod
     def from_request(
@@ -851,211 +691,58 @@ class Component(TemplateView):
         the proper UnicornView object and then (if requested) apply all actions 
         to the UnicornView object.
         """
-        component = cls.create(
+        component = cls.get_or_create(
             component_id=request.id,
             component_name=request.name,
             request=request.request,  # gives the HttpRequest obj
         )
 
         if apply_actions:
-            component = request.apply_to_component(component)
+            request.apply_to_component(component, inplace=True)
 
         return component
 
-    @staticmethod
-    @timed
-    def create(  # should be better named --> e.g. get_cached_obj_or_create()
-        *,
+    @classmethod
+    def get_or_create(
+        cls,
         component_id: str,
         component_name: str,
-        component_key: str = "",
-        parent: "UnicornView" = None,  # !!! why not use the cls arg?
-        request: HttpRequest = None,
-        use_cache=True,
-        component_args: Optional[List] = None,
-        kwargs: Optional[Dict[str, Any]] = None,
+        **kwargs,
     ) -> "UnicornView":
-        """
-        Find and instantiate a component class based on `component_name`.
-
-        Args:
-            param component_id: Id of the component. Required.
-            param component_name: Name of the component. Used to locate the correct `UnicornView`
-                component class and template if necessary. Required.
-            param component_key: Key of the component to allow multiple components of the same name
-                to be differentiated. Optional.
-            param parent: The parent component of the current component.
-            param component_args: Arguments for the component passed in from the template. Defaults to `[]`.
-            param kwargs: Keyword arguments for the component passed in from the template. Defaults to `{}`.
-
-        Returns:
-            Instantiated `UnicornView` component.
-            Raises `ComponentModuleLoadError` or `ComponentClassLoadError` if the component could not be loaded.
-        """
-        if not component_id:
-            raise AssertionError("Component id is required")
-        if not component_name:
-            raise AssertionError("Component name is required")
-
-        component_args = component_args if component_args is not None else []
-        kwargs = kwargs if kwargs is not None else {}
-
-        @timed
-        def _get_component_class(
-            module_name: str, class_name: str
-        ) -> Type[UnicornView]:
-            """
-            Imports a component based on module and class name.
-            """
-            module = importlib.import_module(module_name)
-            component_class = getattr(module, class_name)
-
-            return component_class
+        breakpoint()
 
         component_cache_key = f"unicorn:component:{component_id}"
-        cached_component = restore_from_cache(component_cache_key)
-
-        if not cached_component:
-            # Note that `hydrate()` and `complete` don't need to be called here
-            # because this path only happens for re-rendering from the view
-            cached_component = constructed_views_cache.get(component_id)
-
-            if cached_component:
-                cached_component.setup(request)
-                cached_component._validate_called = False
-                cached_component.calls = []
-
-        if use_cache and cached_component:
-            logger.debug(f"Retrieve {component_id} from constructed views cache")
-
-            cached_component.component_args = component_args
-            cached_component.component_kwargs = kwargs
-
-            # TODO: How should args be handled?
-            # Set kwargs onto the cached component
-            for key, value in kwargs.items():
-                if hasattr(cached_component, key):
-                    setattr(cached_component, key, value)
-
-            cached_component._cache_component(
-                parent=parent, component_args=component_args, **kwargs
-            )
-
-            # Call hydrate because the component will be re-rendered
-            cached_component.hydrate()
-
-            cached_component._set_request(request)
+            
+        # try local cache
+        cached_component = cls.from_local_cache(component_cache_key)
+        if cached_component:
             return cached_component
-
-        if component_id in views_cache:
-            (component_class, parent, component_args, kwargs) = views_cache[
-                component_id
-            ]
-
-            component = construct_component(
-                component_class=component_class,
-                component_id=component_id,
-                component_name=component_name,
-                component_key=component_key,
-                parent=parent,
-                request=request,
-                component_args=component_args,
-                **kwargs,
-            )
-            logger.debug(f"Retrieve {component_id} from views cache")
-
-            component._set_request(request)
-            return component
-
-        locations = []
-
-        if component_name in location_cache:
-            locations.append(location_cache[component_name])
-        else:
-            locations = get_locations(component_name)
-
-        class_name_not_found = None
-        attribute_exception = None
-
-        for module_name, class_name in locations:
-            try:
-                component_class = _get_component_class(module_name, class_name)
-
-                component = construct_component(
-                    component_class=component_class,
-                    component_id=component_id,
-                    component_name=component_name,
-                    component_key=component_key,
-                    parent=parent,
-                    request=request,
-                    component_args=component_args,
-                    **kwargs,
-                )
-
-                component._cache_component(
-                    parent=parent, component_args=component_args, **kwargs
-                )
-
-                component._set_request(request)
-                return component
-            except ModuleNotFoundError as e:
-                logger.debug(e)
-                pass
-            except AttributeError as e:
-                logger.debug(e)
-                attribute_exception = e
-                class_name_not_found = f"{module_name}.{class_name}"
-
-        if class_name_not_found is not None and attribute_exception is not None:
-            message = f"The component class '{class_name_not_found}' could not be loaded: {attribute_exception}"
-            raise ComponentClassLoadError(
-                message, locations=locations
-            ) from attribute_exception
-
-        module_name_not_found = component_name.replace("-", "_")
-        message = f"The component module '{module_name_not_found}' could not be loaded."
-
-        raise ComponentModuleLoadError(message, locations=locations)
-
-    def _set_request(self, request):
-        # TODO: distinguish between django "request" and "component_request".
-        # Maybe change component_request -> component_payload?
-
-        # Make sure that there is always a request on the component if needed
-        if self.request is None:
-            self.request = request
-
-        # Make sure that there is always a request on the parent if needed
-        if self.parent is not None and self.parent.request is None:
-            self.parent.request = request
-
-
-    # !!! this method is not used anywhere as of now
-    def _update_from_component_request(
-            self,
-            component_request,  # : ComponentRequest
-            apply_inplace: bool = False,
-    ):
-        updated_component = component_request.apply_to_component(self)
-        if apply_inplace:
-            self = updated_component  # !!! Not a fan of this... Might produce bugs
-        else:
-            return updated_component
-
-    def _mark_safe_fields(self):
-        # Get set of attributes that should be marked as `safe`
-        safe_fields = []
-        if hasattr(self, "Meta") and hasattr(self.Meta, "safe"):
-            if isinstance(self.Meta.safe, Sequence):
-                for field_name in self.Meta.safe:
-                    if field_name in self._attributes().keys():
-                        safe_fields.append(field_name)
-
-        # Mark safe attributes as such before rendering
-        for field_name in safe_fields:
-            value = getattr(self, field_name)
-            if isinstance(value, str):
-                setattr(self, field_name, mark_safe(value))
+        
+        # try django cache
+        cached_component = cls.from_django_cache(component_cache_key)
+        if cached_component:
+            return cached_component
+        
+        # create new one
+        return cls.create(
+            component_id=component_id,
+            component_name=component_name,
+            **kwargs,
+        )
+    
+    @staticmethod
+    def from_local_cache(component_cache_key: str) -> "UnicornView":
+        return constructed_views_cache.get(component_cache_key)
+    
+    @staticmethod
+    def from_django_cache(component_cache_key: str) -> "UnicornView":
+        return restore_from_cache(component_cache_key)
+    
+    @staticmethod
+    def create(component_name: str, **kwargs) -> "UnicornView":
+        # note this fxn call is cached for speedup
+        component_class = get_all_component_classes()[component_name]
+        return component_class(**kwargs)
 
     @classonlymethod
     def as_view(cls, **initkwargs):  # noqa: N805
@@ -1065,12 +752,123 @@ class Component(TemplateView):
         if "component_name" not in initkwargs:
             module_name = cls.__module__
             module_parts = module_name.split(".")
-            component_name = module_parts[len(module_parts) - 1]
-            component_name = convert_to_dash_case(component_name)
+            component_name = module_parts[-1].replace("_", "-")
 
             initkwargs["component_name"] = component_name
 
         return super().as_view(**initkwargs)
+    
+    # -------------------------------------------------------------------------
+    
+    @property
+    def component_cache_key(self):
+        return f"unicorn:component:{self.component_id}"
+        # return (
+        #     f"{self.parent._component_cache_key}:{self.component_id}" 
+        #     if self.parent 
+        #     else f"unicorn:component:{self.component_id}"
+        # )
+
+    def _cache_component(self):
+        self.to_local_cache()
+        self.to_django_cache()
+    
+    def to_local_cache(self):
+        constructed_views_cache[self.component_cache_key] = self
+    
+    def to_django_cache(self):
+        cache_full_tree(self)
+    
+    # -------------------------------------------------------------------------
+
+
+# modified from simmate get_all_workflows
+@cache
+def get_all_component_classes() -> dict:
+
+    # note - app_config.name gives the python path
+    apps_to_search = [app_config.name for app_config in django_apps_module.get_app_configs()]
+    
+    all_components = {}
+    for app_name in apps_to_search:
+        
+        # check if there is a components module for this app and load it if so
+        components_path = get_app_submodule(app_name, "components")
+        if not components_path:
+            continue  # skip to the next app
+        app_components_module = importlib.import_module(components_path)
+
+        # iterate through each available object in the components file and find
+        # which ones are Component objects. This will be the file "components.py"
+        # or "components/__init__.py"
+        
+        # SETUP OPTION 1
+        # If an __all__ value is set, then this will take priority when grabbing
+        # workflows from the module
+        if hasattr(app_components_module, "__all__"):
+            for component_class_name in app_components_module.__all__:
+                if not component_class_name.endswith("View"):
+                    continue  # !!! unicorn convention, I'd rather isinstance()  
+                component_class = getattr(app_components_module, component_class_name)
+                if component_class_name not in all_components:
+                    all_components[component_class_name] = component_class
+        
+        # SETUP OPTION 2
+        # otherwise we load ALL class objects from the module -- assuming the
+        # user properly limited these to just Component objects.
+        else:
+            # a tuple is returned by getmembers so c[0] is the string name while
+            # c[1] is the python class object.
+            for component_class_name, component_class in getmembers(app_components_module):
+                if not isclass(component_class):
+                    continue
+                if not component_class_name.endswith("View"):
+                    continue  # !!! unicorn convention, I'd rather isinstance()
+                if component_class_name not in all_components:
+                    all_components[component_class_name] = component_class
+    
+    # Switch from class name to unicorn convent (ExampleNameView --> example-name)
+    # adds a hyphen between each capital letter
+    # copied from https://stackoverflow.com/questions/199059/
+    # -4 is to remove "View" at end
+    all_components_cleaned = {}
+    for component_class_name, component_class in all_components.items():
+        component_name = re.sub(r"(\w)([A-Z])", r"\1-\2", component_class_name[:-4]).lower()
+        all_components_cleaned[component_name] = component_class
+
+    return all_components_cleaned
+
+# util borrowed from simmate
+def get_app_submodule(
+    app_path: str,
+    submodule_name: str,
+) -> str:
+    """
+    Checks if an app has a submodule present and returns the import path for it.
+    This is useful for checking if there are workflows or urls defined, which
+    are optional accross all apps. None is return if no app exists
+    """
+    submodule_path = f"{app_path}.{submodule_name}"
+
+    # check if there is a workflows module in the app, and if so,
+    # try loading the workflows.
+    #   stackoverflow.com/questions/14050281
+    has_submodule = importlib.util.find_spec(submodule_path) is not None
+
+    return submodule_path if has_submodule else None
+
+# util borrowed from simmate
+def get_class(class_path: str):
+    """
+    Given the import path for a python class (e.g. path.to.MyClass), this
+    utility will load the class given (MyClass).
+    """
+    config_modulename = ".".join(class_path.split(".")[:-1])
+    config_name = class_path.split(".")[-1]
+    config_module = importlib.import_module(config_modulename)
+    config = getattr(config_module, config_name)
+    return config
+
 
 # to support deprec naming of class
 UnicornView = Component

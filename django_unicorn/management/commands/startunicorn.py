@@ -8,10 +8,6 @@ from django.conf import settings
 from django.core.management import call_command
 from django.core.management.base import BaseCommand, CommandError
 
-from django_unicorn.components.unicorn_view import (
-    convert_to_pascal_case,
-    convert_to_snake_case,
-)
 
 COMPONENT_FILE_CONTENT = """from django_unicorn.components import UnicornView
 
@@ -24,6 +20,22 @@ TEMPLATE_FILE_CONTENT = """<div>
     <!-- put component code here -->
 </div>
 """
+
+
+def convert_to_snake_case(s: str) -> str:
+    # TODO: Better handling of dash->snake
+    return s.replace("-", "_")
+
+
+def convert_to_dash_case(s: str) -> str:
+    # TODO: Better handling of snake->dash
+    return s.replace("_", "-")
+
+
+def convert_to_pascal_case(s: str) -> str:
+    # TODO: Better handling of dash/snake->pascal-case
+    s = convert_to_snake_case(s)
+    return "".join(word.title() for word in s.split("_"))
 
 
 def get_app_path(app_name: str) -> Path:
