@@ -251,6 +251,9 @@ need {{% load unicorn %}} or {{% unicorn_scripts %}}?') }} else {{ {init_script}
                         root_element.insert_after(t)
 
         rendered_template = UnicornTemplateResponse._desoupify(soup)
+        
+        # !!! should rendered be called here instead of in the ComponentResponse
+        # class (see comment there)
         self.component.rendered(rendered_template)
 
         response.content = rendered_template

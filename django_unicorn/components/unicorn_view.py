@@ -1,8 +1,7 @@
 import importlib
-import inspect
 import logging
 import pickle
-from functools import cache, cached_property
+from functools import cache
 import re
 from inspect import getmembers, isclass
 
@@ -32,9 +31,7 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
-# Module cache for constructed component classes
-# This can create a subtle race condition so a more long-term solution needs to be found
-constructed_views_cache = LRUCache(maxsize=100)
+LOCAL_COMPONENT_CACHE = LRUCache(maxsize=1_000)
 
 
 class Component(TemplateView):
@@ -50,28 +47,32 @@ class Component(TemplateView):
     
     parent: "Component" = None
     
-    children: list["Component"] = []
+    children: list["Component"] = None
     
     force_render: bool = False
     
     # JavaScript method calls
-    calls: list = []
+    calls: list = None
     
-    errors: dict = {}
+    errors: dict = None
     
     _validate_called: bool = False
     _init_script: str = ""
     
-    component_args: list = []
-    component_kwargs: dict = {}
+    component_args: list = None
+    component_kwargs: dict = None
 
-    def __init__(self, **kwargs):
-        breakpoint()
-
+    def __init__(
+            self, 
+            component_args: list = [], 
+            component_kwargs: dict = {}, 
+            **kwargs,
+        ):
+        
         # super().__init__(**kwargs) --> same as below
         for key, value in kwargs.items():
             setattr(self, key, value)
-
+        
         if kwargs.get("id"):
             # Sometimes the component_id is initially in kwargs["id"]
             self.component_id = kwargs["id"]
@@ -79,12 +80,21 @@ class Component(TemplateView):
         if not self.component_id:
             raise AssertionError("Component id is required")
 
+        # init mutable sets with a fresh start
+        self.children = []
+        self.calls = []
+        self.errors = {}
+
+        # set parent-child relationships
         if self.parent and self not in self.parent.children:
             self.parent.children.append(self)
-
-        # Only include custom kwargs since the standard kwargs are available
-        # as instance variables
-        custom_kwargs = set(kwargs.keys()) - {
+        
+        # !!! not sure when/where this is used
+        self.component_args = component_args
+        
+        # Revise the kwargs to only include custom kwargs since the 
+        # standard kwargs are available as instance variables
+        custom_kwargs = set(component_kwargs.keys()) - {
             # STANDARD_COMPONENT_KWARG_KEYS
             "id",
             "component_id",
@@ -93,19 +103,25 @@ class Component(TemplateView):
             "parent",
             "request",
         }
-        self.component_kwargs = {k: kwargs[k] for k in list(custom_kwargs)}
+        self.component_kwargs = {k: component_kwargs[k] for k in list(custom_kwargs)}
+        
+        # apply kwargs
+        for key, value in self.component_kwargs.items():
+            setattr(self, key, value)
+        
+        # !!! should kwargs be mounted only on __init__ or should this move
+        # to the get_or_create method?
+        self.mount()
         
         # Make sure that there is always a request on the parent if needed
         # if self.parent is not None and self.parent.request is None:
         #     self.parent.request = self.request
-        
-        # self.mount()
+
         # component.hydrate()
         # component.complete()
         # component._validate_called = False
 
-        # component._cache_component()
-
+        self.to_local_cache()
         # component._set_request(request)
 
     @classmethod
@@ -126,25 +142,6 @@ class Component(TemplateView):
         # Convert component name with a dot to a folder structure
         template_name = self.component_name.replace(".", "/")
         self.template_name = f"unicorn/{template_name}.html"
-
-    def reset(self):
-        for (
-            attribute_name,
-            pickled_value,
-        ) in self._resettable_attributes.items():
-            try:
-                attribute_value = pickle.loads(pickled_value)  # noqa: S301
-                self._set_property(attribute_name, attribute_value)
-            except TypeError:
-                logger.warn(
-                    f"Resetting '{attribute_name}' attribute failed because it could not be constructed."
-                )
-                pass
-            except pickle.PickleError:
-                logger.warn(
-                    f"Resetting '{attribute_name}' attribute failed because it could not be de-pickled."
-                )
-                pass
 
     def call(self, function_name, *args):
         """
@@ -205,6 +202,41 @@ class Component(TemplateView):
         Hook that gets called when a component's method is called.
         """
         pass
+    
+    # -------------------------------------------------------------------------
+    
+    def reset(self):
+        for (
+            attribute_name,
+            pickled_value,
+        ) in self._resettable_attributes.items():
+            try:
+                attribute_value = pickle.loads(pickled_value)  # noqa: S301
+                self._set_property(attribute_name, attribute_value)
+            except TypeError:
+                logger.warn(
+                    f"Resetting '{attribute_name}' attribute failed because it could not be constructed."
+                )
+                pass
+            except pickle.PickleError:
+                logger.warn(
+                    f"Resetting '{attribute_name}' attribute failed because it could not be de-pickled."
+                )
+                pass
+
+    @classonlymethod
+    def as_view(cls, **initkwargs):  # noqa: N805
+        if "component_id" not in initkwargs:
+            initkwargs["component_id"] = shortuuid.uuid()[:8]
+
+        if "component_name" not in initkwargs:
+            module_name = cls.__module__
+            module_parts = module_name.split(".")
+            component_name = module_parts[-1].replace("_", "-")
+
+            initkwargs["component_name"] = component_name
+
+        return super().as_view(**initkwargs)
 
     @timed
     def render(self, *, init_js=False, extra_context=None, request=None) -> str:
@@ -259,9 +291,8 @@ class Component(TemplateView):
         """
         Get publicly available properties and output them in a string-encoded JSON object.
         """
-        breakpoint()
         frontend_context_variables = {}
-        attributes = self._attributes()
+        attributes = self._attributes
         frontend_context_variables.update(attributes)
 
         exclude_field_attributes = []
@@ -356,9 +387,9 @@ class Component(TemplateView):
 
         context = super().get_context_data(**kwargs)
 
-        attributes = self._attributes()
+        attributes = self._attributes
         context.update(attributes)
-        context.update(self._methods())
+        context.update(self._methods)
         context.update(
             {
                 "unicorn": {
@@ -391,7 +422,7 @@ class Component(TemplateView):
 
         self._validate_called = True
 
-        data = self._attributes()
+        data = self._attributes
         form = self._get_form(data)
 
         if form:
@@ -425,36 +456,68 @@ class Component(TemplateView):
     
     # -------------------------------------------------------------------------
 
-    @cached_property
-    def _methods(self) -> dict[str, callable]:
+    @classmethod
+    @property
+    @cache
+    def _methods(cls) -> dict[str, callable]:
         """
         Get publicly available method names and their functions from the component.
         Cached in `_methods_cache`.
         """
-        member_methods = inspect.getmembers(self, inspect.ismethod)
-        public_methods = [
-            method for method in member_methods if self._is_public(method[0])
-        ]
-        methods = dict(public_methods)
-        return methods
+        return {
+            name: getattr(cls, name)
+            for name in dir(cls)
+            # name="_methods" will cause recursion error
+            if cls._is_public(name) and callable(getattr(cls, name)) 
+        }  # dir() looks to be faster than inspect.getmembers
 
-    @cached_property
-    def _hook_methods(self) -> list:
+    @classmethod
+    @property
+    @cache
+    def _hook_methods(cls) -> list:
         """
         Caches the updating/updated attribute function names defined on the component.
         """
         hook_methods = []
-        for attribute_name in self._attribute_names:
-            updating_function_name = f"updating_{attribute_name}"
-            updated_function_name = f"updated_{attribute_name}"
-            hook_function_names = [updating_function_name, updated_function_name]
-
-            for function_name in hook_function_names:
-                if hasattr(self, function_name):
+        # BUG: using 'cls._attribute_names' causes recursion due to is_public method
+        for attribute_name in dir(cls): 
+            for hook_name in ["updating", "updated"]:
+                function_name = f"{hook_name}_{attribute_name}"
+                if hasattr(cls, function_name):
                     hook_methods.append(function_name)
         return hook_methods
 
-    @cached_property
+    @classmethod
+    @property
+    @cache
+    def _attribute_names(cls) -> list[str]:
+        """
+        Gets publicly available attribute names.
+        """
+        attribute_names = [
+            name
+            for name in dir(cls)
+            # name="_methods" will cause recursion error
+            if cls._is_public(name) and not callable(getattr(cls, name)) 
+        ]  # dir() looks to be faster than inspect.getmembers
+
+        # Add type hints for the component to the attribute names since
+        # they won't be returned from `getmembers`/`dir`
+        for type_hint_attribute_name in get_type_hints(cls).keys():
+            if cls._is_public(type_hint_attribute_name):
+                if type_hint_attribute_name not in attribute_names:
+                    attribute_names.append(type_hint_attribute_name)
+
+        return attribute_names
+
+    @property
+    def _attributes(self) -> dict[str, any]:
+        """
+        Get publicly available attributes and their values from the component.
+        """
+        return {attribute_name: getattr(self, attribute_name, None) for attribute_name in self._attribute_names}
+    
+    @property
     def _resettable_attributes(self) -> dict:
         """
         attributes that are "resettable"
@@ -465,7 +528,7 @@ class Component(TemplateView):
             - Django Models without a defined pk
         """
         resettable_attributes = {}
-        for attribute_name, attribute_value in self._attributes().items():
+        for attribute_name, attribute_value in self._attributes.items():
             if isinstance(attribute_value, UnicornField):
                 resettable_attributes[attribute_name] = pickle.dumps(
                     attribute_value
@@ -483,32 +546,6 @@ class Component(TemplateView):
                             )
                             pass
         return resettable_attributes
-
-    @cached_property
-    def _attribute_names(self) -> list[str]:
-        """
-        Gets publicly available attribute names.
-        """
-        non_callables = [
-            member[0] for member in inspect.getmembers(self, lambda x: not callable(x))
-        ]
-        attribute_names = [name for name in non_callables if self._is_public(name)]
-
-        # Add type hints for the component to the attribute names since
-        # they won't be returned from `getmembers`
-        for type_hint_attribute_name in get_type_hints(self).keys():
-            if self._is_public(type_hint_attribute_name):
-                if type_hint_attribute_name not in attribute_names:
-                    attribute_names.append(type_hint_attribute_name)
-
-        return attribute_names
-
-    # @cached_property <-- why was this cached in the original...?
-    def _attributes(self) -> dict[str, any]:
-        """
-        Get publicly available attributes and their values from the component.
-        """
-        return {attribute_name: getattr(self, attribute_name, None) for attribute_name in self._attribute_names}
     
     # -------------------------------------------------------------------------
     
@@ -522,7 +559,7 @@ class Component(TemplateView):
         call_updated_method: bool = False,
     ) -> None:
         # Get the correct value type by using the form if it is available
-        data = self._attributes()
+        data = self._attributes
 
         value = cast_attribute_value(self, name, value)
         data[name] = value
@@ -585,8 +622,9 @@ class Component(TemplateView):
                     component_or_field = component_or_field[property_name_part]
     
     # -------------------------------------------------------------------------
-
-    def _is_public(self, name: str) -> bool:
+    
+    @classmethod
+    def _is_public(cls, name: str) -> bool:
         """
         Determines if the name should be sent in the context.
         """
@@ -641,24 +679,24 @@ class Component(TemplateView):
             "component_args",
             "force_render",
         )
-        excludes = []
 
-        if hasattr(self, "Meta") and hasattr(self.Meta, "exclude"):
-            if not is_non_string_sequence(self.Meta.exclude):
+        excludes = []
+        if hasattr(cls, "Meta") and hasattr(cls.Meta, "exclude"):
+            if not is_non_string_sequence(cls.Meta.exclude):
                 raise AssertionError("Meta.exclude should be a list, tuple, or set")
 
-            for exclude in self.Meta.exclude:
-                if not hasattr(self, exclude):
+            for exclude in cls.Meta.exclude:
+                if not hasattr(cls, exclude):
                     raise serializer.InvalidFieldNameError(
-                        field_name=exclude, data=self._attributes()
+                        field_name=exclude, data=cls._attributes()
                     )
 
-            excludes = self.Meta.exclude
+            excludes = cls.Meta.exclude
 
         return not (
             name.startswith("_")
             or name in protected_names
-            or name in self._hook_methods
+            or name in cls._hook_methods
             or name in excludes
         )
     
@@ -669,7 +707,7 @@ class Component(TemplateView):
             breakpoint()
             if isinstance(self.Meta.safe, Sequence):
                 for field_name in self.Meta.safe:
-                    if field_name in self._attributes().keys():
+                    if field_name in self._attributes.keys():
                         safe_fields.append(field_name)
 
         # Mark safe attributes as such before rendering
@@ -709,21 +747,22 @@ class Component(TemplateView):
         component_name: str,
         **kwargs,
     ) -> "UnicornView":
-        breakpoint()
 
         component_cache_key = f"unicorn:component:{component_id}"
-            
+
         # try local cache
         cached_component = cls.from_local_cache(component_cache_key)
         if cached_component:
+            print(f"get {component_id}")
             return cached_component
         
-        # try django cache
-        cached_component = cls.from_django_cache(component_cache_key)
-        if cached_component:
-            return cached_component
+        # try django cache  (DISABLED FOR NOW)
+        # cached_component = cls.from_django_cache(component_cache_key)
+        # if cached_component:
+        #     return cached_component
         
         # create new one
+        print(f"create {component_id}")
         return cls.create(
             component_id=component_id,
             component_name=component_name,
@@ -732,7 +771,7 @@ class Component(TemplateView):
     
     @staticmethod
     def from_local_cache(component_cache_key: str) -> "UnicornView":
-        return constructed_views_cache.get(component_cache_key)
+        return LOCAL_COMPONENT_CACHE.get(component_cache_key)
     
     @staticmethod
     def from_django_cache(component_cache_key: str) -> "UnicornView":
@@ -743,20 +782,6 @@ class Component(TemplateView):
         # note this fxn call is cached for speedup
         component_class = get_all_component_classes()[component_name]
         return component_class(**kwargs)
-
-    @classonlymethod
-    def as_view(cls, **initkwargs):  # noqa: N805
-        if "component_id" not in initkwargs:
-            initkwargs["component_id"] = shortuuid.uuid()[:8]
-
-        if "component_name" not in initkwargs:
-            module_name = cls.__module__
-            module_parts = module_name.split(".")
-            component_name = module_parts[-1].replace("_", "-")
-
-            initkwargs["component_name"] = component_name
-
-        return super().as_view(**initkwargs)
     
     # -------------------------------------------------------------------------
     
@@ -769,16 +794,16 @@ class Component(TemplateView):
         #     else f"unicorn:component:{self.component_id}"
         # )
 
-    def _cache_component(self):
+    def update_caches(self):
         self.to_local_cache()
-        self.to_django_cache()
+        # self.to_django_cache()  # DISABLE FOR NOW
     
     def to_local_cache(self):
-        constructed_views_cache[self.component_cache_key] = self
+        LOCAL_COMPONENT_CACHE[self.component_cache_key] = self
     
     def to_django_cache(self):
         cache_full_tree(self)
-    
+
     # -------------------------------------------------------------------------
 
 

@@ -153,6 +153,9 @@ class ComponentRequest:
         Updates properties and applies all actions to the component, and
         then returns the updated component
         """
+        # import pprint
+        # pprint.pprint(self.data)
+        # breakpoint()
         # bug-check
         if self.has_been_applied:
             raise Exception(
@@ -166,12 +169,23 @@ class ComponentRequest:
         # will help avoid complex bugs in the future.
 
         # updates all component properties using data sent by request
-        for property_name, property_value in self.data.items():
-            set_property_from_data(
-                updated_component,
-                property_name,
-                property_value,
-            )
+        if hasattr(updated_component, "is_editting") and not updated_component.is_editting:
+            # BUG-FIX: after child elements are modified by a parent message + method,
+            # they fail to update in the frontend. We therefore say that such methods
+            # require child methods to have "is_editting=False" set. This lets us
+            # know that the next child component call should stick to what we
+            # have cached locally (w. past changes) rather than what JS had
+            # cached remotely (wo. past changes)
+            print("BUG-FIX: skip updates")
+            pass
+        else:
+            print("updating w. request.data")
+            for property_name, property_value in self.data.items():
+                set_property_from_data(
+                    updated_component,
+                    property_name,
+                    property_value,
+                )
 
         # hook
         updated_component.hydrate()

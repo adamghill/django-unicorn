@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 
 class PointerUnicornView:
     def __init__(self, component_cache_key):
+        print("pointer")
         self.component_cache_key = component_cache_key
         self.parent = None
         self.children = []

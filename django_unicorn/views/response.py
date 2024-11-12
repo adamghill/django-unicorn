@@ -70,8 +70,9 @@ class ComponentResponse:
             request=request.request,  # gives the original HttpRequest
         )
 
-        # hook
-        component.rendered(component_html)
+        # hook 
+        # !!! also called in UnicornTemplateResponse
+        # component.rendered(component_html)
 
         # Check if there are partials, and if so, we only want specific
         # elements of the component_html, rather than all of it
