@@ -29,7 +29,7 @@
 | django\_unicorn/views/action\_parsers/\_\_init\_\_.py                |        0 |        0 |        0 |        0 |    100% |           |
 | django\_unicorn/views/action\_parsers/call\_method.py                |      121 |       14 |       60 |        9 |     85% |19-24, 33, 40-45, 104, 149, 172->141, 199, 205->exit, 211->205, 215 |
 | django\_unicorn/views/action\_parsers/sync\_input.py                 |       14 |        0 |        4 |        0 |    100% |           |
-| django\_unicorn/views/action\_parsers/utils.py                       |       71 |        8 |       46 |        8 |     86% |30, 32, 76, 82->105, 109, 112, 130-131, 136 |
+| django\_unicorn/views/action\_parsers/utils.py                       |       74 |        9 |       50 |        9 |     85% |30, 32, 55, 79, 85->108, 112, 115, 133-134, 139 |
 | django\_unicorn/views/objects.py                                     |       92 |       11 |       32 |        2 |     86% |25, 29-35, 57, 61, 158-161 |
 | django\_unicorn/views/utils.py                                       |       61 |        5 |       28 |        2 |     92% |26-30, 42->exit, 62-64 |
 | example/apps/\_\_init\_\_.py                                         |        0 |        0 |        0 |        0 |    100% |           |
@@ -99,7 +99,7 @@
 | tests/views/utils/\_\_init\_\_.py                                    |        0 |        0 |        0 |        0 |    100% |           |
 | tests/views/utils/test\_construct\_model.py                          |       47 |       10 |        0 |        0 |     79% |     44-60 |
 | tests/views/utils/test\_set\_property\_from\_data.py                 |      139 |        2 |        0 |        0 |     99% |     29-30 |
-|                                                            **TOTAL** | **5574** |  **393** |  **900** |   **97** | **92%** |           |
+|                                                            **TOTAL** | **5577** |  **394** |  **904** |   **98** | **92%** |           |
 
 
 ## Setup coverage badge
