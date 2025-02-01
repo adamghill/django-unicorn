@@ -41,7 +41,7 @@ minify = ["htmlmin"]
 docs = ["Sphinx", "linkify-it-py", "myst-parser", "furo", "sphinx-copybutton", "sphinx-autobuild", "rst2pdf", "sphinx-autoapi", "sphinxext-opengraph", "toml", "sphinx-design", "colon_fence"]
 
 [tool.poetry.group.dev.dependencies]
-certifi = "^2023.7.22"  # needed for GitHub Actions
+certifi = ">=2023.7.22,<2025.0.0"  # needed for GitHub Actions
 keyring = "24.2.0"  # needed for GitHub Actions
 pytest = "^7"
 mypy = "<1"
