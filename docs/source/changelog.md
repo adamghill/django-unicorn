@@ -1,6 +1,8 @@
 # Changelog
 
-## 0.62.0-dev
+## 0.62.0
+
+- Security fix: class pollution vulnerability (reported by [superboy-zjc](https://github.com/superboy-zjc)).
 
 **Breaking changes**
 
