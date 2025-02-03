@@ -2,7 +2,7 @@
 
 ## 0.62.0
 
-- Security fix: class pollution vulnerability (reported by [superboy-zjc](https://github.com/superboy-zjc)).
+- Security fix: for CVE-2025-24370 for a class pollution vulnerability (reported by [superboy-zjc](https://github.com/superboy-zjc)).
 
 **Breaking changes**
 
