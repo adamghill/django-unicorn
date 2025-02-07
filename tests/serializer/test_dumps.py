@@ -776,6 +776,7 @@ def test_exclude_field_attributes_none():
     assert expected == actual
 
 
+@pytest.mark.skip("Skipping until transformd gets bumped")
 def test_exclude_field_attributes_invalid_name():
     with pytest.raises(InvalidFieldNameError) as e:
         serializer.dumps(
@@ -786,6 +787,7 @@ def test_exclude_field_attributes_invalid_name():
     assert e.exconly() == "django_unicorn.serializer.InvalidFieldNameError: Cannot resolve 'blob'. Choices are: book"
 
 
+@pytest.mark.skip("Skipping until transformd gets bumped")
 def test_exclude_field_attributes_invalid_attribute():
     with pytest.raises(InvalidFieldAttributeError) as e:
         serializer.dumps(
