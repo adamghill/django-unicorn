@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
 
 env:
-  LINT_PYTHON_VERSION: 3.11
+  LINT_PYTHON_VERSION: 3.9
 
 jobs:
   lint:
@@ -42,7 +42,7 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.10", "3.11", "3.12"]
-        django-version: ["4.1", "4.2", "5.0"]
+        django-version: ["4.1", "4.2"]
 
     steps:
       - uses: actions/checkout@v3
