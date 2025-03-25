@@ -18,7 +18,7 @@ packages = [
 
 [tool.poetry.dependencies]
 python = ">=3.9"
-django = ">=2.2 <5"
+django = ">=2.2,<5"
 beautifulsoup4 = ">=4.8.0"
 orjson = ">=3.6.0"
 shortuuid = ">=1.0.1"
