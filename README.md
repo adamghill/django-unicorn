@@ -26,6 +26,12 @@ Available additional settings that can be set to `UNICORN` dict in settings.py w
 
 ## Customization changelog
 
+### 0.61.0.4 - (2025-03-25)
+
+- Update `restore_from_cache` in to handle cases where parent of cached component does not have it in the children.
+  It can happen when parent adds children dynamically and parent restored from cache was cached by another process where 
+  component being restored wasn't present.
+
 ### 0.61.0.3 - (2024-10-30)
 
 - Components are now cached with timeout. Added `COMPONENT_CACHE_TIMEOUT` (Default: `600`) setting that is used as component cache timeout. 
