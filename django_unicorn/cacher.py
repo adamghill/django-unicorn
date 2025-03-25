@@ -137,15 +137,23 @@ def restore_from_cache(
 
     if cached_component:
         roots = {}
-        root: django_unicorn.views.UnicornView = cached_component
-        roots[root.component_cache_key] = root
+        current = cached_component
+        roots[current.component_cache_key] = current
 
-        while root.parent:
-            root = cache.get(root.parent.component_cache_key)
-            roots[root.component_cache_key] = root
+        while current.parent:
+            parent = cache.get(current.parent.component_cache_key)
 
-        to_traverse: List[django_unicorn.views.UnicornView] = []
-        to_traverse.append(root)
+            # if different process cached parent where current component is not in the children
+            # (parent that dynamically adds children), add it so the parent can be linked
+            # to it
+            if not any(child.component_cache_key == current.component_cache_key for child in parent.children):
+                parent.children.append(current)
+
+            current = parent
+            roots[current.component_cache_key] = current
+
+        to_traverse = []
+        to_traverse.append(current)
 
         while to_traverse:
             current = to_traverse.pop()
