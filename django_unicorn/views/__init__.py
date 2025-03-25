@@ -11,7 +11,7 @@ from django.forms import ValidationError
 from django.http import HttpRequest, JsonResponse
 from django.http.response import HttpResponseNotModified
 from django.utils.safestring import mark_safe
-from django.views.decorators.csrf import csrf_protect, csrf_exempt, ensure_csrf_cookie
+from django.views.decorators.csrf import csrf_exempt, csrf_protect, ensure_csrf_cookie
 from django.views.decorators.http import require_POST
 
 from django_unicorn.components import UnicornView
@@ -23,10 +23,10 @@ from django_unicorn.errors import (
 )
 from django_unicorn.serializer import loads
 from django_unicorn.settings import (
-    get_setting,
     get_cache_alias,
     get_serial_enabled,
     get_serial_timeout,
+    get_setting,
 )
 from django_unicorn.utils import generate_checksum
 from django_unicorn.views.action_parsers import call_method, sync_input
