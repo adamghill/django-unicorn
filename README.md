@@ -26,6 +26,10 @@ Available additional settings that can be set to `UNICORN` dict in settings.py w
 
 ## Customization changelog
 
+### 0.62.0.0 - (2025-08-08)
+
+- Sync with main package, version `0.62.0`
+
 ### 0.61.0.4 - (2025-03-25)
 
 - Update `restore_from_cache` in to handle cases where parent of cached component does not have it in the children.
