@@ -50,6 +50,9 @@ def set_property_value(
     The following code updates UnicornView.author.name based the payload's `author.name`.
     """
     property_name_parts = property_name.split(".")
+    for part in property_name_parts:
+        if part.startswith("__") and part.endswith("__"):
+            raise AssertionError("Invalid property name")
     component_or_field = component
     data_or_dict = data  # Could be an internal portion of data that gets set
 
