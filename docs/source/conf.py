@@ -1,4 +1,4 @@
-import toml
+import toml  # type: ignore
 
 # -- Path setup --------------------------------------------------------------
 
@@ -16,11 +16,11 @@ import toml
 # -- Project information -----------------------------------------------------
 
 project = "Unicorn"
-copyright = "2023, Adam Hill"  # noqa: A001
+copyright = "2026, Adam Hill"  # noqa: A001
 author = "Adam Hill"
 
 pyproject = toml.load("../../pyproject.toml")
-version = pyproject["tool"]["poetry"]["version"]
+version = pyproject["project"]["version"]
 release = version
 
 
