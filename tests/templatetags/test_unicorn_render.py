@@ -49,7 +49,8 @@ class FakeComponentArgs(UnicornView):
     hello = "world"
 
     def mount(self):
-        self.hello = self.component_args[0]
+        if self.component_args:
+            self.hello = self.component_args[0]
 
 
 class FakeComponentKwargs(UnicornView):
@@ -57,7 +58,8 @@ class FakeComponentKwargs(UnicornView):
     hello = "world"
 
     def mount(self):
-        self.hello = self.component_kwargs.get("test_kwarg")
+        if self.component_kwargs is not None:
+            self.hello = self.component_kwargs.get("test_kwarg")
 
 
 class FakeComponentKwargsWithHtmlEntity(UnicornView):
@@ -65,7 +67,8 @@ class FakeComponentKwargsWithHtmlEntity(UnicornView):
     hello = "world"
 
     def mount(self):
-        self.hello = self.component_kwargs.get("test_kwarg")
+        if self.component_kwargs is not None:
+            self.hello = self.component_kwargs.get("test_kwarg")
 
 
 class FakeComponentModel(UnicornView):
@@ -73,7 +76,8 @@ class FakeComponentModel(UnicornView):
     model_id = None
 
     def mount(self):
-        self.model_id = self.component_kwargs.get("model_id")
+        if self.component_kwargs:
+            self.model_id = self.component_kwargs.get("model_id")
 
 
 class FakeComponentCalls(UnicornView):
@@ -337,7 +341,7 @@ def test_unicorn_render_component_one_script_tag(settings):
 
 def test_unicorn_render_component_minify_html(settings):
     settings.DEBUG = True
-    settings.UNICORN["MINIFY_HTML"] = True
+    settings.UNICORN = {**settings.UNICORN, "MINIFY_HTML": True}
     token = Token(
         TokenType.TEXT,
         "unicorn 'tests.templatetags.test_unicorn_render.FakeComponentKwargs'",
@@ -349,7 +353,7 @@ def test_unicorn_render_component_minify_html(settings):
     assert "<script type=module" in html
     assert len(re.findall("<script type=module", html)) == 1
 
-    settings.UNICORN["MINIFY_HTML"] = False
+    settings.UNICORN = {**settings.UNICORN, "MINIFY_HTML": False}
 
 
 def test_unicorn_render_child_component_no_script_tag(settings):
@@ -429,7 +433,7 @@ def test_unicorn_render_calls_no_mount_call(settings):
 
 def test_unicorn_render_hash(settings):
     settings.DEBUG = True
-    settings.UNICORN["SCRIPT_LOCATION"] = "after"
+    settings.UNICORN = {**settings.UNICORN, "SCRIPT_LOCATION": "after"}
 
     token = Token(
         TokenType.TEXT,
@@ -452,7 +456,7 @@ def test_unicorn_render_hash(settings):
 
 def test_unicorn_render_hash_append(settings):
     settings.DEBUG = True
-    settings.UNICORN["SCRIPT_LOCATION"] = "append"
+    settings.UNICORN = {**settings.UNICORN, "SCRIPT_LOCATION": "append"}
 
     token = Token(
         TokenType.TEXT,

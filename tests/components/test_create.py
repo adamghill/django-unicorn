@@ -19,7 +19,7 @@ class FakeComponent(UnicornView):
 
 
 def test_components_settings(settings):
-    settings.UNICORN["COMPONENTS"] = {"create-components-setting": FakeComponent}
+    settings.UNICORN = {**settings.UNICORN, "COMPONENTS": {"create-components-setting": FakeComponent}}
 
     component = UnicornView.create(
         component_id="create-components-setting-id", component_name="create-components-setting"

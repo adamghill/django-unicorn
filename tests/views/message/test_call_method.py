@@ -249,7 +249,12 @@ def test_message_call_method_refresh(client):
 
 def test_message_call_method_caches_disabled(client, monkeypatch, settings):
     monkeypatch.setattr(unicorn_view, "COMPONENTS_MODULE_CACHE_ENABLED", False)
-    settings.CACHES["default"]["BACKEND"] = "django.core.cache.backends.dummy.DummyCache"
+    settings.CACHES = {
+        **settings.CACHES,
+        "default": {
+            "BACKEND": "django.core.cache.backends.dummy.DummyCache",
+        },
+    }
 
     component_id = shortuuid.uuid()[:8]
     response = post_and_get_response(
@@ -282,8 +287,13 @@ def test_message_call_method_caches_disabled(client, monkeypatch, settings):
 
 def test_message_call_method_module_cache_disabled(client, monkeypatch, settings):
     monkeypatch.setattr(unicorn_view, "COMPONENTS_MODULE_CACHE_ENABLED", False)
-    settings.UNICORN["CACHE_ALIAS"] = "default"
-    settings.CACHES["default"]["BACKEND"] = "django.core.cache.backends.locmem.LocMemCache"
+    settings.UNICORN = {**settings.UNICORN, "CACHE_ALIAS": "default"}
+    settings.CACHES = {
+        **settings.CACHES,
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        },
+    }
 
     component_id = shortuuid.uuid()[:8]
     response = post_and_get_response(
@@ -316,7 +326,12 @@ def test_message_call_method_module_cache_disabled(client, monkeypatch, settings
 
 def test_message_call_method_cache_backend_dummy(client, monkeypatch, settings):
     monkeypatch.setattr(unicorn_view, "COMPONENTS_MODULE_CACHE_ENABLED", True)
-    settings.CACHES["default"]["BACKEND"] = "django.core.cache.backends.dummy.DummyCache"
+    settings.CACHES = {
+        **settings.CACHES,
+        "default": {
+            "BACKEND": "django.core.cache.backends.dummy.DummyCache",
+        },
+    }
 
     component_id = shortuuid.uuid()[:8]
     response = post_and_get_response(

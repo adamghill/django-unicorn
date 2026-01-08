@@ -139,7 +139,7 @@ def test_caching_components(settings):
             "LOCATION": "unique-snowflake",
         }
     }
-    settings.UNICORN["CACHE_ALIAS"] = "default"
+    settings.UNICORN = {**settings.UNICORN, "CACHE_ALIAS": "default"}
     root = ExampleCachingComponent(component_id="test_caching_components_1", component_name="root")
     child1 = ExampleCachingComponent(
         component_id="test_caching_components_child_1", component_name="child1", parent=root
