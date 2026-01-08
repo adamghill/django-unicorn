@@ -22,7 +22,11 @@
 
 ### 1. [Install the package](https://www.django-unicorn.com/docs/installation/)
 
-`pip install django-unicorn` OR `poetry add django-unicorn`
+Use your favorite package manager to install `Unicorn`:
+
+- `uv add django-unicorn`
+- `pip install django-unicorn`
+- `poetry add django-unicorn`
 
 ### 2. Add `django_unicorn` to `INSTALLED_APPS`
 
