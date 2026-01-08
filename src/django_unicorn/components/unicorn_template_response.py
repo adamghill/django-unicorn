@@ -1,7 +1,6 @@
 import logging
 import re
 from collections import deque
-from typing import Deque
 
 import orjson
 from bs4 import BeautifulSoup
@@ -49,7 +48,7 @@ def is_html_well_formed(html: str) -> bool:
     """
 
     tag_list = re.split("(<[^>!]*>)", html)[1::2]
-    stack: Deque[str] = deque()
+    stack: deque[str] = deque()
 
     for tag in tag_list:
         if "/" not in tag:
@@ -82,6 +81,8 @@ def assert_has_single_wrapper_element(root_element: Tag, component_name: str) ->
 
     # Check that there is not more than one root element
     parent_element = root_element.parent
+    if parent_element is None:
+        raise AssertionError("Root element must have a parent")
 
     tag_count = len([c for c in parent_element.children if isinstance(c, Tag)])
 
@@ -169,7 +170,7 @@ class UnicornTemplateResponse(TemplateResponse):
         object in the sequence is not a Template.
         """
 
-        if isinstance(template, (list, tuple)):
+        if isinstance(template, list | tuple):
             if isinstance(template[0], Template):
                 return template[0]
 
@@ -272,7 +273,7 @@ need {{% load unicorn %}} or {{% unicorn_scripts %}}?') }} else {{ {init_script}
 
         if get_minify_html_enabled():
             # Import here in case the minify extra was not installed
-            from htmlmin import minify
+            from htmlmin import minify  # type: ignore # noqa: PLC0415
 
             minified_html = minify(response.content.decode())
 

@@ -1,3 +1,7 @@
+from typing import cast
+
+from django.db.models import Model
+
 from django_unicorn.serializer import model_value
 
 
@@ -8,4 +12,4 @@ class ModelValueMixin:
     """
 
     def value(self, *fields):
-        return model_value(self, *fields)
+        return model_value(cast(Model, self), *fields)

@@ -1,11 +1,13 @@
 import logging
 import pickle
-from typing import Dict, List, Optional
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from django_unicorn.components.unicorn_view import UnicornView
 
 from django.core.cache import caches
 from django.http import HttpRequest
 
-import django_unicorn
 from django_unicorn.errors import UnicornCacheError
 from django_unicorn.settings import get_cache_alias
 from django_unicorn.utils import create_template
@@ -27,8 +29,8 @@ class CacheableComponent:
     on exit.
     """
 
-    def __init__(self, component: "django_unicorn.views.UnicornView"):
-        self._state: Dict = {}
+    def __init__(self, component: "UnicornView"):
+        self._state: dict = {}
         self.cacheable_component = component
 
     def __enter__(self):
@@ -103,11 +105,11 @@ class CacheableComponent:
             if extra_context:
                 component.extra_context = extra_context
 
-    def components(self) -> List["django_unicorn.views.UnicornView"]:
+    def components(self) -> list["UnicornView"]:
         return [component for component, *_ in self._state.values()]
 
 
-def cache_full_tree(component: "django_unicorn.views.UnicornView"):
+def cache_full_tree(component: "UnicornView"):
     root = component
 
     while root.parent:
@@ -120,10 +122,7 @@ def cache_full_tree(component: "django_unicorn.views.UnicornView"):
             cache.set(_component.component_cache_key, _component)
 
 
-def restore_from_cache(
-        component_cache_key: str,
-        request: Optional[HttpRequest] = None
-    ) -> "django_unicorn.views.UnicornView":
+def restore_from_cache(component_cache_key: str, request: HttpRequest | None = None) -> "UnicornView":
     """
     Gets a cached unicorn view by key, restoring and getting cached parents and children
     and setting the request.
@@ -134,19 +133,20 @@ def restore_from_cache(
 
     if cached_component:
         roots = {}
-        root: django_unicorn.views.UnicornView = cached_component
+        root: UnicornView = cached_component
         roots[root.component_cache_key] = root
 
         while root.parent:
             root = cache.get(root.parent.component_cache_key)
             roots[root.component_cache_key] = root
 
-        to_traverse: List[django_unicorn.views.UnicornView] = []
+        to_traverse: list[UnicornView] = []
         to_traverse.append(root)
 
         while to_traverse:
             current = to_traverse.pop()
-            current.setup(request)
+            if request:
+                current.setup(request)
             current._validate_called = False
             current.calls = []
 

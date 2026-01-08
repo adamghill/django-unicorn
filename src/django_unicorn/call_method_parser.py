@@ -1,8 +1,9 @@
 import ast
 import logging
+from collections.abc import Mapping
 from functools import lru_cache
 from types import MappingProxyType
-from typing import Any, Dict, List, Mapping, Tuple
+from typing import Any
 
 from django_unicorn.typer import CASTERS
 
@@ -84,7 +85,7 @@ def eval_value(value):
 
 
 @lru_cache(maxsize=128, typed=True)
-def parse_kwarg(kwarg: str, *, raise_if_unparseable=False) -> Dict[str, Any]:
+def parse_kwarg(kwarg: str, *, raise_if_unparseable=False) -> dict[str, Any]:
     """
     Parses a potential kwarg as a string into a dictionary.
 
@@ -118,7 +119,7 @@ def parse_kwarg(kwarg: str, *, raise_if_unparseable=False) -> Dict[str, Any]:
                 # context when the templatetag is rendered, so just return the expr
                 # as a string.
                 value = _get_expr_string(assign.value)
-                return {target.id: value} #type: ignore
+                return {target.id: value}  # type: ignore
         else:
             raise InvalidKwargError(f"'{kwarg}' is invalid")
     except SyntaxError as e:
@@ -128,7 +129,7 @@ def parse_kwarg(kwarg: str, *, raise_if_unparseable=False) -> Dict[str, Any]:
 @lru_cache(maxsize=128, typed=True)
 def parse_call_method_name(
     call_method_name: str,
-) -> Tuple[str, Tuple[Any, ...], Mapping[str, Any]]:
+) -> tuple[str, tuple[Any, ...], Mapping[str, Any]]:
     """
     Parses the method name from the request payload into a set of parameters to pass to
     a method.
@@ -142,8 +143,8 @@ def parse_call_method_name(
     """
 
     is_special_method = False
-    args: List[Any] = []
-    kwargs: Dict[str, Any] = {}
+    args: list[Any] = []
+    kwargs: dict[str, Any] = {}
     method_name = call_method_name
 
     # Deal with special methods that start with a "$"
@@ -152,10 +153,10 @@ def parse_call_method_name(
         method_name = method_name[1:]
 
     tree = ast.parse(method_name, "eval")
-    statement = tree.body[0].value #type: ignore
+    statement = tree.body[0].value  # type: ignore
 
     if tree.body and isinstance(statement, ast.Call):
-        call = tree.body[0].value # type: ignore
+        call = tree.body[0].value  # type: ignore
         method_name = call.func.id
         args = [eval_value(arg) for arg in call.args]
         kwargs = {kw.arg: eval_value(kw.value) for kw in call.keywords}

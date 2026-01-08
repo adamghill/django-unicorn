@@ -1,5 +1,4 @@
 import logging
-from typing import Optional
 
 from django.http.response import HttpResponseRedirect
 
@@ -33,7 +32,7 @@ class LocationUpdate(Update):
     Updates the current URL from an action method.
     """
 
-    def __init__(self, redirect: HttpResponseRedirect, title: Optional[str] = None):
+    def __init__(self, redirect: HttpResponseRedirect, title: str | None = None):
         """
         Args:
             param redirect: The redirect that contains the URL to redirect to.
@@ -48,7 +47,7 @@ class PollUpdate(Update):
     Updates the current poll from an action method.
     """
 
-    def __init__(self, *, timing: Optional[int] = None, method: Optional[str] = None, disable: bool = False):
+    def __init__(self, *, timing: int | None = None, method: str | None = None, disable: bool = False):
         """
         Args:
             param timing: The timing that should be used for the poll. Optional. Defaults to `None`

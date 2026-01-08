@@ -1,11 +1,9 @@
-from typing import Dict
-
 from django_unicorn.components import UnicornView
 from django_unicorn.views.action_parsers.utils import set_property_value
 from django_unicorn.views.objects import ComponentRequest
 
 
-def handle(component_request: ComponentRequest, component: UnicornView, payload: Dict):
+def handle(component_request: ComponentRequest, component: UnicornView, payload: dict):
     property_name = payload.get("name")
     property_value = payload.get("value")
 

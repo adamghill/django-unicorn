@@ -1,19 +1,32 @@
 import logging
 from dataclasses import is_dataclass
-from typing import Any, Union
+from typing import Any, Union, cast
 
 from django.db.models import Model
 
 from django_unicorn.components import UnicornField, UnicornView
 from django_unicorn.decorators import timed
-from django_unicorn.typer import cast_value, create_queryset, get_type_hints, is_queryset
+from django_unicorn.typer import (
+    cast_value,
+    create_queryset,
+    get_args,
+    get_origin,
+    get_type_hints,
+    is_queryset,
+)
+
+try:
+    from types import UnionType
+except ImportError:
+    UnionType = Union  # type: ignore
+
 
 logger = logging.getLogger(__name__)
 
 
 @timed
 def set_property_from_data(
-    component_or_field: Union[UnicornView, UnicornField, Model],
+    component_or_field: UnicornView | UnicornField | Model,
     name: str,
     value: Any,
 ) -> None:
@@ -65,14 +78,16 @@ def set_property_from_data(
 
         if hasattr(component_or_field, "_set_property"):
             # Can assume that `component_or_field` is a component
-            component_or_field._set_property(name, value, call_updating_method=True, call_updated_method=False)
+            cast(UnicornView, component_or_field)._set_property(
+                name, value, call_updating_method=True, call_updated_method=False
+            )
         else:
             setattr(component_or_field, name, value)
 
 
 @timed
 def _is_component_field_model_or_unicorn_field(
-    component_or_field: Union[UnicornView, UnicornField, Model],
+    component_or_field: UnicornView | UnicornField | Model,
     name: str,
 ) -> bool:
     """
@@ -91,7 +106,7 @@ def _is_component_field_model_or_unicorn_field(
     """
     field = getattr(component_or_field, name)
 
-    if isinstance(field, (Model, UnicornField)):
+    if isinstance(field, Model | UnicornField):
         return True
 
     is_subclass_of_model = False
@@ -102,15 +117,23 @@ def _is_component_field_model_or_unicorn_field(
         component_type_hints = get_type_hints(component_or_field)
 
         if name in component_type_hints:
-            is_subclass_of_model = issubclass(component_type_hints[name], Model)
+            type_hint = component_type_hints[name]
+
+            if get_origin(type_hint) is Union or get_origin(type_hint) is UnionType:
+                for arg in get_args(type_hint):
+                    if arg is not type(None):
+                        type_hint = arg
+                        break
+
+            is_subclass_of_model = issubclass(type_hint, Model)
 
             if not is_subclass_of_model:
-                is_subclass_of_unicorn_field = issubclass(component_type_hints[name], UnicornField)
+                is_subclass_of_unicorn_field = issubclass(type_hint, UnicornField)
 
             # Construct a new class if the field is None and there is a type hint available
             if field is None:
                 if is_subclass_of_model or is_subclass_of_unicorn_field:
-                    field = component_type_hints[name]()
+                    field = type_hint()
                     setattr(component_or_field, name, field)
     except TypeError:
         pass

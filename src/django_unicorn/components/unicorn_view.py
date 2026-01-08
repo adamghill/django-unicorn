@@ -3,8 +3,9 @@ import inspect
 import logging
 import pickle
 import sys
+from collections.abc import Callable, Sequence
 from functools import lru_cache
-from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Type
+from typing import Any, Optional, cast
 
 import shortuuid
 from django.apps import apps as django_apps_module
@@ -30,7 +31,7 @@ from django_unicorn.typer import cast_attribute_value, get_type_hints
 from django_unicorn.utils import create_template, is_non_string_sequence
 
 try:
-    from cachetools.lru import LRUCache
+    from cachetools.lru import LRUCache  # type: ignore
 except ImportError:
     from cachetools import LRUCache
 
@@ -76,7 +77,7 @@ def convert_to_pascal_case(s: str) -> str:
 
 
 @lru_cache(maxsize=128, typed=True)
-def get_locations(component_name: str) -> List[Tuple[str, str]]:
+def get_locations(component_name: str) -> list[tuple[str, str]]:
     locations = []
 
     if "." in component_name:
@@ -160,10 +161,10 @@ class UnicornView(TemplateView):
     component_name: str = ""
     component_key: str = ""
     component_id: str = ""
-    component_args: Optional[List] = None
-    component_kwargs: Optional[Dict] = None
+    component_args: list | None = None
+    component_kwargs: dict | None = None
 
-    def __init__(self, component_args: Optional[List] = None, **kwargs):
+    def __init__(self, component_args: list | None = None, **kwargs):
         self.response_class = UnicornTemplateResponse
 
         self.component_name: str = ""
@@ -173,19 +174,19 @@ class UnicornView(TemplateView):
         # Without these instance variables calling UnicornView() outside the
         # Django view/template logic (i.e. in unit tests) results in odd results.
         self.request: HttpRequest = HttpRequest()
-        self.parent: Optional[UnicornView] = None
-        self.children: List[UnicornView] = []
+        self.parent: UnicornView | None = None
+        self.children: list[UnicornView] = []
 
         # Caches to reduce the amount of time introspecting the class
-        self._methods_cache: Dict[str, Callable] = {}
-        self._attribute_names_cache: List[str] = []
-        self._hook_methods_cache: List[str] = []
+        self._methods_cache: dict[str, Callable] = {}
+        self._attribute_names_cache: list[str] = []
+        self._hook_methods_cache: list[str] = []
 
         # Dictionary with key: attribute name; value: pickled attribute value
-        self._resettable_attributes_cache: Dict[str, Any] = {}
+        self._resettable_attributes_cache: dict[str, Any] = {}
 
         # JavaScript method calls
-        self.calls: List[Any] = []
+        self.calls: list[Any] = []
 
         # Default force render to False
         self.force_render = False
@@ -226,7 +227,7 @@ class UnicornView(TemplateView):
 
         self._init_script: str = ""
         self._validate_called = False
-        self.errors: Dict[Any, Any] = {}
+        self.errors: dict[Any, Any] = {}
         self._set_default_template_name()
         self._set_caches()
 
@@ -279,10 +280,10 @@ class UnicornView(TemplateView):
                 attribute_value = pickle.loads(pickled_value)  # noqa: S301
                 self._set_property(attribute_name, attribute_value)
             except TypeError:
-                logger.warn(f"Resetting '{attribute_name}' attribute failed because it could not be constructed.")
+                logger.warning(f"Resetting '{attribute_name}' attribute failed because it could not be constructed.")
                 pass
             except pickle.PickleError:
-                logger.warn(f"Resetting '{attribute_name}' attribute failed because it could not be de-pickled.")
+                logger.warning(f"Resetting '{attribute_name}' attribute failed because it could not be de-pickled.")
                 pass
 
     def call(self, function_name, *args):
@@ -379,7 +380,7 @@ class UnicornView(TemplateView):
 
         # render_to_response() could only return a HttpResponse, so check for render()
         if hasattr(response, "render"):
-            response.render()
+            cast(Any, response).render()
 
         rendered_component = response.content.decode("utf-8")
 
@@ -434,20 +435,20 @@ class UnicornView(TemplateView):
         attributes = self._attributes()
         frontend_context_variables.update(attributes)
 
-        exclude_field_attributes: List[str] = []
+        exclude_field_attributes: list[str] = []
 
         # Remove any field in `javascript_exclude` from `frontend_context_variables`
         if hasattr(self, "Meta") and hasattr(self.Meta, "javascript_exclude"):
             if isinstance(self.Meta.javascript_exclude, Sequence):
                 for field_name in self.Meta.javascript_exclude:
-                    if "." in field_name:
+                    if "." in cast(str, field_name):
                         # Because the dictionary value could be an object, we can't just remove the attribute, so
                         # store field attributes for later to remove them from the serialized dictionary
-                        exclude_field_attributes.append(field_name)
+                        exclude_field_attributes.append(cast(str, field_name))
                     else:
                         if field_name not in frontend_context_variables:
                             raise serializer.InvalidFieldNameError(
-                                field_name=field_name, data=frontend_context_variables
+                                field_name=cast(str, field_name), data=cast(dict, frontend_context_variables)
                             )
 
                         del frontend_context_variables[field_name]
@@ -494,7 +495,7 @@ class UnicornView(TemplateView):
     def _get_form(self, data):
         if hasattr(self, "form_class"):
             try:
-                form = self.form_class(data=data)
+                form = cast(Callable, self.form_class)(data=data)
                 form.is_valid()
 
                 return form
@@ -528,11 +529,11 @@ class UnicornView(TemplateView):
         return context
 
     @timed
-    def is_valid(self, model_names: Optional[List] = None) -> bool:
+    def is_valid(self, model_names: list | None = None) -> bool:
         return len(self.validate(model_names).keys()) == 0
 
     @timed
-    def validate(self, model_names: Optional[List] = None) -> Dict:
+    def validate(self, model_names: list | None = None) -> dict:
         """
         Validates the data using the `form_class` set on the component.
 
@@ -579,7 +580,7 @@ class UnicornView(TemplateView):
         return self.errors
 
     @timed
-    def _attribute_names(self) -> List[str]:
+    def _attribute_names(self) -> list[str]:
         """
         Gets publicly available attribute names. Cached in `_attribute_names_cache`.
         """
@@ -596,7 +597,7 @@ class UnicornView(TemplateView):
         return attribute_names
 
     @timed
-    def _attributes(self) -> Dict[str, Any]:
+    def _attributes(self) -> dict[str, Any]:
         """
         Get publicly available attributes and their values from the component.
         """
@@ -659,7 +660,7 @@ class UnicornView(TemplateView):
             raise
 
     @timed
-    def _methods(self) -> Dict[str, Callable]:
+    def _methods(self) -> dict[str, Callable]:
         """
         Get publicly available method names and their functions from the component.
         Cached in `_methods_cache`.
@@ -712,7 +713,7 @@ class UnicornView(TemplateView):
                         try:
                             self._resettable_attributes_cache[attribute_name] = pickle.dumps(attribute_value)
                         except pickle.PickleError:
-                            logger.warn(f"Caching '{attribute_name}' failed because it could not be pickled.")
+                            logger.warning(f"Caching '{attribute_name}' failed because it could not be pickled.")
                             pass
 
     def _is_public(self, name: str) -> bool:
@@ -778,11 +779,13 @@ class UnicornView(TemplateView):
             if not is_non_string_sequence(self.Meta.exclude):
                 raise AssertionError("Meta.exclude should be a list, tuple, or set")
 
-            for exclude in self.Meta.exclude:
-                if not hasattr(self, exclude):
-                    raise serializer.InvalidFieldNameError(field_name=exclude, data=self._attributes())
+            meta_exclude = cast(Sequence[str], self.Meta.exclude)
 
-            excludes = self.Meta.exclude
+            for exclude in meta_exclude:
+                if not hasattr(self, str(exclude)):
+                    raise serializer.InvalidFieldNameError(field_name=str(exclude), data=self._attributes())
+
+            excludes = meta_exclude
 
         return not (
             name.startswith("_") or name in protected_names or name in self._hook_methods_cache or name in excludes
@@ -796,10 +799,10 @@ class UnicornView(TemplateView):
         component_name: str,
         component_key: str = "",
         parent: Optional["UnicornView"] = None,
-        request: Optional[HttpRequest] = None,
+        request: HttpRequest | None = None,
         use_cache=True,
-        component_args: Optional[List] = None,
-        kwargs: Optional[Dict[str, Any]] = None,
+        component_args: list | None = None,
+        kwargs: dict[str, Any] | None = None,
     ) -> "UnicornView":
         """
         Find and instantiate a component class based on `component_name`.
@@ -827,7 +830,7 @@ class UnicornView(TemplateView):
         kwargs = kwargs if kwargs is not None else {}
 
         @timed
-        def _get_component_class(module_name: str, class_name: str) -> Type[UnicornView]:
+        def _get_component_class(module_name: str, class_name: str) -> type[UnicornView]:
             """
             Imports a component based on module and class name.
             """

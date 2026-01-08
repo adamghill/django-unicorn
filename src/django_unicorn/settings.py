@@ -103,7 +103,7 @@ def get_minify_html_enabled():
 
     if minify_html_enabled:
         try:
-            import htmlmin  # noqa: F401
+            import htmlmin  # type: ignore # noqa: F401, PLC0415
         except ModuleNotFoundError:
             logger.error(
                 "MINIFY_HTML is `True`, but minify extra could not be imported. Install with `django-unicorn[minify]`."

@@ -3,7 +3,6 @@ import logging
 from collections.abc import Callable, Sequence, Set
 from inspect import signature
 from pprint import pprint
-from typing import Dict, List, Optional, Union
 
 import shortuuid
 from django.conf import settings
@@ -13,7 +12,7 @@ from django.utils.html import _json_script_escapes  # type: ignore
 from django.utils.safestring import SafeText, mark_safe
 
 try:
-    from cachetools.lru import LRUCache
+    from cachetools.lru import LRUCache  # type: ignore
 except ImportError:
     from cachetools import LRUCache
 
@@ -23,7 +22,7 @@ logger = logging.getLogger(__name__)
 function_signature_cache = LRUCache(maxsize=100)
 
 
-def generate_checksum(data: Union[bytes, str, Dict]) -> str:
+def generate_checksum(data: bytes | str | dict | None) -> str:
     """Generates a checksum for the passed-in data.
 
     Args:
@@ -33,7 +32,7 @@ def generate_checksum(data: Union[bytes, str, Dict]) -> str:
         The generated checksum.
     """
 
-    data_bytes: Optional[bytes] = None
+    data_bytes: bytes | None = None
 
     if isinstance(data, bytes):
         data_bytes = data
@@ -54,7 +53,7 @@ def generate_checksum(data: Union[bytes, str, Dict]) -> str:
     return checksum
 
 
-def dicts_equal(dictionary_one: Dict, dictionary_two: Dict) -> bool:
+def dicts_equal(dictionary_one: dict, dictionary_two: dict) -> bool:
     """
     Return True if all keys and values are the same between two dictionaries.
     """
@@ -73,7 +72,7 @@ def dicts_equal(dictionary_one: Dict, dictionary_two: Dict) -> bool:
     return is_valid
 
 
-def get_method_arguments(func) -> List[str]:
+def get_method_arguments(func) -> list[str]:
     """
     Gets the arguments for a method.
 
@@ -109,7 +108,7 @@ def is_non_string_sequence(obj):
     Helpful when you expect to loop over `obj`, but explicitly don't want to allow `str`.
     """
 
-    if (isinstance(obj, (Sequence, Set))) and not isinstance(obj, (str, bytes, bytearray)):
+    if isinstance(obj, Sequence | Set) and not isinstance(obj, (str | bytes | bytearray)):
         return True
 
     return False
@@ -128,7 +127,7 @@ def is_int(s: str) -> bool:
         return True
 
 
-def create_template(template_html: Union[str, Callable], engine_name: Optional[str] = None) -> Template:
+def create_template(template_html: str | Callable, engine_name: str | None = None) -> Template:
     """Create a `Template` from a string or callable."""
 
     if callable(template_html):

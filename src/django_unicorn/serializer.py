@@ -3,7 +3,7 @@ from datetime import timedelta
 from decimal import Decimal
 from functools import lru_cache
 from types import MappingProxyType
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 import orjson
 from django.core.serializers import serialize
@@ -29,7 +29,7 @@ from django_unicorn.utils import is_int, is_non_string_sequence
 try:
     from pydantic import BaseModel as PydanticBaseModel
 except ImportError:
-    PydanticBaseModel = None # type: ignore
+    PydanticBaseModel = None  # type: ignore
 
 
 logger = logging.getLogger(__name__)
@@ -42,7 +42,7 @@ class JSONDecodeError(Exception):
 
 
 class InvalidFieldNameError(Exception):
-    def __init__(self, field_name: str, data: Optional[Dict] = None):
+    def __init__(self, field_name: str, data: dict | None = None):
         message = f"Cannot resolve '{field_name}'."
 
         if data:
@@ -53,7 +53,7 @@ class InvalidFieldNameError(Exception):
 
 
 class InvalidFieldAttributeError(Exception):
-    def __init__(self, field_name: str, field_attr: str, data: Optional[Dict] = None):
+    def __init__(self, field_name: str, field_attr: str, data: dict | None = None):
         message = f"Cannot resolve '{field_attr}'."
 
         if data:
@@ -86,7 +86,7 @@ def _parse_field_values_from_string(model: Model) -> None:
             setattr(model, field.attname, parse_duration(val))
 
 
-def _get_many_to_many_field_related_names(model: Model) -> List[str]:
+def _get_many_to_many_field_related_names(model: Model) -> list[str]:
     """
     Get the many-to-many fields for a particular model. Returns either the automatically
     defined field name (i.e. something_set) or the related name.
@@ -111,7 +111,7 @@ def _get_many_to_many_field_related_names(model: Model) -> List[str]:
     return _get_many_to_many_field_related_names_from_meta(model._meta)
 
 
-def _get_m2m_field_serialized(model: Model, field_name) -> List:
+def _get_m2m_field_serialized(model: Model, field_name) -> list:
     pks = []
 
     try:
@@ -127,7 +127,7 @@ def _get_m2m_field_serialized(model: Model, field_name) -> List:
     return pks
 
 
-def _handle_inherited_models(model: Model, model_json: Dict):
+def _handle_inherited_models(model: Model, model_json: dict):
     """
     Handle if the model has a parent (i.e. the model is a subclass of another model).
 
@@ -188,7 +188,7 @@ def _get_model_dict(model: Model) -> dict:
 
     # Set `pk` for models that subclass another model which only have `id` set
     if not model_pk:
-        model_json["pk"] = model.pk or model.id #type: ignore
+        model_json["pk"] = model.pk or model.id  # type: ignore
 
     # Add in m2m fields
     m2m_field_names = _get_many_to_many_field_related_names(model)
@@ -211,7 +211,7 @@ def _json_serializer(obj):
     TODO: Investigate other ways to serialize objects automatically.
     e.g. Using DRF serializer: https://www.django-rest-framework.org/api-guide/serializers/#serializing-objects
     """
-    from django_unicorn.components import UnicornView
+    from django_unicorn.components import UnicornView  # noqa: PLC0415
 
     try:
         if isinstance(obj, UnicornView):
@@ -235,7 +235,7 @@ def _json_serializer(obj):
                 queryset_json.append(model_json)
 
             return queryset_json
-        elif PydanticBaseModel and isinstance(obj, PydanticBaseModel): #type: ignore
+        elif PydanticBaseModel and isinstance(obj, PydanticBaseModel):  # type: ignore
             return obj.dict()
         elif isinstance(obj, Decimal):
             return str(obj)
@@ -251,7 +251,7 @@ def _json_serializer(obj):
     raise TypeError
 
 
-def _fix_floats(current: Dict, data: Optional[Dict] = None, paths: Optional[List] = None) -> None:
+def _fix_floats(current: dict, data: dict | None = None, paths: list | None = None) -> None:
     """
     Recursively change any Python floats to a string so that JavaScript
     won't convert the float to an integer when deserializing.
@@ -288,7 +288,7 @@ def _fix_floats(current: Dict, data: Optional[Dict] = None, paths: Optional[List
                 _piece = _piece[path]
 
 
-def _sort_dict(data: Dict) -> Dict:
+def _sort_dict(data: dict) -> dict:
     """
     Recursively sort the dictionary keys so that JavaScript won't change the order
     and change the generated checksum.
@@ -315,7 +315,7 @@ def _sort_dict(data: Dict) -> Dict:
     return dict(items)
 
 
-def _exclude_field_attributes(dict_data: Dict[Any, Any], exclude_field_attributes: Optional[Tuple[str]] = None) -> None:
+def _exclude_field_attributes(dict_data: dict[Any, Any], exclude_field_attributes: tuple[str] | None = None) -> None:
     """
     Remove the field attribute from `dict_data`. Handles nested attributes with a dot.
 
@@ -352,9 +352,9 @@ def _dumps(
     serialized_data: bytes,
     *,
     fix_floats: bool = True,
-    exclude_field_attributes: Optional[Tuple[str]] = None,
+    exclude_field_attributes: tuple[str] | None = None,
     sort_dict: bool = True,
-) -> Dict:
+) -> dict:
     """
     Dump serialized data with custom massaging.
 
@@ -384,10 +384,10 @@ def _dumps(
 
 
 def dumps(
-    data: Dict,
+    data: Any,
     *,
     fix_floats: bool = True,
-    exclude_field_attributes: Optional[Tuple[str, ...]] = None,
+    exclude_field_attributes: tuple[str, ...] | None = None,
     sort_dict: bool = True,
 ) -> str:
     """

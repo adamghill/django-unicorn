@@ -4,11 +4,11 @@ from django_unicorn.components.updaters import HashUpdate, LocationUpdate, PollU
 from django_unicorn.typing import QuerySetType
 
 __all__ = [
+    "HashUpdate",
+    "LocationUpdate",
+    "ModelValueMixin",
+    "PollUpdate",
     "QuerySetType",
     "UnicornField",
     "UnicornView",
-    "HashUpdate",
-    "LocationUpdate",
-    "PollUpdate",
-    "ModelValueMixin",
 ]

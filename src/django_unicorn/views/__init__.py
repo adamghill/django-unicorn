@@ -1,7 +1,8 @@
 import copy
 import logging
+from collections.abc import Sequence
 from functools import wraps
-from typing import Dict, Optional, Sequence, cast
+from typing import cast
 
 import orjson
 from bs4 import BeautifulSoup, Tag
@@ -57,7 +58,7 @@ def handle_error(view_func):
     return wraps(view_func)(wrapped_view)
 
 
-def _process_component_request(request: HttpRequest, component_request: ComponentRequest) -> Dict:
+def _process_component_request(request: HttpRequest, component_request: ComponentRequest) -> dict:
     """
     Process a `ComponentRequest`:
         1. construct a Component view
@@ -98,6 +99,8 @@ def _process_component_request(request: HttpRequest, component_request: Componen
         component.parent.request = request
 
     # Get a deepcopy of the data passed in to determine what fields are updated later
+    if component_request.data is None:
+        raise AssertionError("Component request data is required")
     original_data = copy.deepcopy(component_request.data)
 
     # Set component properties based on request data
@@ -382,7 +385,7 @@ def _process_component_request(request: HttpRequest, component_request: Componen
     return result
 
 
-def _handle_component_request(request: HttpRequest, component_request: ComponentRequest) -> Dict:
+def _handle_component_request(request: HttpRequest, component_request: ComponentRequest) -> dict:
     """
     Process a `ComponentRequest` by adding it to the cache and then either:
         - processing all of the component requests in the cache and returning the resulting value if
@@ -435,7 +438,7 @@ def _handle_component_request(request: HttpRequest, component_request: Component
     return _handle_queued_component_requests(request, queue_cache_key)
 
 
-def _handle_queued_component_requests(request: HttpRequest, queue_cache_key) -> Dict:
+def _handle_queued_component_requests(request: HttpRequest, queue_cache_key) -> dict:
     """
     Process the current component requests that are stored in cache.
     Also recursively checks for new requests that might have happened
@@ -526,9 +529,9 @@ def _handle_queued_component_requests(request: HttpRequest, queue_cache_key) -> 
 @timed
 @handle_error
 @ensure_csrf_cookie
-@csrf_protect
-@require_POST
-def message(request: HttpRequest, component_name: Optional[str] = None) -> JsonResponse:
+@csrf_protect  # type: ignore
+@require_POST  # type: ignore
+def message(request: HttpRequest, component_name: str | None = None) -> JsonResponse:  # type: ignore
     """
     Endpoint that instantiates the component and does the correct action
     (set an attribute or call a method) depending on the JSON payload in the body.

@@ -2,7 +2,13 @@ import logging
 from dataclasses import is_dataclass
 from datetime import date, datetime, time, timedelta, timezone
 from inspect import signature
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Union
+
+try:
+    from types import UnionType
+except ImportError:
+    UnionType = Union  # type: ignore
+
 from typing import get_type_hints as typing_get_type_hints
 from uuid import UUID
 
@@ -32,19 +38,19 @@ try:
     from typing import get_args, get_origin
 except ImportError:
     # Fallback to dunder methods for older versions of Python
-    def get_args(tp: Any) -> Tuple[Any, ...]:
+    def get_args(tp: Any) -> tuple[Any, ...]:
         if hasattr(tp, "__args__"):
             return tp.__args__
         return ()
 
-    def get_origin(tp: Any) -> Optional[Any]:
+    def get_origin(tp: Any) -> Any | None:
         if hasattr(tp, "__origin__"):
             return tp.__origin__
         return None
 
 
 try:
-    from cachetools.lru import LRUCache
+    from cachetools.lru import LRUCache  # type: ignore
 except ImportError:
     from cachetools import LRUCache
 
@@ -71,7 +77,7 @@ CASTERS = {
 }
 
 
-def get_type_hints(obj) -> Dict:
+def get_type_hints(obj) -> dict:
     """Get type hints from an object. These get cached in a local memory cache for quicker look-up later.
 
     Returns:
@@ -110,7 +116,7 @@ def cast_value(type_hint, value):
 
     type_hints = []
 
-    if get_origin(type_hint) is Union or get_origin(type_hint) is list:
+    if get_origin(type_hint) is Union or get_origin(type_hint) is UnionType or get_origin(type_hint) is list:
         for arg in get_args(type_hint):
             type_hints.append(arg)
     else:
@@ -140,7 +146,7 @@ def cast_value(type_hint, value):
                 value = caster(value)
                 break
             except TypeError:
-                if (_type_hint is datetime or _type_hint is date) and (isinstance(value, (float, int))):
+                if (_type_hint is datetime or _type_hint is date) and (isinstance(value, float | int)):
                     try:
                         value = datetime.fromtimestamp(value, tz=timezone.utc)
 
@@ -151,7 +157,7 @@ def cast_value(type_hint, value):
                     except ValueError:
                         pass
         else:
-            if issubclass(_type_hint, Model):
+            if isinstance(_type_hint, type) and issubclass(_type_hint, Model):
                 continue
 
             if _check_pydantic(_type_hint) or is_dataclass(_type_hint):
@@ -184,7 +190,7 @@ def cast_attribute_value(obj, name, value):
     return value
 
 
-def get_method_arguments(func) -> List[str]:
+def get_method_arguments(func) -> list[str]:
     """Gets the arguments for a method.
 
     Returns:
@@ -204,14 +210,21 @@ def is_queryset(obj, type_hint, value):
     """Determines whether an obj is a `QuerySet` or not based on the current instance of the
     component or the type hint."""
 
-    return (
-        (isinstance(obj, QuerySet) or (type_hint and get_origin(type_hint) is QuerySetType))
-        and isinstance(value, list)
-        or isinstance(value, QuerySet)
-    )
+    is_queryset_type = False
+
+    if type_hint:
+        if get_origin(type_hint) is QuerySetType:
+            is_queryset_type = True
+        elif get_origin(type_hint) is Union or get_origin(type_hint) is UnionType:
+            for arg in get_args(type_hint):
+                if get_origin(arg) is QuerySetType:
+                    is_queryset_type = True
+                    break
+
+    return ((isinstance(obj, QuerySet) or is_queryset_type) and isinstance(value, list)) or isinstance(value, QuerySet)
 
 
-def _construct_model(model_type, model_data: Dict):
+def _construct_model(model_type, model_data: dict):
     """Construct a model based on the type and dictionary data."""
 
     if not model_data:
@@ -219,7 +232,7 @@ def _construct_model(model_type, model_data: Dict):
 
     model = model_type()
 
-    for field_name in model_data.keys():
+    for field_name, field_value in model_data.items():
         for field in model._meta.fields:
             if field.name == field_name or (field_name == "pk" and field.primary_key):
                 column_name = field.name
@@ -227,7 +240,7 @@ def _construct_model(model_type, model_data: Dict):
                 if field.is_relation:
                     column_name = field.attname
 
-                setattr(model, column_name, model_data[field_name])
+                setattr(model, column_name, field_value)
 
                 break
 
@@ -259,12 +272,23 @@ def create_queryset(obj, type_hint, value) -> QuerySet:
     model_type = None
 
     if type_hint and not isinstance(queryset, QuerySet):
-        type_arguments = get_args(type_hint)
+        if get_origin(type_hint) is Union or get_origin(type_hint) is UnionType:
+            for arg in get_args(type_hint):
+                if get_origin(arg) is QuerySetType:
+                    type_arguments = get_args(arg)
+                    if type_arguments:
+                        if hasattr(type_arguments[0], "objects"):
+                            queryset = type_arguments[0].objects.none()
+                            model_type = type_arguments[0]
+                    break
+        else:
+            type_arguments = get_args(type_hint)
 
-        if type_arguments:
-            # First type argument should be the type of the model
-            queryset = type_arguments[0].objects.none()
-            model_type = type_arguments[0]
+            if type_arguments:
+                # First type argument should be the type of the model
+                if hasattr(type_arguments[0], "objects"):
+                    queryset = type_arguments[0].objects.none()
+                    model_type = type_arguments[0]
 
     if not model_type and not isinstance(queryset, QuerySet):
         raise Exception(f"Getting Django Model type failed for type: {type(queryset)}")

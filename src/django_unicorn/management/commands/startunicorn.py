@@ -1,7 +1,6 @@
 import os
 import webbrowser
 from pathlib import Path
-from typing import Dict, Tuple
 
 from django.apps import apps
 from django.conf import settings
@@ -41,7 +40,7 @@ class Command(BaseCommand):
         parser.add_argument("app_name", type=str)
         parser.add_argument("component_names", nargs="+", type=str, help="Names of components")
 
-    def check_initials_directories(self, app_directory: Path) -> Tuple[Dict[str, Path], bool]:
+    def check_initials_directories(self, app_directory: Path) -> tuple[dict[str, Path], bool]:
         """
         Checks for directories existance and creates them if necessary.
         Returns a tuple containing a dictonary `components` and `templates`
@@ -69,7 +68,7 @@ class Command(BaseCommand):
 
         return paths, is_first
 
-    def obtain_nested_path(self, component_name: str) -> Tuple[str, str]:
+    def obtain_nested_path(self, component_name: str) -> tuple[str, str]:
         """
         Receives the complete component name and returns a tuple
         with the nested path and component name itself.
@@ -82,7 +81,7 @@ class Command(BaseCommand):
 
         return "/".join(nested_paths), component_name
 
-    def create_nested_directories(self, paths: Dict[str, Path], nested_path: str) -> None:
+    def create_nested_directories(self, paths: dict[str, Path], nested_path: str) -> None:
         """
         Creates the nested directories for the components and templates.
         """
@@ -104,7 +103,7 @@ class Command(BaseCommand):
 
             (component_path / "__init__.py").touch(exist_ok=True)
 
-    def create_component_and_template(self, paths: Dict[str, Path], nested_path: str, component_name: str) -> None:
+    def create_component_and_template(self, paths: dict[str, Path], nested_path: str, component_name: str) -> None:
         """
         Creates the component and template files.
         """

@@ -1,5 +1,3 @@
-from typing import Dict, List, Optional
-
 import shortuuid
 from django import template
 from django.conf import settings
@@ -18,7 +16,7 @@ MINIMUM_ARGUMENT_COUNT = 2
 @register.inclusion_tag("unicorn/scripts.html")
 def unicorn_scripts():
     # Import here to prevent the potential of this loading before Django settings
-    from django_unicorn.settings import get_setting
+    from django_unicorn.settings import get_setting  # noqa: PLC0415
 
     csrf_header_name = settings.CSRF_HEADER_NAME
 
@@ -74,9 +72,9 @@ class UnicornNode(template.Node):
     def __init__(
         self,
         component_name: FilterExpression,
-        args: Optional[List] = None,
-        kwargs: Optional[Dict] = None,
-        unparseable_kwargs: Optional[Dict] = None,
+        args: list | None = None,
+        kwargs: dict | None = None,
+        unparseable_kwargs: dict | None = None,
     ):
         self.component_name = component_name
         self.args = args if args is not None else []
@@ -91,7 +89,7 @@ class UnicornNode(template.Node):
         if hasattr(context, "request"):
             request = context.request
 
-        from django_unicorn.components import UnicornView
+        from django_unicorn.components import UnicornView  # noqa: PLC0415
 
         resolved_args = []
 

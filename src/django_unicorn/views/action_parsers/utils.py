@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any, cast
 
 from django.db.models import QuerySet
 
@@ -9,9 +9,9 @@ from django_unicorn.decorators import timed
 @timed
 def set_property_value(
     component: UnicornView,
-    property_name: Optional[str],
+    property_name: str | None,
     property_value: Any,
-    data: Optional[Dict] = None,
+    data: dict | None = None,
     call_resolved_method=True,  # noqa: FBT002
 ) -> None:
     """
@@ -53,7 +53,7 @@ def set_property_value(
     for part in property_name_parts:
         if part.startswith("__") and part.endswith("__"):
             raise AssertionError("Invalid property name")
-    component_or_field = component
+    component_or_field: Any = cast(Any, component)
     data_or_dict = data  # Could be an internal portion of data that gets set
 
     for idx, property_name_part in enumerate(property_name_parts):
@@ -125,7 +125,7 @@ def set_property_value(
             else:
                 component_or_field = component_or_field[property_name_part]
                 data_or_dict = data_or_dict.get(property_name_part, {})
-        elif isinstance(component_or_field, (QuerySet, list)):
+        elif isinstance(component_or_field, QuerySet | list):
             # TODO: Check for iterable instead of list? `from collections.abc import Iterable`
             property_name_part_int = int(property_name_part)
 

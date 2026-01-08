@@ -1,4 +1,9 @@
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Union
+
+try:
+    from types import UnionType
+except ImportError:
+    UnionType = Union  # type: ignore
 
 from django.db.models import Model
 
@@ -18,14 +23,15 @@ try:
     from typing import get_origin
 except ImportError:
 
-    def get_origin(tp: Any) -> Optional[Any]:
+    def get_origin(tp: Any) -> Any | None:
         if hasattr(tp, "__origin__"):
             return tp.__origin__
         return None
 
-def handle(component_request: ComponentRequest, component: UnicornView, payload: Dict):
+
+def handle(component_request: ComponentRequest, component: UnicornView, payload: dict):
     # Import here to prevent cyclic import
-    from django_unicorn.views.utils import set_property_from_data
+    from django_unicorn.views.utils import set_property_from_data  # noqa: PLC0415
 
     call_method_name = payload.get("name", "")
 
@@ -73,6 +79,8 @@ def handle(component_request: ComponentRequest, component: UnicornView, payload:
         )
 
         # Set component properties based on request data
+        if component_request.data is None:
+            raise AssertionError("Component request data is required")
         for (
             property_name,
             property_value,
@@ -119,7 +127,7 @@ def handle(component_request: ComponentRequest, component: UnicornView, payload:
 
 
 @timed
-def _call_method_name(component: UnicornView, method_name: str, args: Tuple[Any], kwargs: Dict[str, Any]) -> Any:
+def _call_method_name(component: UnicornView, method_name: str, args: tuple[Any], kwargs: dict[str, Any]) -> Any:
     """
     Calls the method name with parameters.
 
@@ -133,7 +141,7 @@ def _call_method_name(component: UnicornView, method_name: str, args: Tuple[Any]
     if method_name is not None and hasattr(component, method_name):
         func = getattr(component, method_name)
 
-        parsed_args: List[Any] = []
+        parsed_args: list[Any] = []
         parsed_kwargs = {}
         arguments = get_method_arguments(func)
         type_hints = get_type_hints(func)
@@ -144,8 +152,11 @@ def _call_method_name(component: UnicornView, method_name: str, args: Tuple[Any]
 
                 # Check that the type hint is a regular class or Union
                 # (which will also include Optional)
-                # TODO: Use types.UnionType to handle `|` for newer unions
-                if not isinstance(type_hint, type) and get_origin(type_hint) is not Union:
+                if (
+                    not isinstance(type_hint, type)
+                    and get_origin(type_hint) is not Union
+                    and get_origin(type_hint) is not UnionType
+                ):
                     continue
 
                 is_model = False
