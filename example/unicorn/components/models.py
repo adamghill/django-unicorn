@@ -1,20 +1,24 @@
-from django_unicorn import QuerySetType, UnicornView
+from django_unicorn.components import UnicornView
+from django_unicorn.typing import QuerySetType
+from typing import Optional, cast, Any
+
 from example.coffee.models import Flavor, Taste
 
 
 class ModelsView(UnicornView):
-    flavor: Flavor = None
-    flavors: QuerySetType[Flavor] = Flavor.objects.none()
+    flavor: Optional[Flavor] = None
+    flavors: QuerySetType[Flavor] = cast(QuerySetType[Flavor], Flavor.objects.none())
 
     def mount(self):
         self.flavor = Flavor()
         self.refresh_flavors()
 
     def refresh_flavors(self):
-        self.flavors = Flavor.objects.all().order_by("-id")[:2]
+        self.flavors = cast(QuerySetType[Flavor], Flavor.objects.all().order_by("-id")[:2])
 
     def save_flavor(self):
-        self.flavor.save()
+        if self.flavor:
+            self.flavor.save()
         self.flavor = Flavor()
         self.refresh_flavors()
 

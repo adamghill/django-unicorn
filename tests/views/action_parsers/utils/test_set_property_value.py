@@ -12,7 +12,7 @@ class FakeComponent(UnicornView):
     string = "property_view"
     integer = 99
     datetime = datetime(2020, 1, 1)  # noqa: DTZ001
-    array: List[str] = []  # noqa: RUF012
+    array: list[str] = []  # noqa: RUF012
     model = Flavor(name="initial-flavor")
     queryset = Flavor.objects.none()
     taste = Taste(name="bitter")

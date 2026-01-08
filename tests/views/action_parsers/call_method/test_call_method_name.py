@@ -1,6 +1,5 @@
 from datetime import date, datetime, time, timedelta
 from types import MappingProxyType
-from typing import Optional, Union
 from uuid import UUID, uuid4
 
 import pytest
@@ -34,8 +33,8 @@ class FakeComponent(UnicornView):
         assert issubclass(type(model), Flavor), "model arg should be a `Flavor` model"
         return model.pk
 
-    def save_with_union(self, id: Union[int, str]):  # noqa: A002
-        assert isinstance(id, (int, str))
+    def save_with_union(self, id: int | str):  # noqa: A002
+        assert isinstance(id, int | str)
         return id
 
     def get_datetime_without_type_hint(self, _datetime):
@@ -56,7 +55,7 @@ class FakeComponent(UnicornView):
     def get_time(self, _time: time):
         return _time
 
-    def get_duration_and_time(self, _duration: Optional[timedelta] = None, _time: Optional[time] = None):
+    def get_duration_and_time(self, _duration: timedelta | None = None, _time: time | None = None):
         return (_duration, _time)
 
     def get_uuid(self, _uuid: UUID):

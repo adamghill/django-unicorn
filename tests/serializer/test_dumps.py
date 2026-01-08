@@ -81,7 +81,7 @@ class SubclassManyToManyTestModel(ManyToManyTestModel):
         app_label = "tests"
 
 
-def assert_dicts(expected: Dict, serialized_dumps: str) -> None:
+def assert_dicts(expected: dict, serialized_dumps: str) -> None:
     actual = json.loads(serialized_dumps)
 
     assert dicts_equal(expected, actual)
@@ -623,7 +623,7 @@ def test_get_model_dict_many_to_many_is_referenced_prefetched(
         "origins": [],
     }
 
-    flavor_one = Flavor.objects.prefetch_related("taste_set").filter(id=flavor_one.id).first()
+    flavor_one = Flavor.objects.prefetch_related("taste_set").filter(pk=flavor_one.pk).first()
 
     # prefetch_related should reduce the database calls
     with django_assert_num_queries(1):
@@ -700,8 +700,8 @@ def test_nested_list_float_less_complicated():
 
 def test_pydantic():
     class Book(BaseModel):
-        title = "The Grapes of Wrath"
-        author = "John Steinbeck"
+        title: str = "The Grapes of Wrath"
+        author: str = "John Steinbeck"
 
     expected = '{"author":"John Steinbeck","title":"The Grapes of Wrath"}'
     actual = serializer.dumps(Book())
@@ -803,7 +803,7 @@ def test_exclude_field_attributes_invalid_type():
     with pytest.raises(AssertionError):
         serializer.dumps(
             {"book": {"title": "The Grapes of Wrath", "author": "John Steinbeck"}},
-            exclude_field_attributes=("book.blob"),
+            exclude_field_attributes=("book.blob"),  # type: ignore
         )
 
 

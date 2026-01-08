@@ -26,7 +26,7 @@ def test_model():
 
     actual = _construct_model(Flavor, flavor_data)
 
-    assert actual.pk == flavor.id
+    assert actual.pk == flavor.pk
     assert actual.name == flavor.name
     assert actual.parent is None
 
@@ -44,9 +44,9 @@ def test_model_foreign_key():
 
     actual = _construct_model(Flavor, flavor_data)
 
-    assert actual.pk == flavor.id
+    assert actual.pk == flavor.pk
     assert actual.name == flavor.name
-    assert actual.parent.pk == parent.id
+    assert actual.parent.pk == parent.pk
     assert actual.parent.name == parent.name
 
 
@@ -67,7 +67,7 @@ def test_queryset():
 
     assert test_component.flavors.count() == 1
     assert test_component.flavors[0].uuid == str(flavor.uuid)
-    assert test_component.flavors[0].id == flavor.id
+    assert test_component.flavors[0].pk == flavor.pk
 
 
 @pytest.mark.django_db

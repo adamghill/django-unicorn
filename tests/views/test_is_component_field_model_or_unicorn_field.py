@@ -4,7 +4,7 @@ from example.coffee.models import Flavor
 
 
 class TypeHintView(UnicornView):
-    model: Flavor = None
+    model: Flavor | None = None
 
 
 class ModelInstanceView(UnicornView):

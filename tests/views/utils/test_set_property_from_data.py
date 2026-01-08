@@ -16,7 +16,7 @@ class FakeComponent(UnicornView):
     integer = 99
     datetime_without_typehint = datetime(2020, 1, 1, tzinfo=timezone.utc)
     datetime_with_typehint: datetime = datetime(2020, 2, 1, tzinfo=timezone.utc)
-    array: List[str] = []  # noqa: RUF012
+    array: list[str] = []  # noqa: RUF012
     model = Flavor(name="test-initial")
     queryset = Flavor.objects.none()
     queryset_with_typehint: QuerySetType[Flavor] = []  # noqa: RUF012

@@ -25,9 +25,9 @@ def test_construct_model_foreign_key():
     parent.save()
 
     model_data = {
-        "pk": flavor.id,
+        "pk": flavor.pk,
         "name": flavor.name,
-        "parent": parent.id,
+        "parent": parent.pk,
     }
 
     actual = _construct_model(Flavor, model_data)

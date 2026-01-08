@@ -1,5 +1,5 @@
 import time
-from typing import Dict, Optional
+from typing import Any
 
 import orjson
 import shortuuid
@@ -13,8 +13,8 @@ def _post_to_component(
     client,
     method_name: str,
     component_name: str = "FakeComponent",
-    data: Optional[Dict] = None,
-) -> str:
+    data: dict | None = None,
+) -> Any:
     if data is None:
         data = {}
 

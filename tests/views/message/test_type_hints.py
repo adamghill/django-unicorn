@@ -14,10 +14,10 @@ class ExampleDataclass:
 class FakeObjectsComponent(UnicornView):
     template_name = "templates/test_component.html"
 
-    decimal_example: Decimal = Decimal(1.1)
+    decimal_example: Decimal = Decimal("1.1")
     float_example: float = 1.2
     int_example: int = 3
-    dataclass_example: ExampleDataclass = None
+    dataclass_example: ExampleDataclass | None = None
 
     def assert_int(self):
         assert self.int_example == 4
@@ -26,9 +26,10 @@ class FakeObjectsComponent(UnicornView):
         assert self.float_example == 1.3
 
     def assert_decimal(self):
-        assert self.decimal_example == Decimal(1.5)
+        assert self.decimal_example == Decimal("1.5")
 
     def assert_dataclass(self):
+        assert self.dataclass_example is not None
         assert self.dataclass_example == ExampleDataclass(hello="world")
         assert self.dataclass_example.hello == "world"
 
