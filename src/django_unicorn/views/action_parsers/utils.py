@@ -1,4 +1,4 @@
-from typing import Any, cast
+from typing import Any
 
 from django.db.models import QuerySet
 
@@ -53,7 +53,7 @@ def set_property_value(
     for part in property_name_parts:
         if part.startswith("__") and part.endswith("__"):
             raise AssertionError("Invalid property name")
-    component_or_field: Any = cast(Any, component)
+    component_or_field: Any = component
     data_or_dict = data  # Could be an internal portion of data that gets set
 
     for idx, property_name_part in enumerate(property_name_parts):
@@ -120,7 +120,7 @@ def set_property_value(
                 data_or_dict = data_or_dict.get(property_name_part, {})
         elif isinstance(component_or_field, dict):
             if idx == len(property_name_parts) - 1:
-                component_or_field[property_name_part] = property_value
+                component_or_field[property_name_part] = property_value  # type: ignore[index]
                 data_or_dict[property_name_part] = property_value
             else:
                 component_or_field = component_or_field[property_name_part]
