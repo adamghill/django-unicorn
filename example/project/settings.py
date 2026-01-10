@@ -15,13 +15,13 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     # Internal apps
-    "books",
-    "coffee",
-    "www",
+    "example.books",
+    "example.coffee",
+    "example.www",
     # Include django-unicorn package
     "django_unicorn",
     # Include internal unicorn app
-    "unicorn",
+    "example.unicorn",
 ]
 
 MIDDLEWARE = [
@@ -34,7 +34,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = "project.urls"
+ROOT_URLCONF = "example.project.urls"
 
 TEMPLATES = [
     {
@@ -52,7 +52,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "project.wsgi.application"
+WSGI_APPLICATION = "example.project.wsgi.application"
 
 
 CACHES = {
