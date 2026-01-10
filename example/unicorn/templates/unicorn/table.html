@@ -1,0 +1,29 @@
+{% load unicorn %}
+<html>
+
+<head>
+  {% unicorn_scripts %}
+</head>
+
+<body>
+  {% csrf_token %}
+  <div unicorn:view>
+    <div>
+      <!-- table.html -->
+      {% unicorn 'filter' %}
+      <table>
+        <thead>
+          <tr>
+            <td>Author</td>
+            <td>Title</td>
+          </tr>
+        </thead>
+        {% for book in books %}
+        {{book}}
+        {% endfor %}
+      </table>
+    </div>
+  </div>
+</body>
+
+</html>
