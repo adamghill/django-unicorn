@@ -24,6 +24,25 @@ dependencies = [
     "decorator>=4.4.2",
 ]
 
+[dependency-groups]
+dev = [
+    "certifi>=2023.7.22",
+    "keyring==24.2.0",
+    "pytest>=7",
+    "django-stubs",
+    "pytest-django",
+    "django-mock-queries>=2.1.5",
+    "pydantic>=1",
+    "pywatchman",
+    "django-redis>=4.12.1",
+    "coverage[toml]",
+    "pytest-cov",
+    "pytest-benchmark",
+    "ruff",
+    "genbadge[all]>=1.1.1",
+    "ty>=0.0.10",
+]
+
 [project.optional-dependencies]
 minify = ["htmlmin"]
 docs = [
@@ -46,27 +65,8 @@ Repository = "https://github.com/adamghill/django-unicorn/"
 Documentation = "https://www.django-unicorn.com/docs/"
 Funding = "https://github.com/sponsors/adamghill"
 
-[dependency-groups]
-dev = [
-    "certifi>=2023.7.22",
-    "keyring==24.2.0",
-    "pytest>=7",
-    "django-stubs",
-    "pytest-django",
-    "django-mock-queries>=2.1.5",
-    "pydantic>=1",
-    "pywatchman",
-    "django-redis>=4.12.1",
-    "coverage[toml]",
-    "pytest-cov",
-    "pytest-benchmark",
-    "ruff",
-    "genbadge[all]>=1.1.1",
-    "ty>=0.0.10",
-]
-
 [tool.ruff]
-src = ["django_unicorn"]
+src = ["src"]
 exclude = ["example", "**/migrations/*"]
 target-version = "py310"
 line-length = 120
