@@ -30,7 +30,7 @@ class BookField(UnicornField):
 
 
 class PydanticBook(BaseModel):
-    title = "American Gods"
+    title: str = "American Gods"
     publish_date: Optional[datetime] = datetime(1996, 9, 16)
 
 
