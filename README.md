@@ -33,7 +33,7 @@
 | src/django\_unicorn/typing.py                                        |        5 |        0 |        0 |        0 |    100% |           |
 | src/django\_unicorn/urls.py                                          |        4 |        0 |        0 |        0 |    100% |           |
 | src/django\_unicorn/utils.py                                         |       67 |        8 |       18 |        3 |     87% |66-70, 137->136, 140-143 |
-| src/django\_unicorn/views/\_\_init\_\_.py                            |      255 |       47 |      128 |       18 |     79% |103, 147, 150->117, 153, 158, 162, 172->178, 174->173, 180->178, 195, 208-209, 218-219, 242->245, 246, 256->226, 332-380, 431-432, 470, 486->494, 496-524 |
+| src/django\_unicorn/views/\_\_init\_\_.py                            |      255 |       49 |      128 |       20 |     78% |95, 99, 103, 147, 150->117, 153, 158, 162, 172->178, 174->173, 180->178, 195, 208-209, 218-219, 242->245, 246, 256->226, 332-380, 431-432, 470, 486->494, 496-524 |
 | src/django\_unicorn/views/action\_parsers/\_\_init\_\_.py            |        0 |        0 |        0 |        0 |    100% |           |
 | src/django\_unicorn/views/action\_parsers/call\_method.py            |      127 |       17 |       62 |       10 |     84% |5-6, 24-29, 39, 46-51, 83, 112, 160, 183->149, 210, 216->exit, 222->216, 226 |
 | src/django\_unicorn/views/action\_parsers/sync\_input.py             |       13 |        0 |        4 |        0 |    100% |           |
@@ -54,6 +54,7 @@
 | tests/components/test\_create.py                                     |       13 |        0 |        0 |        0 |    100% |           |
 | tests/components/test\_get\_locations.py                             |       74 |        0 |        4 |        2 |     97% |15->19, 21->exit |
 | tests/components/test\_is\_html\_well\_formed.py                     |       37 |        0 |        0 |        0 |    100% |           |
+| tests/components/test\_issue\_650.py                                 |       27 |        0 |        0 |        0 |    100% |           |
 | tests/components/test\_unicorn\_template\_response.py                |       81 |        1 |        0 |        0 |     99% |        56 |
 | tests/components/test\_unicorn\_template\_response\_recursion.py     |       30 |        0 |        0 |        0 |    100% |           |
 | tests/management/\_\_init\_\_.py                                     |        0 |        0 |        0 |        0 |    100% |           |
@@ -100,7 +101,7 @@
 | tests/views/utils/\_\_init\_\_.py                                    |        0 |        0 |        0 |        0 |    100% |           |
 | tests/views/utils/test\_construct\_model.py                          |       47 |       10 |        0 |        0 |     79% |     44-60 |
 | tests/views/utils/test\_set\_property\_from\_data.py                 |      139 |        2 |        0 |        0 |     99% |     29-30 |
-| **TOTAL**                                                            | **5646** |  **408** |  **958** |  **113** | **91%** |           |
+| **TOTAL**                                                            | **5673** |  **410** |  **958** |  **115** | **91%** |           |
 
 
 ## Setup coverage badge
