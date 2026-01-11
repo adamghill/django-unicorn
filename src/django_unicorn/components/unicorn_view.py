@@ -9,11 +9,12 @@ from typing import Any, Optional, cast
 
 import shortuuid
 from django.apps import apps as django_apps_module
-from django.core.exceptions import ImproperlyConfigured
+from django.core.exceptions import NON_FIELD_ERRORS
 from django.db.models import Model
 from django.forms.widgets import CheckboxInput, Select
 from django.http import HttpRequest
 from django.utils.decorators import classonlymethod
+from django.utils.safestring import mark_safe
 from django.views.generic.base import TemplateView
 
 from django_unicorn import serializer
@@ -156,7 +157,7 @@ def construct_component(
     return component
 
 
-class UnicornView(TemplateView):
+class Component(TemplateView):
     # These class variables are required to set these via kwargs
     component_name: str = ""
     component_key: str = ""
@@ -167,15 +168,15 @@ class UnicornView(TemplateView):
     def __init__(self, component_args: list | None = None, **kwargs):
         self.response_class = UnicornTemplateResponse
 
-        self.component_name: str = ""
+        self.component_name = kwargs.get("component_name", "")
         self.component_key: str = ""
         self.component_id: str = ""
 
         # Without these instance variables calling UnicornView() outside the
         # Django view/template logic (i.e. in unit tests) results in odd results.
         self.request: HttpRequest = HttpRequest()
-        self.parent: UnicornView | None = None
-        self.children: list[UnicornView] = []
+        self.parent: Component | None = None
+        self.children: list[Component] = []
 
         # Caches to reduce the amount of time introspecting the class
         self._methods_cache: dict[str, Callable] = {}
@@ -248,16 +249,54 @@ class UnicornView(TemplateView):
 
         try:
             # Check for get_template_names by explicitly calling it since it
-            # is defined in TemplateResponseMixin, but can throw ImproperlyConfigured.
+            # is a method on the parent class
             self.get_template_names()
             get_template_names_is_valid = True
-        except ImproperlyConfigured:
-            pass
+            # pylint: disable=broad-except
+        except Exception as e:
+            logger.debug(e)
 
         if not self.template_name and not get_template_names_is_valid:
             # Convert component name with a dot to a folder structure
             template_name = self.component_name.replace(".", "/")
             self.template_name = f"unicorn/{template_name}.html"
+
+    def _handle_validation_error(self, e):
+        # validation error handling
+        min_validation_error_args = 2
+
+        if len(e.args) < min_validation_error_args or not e.args[1]:
+            raise AssertionError("Error code must be specified") from e
+
+        if hasattr(e, "error_list"):
+            error_code = e.args[1]
+            for error in e.error_list:
+                if NON_FIELD_ERRORS in self.errors:
+                    self.errors[NON_FIELD_ERRORS].append({"code": error_code, "message": error.message})
+                else:
+                    self.errors[NON_FIELD_ERRORS] = [{"code": error_code, "message": error.message}]
+        elif hasattr(e, "message_dict"):
+            for field, message in e.message_dict.items():
+                if not e.args[1]:
+                    raise AssertionError("Error code must be specified") from e
+                error_code = e.args[1]
+                if field in self.errors:
+                    self.errors[field].append({"code": error_code, "message": message})
+                else:
+                    self.errors[field] = [{"code": error_code, "message": message}]
+
+    def _handle_safe_fields(self):
+        safe_fields = []
+        if hasattr(self, "Meta") and hasattr(self.Meta, "safe"):
+            if isinstance(self.Meta.safe, (list, tuple)):
+                for field_name in self.Meta.safe:
+                    if field_name in self._attributes().keys():
+                        safe_fields.append(field_name)
+
+        for field_name in safe_fields:
+            value = getattr(self, field_name)
+            if isinstance(value, str):
+                setattr(self, field_name, mark_safe(value))  # noqa: S308
 
     @timed
     def _set_caches(self) -> None:
@@ -349,6 +388,18 @@ class UnicornView(TemplateView):
     def called(self, name, args):
         """
         Hook that gets called when a component's method is called.
+        """
+        pass
+
+    def pre_parse(self):
+        """
+        Hook that gets called before the data is parsed and applied to the component.
+        """
+        pass
+
+    def post_parse(self):
+        """
+        Hook that gets called after the data is parsed and applied to the component.
         """
         pass
 
@@ -772,6 +823,18 @@ class UnicornView(TemplateView):
             "component_kwargs",
             "component_args",
             "force_render",
+            # Lifecycle hooks
+            "pre_parse",
+            "post_parse",
+            "hydrate",
+            "complete",
+            "rendered",
+            "parent_rendered",
+            "updating",
+            "updated",
+            "resolved",
+            "calling",
+            "called",
         )
         excludes = []
 
@@ -798,12 +861,12 @@ class UnicornView(TemplateView):
         component_id: str,
         component_name: str,
         component_key: str = "",
-        parent: Optional["UnicornView"] = None,
+        parent: Optional["Component"] = None,
         request: HttpRequest | None = None,
         use_cache=True,
         component_args: list | None = None,
         kwargs: dict[str, Any] | None = None,
-    ) -> "UnicornView":
+    ) -> "Component":
         """
         Find and instantiate a component class based on `component_name`.
 
@@ -830,7 +893,7 @@ class UnicornView(TemplateView):
         kwargs = kwargs if kwargs is not None else {}
 
         @timed
-        def _get_component_class(module_name: str, class_name: str) -> type[UnicornView]:
+        def _get_component_class(module_name: str, class_name: str) -> type[Component]:
             """
             Imports a component based on module and class name.
             """
@@ -967,3 +1030,6 @@ class UnicornView(TemplateView):
             initkwargs["component_name"] = component_name
 
         return super().as_view(**initkwargs)
+
+
+UnicornView = Component
