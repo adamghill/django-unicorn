@@ -91,7 +91,7 @@ export function getComponent(componentNameOrKey) {
     if (isEmpty(component)) {
       const _component = components[id];
 
-      if (_component.key == componentNameOrKey) {
+      if (String(_component.key) === String(componentNameOrKey)) {
         component = _component;
       }
     }
