@@ -1,5 +1,5 @@
 import test from "ava";
-import { toRegExp } from "../../../django_unicorn/static/unicorn/js/utils";
+import { toRegExp } from "../../../src/django_unicorn/static/unicorn/js/utils.js";
 
 test("To regexp 'test-*'", (t) => {
   t.deepEqual(toRegExp("test-*"), /(test-)[a-zA-Z0-9_:.\-]*/);

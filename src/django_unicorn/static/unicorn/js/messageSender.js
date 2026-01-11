@@ -39,7 +39,7 @@ export function send(component, callback) {
   };
   headers[component.csrfTokenHeaderName] = getCsrfToken(component);
 
-  fetch(component.syncUrl, {
+  return fetch(component.syncUrl, {
     method: "POST",
     headers,
     body: JSON.stringify(body),

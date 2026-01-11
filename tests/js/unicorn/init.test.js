@@ -1,5 +1,5 @@
 import test from "ava";
-import { init } from "../../../django_unicorn/static/unicorn/js/unicorn.js";
+import { init } from "../../../src/django_unicorn/static/unicorn/js/unicorn.js";
 
 test("init unicorn", (t) => {
   const actual = init("unicorn/", "X-Unicorn", "unicorn", { NAME: "morphdom" });

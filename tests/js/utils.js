@@ -1,7 +1,7 @@
 import { JSDOM } from "jsdom";
 import fetchMock from "fetch-mock";
-import { Element } from "../../django_unicorn/static/unicorn/js/element.js";
-import { Component } from "../../django_unicorn/static/unicorn/js/component.js";
+import { Element } from "../../src/django_unicorn/static/unicorn/js/element.js";
+import { Component } from "../../src/django_unicorn/static/unicorn/js/component.js";
 
 /**
  * Mock some browser globals using a fake DOM
