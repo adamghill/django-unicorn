@@ -3,7 +3,6 @@ import uuid
 from datetime import timedelta
 from decimal import Decimal
 from types import MappingProxyType
-from typing import Dict
 
 import pytest
 from django.db import models

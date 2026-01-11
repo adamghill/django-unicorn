@@ -1,6 +1,6 @@
 import sys
 from datetime import datetime, timezone
-from typing import List
+from typing import List  # noqa: UP035
 
 import pytest
 from django.db.models import Model, QuerySet
@@ -21,7 +21,7 @@ class FakeComponent(UnicornView):
     queryset = Flavor.objects.none()
     queryset_with_typehint: QuerySetType[Flavor] = []  # noqa: RUF012
     datetimes = [datetime(2020, 3, 1, tzinfo=timezone.utc)]  # noqa: RUF012
-    datetimes_with_old_typehint: List[datetime] = [datetime(2020, 4, 1, tzinfo=timezone.utc)]  # noqa: RUF012
+    datetimes_with_old_typehint: List[datetime] = [datetime(2020, 4, 1, tzinfo=timezone.utc)]  # noqa: RUF012, UP006
     datetimes_with_list_typehint: list = [datetime(2020, 6, 1, tzinfo=timezone.utc)]  # noqa: RUF012
 
     try:
