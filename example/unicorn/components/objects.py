@@ -44,7 +44,7 @@ class ObjectsView(UnicornView):
     date_example = now()
     date_example_with_typehint: datetime = now()
     dates_with_no_typehint = None
-    dates_with_old_typehint: List[datetime] = None
+    dates_with_old_typehint: List[datetime] = None  # noqa: RUF012
     dates_with_new_typehint: list[datetime] = None
     dates_with_list_typehint: list = None
     float_example: float = 1.1
