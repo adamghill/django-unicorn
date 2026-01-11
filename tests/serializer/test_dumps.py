@@ -257,7 +257,7 @@ def test_model_with_datetime_as_string(db):  # noqa: ARG001
             "decimal_value": None,
             "uuid": str(flavor.uuid),
             "date": None,
-            "datetime": datetime,
+            "datetime": datetime.replace(".000", ""),
             "time": None,
             "duration": None,
             "pk": None,
