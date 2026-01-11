@@ -118,6 +118,7 @@ export class Element {
         action.isPrevent = false;
         action.isStop = false;
         action.isDiscard = false;
+        action.isDisable = false;
         action.debounceTime = 0;
 
         if (attribute.modifiers) {
@@ -128,6 +129,8 @@ export class Element {
               action.isStop = true;
             } else if (modifier === "discard") {
               action.isDiscard = true;
+            } else if (modifier === "disable") {
+              action.isDisable = true;
             } else if (modifier === "debounce") {
               action.debounceTime = attribute.modifiers.debounce
                 ? parseInt(attribute.modifiers.debounce, 10) || 0

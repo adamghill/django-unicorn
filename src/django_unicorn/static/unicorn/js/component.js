@@ -45,6 +45,7 @@ export class Component {
     this.poll = {};
 
     this.actionQueue = [];
+    this.actionCleanups = [];
     this.currentActionQueue = null;
     this.lastTriggeringElements = [];
 

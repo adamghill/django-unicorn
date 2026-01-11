@@ -62,6 +62,9 @@ export function send(component, callback) {
         loadingElement.handleDirty(true);
       });
 
+      component.actionCleanups.forEach((cleanup) => cleanup());
+      component.actionCleanups = [];
+
       // HTTP status code of 304 is `Not Modified`. This null gets caught in the next promise
       // and stops any more processing.
       if (response.status === 304) {
@@ -73,6 +76,9 @@ export function send(component, callback) {
       );
     })
     .then((responseJson) => {
+      component.actionCleanups.forEach((cleanup) => cleanup());
+      component.actionCleanups = [];
+
       if (!responseJson) {
         return;
       }
@@ -295,6 +301,9 @@ export function send(component, callback) {
       component.actionQueue = [];
       component.currentActionQueue = null;
       component.lastTriggeringElements = [];
+
+      component.actionCleanups.forEach((cleanup) => cleanup());
+      component.actionCleanups = [];
 
       if (isFunction(callback)) {
         callback(null, null, err);
