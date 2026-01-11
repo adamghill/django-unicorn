@@ -53,6 +53,8 @@ jobs:
           npm run build
 
       - name: Build Python Package
+        env:
+          SETUPTOOLS_SCM_PRETEND_VERSION: ${{ github.ref_name }}
         run: uv build
 
       - name: Publish package distributions to PyPI
