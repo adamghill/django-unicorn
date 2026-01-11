@@ -44,3 +44,18 @@ test("loading attr", (t) => {
 
   t.is(element.loading.attr, "disabled");
 });
+
+test("loading delay", (t) => {
+  const html = "<div u:click='update()' u:loading.delay></div>";
+  const element = getElement(html);
+
+  t.is(element.loading.delay, 200);
+});
+
+test("loading delay with time", (t) => {
+  const html = "<div u:click='update()' u:loading.delay-1000></div>";
+  const element = getElement(html);
+
+  t.is(element.loading.delay, 1000);
+});
+
