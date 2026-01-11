@@ -174,12 +174,16 @@ def _get_model_dict(model: Model) -> dict:
 
     _parse_field_values_from_string(model)
 
-    # Django's `serialize` method always returns a string of an array,
-    # so remove the brackets from the resulting string
-    serialized_model = serialize("json", [model])[1:-1]
+    # Django's `serialize` method always returns a string of an array
+    serialized_model = serialize("json", [model])
 
-    # Convert the string into a dictionary and grab the `pk`
-    model_json = orjson.loads(serialized_model)
+    try:
+        # Django's `serialize` method always returns a string of an array,
+        # so remove the brackets from the resulting string
+        model_json = orjson.loads(serialized_model[1:-1])
+    except orjson.JSONDecodeError:
+        # Convert the string into a dictionary and grab the `pk`
+        model_json = orjson.loads(serialized_model)[0]
     model_pk = model_json.get("pk")
 
     # Shuffle around the serialized pieces to condense the size of the payload
