@@ -27,6 +27,8 @@ This template is **valid**:
 
 `Unicorn` element attributes usually start with `unicorn:`, however the shortcut `u:` is also supported. So, for example, `unicorn:model` could also be written as `u:model`.
 
+`unicorn:bind` can also be used as a synonym for `unicorn:model` (and `u:bind` for `u:model`).
+
 ## Accessing nested fields
 
 Fields in a `dictionary` or Django model can be accessed similarly to the Django template language with "dot notation".

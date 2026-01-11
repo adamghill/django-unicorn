@@ -32,7 +32,7 @@ export class Attribute {
       this.isUnicorn = true;
 
       // Use `contains` when there could be modifiers
-      if (contains(this.name, ":model")) {
+      if (contains(this.name, ":model") || contains(this.name, ":bind")) {
         this.isModel = true;
       } else if (contains(this.name, ":poll.disable")) {
         this.isPollDisable = true;
