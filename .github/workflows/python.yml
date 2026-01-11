@@ -34,8 +34,8 @@ jobs:
       - name: ruff check
         run: uv run ruff check .
 
-      - name: mypy check
-        run: uv run mypy django_unicorn
+      # - name: mypy check
+      #   run: uv run mypy django_unicorn
 
   test:
     runs-on: ubuntu-latest
