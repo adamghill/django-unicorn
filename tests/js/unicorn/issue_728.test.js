@@ -1,6 +1,6 @@
 import test from "ava";
-import { getComponent } from "../../../django_unicorn/static/unicorn/js/unicorn.js";
-import { components } from "../../../django_unicorn/static/unicorn/js/store.js";
+import { getComponent } from "../../../src/django_unicorn/static/unicorn/js/unicorn.js";
+import { components } from "../../../src/django_unicorn/static/unicorn/js/store.js";
 import { getComponent as getComponentUtil } from "../utils.js";
 
 test("getComponent by key with type mismatch (existing string key, int lookup)", (t) => {
