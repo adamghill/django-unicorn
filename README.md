@@ -25,7 +25,7 @@
 | src/django\_unicorn/decorators.py                                    |       25 |        0 |       10 |        1 |     97% |    35->38 |
 | src/django\_unicorn/errors.py                                        |       24 |        0 |        0 |        0 |    100% |           |
 | src/django\_unicorn/management/commands/startunicorn.py              |      102 |        8 |       36 |        7 |     89% |40-41, 80, 99, 102, 117, 129, 173->177, 187 |
-| src/django\_unicorn/serializer.py                                    |      202 |        7 |      110 |        7 |     96% |31-32, 59->63, 84, 144->140, 218, 247-251, 326->exit, 451->450 |
+| src/django\_unicorn/serializer.py                                    |      205 |        9 |      110 |        7 |     95% |31-32, 59->63, 84, 144->140, 184-186, 222, 251-255, 330->exit, 455->454 |
 | src/django\_unicorn/settings.py                                      |       57 |        7 |       16 |        3 |     86% |25->28, 52-56, 59, 107-112 |
 | src/django\_unicorn/templatetags/\_\_init\_\_.py                     |        0 |        0 |        0 |        0 |    100% |           |
 | src/django\_unicorn/templatetags/unicorn.py                          |      120 |        8 |       44 |        4 |     93% |23->26, 40, 47-48, 119, 126-129, 141->146, 170->173 |
@@ -99,7 +99,7 @@
 | tests/views/utils/\_\_init\_\_.py                                    |        0 |        0 |        0 |        0 |    100% |           |
 | tests/views/utils/test\_construct\_model.py                          |       47 |       10 |        0 |        0 |     79% |     44-60 |
 | tests/views/utils/test\_set\_property\_from\_data.py                 |      139 |        2 |        0 |        0 |     99% |     29-30 |
-| **TOTAL**                                                            | **5612** |  **407** |  **958** |  **115** | **91%** |           |
+| **TOTAL**                                                            | **5615** |  **409** |  **958** |  **115** | **91%** |           |
 
 
 ## Setup coverage badge
