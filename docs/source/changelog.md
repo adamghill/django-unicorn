@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.63.0
+
+- Fix: Child components would cause RecursionError when pickling by [igadmile](https://github.com/igadmile) in [#672](https://github.com/adamghill/django-unicorn/pull/672).
+
 ## 0.62.0
 
 - Security fix: for CVE-2025-24370 for a class pollution vulnerability (reported by [superboy-zjc](https://github.com/superboy-zjc)).
