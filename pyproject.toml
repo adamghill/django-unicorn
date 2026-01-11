@@ -26,8 +26,6 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "certifi>=2023.7.22",
-    "keyring==24.2.0",
     "pytest>=7",
     "django-stubs",
     "pytest-django",
