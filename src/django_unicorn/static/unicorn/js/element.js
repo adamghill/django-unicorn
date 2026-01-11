@@ -88,6 +88,13 @@ export class Element {
         } else if (attribute.isLoading) {
           this.loading.show = true;
         }
+
+        if (this.loading) {
+          if (attribute.modifiers.delay) {
+            const delayValue = parseInt(attribute.modifiers.delay, 10);
+            this.loading.delay = Number.isNaN(delayValue) ? 200 : delayValue;
+          }
+        }
       } else if (attribute.isTarget) {
         this.target = attribute.value;
       } else if (attribute.isPartial) {
@@ -198,6 +205,22 @@ export class Element {
    * @param {bool} revert Whether or not the revert the loading class.
    */
   handleLoading(revert) {
+    if (this.loading.delay) {
+      if (revert) {
+        if (this.loading.timer) {
+          clearTimeout(this.loading.timer);
+          this.loading.timer = null;
+          return;
+        }
+      } else {
+        this.loading.timer = setTimeout(() => {
+          this.handleInterfacer("loading", revert);
+          this.loading.timer = null;
+        }, this.loading.delay);
+        return;
+      }
+    }
+
     this.handleInterfacer("loading", revert);
   }
 
