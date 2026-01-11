@@ -212,6 +212,13 @@ export function addActionEventListener(component, eventType) {
           });
 
           if (!action.key || action.key === toKebabCase(event.key)) {
+            if (action.isDisable) {
+              element.el.disabled = true;
+              component.actionCleanups.push(() => {
+                element.el.disabled = false;
+              });
+            }
+
             handleLoading(component, targetElement);
             component.callMethod(
               actionName,
