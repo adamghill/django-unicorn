@@ -840,7 +840,7 @@ class UnicornView(TemplateView):
             return component_class
 
         component_cache_key = f"unicorn:component:{component_id}"
-        cached_component = restore_from_cache(component_cache_key)
+        cached_component = restore_from_cache(component_cache_key, request=request)
 
         if not cached_component:
             # Note that `hydrate()` and `complete` don't need to be called here
