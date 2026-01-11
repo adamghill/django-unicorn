@@ -1,6 +1,6 @@
 [project]
 name = "django-unicorn"
-version = "0.62.0"
+dynamic = ["version"]
 description = "A magical full-stack framework for Django."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -143,5 +143,11 @@ branch = true
 relative_files = true
 
 [build-system]
-requires = ["uv_build>=0.8.12,<0.9.0"]
-build-backend = "uv_build"
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/django_unicorn"]
