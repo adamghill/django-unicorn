@@ -284,7 +284,7 @@ class UnicornTemplateResponse(TemplateResponse):
         response.content = rendered_template
 
         if get_minify_html_enabled():
-            from htmlmin import minify  # noqa: PLC0415
+            from htmlmin import minify  # noqa: PLC0415  # type: ignore
 
             minified_html = minify(response.content.decode())
             if len(minified_html) < len(rendered_template):
