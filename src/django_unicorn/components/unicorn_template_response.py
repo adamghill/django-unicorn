@@ -121,6 +121,16 @@ def assert_has_single_wrapper_element(content: str, component_name: str) -> None
         # Should have been caught by get_root_element usually
         return
 
+    # Check if any element has unicorn:view or u:view - these are direct views
+    # and should skip the multiple root check
+    for element in elements:
+        has_view = "unicorn:view" in element.attrib or "u:view" in element.attrib
+        has_poll = "unicorn:poll" in element.attrib or "u:poll" in element.attrib
+
+        if has_view or (has_view and has_poll):
+            # If the root element is a direct view (with or without poll), skip the check
+            return
+
     if len(elements) > 1:
         raise MultipleRootComponentElementError(
             f"The '{component_name}' component appears to have multiple root elements."
