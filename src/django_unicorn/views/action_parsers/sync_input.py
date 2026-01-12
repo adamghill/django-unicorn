@@ -1,6 +1,6 @@
 from django_unicorn.components import UnicornView
 from django_unicorn.views.action_parsers.utils import set_property_value
-from django_unicorn.views.objects import ComponentRequest
+from django_unicorn.views.request import ComponentRequest
 
 
 def handle(component_request: ComponentRequest, component: UnicornView, payload: dict):

@@ -3,9 +3,11 @@ import uuid
 from datetime import timedelta
 from decimal import Decimal
 from types import MappingProxyType
+from typing import cast
 
 import pytest
 from django.db import models
+from django.db.models import Model
 from django.utils.timezone import now
 from pydantic import BaseModel
 
@@ -355,7 +357,7 @@ def test_model_inherited_model_with_many_to_many_and_foreign_key():
 
     taste1 = Taste(name="Bitter1")
     taste1.save()
-    flavor_two.taste_set.add(taste1)
+    flavor_two.taste_set.add(taste1)  # type: ignore
 
     expected = {
         "new_name": "new_name_1",
@@ -402,9 +404,9 @@ def test_model_many_to_many(django_assert_num_queries):
     taste3 = Taste(name="Bitter3")
     taste3.save()
 
-    flavor_one.taste_set.add(taste1)
-    flavor_one.taste_set.add(taste2)
-    flavor_one.taste_set.add(taste3)
+    flavor_one.taste_set.add(taste1)  # type: ignore
+    flavor_one.taste_set.add(taste2)  # type: ignore
+    flavor_one.taste_set.add(taste3)  # type: ignore
 
     with django_assert_num_queries(2):
         actual = json.loads(serializer.dumps(flavor_one))
@@ -440,9 +442,9 @@ def test_model_many_to_many_with_excludes(django_assert_num_queries):
     taste3 = Taste(name="Bitter3")
     taste3.save()
 
-    flavor_one.taste_set.add(taste1)
-    flavor_one.taste_set.add(taste2)
-    flavor_one.taste_set.add(taste3)
+    flavor_one.taste_set.add(taste1)  # type: ignore
+    flavor_one.taste_set.add(taste2)  # type: ignore
+    flavor_one.taste_set.add(taste3)  # type: ignore
 
     flavor_one = Flavor.objects.prefetch_related("taste_set", "origins").get(pk=flavor_one.pk)
 
@@ -560,9 +562,9 @@ def test_get_model_dict_many_to_many_is_referenced(django_assert_num_queries):
     taste3 = Taste(name="Bitter3")
     taste3.save()
 
-    flavor_one.taste_set.add(taste1)
-    flavor_one.taste_set.add(taste2)
-    flavor_one.taste_set.add(taste3)
+    flavor_one.taste_set.add(taste1)  # type: ignore
+    flavor_one.taste_set.add(taste2)  # type: ignore
+    flavor_one.taste_set.add(taste3)  # type: ignore
 
     expected = {
         "pk": 1,
@@ -580,10 +582,10 @@ def test_get_model_dict_many_to_many_is_referenced(django_assert_num_queries):
         "origins": [],
     }
 
-    flavor_one = Flavor.objects.filter(id=flavor_one.id).first()
+    flavor_one = Flavor.objects.filter(id=flavor_one.id).first()  # type: ignore
 
     with django_assert_num_queries(2):
-        actual = serializer._get_model_dict(flavor_one)
+        actual = serializer._get_model_dict(cast(Model, flavor_one))
 
     assert dicts_equal(expected, actual)
 
@@ -602,9 +604,9 @@ def test_get_model_dict_many_to_many_is_referenced_prefetched(
     taste3 = Taste(name="Bitter3")
     taste3.save()
 
-    flavor_one.taste_set.add(taste1)
-    flavor_one.taste_set.add(taste2)
-    flavor_one.taste_set.add(taste3)
+    flavor_one.taste_set.add(taste1)  # type: ignore
+    flavor_one.taste_set.add(taste2)  # type: ignore
+    flavor_one.taste_set.add(taste3)  # type: ignore
 
     expected = {
         "pk": 1,
@@ -626,7 +628,7 @@ def test_get_model_dict_many_to_many_is_referenced_prefetched(
 
     # prefetch_related should reduce the database calls
     with django_assert_num_queries(1):
-        actual = serializer._get_model_dict(flavor_one)
+        actual = serializer._get_model_dict(cast(Model, flavor_one))
 
     assert dicts_equal(expected, actual)
 
@@ -637,7 +639,7 @@ def test_get_model_dict_many_to_many_references_model():
     taste.save()
     flavor_one = Flavor(name="name1", label="label1")
     flavor_one.save()
-    flavor_one.taste_set.add(taste)
+    flavor_one.taste_set.add(taste)  # type: ignore
     actual = serializer._get_model_dict(taste)
 
     expected = {"name": taste.name, "flavor": [flavor_one.pk], "pk": taste.pk}

@@ -17,7 +17,8 @@ from django_unicorn.decorators import timed
 from django_unicorn.typer import cast_value, get_type_hints
 from django_unicorn.utils import get_method_arguments
 from django_unicorn.views.action_parsers.utils import set_property_value
-from django_unicorn.views.objects import ComponentRequest, Return
+from django_unicorn.views.objects import Return
+from django_unicorn.views.request import ComponentRequest
 
 try:
     from typing import get_origin
