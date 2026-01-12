@@ -288,7 +288,7 @@ class Component(TemplateView):
     def _handle_safe_fields(self):
         safe_fields = []
         if hasattr(self, "Meta") and hasattr(self.Meta, "safe"):
-            if isinstance(self.Meta.safe, (list, tuple)):
+            if isinstance(self.Meta.safe, list | tuple):
                 for field_name in self.Meta.safe:
                     if field_name in self._attributes().keys():
                         safe_fields.append(field_name)

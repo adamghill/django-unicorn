@@ -8,7 +8,7 @@ class Action:
     Base class for all actions.
     """
 
-    __slots__ = ("action_type", "payload", "partials")
+    __slots__ = ("action_type", "partials", "payload")
 
     def __init__(self, data: dict[str, Any]):
         self.action_type = data.get("type")
@@ -35,7 +35,7 @@ class SyncInput(Action):
 
 
 class CallMethod(Action):
-    __slots__ = ("method_name", "args", "kwargs")
+    __slots__ = ("args", "kwargs", "method_name")
 
     def __init__(self, data: dict[str, Any]):
         super().__init__(data)
@@ -62,7 +62,7 @@ class Refresh(Action):
 
 
 class Toggle(Action):
-    __slots__ = ("method_name", "args", "kwargs")
+    __slots__ = ("args", "kwargs", "method_name")
 
     def __init__(self, data: dict[str, Any]):
         # We need to parse args similar to CallMethod

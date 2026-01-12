@@ -1,18 +1,16 @@
 import copy
 import logging
-from typing import cast
 
 import orjson
-from bs4 import BeautifulSoup
 from django.core.cache import caches
-from django.core.exceptions import NON_FIELD_ERRORS
 from django.forms import ValidationError
 from django.http import HttpRequest
-from django.utils.safestring import mark_safe
 
 from django_unicorn.components import UnicornView
+from django_unicorn.components.unicorn_template_response import get_root_element
 from django_unicorn.errors import RenderNotModifiedError, UnicornViewError
 from django_unicorn.settings import get_cache_alias, get_serial_enabled, get_serial_timeout
+from django_unicorn.utils import html_element_to_string
 from django_unicorn.views.action import Action, CallMethod, Refresh, Reset, SyncInput, Toggle
 from django_unicorn.views.action_parsers import call_method, sync_input
 from django_unicorn.views.request import ComponentRequest
@@ -106,8 +104,9 @@ class UnicornMessageHandler:
                     timeout=get_serial_timeout(),
                 )
 
-            merged_component_request.request = self.request
-            return self.handle(cast(ComponentRequest, merged_component_request))
+            if merged_component_request:
+                merged_component_request.request = self.request
+                return self.handle(merged_component_request)
 
         return first_json_result
 
@@ -155,7 +154,7 @@ class UnicornMessageHandler:
                 # Reconstruct payload for existing handler
                 # existing handler expects {"name": ..., "value": ...}
                 sync_input.handle(component_request, component, action.payload)
-            elif isinstance(action, (CallMethod, Refresh, Reset, Toggle)):
+            elif isinstance(action, CallMethod | Refresh | Reset | Toggle):
                 # Refresh and Reset are handled inside call_method.handle currently via special methods
                 # or we might need to handle them explicitly if we changed something.
                 # Since I'm using the existing call_method.handle, and it parses "name",
@@ -218,45 +217,39 @@ class UnicornMessageHandler:
         # Restore queued messages
         self._restore_queued_messages(component)
 
-        # Partial parsing logic from views/__init__.py
-        # But wait, ComponentResponse handles 'dom' creation?
-        # In views/__init__.py, partial_doms extraction happens BEFORE creating 'result'.
-        # ComponentResponse seems to expect 'partials' as a list of dicts with 'key'/'id' and 'dom'.
-        # So I need to process partials here.
-
         partial_doms = []
         if partials:
-            # Reconstruct list of partial dictionaries from Action objects or use what we collected
-            # action.partials is list of dicts like {'target': ...}
-
-            # Logic from views/__init__.py
-
-            soup = BeautifulSoup(rendered_component, features="html.parser")
+            soup = get_root_element(rendered_component)
 
             for partial in partials:
-                # ... logic ...
                 target = partial.get("target") or partial.get("key") or partial.get("id")
                 if not target:
                     raise AssertionError("Partial target is required")
 
                 found = False
-                # ... search in soup ...
-                # For brevity I assume I need to copy that logic here.
 
-                # Optimization: I will assume the logic is complex enough to copy/paste or refactor into a helper.
-                # Let's import the helper if I extract it, or just put it here.
-                # I'll put it here for now.
+                # Check root element
+                if soup.get("unicorn:key") == target:
+                    partial_doms.append({"key": target, "dom": html_element_to_string(soup, with_tail=False)})
+                    found = True
+                    continue
 
-                for element in soup.find_all():
-                    if "unicorn:key" in element.attrs and element.attrs["unicorn:key"] == target:
-                        partial_doms.append({"key": target, "dom": str(element)})
+                if soup.get("id") == target:
+                    partial_doms.append({"id": target, "dom": html_element_to_string(soup, with_tail=False)})
+                    found = True
+                    continue
+
+                # Check children
+                for element in soup.iter():
+                    if element.get("unicorn:key") == target:
+                        partial_doms.append({"key": target, "dom": html_element_to_string(element, with_tail=False)})
                         found = True
                         break
 
                 if not found:
-                    for element in soup.find_all():
-                        if "id" in element.attrs and element.attrs["id"] == target:
-                            partial_doms.append({"id": target, "dom": str(element)})
+                    for element in soup.iter():
+                        if element.get("id") == target:
+                            partial_doms.append({"id": target, "dom": html_element_to_string(element, with_tail=False)})
                             found = True
                             break
 

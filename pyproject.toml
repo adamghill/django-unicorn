@@ -16,8 +16,8 @@ classifiers = [
     "Framework :: Django",
 ]
 dependencies = [
-    "django>=2.2",
-    "beautifulsoup4>=4.8.0",
+    "django>=2.2",  # Deliberately loose on dependencies even though only newer Django versions are officially tested/supported
+    "lxml",
     "orjson>=3.6.0",
     "shortuuid>=1.0.1",
     "cachetools>=4.1.1",

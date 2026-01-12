@@ -1,12 +1,10 @@
 from typing import Any
 
-from bs4 import BeautifulSoup, Tag
-
 from django_unicorn.components import UnicornView
 from django_unicorn.components.unicorn_template_response import get_root_element
 from django_unicorn.errors import RenderNotModifiedError
 from django_unicorn.serializer import loads
-from django_unicorn.utils import generate_checksum
+from django_unicorn.utils import generate_checksum, html_element_to_string
 from django_unicorn.views.request import ComponentRequest
 
 
@@ -27,9 +25,10 @@ class ComponentResponse:
 
     def get_data(self) -> dict[str, Any]:
         # Sort data so it's stable
-        self.component_request.data = {
-            key: self.component_request.data[key] for key in sorted(self.component_request.data)
-        }
+        if self.component_request.data:
+            self.component_request.data = {
+                key: self.component_request.data[key] for key in sorted(self.component_request.data)
+            }
 
         result = {
             "id": self.component_request.id,
@@ -40,9 +39,8 @@ class ComponentResponse:
         }
 
         render_not_modified = False
-        soup = None
-        soup_root = None
-        rendered_component = self.component.last_rendered_dom
+        root_element = None
+        rendered_component = self.component.last_rendered_dom  # type: ignore
 
         if self.partials:
             result.update({"partials": self.partials})
@@ -59,11 +57,8 @@ class ComponentResponse:
                 else:
                     render_not_modified = True
 
-            # Make sure that partials with comments or blank lines before the root element
-            # only return the root element
-            soup = BeautifulSoup(rendered_component, features="html.parser")
-            soup_root = get_root_element(soup)
-            rendered_component = str(soup_root)
+            root_element = get_root_element(rendered_component)
+            rendered_component = html_element_to_string(root_element)
 
             result.update(
                 {
@@ -108,25 +103,30 @@ class ComponentResponse:
                 }
 
                 if not self.partials:
+                    # Get re-generated child checksum and update the child component inside the parent DOM
                     parent_dom = parent_component.render()
                     self.component.parent_rendered(parent_dom)
 
-                    # Get re-generated child checksum and update the child component inside the parent DOM
-                    if not soup_root:
+                    if root_element is None:
                         raise AssertionError("Missing root element")
 
-                    # TODO: Use minestrone for this
-                    child_soup_checksum = soup_root.attrs["unicorn:checksum"]
-                    child_soup_unicorn_id = soup_root.attrs["unicorn:id"]
+                    # Use lxml for attribute extraction
+                    child_checksum = root_element.get("unicorn:checksum")
+                    child_unicorn_id = root_element.get("unicorn:id")
 
-                    parent_soup = BeautifulSoup(parent_dom, features="html.parser")
+                    # Parse parent DOM
+                    parent_soup = get_root_element(parent_dom)
 
-                    for _child in parent_soup.descendants:
-                        if isinstance(_child, Tag) and child_soup_unicorn_id == _child.attrs.get("unicorn:id"):
-                            _child.attrs["unicorn:checksum"] = child_soup_checksum
+                    # Find child in parent and update checksum
+                    if parent_soup.get("unicorn:id") == child_unicorn_id:
+                        parent_soup.set("unicorn:checksum", child_checksum)
+                    else:
+                        # lxml iter is recursive, so this finds nested components too.
+                        for _child in parent_soup.iter():
+                            if child_unicorn_id == _child.get("unicorn:id"):
+                                _child.set("unicorn:checksum", child_checksum)
 
-                    parent_soup = get_root_element(parent_soup)
-                    parent_dom = str(parent_soup)
+                    parent_dom = html_element_to_string(parent_soup)
 
                     # Remove the child DOM from the payload since the parent DOM supersedes it
                     result["dom"] = None
