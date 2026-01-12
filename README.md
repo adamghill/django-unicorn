@@ -237,6 +237,7 @@ Thanks to the following wonderful people ([emoji key](https://allcontributors.or
       <td align="center" valign="top" width="14.28%"><a href="https://www.pythonbynight.com"><img src="https://avatars.githubusercontent.com/u/46942991?v=4?s=100" width="100px;" alt="Mario Munoz"/><br /><sub><b>Mario Munoz</b></sub></a><br /><a href="https://github.com/adamghill/django-unicorn/commits?author=tataraba" title="Documentation">📖</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/epw1624"><img src="https://avatars.githubusercontent.com/u/112768709?v=4?s=100" width="100px;" alt="Emily Wood"/><br /><sub><b>Emily Wood</b></sub></a><br /><a href="https://github.com/adamghill/django-unicorn/commits?author=epw1624" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://quiescent.us"><img src="https://avatars.githubusercontent.com/u/2302957?v=4?s=100" width="100px;" alt="Jeremy Wright"/><br /><sub><b>Jeremy Wright</b></sub></a><br /><a href="https://github.com/adamghill/django-unicorn/commits?author=JeremyLWright" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://johananoppongamoateng.hashnode.dev/"><img src="https://avatars.githubusercontent.com/u/88411614?v=4?s=100" width="100px;" alt="Johanan Oppong Amoateng"/><br /><sub><b>Johanan Oppong Amoateng</b></sub></a><br /><a href="https://github.com/adamghill/django-unicorn/commits?author=JohananOppongAmoateng" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
