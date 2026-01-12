@@ -3,12 +3,10 @@ import re
 from collections import deque
 
 import orjson
-from bs4 import BeautifulSoup
-from bs4.dammit import EntitySubstitution
-from bs4.element import Tag
-from bs4.formatter import HTMLFormatter
+from django.conf import settings
 from django.template.backends.django import Template
 from django.template.response import TemplateResponse
+from lxml import html
 
 from django_unicorn.decorators import timed
 from django_unicorn.errors import (
@@ -18,7 +16,7 @@ from django_unicorn.errors import (
     NoRootComponentElementError,
 )
 from django_unicorn.settings import get_minify_html_enabled, get_script_location
-from django_unicorn.utils import generate_checksum, sanitize_html
+from django_unicorn.utils import generate_checksum, html_element_to_string, sanitize_html
 
 logger = logging.getLogger(__name__)
 
@@ -42,12 +40,12 @@ EMPTY_ELEMENTS = (
 )
 
 
-def is_html_well_formed(html: str) -> bool:
+def is_html_well_formed(html_content: str) -> bool:
     """
     Whether the passed-in HTML is missing any closing elements which can cause issues when rendering.
     """
 
-    tag_list = re.split("(<[^>!]*>)", html)[1::2]
+    tag_list = re.split("(<[^>!]*>)", html_content)[1::2]
     stack: deque[str] = deque()
 
     for tag in tag_list:
@@ -62,77 +60,80 @@ def is_html_well_formed(html: str) -> bool:
     return len(stack) == 0
 
 
-def assert_has_single_wrapper_element(root_element: Tag, component_name: str) -> None:
-    """Assert that there is at least one child in the root element. And that there is only
-    one root element.
-    """
-
-    # Check that the root element has at least one child
-    try:
-        next(root_element.descendants)
-    except StopIteration:
-        raise NoRootComponentElementError(
-            f"The '{component_name}' component does not appear to have one root element."
-        ) from None
-
-    if "unicorn:view" in root_element.attrs or "u:view" in root_element.attrs:
-        # If the root element is a direct view, skip the check
-        return
-
-    # Check that there is not more than one root element
-    parent_element = root_element.parent
-    if parent_element is None:
-        raise AssertionError("Root element must have a parent")
-
-    tag_count = len([c for c in parent_element.children if isinstance(c, Tag)])
-
-    if tag_count > 1:
-        raise MultipleRootComponentElementError(
-            f"The '{component_name}' component appears to have multiple root elements."
-        ) from None
-
-
-def _get_direct_view(tag: Tag):
-    return tag.find_next(attrs={"unicorn:view": True}) or tag.find_next(attrs={"u:view": True})
-
-
-def get_root_element(soup: BeautifulSoup) -> Tag:
+def get_root_element(content: str) -> html.HtmlElement:
     """Gets the first tag element for the component or the first element with a `unicorn:view` attribute for a direct
     view.
 
     Returns:
-        BeautifulSoup tag element.
+        lxml element.
 
         Raises `Exception` if an element cannot be found.
     """
+    try:
+        if isinstance(content, html.HtmlElement):
+            return content
 
-    for element in soup.contents:
-        if isinstance(element, Tag) and element.name:
-            if element.name == "html":
-                view_element = _get_direct_view(element)
+        if "<html" in content.lower():
+            root_element = html.fromstring(content)
+        else:
+            # lxml.html.fragments_fromstring returns a list of elements/strings
+            fragments = html.fragments_fromstring(content)
+            elements = [f for f in fragments if isinstance(f, html.HtmlElement)]
 
-                if not view_element:
-                    raise MissingComponentViewElementError(
-                        "An element with an `unicorn:view` attribute is required for a direct view"
-                    )
+            if not elements:
+                raise MissingComponentElementError("No root element for the component was found")
 
-                return view_element
+            root_element = elements[0]
+    except MissingComponentViewElementError:
+        # Re-raise this specific error
+        raise
+    except Exception as e:
+        if isinstance(e, MissingComponentElementError):
+            raise
+        raise MissingComponentElementError(f"Failed to parse component HTML: {e}") from e
 
-            return element
+    if root_element.tag == "html":
+        # Check for unicorn:view in descendants
+        view_element = None
+        for element in root_element.iter():
+            if "unicorn:view" in element.attrib or "u:view" in element.attrib:
+                view_element = element
+                break
 
-    raise MissingComponentElementError("No root element for the component was found")
+        if view_element is None:
+            raise MissingComponentViewElementError(
+                "An element with an `unicorn:view` attribute is required for a direct view"
+            )
+        return view_element
+
+    return root_element
 
 
-class UnsortedAttributes(HTMLFormatter):
-    """
-    Prevent beautifulsoup from re-ordering attributes.
-    """
+def assert_has_single_wrapper_element(content: str, component_name: str) -> None:
+    """Assert that there is only one root element."""
+    try:
+        if isinstance(content, html.HtmlElement):
+            elements = [content]
+        else:
+            fragments = html.fragments_fromstring(content)
+            elements = [f for f in fragments if isinstance(f, html.HtmlElement)]
+    except Exception:
+        # Should have been caught by get_root_element usually
+        return
 
-    def __init__(self):
-        super().__init__(entity_substitution=EntitySubstitution.substitute_html)
+    if len(elements) > 1:
+        raise MultipleRootComponentElementError(
+            f"The '{component_name}' component appears to have multiple root elements."
+        )
 
-    def attributes(self, tag: Tag):
-        yield from tag.attrs.items()
+    if not elements:
+        raise NoRootComponentElementError(f"The '{component_name}' component does not appear to have one root element.")
+
+    if f"<{elements[0].tag}>" in EMPTY_ELEMENTS:
+        raise NoRootComponentElementError(
+            f"The '{component_name}' component root element cannot be a void element like <{elements[0].tag}>. "
+            "It must be a wrapping element."
+        )
 
 
 class UnicornTemplateResponse(TemplateResponse):
@@ -185,36 +186,41 @@ class UnicornTemplateResponse(TemplateResponse):
 
         content = response.content.decode("utf-8")
 
-        if not is_html_well_formed(content):
+        # Only check if HTML is well-formed in DEBUG mode
+        if settings.DEBUG and not is_html_well_formed(content):
             logger.warning(
-                f"The HTML in '{self.component.component_name}' appears to be missing a closing tag. That can \
-potentially cause errors in Unicorn."
+                f"The HTML in '{self.component.component_name}' appears to be missing a closing tag. "
+                "That can potentially cause errors in Unicorn."
             )
 
+        try:
+            assert_has_single_wrapper_element(content, self.component.component_name)
+        except (NoRootComponentElementError, MultipleRootComponentElementError) as ex:
+            logger.warning(ex)
+
+        root_element = get_root_element(content)
+
+        # Prepare Data
         frontend_context_variables = self.component.get_frontend_context_variables()
         frontend_context_variables_dict = orjson.loads(frontend_context_variables)
         checksum = generate_checksum(frontend_context_variables_dict)
 
-        # Use `html.parser` and not `lxml` because in testing it was no faster even with `cchardet`
-        # despite https://thehftguy.com/2020/07/28/making-beautifulsoup-parsing-10-times-faster/
-        soup = BeautifulSoup(content, features="html.parser")
-        root_element = get_root_element(soup)
+        # Modify Attributes
+        root_element.set("unicorn:id", self.component.component_id)
+        if hasattr(self.component, "component_name"):
+            root_element.set("unicorn:name", self.component.component_name)
+        root_element.set("unicorn:key", str(self.component.component_key or ""))
+        root_element.set("unicorn:checksum", checksum)
+        root_element.set("unicorn:data", frontend_context_variables)
+        root_element.set("unicorn:calls", orjson.dumps(self.component.calls).decode("utf-8"))
 
-        try:
-            assert_has_single_wrapper_element(root_element, self.component.component_name)
-        except (NoRootComponentElementError, MultipleRootComponentElementError) as ex:
-            logger.warning(ex)
+        # Calculate content hash (without script)
+        rendered_template_no_script = html_element_to_string(root_element)
+        content_hash = generate_checksum(rendered_template_no_script)
 
-        root_element["unicorn:id"] = self.component.component_id
-        root_element["unicorn:name"] = self.component.component_name
-        root_element["unicorn:key"] = self.component.component_key
-        root_element["unicorn:checksum"] = checksum
-        root_element["unicorn:data"] = frontend_context_variables
-        root_element["unicorn:calls"] = orjson.dumps(self.component.calls).decode("utf-8")
+        rendered_template = rendered_template_no_script
 
-        # Generate the checksum based on the rendered content (without script tag)
-        content_hash = generate_checksum(UnicornTemplateResponse._desoupify(soup))
-
+        # Inject Scripts
         if self.init_js:
             init = {
                 "id": self.component.component_id,
@@ -224,16 +230,16 @@ potentially cause errors in Unicorn."
                 "calls": self.component.calls,
                 "hash": content_hash,
             }
-            init = orjson.dumps(init).decode("utf-8")
+            init_json = orjson.dumps(init).decode("utf-8")
+            init_json_safe = sanitize_html(init_json)
             json_element_id = f"unicorn:data:{self.component.component_id}"
             init_script = (
                 f"Unicorn.componentInit(JSON.parse(document.getElementById('{json_element_id}').textContent));"
             )
 
-            json_tag = soup.new_tag("script")
-            json_tag["type"] = "application/json"
-            json_tag["id"] = json_element_id
-            json_tag.string = sanitize_html(init)
+            # Create JSON script tag
+            json_tag = html.Element("script", type="application/json", id=json_element_id)
+            json_tag.text = init_json_safe
 
             if self.component.parent:
                 self.component._init_script = init_script
@@ -247,49 +253,41 @@ potentially cause errors in Unicorn."
                     descendant = descendants.pop()
                     for child in descendant.children:
                         init_script = f"{init_script} {child._init_script}"
-                        json_tags.append(child._json_tag)
 
-                        # We need to delete this property here as it can cause RecursionError
-                        # when pickling child component. Tag element has previous_sibling
-                        # and next_sibling which would also be pickled and if they are big,
-                        # cause RecursionError
-                        del child._json_tag
+                        if hasattr(child, "_json_tag"):
+                            json_tags.append(child._json_tag)
+                            del child._json_tag
 
                         descendants.append(child)
 
-                script_tag = soup.new_tag("script")
-                script_tag["type"] = "module"
-                script_tag.string = f"if (typeof Unicorn === 'undefined') {{ console.error('Unicorn is missing. Do you \
-need {{% load unicorn %}} or {{% unicorn_scripts %}}?') }} else {{ {init_script} }}"
+                script_tag = html.Element("script", type="module")
+                script_content = (
+                    "if (typeof Unicorn === 'undefined') { "
+                    "console.error('Unicorn is missing. Do you need {% load unicorn %} or {% unicorn_scripts %}?') "
+                    "} else { " + init_script + " }"
+                )
+                script_tag.text = script_content
 
                 if get_script_location() == "append":
                     root_element.append(script_tag)
-                else:
-                    root_element.insert_after(script_tag)
-
-                for t in json_tags:
-                    if get_script_location() == "append":
+                    for t in json_tags:
                         root_element.append(t)
-                    else:
-                        root_element.insert_after(t)
+                    rendered_template = html_element_to_string(root_element)
+                else:
+                    root_html = html_element_to_string(root_element)
+                    script_html = html_element_to_string(script_tag)
+                    for t in json_tags:
+                        script_html += html_element_to_string(t)
+                    rendered_template = root_html + script_html
 
-        rendered_template = UnicornTemplateResponse._desoupify(soup)
         self.component.rendered(rendered_template)
-
         response.content = rendered_template
 
         if get_minify_html_enabled():
-            # Import here in case the minify extra was not installed
-            from htmlmin import minify  # type: ignore # noqa: PLC0415
+            from htmlmin import minify  # noqa: PLC0415
 
             minified_html = minify(response.content.decode())
-
             if len(minified_html) < len(rendered_template):
                 response.content = minified_html
 
         return response
-
-    @staticmethod
-    def _desoupify(soup):
-        soup.smooth()
-        return soup.encode(formatter=UnsortedAttributes()).decode("utf-8")

@@ -23,7 +23,7 @@ class FakeComponentChild(UnicornView):
     template_name = "templates/test_component_child.html"
 
     def parent_increment(self):
-        self.parent.value += 1
+        self.parent.value += 1  # type: ignore
 
 
 def test_message_hash_no_change(client):
@@ -268,7 +268,7 @@ def test_message_hash_no_change_but_parent(client):
     rendered_child_content = child.render()
     child_hash = generate_checksum(rendered_child_content)
 
-    assert child.parent.value == 0
+    assert child.parent.value == 0  # type: ignore
 
     data = {}
     response = post_and_get_response(

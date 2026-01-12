@@ -42,13 +42,10 @@ def test_component_request_parsing():
         "key": "",
         "hash": "abc",
         "data": {},
-        "checksum": "fail",  # This will fail checksum validation if we don't mock generate_checksum or provide correct checksum
+        "checksum": "fail",
     }
-    # We need to construct a valid body.
-    # Let's bypass validation for this unit test or mock it?
-    # Or just provide valid checksum.
 
-    body["checksum"] = generate_checksum(body["data"])
+    body["checksum"] = generate_checksum(str(body["data"]))
 
     request.body = json.dumps(body).encode("utf-8")
 
@@ -74,7 +71,7 @@ def test_component_request_action_parsing():
         ],
     }
 
-    body["checksum"] = generate_checksum(body["data"])
+    body["checksum"] = generate_checksum(str(body["data"]))
     request.body = json.dumps(body).encode("utf-8")
 
     req = ComponentRequest(request, "test-component")

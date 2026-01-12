@@ -106,13 +106,13 @@ def test_set_property_value_queryset():
 def test_set_property_value_many_to_many_is_referenced():
     component = FakeComponent(component_name="test", component_id="test_set_property_value_many_to_many_is_referenced")
     component.model.save()
-    assert component.model.taste_set.count() == 0
+    assert component.model.taste_set.count() == 0  # type: ignore
 
     taste = Taste(name="Bitter")
     taste.save()
     flavor = Flavor(name="test-flavor")
     flavor.save()
-    flavor.taste_set.add(taste)
+    flavor.taste_set.add(taste)  # type: ignore
 
     data = {"model": {}}
 
@@ -124,7 +124,7 @@ def test_set_property_value_many_to_many_is_referenced():
     )
 
     assert data["model"]["taste_set"] == [taste.pk]
-    assert component.model.taste_set.count() == 1
+    assert component.model.taste_set.count() == 1  # type: ignore
 
 
 @pytest.mark.django_db
@@ -133,13 +133,13 @@ def test_set_property_value_many_to_many_references_model():
         component_name="test", component_id="test_set_property_value_many_to_many_references_model"
     )
     component.taste.save()
-    assert component.taste.flavor.count() == 0
+    assert component.taste.flavor.count() == 0  # type: ignore
 
     taste = Taste(name="Bitter")
     taste.save()
     flavor = Flavor(name="test-flavor")
     flavor.save()
-    flavor.taste_set.add(taste)
+    flavor.taste_set.add(taste)  # type: ignore
 
     data = {"taste": {}}
 
@@ -151,4 +151,4 @@ def test_set_property_value_many_to_many_references_model():
     )
 
     assert data["taste"]["flavor"] == [flavor.pk]
-    assert component.taste.flavor.count() == 1
+    assert component.taste.flavor.count() == 1  # type: ignore

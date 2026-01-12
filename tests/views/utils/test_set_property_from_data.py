@@ -27,7 +27,7 @@ class FakeComponent(UnicornView):
     try:
         datetimes_with_new_typehint: list[datetime] = [datetime(2020, 5, 1, tzinfo=timezone.utc)]
     except TypeError:
-        datetimes_with_new_typehint: None
+        datetimes_with_new_typehint: None  # type: ignore
 
 
 class FakeQuerySetComponent(UnicornView):
@@ -207,7 +207,7 @@ def test_set_property_from_data_queryset_list_with_typehint():
     component = FakeComponent(
         component_name="test", component_id="test_set_property_from_data_queryset_list_with_typehint"
     )
-    assert len(component.queryset_with_typehint) == 0
+    assert len(component.queryset_with_typehint) == 0  # type: ignore
 
     set_property_from_data(component, "queryset_with_typehint", [{"name": "test-qs"}])
 
