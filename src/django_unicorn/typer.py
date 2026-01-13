@@ -92,7 +92,13 @@ def get_type_hints(obj) -> dict:
         pass
 
     try:
-        type_hints = typing_get_type_hints(obj)
+        if hasattr(obj, "__class__"):
+            # Should be called with class object (instead of instance) to get type hints of parent classes. From docs:
+            # "If obj is a class C, the function returns a dictionary that merges annotations from C’s base classes with those on C directly.
+            # This is done by traversing C.__mro__ and iteratively combining __annotations__ dictionaries." (https://docs.python.org/3/library/typing.html#typing.get_type_hints)
+            type_hints = typing_get_type_hints(obj.__class__)
+        else:
+            type_hints = typing_get_type_hints(obj)
 
         # Cache the type hints just in case
         type_hints_cache[obj] = type_hints
