@@ -75,8 +75,11 @@ def assert_has_single_wrapper_element(root_element: Tag, component_name: str) ->
             f"The '{component_name}' component does not appear to have one root element."
         ) from None
 
-    if "unicorn:view" in root_element.attrs or "u:view" in root_element.attrs:
-        # If the root element is a direct view, skip the check
+    has_view = "unicorn:view" in root_element.attrs or "u:view" in root_element.attrs
+    has_poll = "unicorn:poll" in root_element.attrs or "u:poll" in root_element.attrs
+
+    if has_view or (has_view and has_poll):
+    # If the root element is a direct view (with or without poll), skip the check
         return
 
     # Check that there is not more than one root element
