@@ -23,7 +23,7 @@ class ModelsView(UnicornView):
         self.refresh_flavors()
 
     def save(self, flavor_idx: int):
-        flavor_data = self.flavors[flavor_idx]
+        flavor_data = self.flavors[flavor_idx]  # type: ignore
         flavor_data.save()
 
     def delete(self, flavor_to_delete: Flavor):

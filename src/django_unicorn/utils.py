@@ -10,6 +10,7 @@ from django.template import engines
 from django.template.backends.django import Template
 from django.utils.html import _json_script_escapes  # type: ignore
 from django.utils.safestring import SafeText, mark_safe
+from lxml import html
 
 try:
     from cachetools.lru import LRUCache  # type: ignore
@@ -20,6 +21,13 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 function_signature_cache = LRUCache(maxsize=100)
+
+
+def html_element_to_string(element: html.HtmlElement, **kwargs) -> str:
+    """
+    Convert an lxml element to a string with unicode encoding.
+    """
+    return html.tostring(element, encoding="unicode", **kwargs)
 
 
 def generate_checksum(data: bytes | str | dict | None) -> str:

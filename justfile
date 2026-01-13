@@ -1,7 +1,7 @@
 import? 'adamghill.justfile'
 import? '../dotfiles/just/justfile'
 
-src := "django_unicorn"
+src := "src/django_unicorn"
 
 # List commands
 _default:
@@ -13,7 +13,7 @@ fetch:
 
 # Run the dev server for the example project
 runserver:
-    uv run example/manage.py runserver 0:8080
+    -uv run --all-extras example/manage.py runserver 0:8080
 
 # Run the Python matrix test suite
 test-python-matrix:
@@ -38,30 +38,30 @@ js-install:
 
 # Run Python unit tests
 test-python:
-    uv run pytest -m 'not slow'
+    -uv run --all-extras pytest -m 'not slow'
 
 # Run Python unit tests with benchmarks
 test-python-benchmarks:
-    uv run pytest tests/benchmarks/ --benchmark-autosave --benchmark-only
+    -uv run --all-extras pytest tests/benchmarks/ --benchmark-autosave --benchmark-only
 
 # Run Python unit tests with compared benchmarks
 test-python-benchmarks-compare:
-    uv run pytest tests/benchmarks/ --benchmark-only --benchmark-compare
+    -uv run --all-extras pytest tests/benchmarks/ --benchmark-only --benchmark-compare
 
 # Run tests with coverage
 test-python-coverage:
-    uv run pytest --cov=django_unicorn
+    -uv run --all-extras pytest --cov=django_unicorn
 
 type:
-    uv run ty check .
+    -uv run --all-extras ty check .
 
 # Sphinx autobuild
 docs-serve:
-    uv run sphinx-autobuild -W docs/source docs/build
+    -uv run --all-extras sphinx-autobuild -W docs/source docs/build
 
 # Build documentation
 docs-build:
-    uv run sphinx-build -W docs/source docs/build
+    -uv run --all-extras sphinx-build -W docs/source docs/build
 
 # Build everything (checks, JS, docs)
 build:
@@ -71,7 +71,10 @@ build:
     js-build
     docs-build
 
-# Publish package
-publish:
-    uv build
-    uv publish
+# Run e2e tests
+test-e2e:
+    uv run pytest tests/integration -m integration
+
+# Run e2e tests with headed browser
+test-e2e-headed:
+    uv run pytest tests/integration -m integration --headed

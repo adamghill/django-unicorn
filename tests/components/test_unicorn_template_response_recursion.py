@@ -2,8 +2,8 @@ import pickle
 import sys
 from unittest.mock import MagicMock
 
-from bs4 import BeautifulSoup
 from django.test import RequestFactory
+from lxml import html
 
 from django_unicorn.components import UnicornView
 from django_unicorn.components.unicorn_template_response import UnicornTemplateResponse
@@ -21,8 +21,7 @@ def test_child_component_cleanup_prevents_recursion_error():
     # Create a deep DOM to ensure recursion error would happen if not cleaned up
     depth = 2000
     html_content = "<div>" + ("<span>" * depth) + "Hello" + ("</span>" * depth) + "</div>"
-    soup = BeautifulSoup(html_content, "html.parser")
-    child._json_tag = soup.find("div")  # Simulate the tag attached during child render
+    child._json_tag = html.fragment_fromstring(html_content)  # type: ignore
     child._init_script = "Unicorn.componentInit({});"
 
     # 2. Create parent component and link child
@@ -41,8 +40,7 @@ def test_child_component_cleanup_prevents_recursion_error():
         init_js=True,  # Important to trigger the logic that collects json_tags
     )
 
-    # Increase recursion limit to allow BS4 to process the deep tree without crashing during render
-    # We want to verify that pickling works AFTER the tag is removed, not that BS4 crashes.
+    # Increase recursion limit
     original_recursion_limit = sys.getrecursionlimit()
     sys.setrecursionlimit(10000)
 
@@ -55,8 +53,6 @@ def test_child_component_cleanup_prevents_recursion_error():
         assert not hasattr(child, "_json_tag"), "child._json_tag should have been deleted"
 
         # 6. Verify pickling parent works
-        # If _json_tag was arguably still there, this might fail or pass depending on limit.
-        # But since we verified it IS deleted, this confirms the object state is clean.
         pickle.dumps(parent)
 
     finally:

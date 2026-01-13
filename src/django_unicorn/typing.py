@@ -7,9 +7,7 @@ M_co = TypeVar("M_co", bound=Model, covariant=True)
 
 
 if TYPE_CHECKING:
-
-    class QuerySetType(QuerySet[M_co]):
-        pass
+    QuerySetType = QuerySet[M_co] | list[M_co] | None
 else:
 
     class QuerySetType(Generic[M_co], QuerySet):

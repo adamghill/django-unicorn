@@ -3,7 +3,7 @@ from example.coffee.models import Flavor
 
 
 class RowView(UnicornView):
-    model: Flavor = None
+    model: Flavor = None  # type: ignore
     is_editing = False
     is_updated_by_child = False
 
