@@ -66,7 +66,7 @@ jobs:
           uv pip install django==${{ matrix.django-version }}
 
       - name: Fast tests
-        run: uv run pytest -m 'not slow'
+        run: uv run pytest -m 'not slow and not playwright'
 
       - name: Slow tests
         run: uv run pytest -m 'slow'
