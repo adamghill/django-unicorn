@@ -16,6 +16,13 @@ logger = logging.getLogger(__name__)
 
 
 class PointerUnicornView:
+    """Lightweight placeholder for UnicornView during caching.
+
+    This class is used to break circular references when pickling components.
+    It should ONLY be used during cache serialization/deserialization.
+    If this class is accessed outside of caching context, it indicates a bug.
+    """
+
     def __init__(self, component_cache_key):
         self.component_cache_key = component_cache_key
         self.parent = None
@@ -76,18 +83,23 @@ class CacheableComponent:
                 components.append(child)
                 component.children[index] = PointerUnicornView(child.component_cache_key)
 
-        for component, *_ in self._state.values():
-            try:
+        # Verify all components can be pickled. If any fail, we MUST restore state
+        # before raising the exception, otherwise parent/children will be left as
+        # PointerUnicornView objects.
+        try:
+            for component, *_ in self._state.values():
                 pickle.dumps(component)
-            except (
-                TypeError,
-                AttributeError,
-                NotImplementedError,
-                pickle.PicklingError,
-            ) as e:
-                raise UnicornCacheError(
-                    f"Cannot cache component '{type(component)}' because it is not picklable: {type(e)}: {e}"
-                ) from e
+        except (
+            TypeError,
+            AttributeError,
+            NotImplementedError,
+            pickle.PicklingError,
+        ) as e:
+            # Restore state before raising!
+            self.__exit__(None, None, None)
+            raise UnicornCacheError(
+                f"Cannot cache component '{type(component)}' because it is not picklable: {type(e)}: {e}"
+            ) from e
 
         return self
 

@@ -1,11 +1,15 @@
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 from django_unicorn.cacher import (
     CacheableComponent,
+    PointerUnicornView,
     cache_full_tree,
     restore_from_cache,
 )
 from django_unicorn.components import UnicornView
+from django_unicorn.errors import UnicornCacheError
 
 
 class FakeComponent(UnicornView):
@@ -204,3 +208,87 @@ def test_caching_components_with_template_html(create_template):
 
     # check that template_name will re-create a Template based on `template_html`
     create_template.assert_called_once_with(component.template_html)
+
+
+class UnpicklableObject:
+    """Object that cannot be pickled, used to test pickle failure handling."""
+
+    def __reduce__(self):
+        raise TypeError("Cannot pickle this object")
+
+
+class ComponentWithUnpicklableAttribute(UnicornView):
+    """Component that has an attribute that cannot be pickled."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.unpicklable = UnpicklableObject()
+
+
+def test_cacheable_component_restores_state_on_pickle_failure():
+    """Test that parent/children are restored when pickle fails.
+
+    This is a regression test for a bug where pickle failure in CacheableComponent
+    would leave parent/children as PointerUnicornView objects instead of restoring
+    them to the original components.
+    """
+
+    parent = FakeComponent(
+        component_id="test_pickle_failure_parent",
+        component_name="parent",
+    )
+    child = ComponentWithUnpicklableAttribute(
+        component_id="test_pickle_failure_child",
+        component_name="child",
+        parent=parent,
+    )
+
+    # Verify initial state
+    assert child.parent is parent
+    assert parent in [child.parent]
+    assert child in parent.children
+
+    # CacheableComponent should raise UnicornCacheError due to unpicklable attribute
+    with pytest.raises(UnicornCacheError):
+        with CacheableComponent(child):
+            pass
+
+    # After pickle failure, parent/children should be restored to original components,
+    # NOT left as PointerUnicornView objects
+    assert child.parent is parent, "child.parent should be restored to original parent component"
+    assert not isinstance(child.parent, PointerUnicornView), "child.parent should not be PointerUnicornView"
+    assert child in parent.children, "child should still be in parent.children"
+    assert not any(isinstance(c, PointerUnicornView) for c in parent.children), (
+        "parent.children should not contain PointerUnicornView objects"
+    )
+
+
+def test_cacheable_component_restores_nested_state_on_pickle_failure():
+    """Test that deeply nested parent/children are all restored when pickle fails."""
+
+    grandparent = FakeComponent(
+        component_id="test_nested_pickle_failure_grandparent",
+        component_name="grandparent",
+    )
+    parent = FakeComponent(
+        component_id="test_nested_pickle_failure_parent",
+        component_name="parent",
+        parent=grandparent,
+    )
+    child = ComponentWithUnpicklableAttribute(
+        component_id="test_nested_pickle_failure_child",
+        component_name="child",
+        parent=parent,
+    )
+
+    with pytest.raises(UnicornCacheError):
+        with CacheableComponent(child):
+            pass
+
+    # All parent/children relationships should be restored
+    assert child.parent is parent
+    assert parent.parent is grandparent
+    assert not isinstance(child.parent, PointerUnicornView)
+    assert not isinstance(parent.parent, PointerUnicornView)
+    assert child in parent.children
+    assert parent in grandparent.children
