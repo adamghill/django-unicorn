@@ -10,7 +10,10 @@ These tests verify actual reactivity - that when inputs change, the DOM updates 
 import pytest
 from playwright.sync_api import Page, expect
 
-pytestmark = pytest.mark.integration
+pytestmark = [
+    pytest.mark.integration,
+    pytest.mark.playwright,
+]
 
 BASE_URL = "http://localhost:8080"
 
