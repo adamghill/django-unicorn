@@ -1,7 +1,7 @@
 import logging
 from dataclasses import is_dataclass
 from datetime import date, datetime, time, timedelta, timezone
-from inspect import Parameter, signature
+from inspect import signature
 from typing import Any, Union
 
 try:
@@ -84,6 +84,8 @@ def get_type_hints(obj) -> dict:
         An empty dictionary if no type hints can be retrieved.
     """
 
+    type_hints = {}
+
     try:
         if obj in type_hints_cache:
             return type_hints_cache[obj]
@@ -99,36 +101,18 @@ def get_type_hints(obj) -> dict:
             type_hints = typing_get_type_hints(obj.__class__)
         else:
             type_hints = typing_get_type_hints(obj)
+    except (TypeError, NameError):
+        # Fallback to __annotations__ if get_type_hints fails, which can happen in some environments
+        # (e.g. Python 3.11 with coverage instrumentation)
+        type_hints = getattr(obj, "__annotations__", {})
 
+    try:
         # Cache the type hints just in case
         type_hints_cache[obj] = type_hints
+    except TypeError:
+        pass
 
-        return type_hints
-    except (TypeError, NameError) as e:
-        logger.warning(f"Failed to get type hints for {obj}: {e}")
-
-        try:
-            type_hints = {}
-            sig = signature(obj)
-
-            for param in sig.parameters.values():
-                if param.annotation is not Parameter.empty:
-                    type_hints[param.name] = param.annotation
-
-            if sig.return_annotation is not Parameter.empty:
-                type_hints["return"] = sig.return_annotation
-
-            # Cache the type hints just in case
-            type_hints_cache[obj] = type_hints
-
-            return type_hints
-        except (ValueError, TypeError):
-            pass
-
-        # Return an empty dictionary when there is a TypeError. From `get_type_hints`: "TypeError is
-        # raised if the argument is not of a type that can contain annotations, and an empty dictionary
-        # is returned if no annotations are present"
-        return {}
+    return type_hints
 
 
 def cast_value(type_hint, value):
