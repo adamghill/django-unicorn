@@ -1,12 +1,13 @@
-
-from typing import List
 from django_unicorn.typer import get_type_hints
+
 
 class Parent:
     name: str
 
+
 class Child(Parent):
     age: int
+
 
 def test_get_type_hints_inheritance():
     """
@@ -15,12 +16,12 @@ def test_get_type_hints_inheritance():
     """
     instance = Child()
     type_hints = get_type_hints(instance)
-    
+
     assert "name" in type_hints
-    assert type_hints["name"] == str
+    assert type_hints["name"] is str
     assert "age" in type_hints
-    assert type_hints["age"] == int
+    assert type_hints["age"] is int
+
 
 if __name__ == "__main__":
     test_get_type_hints_inheritance()
-    print("Test passed!")
