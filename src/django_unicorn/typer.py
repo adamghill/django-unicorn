@@ -1,3 +1,4 @@
+import inspect
 import logging
 from dataclasses import is_dataclass
 from datetime import date, datetime, time, timedelta, timezone
@@ -94,7 +95,9 @@ def get_type_hints(obj) -> dict:
         pass
 
     try:
-        if hasattr(obj, "__class__"):
+        if inspect.isclass(obj) or inspect.ismodule(obj) or inspect.isroutine(obj):
+            type_hints = typing_get_type_hints(obj)
+        elif hasattr(obj, "__class__"):
             # Should be called with class object (instead of instance) to get type hints of parent classes. From docs:
             # "If obj is a class C, the function returns a dictionary that merges annotations from C’s base classes with those on C directly.
             # This is done by traversing C.__mro__ and iteratively combining __annotations__ dictionaries." (https://docs.python.org/3/library/typing.html#typing.get_type_hints)
