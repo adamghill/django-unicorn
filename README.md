@@ -43,7 +43,7 @@
 | src/django\_unicorn/views/objects.py                                 |       92 |       46 |       32 |        0 |     47% |19-22, 25, 29-35, 44-79, 82, 94-104, 158-161 |
 | src/django\_unicorn/views/request.py                                 |       59 |        4 |       26 |        3 |     92% |43, 47, 83, 86 |
 | src/django\_unicorn/views/response.py                                |       67 |       23 |       30 |        1 |     63% |    97-149 |
-| src/django\_unicorn/views/utils.py                                   |       71 |        8 |       34 |        5 |     88% |20-21, 39-43, 55->exit, 71, 75-77, 123->128, 124->123 |
+| src/django\_unicorn/views/utils.py                                   |       71 |        8 |       34 |        5 |     88% |18-19, 37-41, 53->exit, 69, 73-75, 121->126, 122->121 |
 | tests/\_\_init\_\_.py                                                |        0 |        0 |        0 |        0 |    100% |           |
 | tests/benchmarks/\_\_init\_\_.py                                     |        0 |        0 |        0 |        0 |    100% |           |
 | tests/benchmarks/serializer/\_\_init\_\_.py                          |        0 |        0 |        0 |        0 |    100% |           |
