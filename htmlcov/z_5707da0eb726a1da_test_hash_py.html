@@ -67,7 +67,7 @@
             <a id="nextFileLink" class="nav" href="z_5707da0eb726a1da_test_message_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.13.1">coverage.py v7.13.1</a>,
-            created at 2026-01-12 03:36 +0000
+            created at 2026-01-19 01:10 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -107,7 +107,7 @@
     <p class="run"><span class="n"><a id="t23" href="#t23">23</a></span><span class="t">    <span class="nam">template_name</span> <span class="op">=</span> <span class="str">"templates/test_component_child.html"</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t24" href="#t24">24</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t25" href="#t25">25</a></span><span class="t">    <span class="key">def</span> <span class="nam">parent_increment</span><span class="op">(</span><span class="nam">self</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t26" href="#t26">26</a></span><span class="t">        <span class="nam">self</span><span class="op">.</span><span class="nam">parent</span><span class="op">.</span><span class="nam">value</span> <span class="op">+=</span> <span class="num">1</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t26" href="#t26">26</a></span><span class="t">        <span class="nam">self</span><span class="op">.</span><span class="nam">parent</span><span class="op">.</span><span class="nam">value</span> <span class="op">+=</span> <span class="num">1</span>  <span class="com"># type: ignore</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t27" href="#t27">27</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t28" href="#t28">28</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t29" href="#t29">29</a></span><span class="t"><span class="key">def</span> <span class="nam">test_message_hash_no_change</span><span class="op">(</span><span class="nam">client</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
@@ -352,7 +352,7 @@
     <p class="run"><span class="n"><a id="t268" href="#t268">268</a></span><span class="t">    <span class="nam">rendered_child_content</span> <span class="op">=</span> <span class="nam">child</span><span class="op">.</span><span class="nam">render</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t269" href="#t269">269</a></span><span class="t">    <span class="nam">child_hash</span> <span class="op">=</span> <span class="nam">generate_checksum</span><span class="op">(</span><span class="nam">rendered_child_content</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t270" href="#t270">270</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t271" href="#t271">271</a></span><span class="t">    <span class="key">assert</span> <span class="nam">child</span><span class="op">.</span><span class="nam">parent</span><span class="op">.</span><span class="nam">value</span> <span class="op">==</span> <span class="num">0</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t271" href="#t271">271</a></span><span class="t">    <span class="key">assert</span> <span class="nam">child</span><span class="op">.</span><span class="nam">parent</span><span class="op">.</span><span class="nam">value</span> <span class="op">==</span> <span class="num">0</span>  <span class="com"># type: ignore</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t272" href="#t272">272</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t273" href="#t273">273</a></span><span class="t">    <span class="nam">data</span> <span class="op">=</span> <span class="op">{</span><span class="op">}</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t274" href="#t274">274</a></span><span class="t">    <span class="nam">response</span> <span class="op">=</span> <span class="nam">post_and_get_response</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
@@ -386,7 +386,7 @@
             <a class="nav" href="z_5707da0eb726a1da_test_message_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.13.1">coverage.py v7.13.1</a>,
-            created at 2026-01-12 03:36 +0000
+            created at 2026-01-19 01:10 +0000
         </p>
     </div>
 </footer>
