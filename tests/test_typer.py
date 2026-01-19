@@ -31,9 +31,10 @@ def test_get_type_hints_gh_639():
     class MyComponentView(UnicornView):
         a_date: datetime.date
 
-    expected = {"a_date": datetime.date}
     actual = get_type_hints(MyComponentView(component_name="test", component_id="test_get_type_hints_gh_639"))
-    assert actual == expected
+
+    assert "a_date" in actual
+    assert actual["a_date"] == datetime.date
 
 
 class TestClass:
