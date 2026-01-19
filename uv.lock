@@ -469,6 +469,7 @@ wheels = [
 
 [[package]]
 name = "django-unicorn"
+version = "0.64.0"
 source = { editable = "." }
 dependencies = [
     { name = "cachetools" },
@@ -539,7 +540,7 @@ requires-dist = [
     { name = "sphinxext-opengraph", marker = "extra == 'docs'" },
     { name = "toml", marker = "extra == 'docs'" },
 ]
-provides-extras = ["docs", "minify"]
+provides-extras = ["minify", "docs"]
 
 [package.metadata.requires-dev]
 dev = [

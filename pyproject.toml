@@ -1,6 +1,6 @@
 [project]
 name = "django-unicorn"
-dynamic = ["version"]
+version = "0.64.0"
 description = "A magical full-stack framework for Django."
 readme = "README.md"
 requires-python = ">=3.10"

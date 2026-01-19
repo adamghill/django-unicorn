@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.64.0
+
+- Switch to `lxml` instead of `beautifulsoup` for improved HTML parsing performance.
+- Add `unicorn:bind` as a synonym for `unicorn:model`.
+- Add [`unicorn:loading.delay`](loading-states.md#delay) modifier to prevent loading state from showing for fast actions [#754](https://github.com/adamghill/django-unicorn/pull/754) by [JohananOppongAmoateng](https://github.com/JohananOppongAmoateng).
+- Add [action modifier to disable](actions.md#disable) an element while an action is in-flight [#755](https://github.com/adamghill/django-unicorn/pull/755) by [JohananOppongAmoateng](https://github.com/JohananOppongAmoateng).
+- Add `Component` base class as an alias for `UnicornView`.
+- Fix: Set request on restored component [#753](https://github.com/adamghill/django-unicorn/pull/753).
+- Fix: Coerce component key types to handle integer/string comparisons.
+- Fix: Handle pickle error for nested components.
+- Fix: Support inherited type hints in `get_type_hints` by [#759](https://github.com/adamghill/django-unicorn/pull/759) by [JohananOppongAmoateng](https://github.com/JohananOppongAmoateng).
+- Fix: "Multiple root elements" error with `unicorn:view` and `unicorn:poll` [#668](https://github.com/adamghill/django-unicorn/pull/668) by [JohananOppongAmoateng](https://github.com/JohananOppongAmoateng).
+
 ## 0.63.0
 
 - Fix: Child components would cause RecursionError when pickling by [igadmile](https://github.com/igadmile) in [#672](https://github.com/adamghill/django-unicorn/pull/672).

@@ -1,6 +1,6 @@
 import logging
 from dataclasses import is_dataclass
-from typing import Any, Union, cast
+from typing import Any, Union, cast, get_args, get_origin
 
 from django.db.models import Model
 
@@ -9,8 +9,6 @@ from django_unicorn.decorators import timed
 from django_unicorn.typer import (
     cast_value,
     create_queryset,
-    get_args,
-    get_origin,
     get_type_hints,
     is_queryset,
 )

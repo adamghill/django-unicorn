@@ -38,7 +38,7 @@ js-install:
 
 # Run Python unit tests
 test-python:
-    -uv run --all-extras pytest -m 'not slow'
+    -uv run --all-extras pytest -m 'not slow and not playwright'
 
 # Run Python unit tests with benchmarks
 test-python-benchmarks:
@@ -65,11 +65,11 @@ docs-build:
 
 # Build everything (checks, JS, docs)
 build:
-    type
-    test-python
-    js-install
-    js-build
-    docs-build
+    just type
+    just test-python
+    just js-install
+    just js-build
+    just docs-build
 
 # Run e2e tests
 test-e2e:

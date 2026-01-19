@@ -292,6 +292,20 @@ Waits the specified time in milliseconds before calling the specified method.
 </div>
 :::
 
+### disable
+
+Disables the element while the action is in flight.
+
+:::{code} html
+:force: true
+
+<!-- disable-modifier.html -->
+<div>
+    <input type="text" unicorn:model="name">
+    <button unicorn:click.disable="add_count">Add Count</button>
+</div>
+:::
+
 ## Special arguments
 
 ### $event
