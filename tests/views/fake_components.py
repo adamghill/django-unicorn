@@ -198,3 +198,11 @@ class FakeComponentWithResolveMethods(UnicornView):
         count_resolved += 1
 
         assert count_resolved == 1, "count_resolved called more than once"
+
+
+class BugComponent(UnicornView):
+    template_name = "templates/test_component.html"
+    flavor: str = "initial"
+
+    def set_flavor(self, value: str = ""):
+        self.flavor = value

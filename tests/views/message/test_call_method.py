@@ -405,3 +405,24 @@ def test_message_call_method_validation_error_string_no_code(client):
 
     assert body["error"]
     assert body["error"] == "Error code must be specified"
+
+
+def test_gh_628_custom_setter_empty_string(client):
+    data = {"flavor": "initial"}
+    # Simulate set_flavor() call with no args (empty string case)
+    action_queue = [
+        {
+            "payload": {"name": "set_flavor()"}, 
+            "type": "callMethod",
+        }
+    ]
+
+    response = post_and_get_response(
+        client,
+        url="/message/tests.views.fake_components.BugComponent",
+        data=data,
+        action_queue=action_queue,
+    )
+
+    assert not response["errors"]
+    assert response["data"]["flavor"] == ""

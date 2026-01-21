@@ -173,8 +173,9 @@ def _call_method_name(component: UnicornView, method_name: str, args: tuple[Any]
                     value = None
 
                     if not kwargs:
-                        value = args[len(parsed_args)]
-                        parsed_args.append(DbModel.objects.get(**{key: value}))
+                        if len(args) > len(parsed_args):
+                            value = args[len(parsed_args)]
+                            parsed_args.append(DbModel.objects.get(**{key: value}))
                     else:
                         value = kwargs.get("pk")
                         parsed_kwargs[argument] = DbModel.objects.get(**{key: value})
@@ -186,7 +187,8 @@ def _call_method_name(component: UnicornView, method_name: str, args: tuple[Any]
             elif argument in kwargs:
                 parsed_kwargs[argument] = kwargs[argument]
             else:
-                parsed_args.append(args[len(parsed_args)])
+                if len(args) > len(parsed_args):
+                    parsed_args.append(args[len(parsed_args)])
 
         if parsed_args:
             return func(*parsed_args, **parsed_kwargs)
