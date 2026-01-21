@@ -52,3 +52,19 @@ The first argument to `trigger` is the component name. The second argument is th
   Unicorn.trigger("hello_world", "nameKey");
 </script>
 ```
+
+## Dynamic Content
+
+Unicorn automatically initializes components that are dynamically added to the page (e.g. via `htmx`, `fetch`, or `innerHTML`) using a `MutationObserver`.
+
+If you need to manually check the DOM for new components, you can use `Unicorn.scan()`.
+
+```javascript
+// Scan the entire document
+Unicorn.scan();
+
+// Scan a specific element
+const container = document.getElementById('container');
+Unicorn.scan(container);
+```
+
