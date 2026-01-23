@@ -3,6 +3,15 @@ import? '../dotfiles/just/justfile'
 
 src := "src/django_unicorn"
 
+# Install pre-commit hooks
+install-pre-commit:
+    uv run --all-extras pre-commit install
+
+# Run pre-commit on all files
+lint:
+    uv run --all-extras pre-commit run --all-files
+
+
 # List commands
 _default:
     just --list --unsorted --justfile {{ justfile() }} --list-heading $'Available commands:\n'
