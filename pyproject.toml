@@ -40,6 +40,7 @@ dev = [
     "genbadge[all]>=1.1.1",
     "ty>=0.0.10",
     "pytest-playwright>=0.7.2",
+    "pre-commit>=4.5.1",
 ]
 
 [project.optional-dependencies]

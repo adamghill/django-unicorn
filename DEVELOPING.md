@@ -5,6 +5,7 @@
 1. Fork https://github.com/adamghill/django-unicorn`
 1. `git clone` your forked repository
 1. `cd django-unicorn`
+1. Install pre-commit hooks: `just install-pre-commit` _or_ `uv run pre-commit install`
 1. `uv sync --extra minify --extra docs`
 1. `just runserver`
 1. Go to `localhost:8080` in your browser
