@@ -16,7 +16,7 @@ classifiers = [
     "Framework :: Django",
 ]
 dependencies = [
-    "django>=2.2",  # Deliberately loose on dependencies even though only newer Django versions are officially tested/supported
+    "django>=5.2",
     "lxml",
     "orjson>=3.6.0",
     "shortuuid>=1.0.1",
