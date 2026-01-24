@@ -521,11 +521,18 @@ export class Component {
    * Queues the `messageSender.send` call.
    */
   queueMessage(debounceTime, callback) {
-    if (debounceTime === -1) {
-      debounce(send, 250, false)(this, callback);
-    } else {
-      debounce(send, debounceTime, false)(this, callback);
+    if (this.debounceTimer) {
+      clearTimeout(this.debounceTimer);
     }
+
+    if (debounceTime === -1) {
+      debounceTime = 250;
+    }
+
+    this.debounceTimer = setTimeout(() => {
+      send(this, callback);
+      this.debounceTimer = null;
+    }, debounceTime);
   }
 
   /**
