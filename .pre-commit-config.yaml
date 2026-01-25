@@ -1,12 +1,23 @@
 repos:
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.14.14
+  - repo: local
     hooks:
       - id: ruff
+        name: ruff
+        entry: uv run ruff check --force-exclude
+        language: system
+        types: [python]
         args: [--fix, --exit-non-zero-on-fix]
       - id: ruff-format
+        name: ruff-format
+        entry: uv run ruff format --force-exclude
+        language: system
+        types: [python]
 
-  - repo: https://github.com/allganize/ty-pre-commit
-    rev: v0.0.13
+  - repo: local
     hooks:
-      - id: ty-check
+      - id: ty
+        name: ty
+        entry: uv run --all-extras ty check .
+        language: system
+        types: [python]
+        pass_filenames: false
