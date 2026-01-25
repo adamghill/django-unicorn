@@ -412,7 +412,7 @@ def test_gh_628_custom_setter_empty_string(client):
     # Simulate set_flavor() call with no args (empty string case)
     action_queue = [
         {
-            "payload": {"name": "set_flavor()"}, 
+            "payload": {"name": "set_flavor()"},
             "type": "callMethod",
         }
     ]
