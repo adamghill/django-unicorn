@@ -131,7 +131,7 @@ class UnicornMessageHandler:
         component.pre_parse()
 
         for property_name, property_value in component_request.data.items():
-            set_property_from_data(component, property_name, property_value)
+            set_property_from_data(component, property_name, property_value, ignore_m2m=True)
 
         component.post_parse()
 
