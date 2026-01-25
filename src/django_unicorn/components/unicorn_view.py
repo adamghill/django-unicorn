@@ -12,7 +12,7 @@ from django.apps import apps as django_apps_module
 from django.core.exceptions import NON_FIELD_ERRORS
 from django.db.models import Model
 from django.forms.widgets import CheckboxInput, Select
-from django.http import HttpRequest
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.utils.decorators import classonlymethod
 from django.utils.safestring import mark_safe
 from django.views.generic.base import TemplateView
@@ -149,7 +149,7 @@ def construct_component(
     component.calls = []
     component.children = []
 
-    component.mount()
+    component._mount_result = component.mount()
     component.hydrate()
     component.complete()
     component._validate_called = False
@@ -423,6 +423,10 @@ class Component(TemplateView):
         if request:
             self.request = request
 
+        if hasattr(self, "_mount_result") and self._mount_result:
+            if isinstance(self._mount_result, HttpResponseRedirect):
+                return f"<script>window.location.href = '{self._mount_result.url}';</script>"
+
         response = self.render_to_response(
             context=self.get_context_data(),
             component=self,
@@ -442,7 +446,10 @@ class Component(TemplateView):
         Called by the `as_view` class method when utilizing a component directly as a view.
         """
 
-        self.mount()
+        self._mount_result = self.mount()
+        if self._mount_result and isinstance(self._mount_result, HttpResponse):
+            return self._mount_result
+
         self.hydrate()
 
         return self.render_to_response(

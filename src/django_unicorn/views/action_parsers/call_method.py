@@ -32,7 +32,7 @@ except ImportError:
 
 def handle(component_request: ComponentRequest, component: UnicornView, payload: dict):
     # Import here to prevent cyclic import
-    from django_unicorn.views.utils import set_property_from_data  # noqa: PLC0415
+    from django_unicorn.views.utils import set_property_from_data
 
     call_method_name = payload.get("name", "")
 
@@ -186,9 +186,8 @@ def _call_method_name(component: UnicornView, method_name: str, args: tuple[Any]
                     parsed_args.append(cast_value(type_hint, args[len(parsed_args)]))
             elif argument in kwargs:
                 parsed_kwargs[argument] = kwargs[argument]
-            else:
-                if len(args) > len(parsed_args):
-                    parsed_args.append(args[len(parsed_args)])
+            elif len(args) > len(parsed_args):
+                parsed_args.append(args[len(parsed_args)])
 
         if parsed_args:
             return func(*parsed_args, **parsed_kwargs)
