@@ -36,7 +36,7 @@
 | src/django\_unicorn/views/\_\_init\_\_.py                            |       35 |        0 |        2 |        0 |    100% |           |
 | src/django\_unicorn/views/action.py                                  |       46 |        6 |        2 |        0 |     88% |22, 34, 47, 54, 61, 75 |
 | src/django\_unicorn/views/action\_parsers/\_\_init\_\_.py            |        0 |        0 |        0 |        0 |    100% |           |
-| src/django\_unicorn/views/action\_parsers/call\_method.py            |      130 |       17 |       66 |       11 |     84% |5-6, 25-30, 40, 47-52, 84, 113, 161, 176->150, 190->150, 213, 219->exit, 225->219, 229 |
+| src/django\_unicorn/views/action\_parsers/call\_method.py            |      130 |       17 |       66 |       11 |     84% |5-6, 25-30, 40, 47-52, 84, 113, 161, 176->150, 189->150, 212, 218->exit, 224->218, 228 |
 | src/django\_unicorn/views/action\_parsers/sync\_input.py             |       13 |        0 |        4 |        0 |    100% |           |
 | src/django\_unicorn/views/action\_parsers/utils.py                   |       74 |        9 |       50 |        9 |     85% |30, 32, 55, 79, 85->108, 112, 115, 133-134, 139 |
 | src/django\_unicorn/views/message.py                                 |      163 |       36 |       74 |       13 |     73% |54-55, 68, 82->90, 91-109, 122, 125, 128, 178-186, 206, 227, 233-235, 238-240, 250->224, 268-269, 275-276 |
