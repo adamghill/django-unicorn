@@ -36,7 +36,7 @@
 | src/django\_unicorn/views/\_\_init\_\_.py                            |       35 |        0 |        2 |        0 |    100% |           |
 | src/django\_unicorn/views/action.py                                  |       46 |        6 |        2 |        0 |     88% |22, 34, 47, 54, 61, 75 |
 | src/django\_unicorn/views/action\_parsers/\_\_init\_\_.py            |        0 |        0 |        0 |        0 |    100% |           |
-| src/django\_unicorn/views/action\_parsers/call\_method.py            |      128 |       17 |       62 |       10 |     84% |5-6, 25-30, 40, 47-52, 84, 113, 161, 184->150, 211, 217->exit, 223->217, 227 |
+| src/django\_unicorn/views/action\_parsers/call\_method.py            |      130 |       17 |       66 |       11 |     84% |5-6, 25-30, 40, 47-52, 84, 113, 161, 176->150, 190->150, 213, 219->exit, 225->219, 229 |
 | src/django\_unicorn/views/action\_parsers/sync\_input.py             |       13 |        0 |        4 |        0 |    100% |           |
 | src/django\_unicorn/views/action\_parsers/utils.py                   |       74 |        9 |       50 |        9 |     85% |30, 32, 55, 79, 85->108, 112, 115, 133-134, 139 |
 | src/django\_unicorn/views/message.py                                 |      163 |       36 |       74 |       13 |     73% |54-55, 68, 82->90, 91-109, 122, 125, 128, 178-186, 206, 227, 233-235, 238-240, 250->224, 268-269, 275-276 |
@@ -85,8 +85,8 @@
 | tests/views/action\_parsers/call\_method/test\_call\_method\_name.py |      147 |        1 |        4 |        0 |     99% |        68 |
 | tests/views/action\_parsers/utils/\_\_init\_\_.py                    |        0 |        0 |        0 |        0 |    100% |           |
 | tests/views/action\_parsers/utils/test\_set\_property\_value.py      |       86 |        0 |        0 |        0 |    100% |           |
-| tests/views/fake\_components.py                                      |      126 |        5 |        4 |        2 |     95% |94, 121, 137, 174, 183 |
-| tests/views/message/test\_call\_method.py                            |      175 |        0 |        2 |        0 |    100% |           |
+| tests/views/fake\_components.py                                      |      131 |        5 |        4 |        2 |     95% |94, 121, 137, 174, 183 |
+| tests/views/message/test\_call\_method.py                            |      181 |        0 |        2 |        0 |    100% |           |
 | tests/views/message/test\_call\_method\_multiple.py                  |      170 |      136 |        6 |        0 |     19% |20-23, 32-41, 50-61, 66-90, 95-122, 127-154, 159-187, 197-231, 236-263, 268-295, 300-327, 333-360 |
 | tests/views/message/test\_calls.py                                   |       23 |        0 |        0 |        0 |    100% |           |
 | tests/views/message/test\_get\_property\_value.py                    |       18 |        0 |        0 |        0 |    100% |           |
@@ -109,7 +109,7 @@
 | tests/views/utils/\_\_init\_\_.py                                    |        0 |        0 |        0 |        0 |    100% |           |
 | tests/views/utils/test\_construct\_model.py                          |       47 |       10 |        0 |        0 |     79% |     44-60 |
 | tests/views/utils/test\_set\_property\_from\_data.py                 |      139 |        2 |        0 |        0 |     99% |     29-30 |
-| **TOTAL**                                                            | **6053** |  **557** | **1012** |  **122** | **89%** |           |
+| **TOTAL**                                                            | **6066** |  **557** | **1016** |  **123** | **89%** |           |
 
 
 ## Setup coverage badge

@@ -55,8 +55,8 @@
             </div>
         </aside>
         <h2>
-            <span class="text">175 statements &nbsp;</span>
-            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">175<span class="text"> run</span></button>
+            <span class="text">181 statements &nbsp;</span>
+            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">181<span class="text"> run</span></button>
             <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">0<span class="text"> missing</span></button>
             <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">0<span class="text"> excluded</span></button>
             <button type="button" class="par run show_par button_toggle_par" value="par" data-shortcut="p" title="Toggle lines partially run">0<span class="text"> partial</span></button>
@@ -67,7 +67,7 @@
             <a id="nextFileLink" class="nav" href="z_5707da0eb726a1da_test_call_method_multiple_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.13.1">coverage.py v7.13.1</a>,
-            created at 2026-01-25 01:41 +0000
+            created at 2026-01-25 01:43 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -489,6 +489,27 @@
     <p class="pln"><span class="n"><a id="t405" href="#t405">405</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t406" href="#t406">406</a></span><span class="t">    <span class="key">assert</span> <span class="nam">body</span><span class="op">[</span><span class="str">"error"</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t407" href="#t407">407</a></span><span class="t">    <span class="key">assert</span> <span class="nam">body</span><span class="op">[</span><span class="str">"error"</span><span class="op">]</span> <span class="op">==</span> <span class="str">"Error code must be specified"</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t408" href="#t408">408</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t409" href="#t409">409</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t410" href="#t410">410</a></span><span class="t"><span class="key">def</span> <span class="nam">test_gh_628_custom_setter_empty_string</span><span class="op">(</span><span class="nam">client</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t411" href="#t411">411</a></span><span class="t">    <span class="nam">data</span> <span class="op">=</span> <span class="op">{</span><span class="str">"flavor"</span><span class="op">:</span> <span class="str">"initial"</span><span class="op">}</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t412" href="#t412">412</a></span><span class="t">    <span class="com"># Simulate set_flavor() call with no args (empty string case)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t413" href="#t413">413</a></span><span class="t">    <span class="nam">action_queue</span> <span class="op">=</span> <span class="op">[</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t414" href="#t414">414</a></span><span class="t">        <span class="op">{</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t415" href="#t415">415</a></span><span class="t">            <span class="str">"payload"</span><span class="op">:</span> <span class="op">{</span><span class="str">"name"</span><span class="op">:</span> <span class="str">"set_flavor()"</span><span class="op">}</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t416" href="#t416">416</a></span><span class="t">            <span class="str">"type"</span><span class="op">:</span> <span class="str">"callMethod"</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t417" href="#t417">417</a></span><span class="t">        <span class="op">}</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t418" href="#t418">418</a></span><span class="t">    <span class="op">]</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t419" href="#t419">419</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t420" href="#t420">420</a></span><span class="t">    <span class="nam">response</span> <span class="op">=</span> <span class="nam">post_and_get_response</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t421" href="#t421">421</a></span><span class="t">        <span class="nam">client</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t422" href="#t422">422</a></span><span class="t">        <span class="nam">url</span><span class="op">=</span><span class="str">"/message/tests.views.fake_components.BugComponent"</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t423" href="#t423">423</a></span><span class="t">        <span class="nam">data</span><span class="op">=</span><span class="nam">data</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t424" href="#t424">424</a></span><span class="t">        <span class="nam">action_queue</span><span class="op">=</span><span class="nam">action_queue</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t425" href="#t425">425</a></span><span class="t">    <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t426" href="#t426">426</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t427" href="#t427">427</a></span><span class="t">    <span class="key">assert</span> <span class="key">not</span> <span class="nam">response</span><span class="op">[</span><span class="str">"errors"</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t428" href="#t428">428</a></span><span class="t">    <span class="key">assert</span> <span class="nam">response</span><span class="op">[</span><span class="str">"data"</span><span class="op">]</span><span class="op">[</span><span class="str">"flavor"</span><span class="op">]</span> <span class="op">==</span> <span class="str">""</span>&nbsp;</span><span class="r"></span></p>
 </main>
 <footer>
     <div class="content">
@@ -498,7 +519,7 @@
             <a class="nav" href="z_5707da0eb726a1da_test_call_method_multiple_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.13.1">coverage.py v7.13.1</a>,
-            created at 2026-01-25 01:41 +0000
+            created at 2026-01-25 01:43 +0000
         </p>
     </div>
 </footer>
