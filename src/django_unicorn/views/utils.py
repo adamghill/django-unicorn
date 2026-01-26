@@ -27,6 +27,8 @@ def set_property_from_data(
     component_or_field: UnicornView | UnicornField | Model,
     name: str,
     value: Any,
+    *,
+    ignore_m2m: bool = False,
 ) -> None:
     """
     Sets properties on the component based on passed-in data.
@@ -53,10 +55,11 @@ def set_property_from_data(
         if isinstance(value, dict):
             for key in value.keys():
                 key_value = value[key]
-                set_property_from_data(field, key, key_value)
+                set_property_from_data(field, key, key_value, ignore_m2m=ignore_m2m)
     elif hasattr(field, "related_val"):
         # Use `related_val` to check for many-to-many
-        field.set(value)
+        if not ignore_m2m:
+            field.set(value)
     else:
         # TODO: Call django_unicorn.typing.cast_attribute_value?
         type_hints = get_type_hints(component_or_field)
