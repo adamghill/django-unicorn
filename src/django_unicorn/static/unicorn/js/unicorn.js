@@ -31,6 +31,23 @@ export function init(
     csrfTokenCookieName = _csrfTokenCookieName;
   }
 
+  if (typeof MutationObserver !== "undefined") {
+    const unicornObserver = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        mutation.addedNodes.forEach((node) => {
+          if (node.nodeType === Node.ELEMENT_NODE) {
+            scan(node);
+          }
+        });
+      });
+    });
+
+    unicornObserver.observe(document, {
+      childList: true,
+      subtree: true,
+    });
+  }
+
   return {
     messageUrl,
     csrfTokenHeaderName,
@@ -79,7 +96,27 @@ export function insertComponentFromDom(node) {
 }
 
 /**
- * Gets the component with the specified name or key.
+ * Scans the DOM for any component roots and initializes them if they haven't been already.
+ * @param {Element} root The root element to scan. Defaults to document.
+ */
+export function scan(root) {
+  if (!root) {
+    root = document;
+  }
+
+  if (root.hasAttribute && root.hasAttribute("unicorn:id")) {
+    insertComponentFromDom(root);
+  }
+
+  const elements = root.querySelectorAll("[unicorn\\:id]");
+
+  elements.forEach((element) => {
+    insertComponentFromDom(element);
+  });
+}
+
+/**
+ * Gets the component wit h the specified name or key.
  * Component keys are searched first, then names.
  *
  * @param {String} componentNameOrKey The name or key of the component to search for.
