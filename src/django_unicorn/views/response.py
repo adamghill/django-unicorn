@@ -57,8 +57,9 @@ class ComponentResponse:
                 else:
                     render_not_modified = True
 
-            root_element = get_root_element(rendered_component)
-            rendered_component = html_element_to_string(root_element)
+            if rendered_component:
+                root_element = get_root_element(rendered_component)
+                rendered_component = html_element_to_string(root_element)
 
             result.update(
                 {

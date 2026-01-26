@@ -14,6 +14,8 @@ class ComponentRequest:
     Parses, validates, and stores all of the data from the message request.
     """
 
+    __hash__ = None
+
     __slots__ = (
         "action_queue",
         "body",
@@ -86,6 +88,17 @@ class ComponentRequest:
         return (
             f"ComponentRequest(name='{self.name}' id='{self.id}' key='{self.key}'"
             f" epoch={self.epoch} data={self.data} action_queue={self.action_queue} hash={self.hash})"
+        )
+
+    def __eq__(self, other):
+        if not isinstance(other, ComponentRequest):
+            return False
+        return (
+            self.id == other.id
+            and self.name == other.name
+            and self.data == other.data
+            and self.epoch == other.epoch
+            and self.action_queue == other.action_queue
         )
 
     def validate_checksum(self):
