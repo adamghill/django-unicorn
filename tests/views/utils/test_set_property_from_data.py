@@ -1,6 +1,6 @@
 import sys
 from datetime import datetime, timezone
-from typing import List
+from typing import List  # noqa: UP035
 
 import pytest
 from django.db.models import Model, QuerySet
@@ -16,18 +16,18 @@ class FakeComponent(UnicornView):
     integer = 99
     datetime_without_typehint = datetime(2020, 1, 1, tzinfo=timezone.utc)
     datetime_with_typehint: datetime = datetime(2020, 2, 1, tzinfo=timezone.utc)
-    array: List[str] = []  # noqa: RUF012
+    array: list[str] = []  # noqa: RUF012
     model = Flavor(name="test-initial")
     queryset = Flavor.objects.none()
     queryset_with_typehint: QuerySetType[Flavor] = []  # noqa: RUF012
     datetimes = [datetime(2020, 3, 1, tzinfo=timezone.utc)]  # noqa: RUF012
-    datetimes_with_old_typehint: List[datetime] = [datetime(2020, 4, 1, tzinfo=timezone.utc)]  # noqa: RUF012
+    datetimes_with_old_typehint: List[datetime] = [datetime(2020, 4, 1, tzinfo=timezone.utc)]  # noqa: RUF012, UP006
     datetimes_with_list_typehint: list = [datetime(2020, 6, 1, tzinfo=timezone.utc)]  # noqa: RUF012
 
     try:
         datetimes_with_new_typehint: list[datetime] = [datetime(2020, 5, 1, tzinfo=timezone.utc)]
     except TypeError:
-        datetimes_with_new_typehint: None
+        datetimes_with_new_typehint: None  # type: ignore
 
 
 class FakeQuerySetComponent(UnicornView):
@@ -207,7 +207,7 @@ def test_set_property_from_data_queryset_list_with_typehint():
     component = FakeComponent(
         component_name="test", component_id="test_set_property_from_data_queryset_list_with_typehint"
     )
-    assert len(component.queryset_with_typehint) == 0
+    assert len(component.queryset_with_typehint) == 0  # type: ignore
 
     set_property_from_data(component, "queryset_with_typehint", [{"name": "test-qs"}])
 

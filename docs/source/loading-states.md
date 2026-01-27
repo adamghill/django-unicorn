@@ -126,3 +126,17 @@ This example will remove a `active` class from the _Update_ button when it is cl
   </button>
 </div>
 :::
+
+
+### delay
+
+To prevent flicker only show/remove unicorn:loading when the action takes longer than 200ms.
+
+:::{code} html
+:force: true
+
+<!-- loading-delay.html -->
+<div>
+  <button unicorn:click="update" unicorn:loading.delay>Update</button>
+</div>
+:::

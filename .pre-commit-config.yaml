@@ -1,0 +1,23 @@
+repos:
+  - repo: local
+    hooks:
+      - id: ruff
+        name: ruff
+        entry: uv run ruff check --force-exclude
+        language: system
+        types: [python]
+        args: [--fix, --exit-non-zero-on-fix]
+      - id: ruff-format
+        name: ruff-format
+        entry: uv run ruff format --force-exclude
+        language: system
+        types: [python]
+
+  - repo: local
+    hooks:
+      - id: ty
+        name: ty
+        entry: uv run --all-extras ty check .
+        language: system
+        types: [python]
+        pass_filenames: false

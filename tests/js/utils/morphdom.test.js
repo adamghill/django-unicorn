@@ -1,5 +1,5 @@
 import test from "ava";
-import morphdom from "../../../django_unicorn/static/unicorn/js/morphdom/2.6.1/morphdom.js";
+import morphdom from "../../../src/django_unicorn/static/unicorn/js/morphdom/2.6.1/morphdom.js";
 import { getEl } from "../utils.js";
 
 test("contains", (t) => {

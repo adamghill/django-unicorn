@@ -1,6 +1,6 @@
 import test from "ava";
-import { call } from "../../../django_unicorn/static/unicorn/js/unicorn.js";
-import { components } from "../../../django_unicorn/static/unicorn/js/store.js";
+import { call } from "../../../src/django_unicorn/static/unicorn/js/unicorn.js";
+import { components } from "../../../src/django_unicorn/static/unicorn/js/store.js";
 import { getComponent } from "../utils.js";
 
 test("call a method", (t) => {

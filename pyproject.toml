@@ -1,69 +1,78 @@
-[tool.poetry]
+[project]
 name = "django-unicorn"
-version = "0.62.0"
+version = "0.64.0"
 description = "A magical full-stack framework for Django."
-authors = ["Adam Hill <unicorn@adamghill.com>"]
-license = "MIT"
 readme = "README.md"
-repository = "https://github.com/adamghill/django-unicorn/"
-homepage = "https://www.django-unicorn.com"
-documentation = "https://www.django-unicorn.com/docs/"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+    { name = "Adam Hill", email = "unicorn@adamghill.com" },
+]
 keywords = ["django", "python", "javascript", "fullstack"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Framework :: Django",
+]
+dependencies = [
+    "django>=2.2", # Deliberately loose on dependencies even though only newer Django versions are officially tested/supported
+    "lxml",
+    "orjson>=3.6.0",
+    "shortuuid>=1.0.1",
+    "cachetools>=4.1.1",
+    "decorator>=4.4.2",
+]
 
-[tool.poetry.urls]
-"Funding" = "https://github.com/sponsors/adamghill"
+[dependency-groups]
+dev = [
+    "pytest>=7",
+    "django-stubs",
+    "pytest-django",
+    "django-mock-queries>=2.1.5",
+    "pydantic>=1",
+    "pywatchman",
+    "django-redis>=4.12.1",
+    "coverage[toml]",
+    "pytest-cov",
+    "pytest-benchmark",
+    "ruff",
+    "genbadge[all]>=1.1.1",
+    "ty>=0.0.10",
+    "pytest-playwright>=0.7.2",
+    "pre-commit>=4.5.1",
+]
 
-[tool.poetry.dependencies]
-python = ">=3.10"
-django = ">=2.2"
-beautifulsoup4 = ">=4.8.0"
-orjson = ">=3.6.0"
-shortuuid = ">=1.0.1"
-cachetools = ">=4.1.1"
-decorator = ">=4.4.2"
-htmlmin = { version = "^0", optional = true }
-
-# docs extras
-Sphinx = { version = "*", optional = true }
-linkify-it-py = { version = "*", optional = true }
-myst-parser = { version = "*", optional = true }
-furo = { version = "*", optional = true }
-sphinx-copybutton = { version = "*", optional = true }
-sphinx-autobuild = { version = "*", optional = true }
-rst2pdf = { version = "*", optional = true }
-sphinx-autoapi = { version = "*", optional = true }
-sphinxext-opengraph = { version = "*", optional = true }
-toml = { version = "*", optional = true }
-sphinx-design = { version = "*", optional = true }
-
-[tool.poetry.extras]
+[project.optional-dependencies]
 minify = ["htmlmin"]
-docs = ["Sphinx", "linkify-it-py", "myst-parser", "furo", "sphinx-copybutton", "sphinx-autobuild", "rst2pdf", "sphinx-autoapi", "sphinxext-opengraph", "toml", "sphinx-design", "colon_fence"]
+docs = [
+    "Sphinx",
+    "linkify-it-py",
+    "myst-parser",
+    "furo",
+    "sphinx-copybutton",
+    "sphinx-autobuild",
+    "rst2pdf",
+    "sphinx-autoapi",
+    "sphinxext-opengraph",
+    "toml",
+    "sphinx-design",
+]
 
-[tool.poetry.group.dev.dependencies]
-certifi = "^2023.7.22"  # needed for GitHub Actions
-keyring = "24.2.0"  # needed for GitHub Actions
-pytest = "^7"
-mypy = "<1"
-django-stubs = "*"
-pytest-django = "*"
-django-mock-queries = "^2.1.5"
-pydantic = "^1"
-pywatchman = "*"
-django-redis = "^4.12.1"
-poethepoet = "*"
-coverage = {extras = ["toml"], version = "*"}
-pytest-cov = "*"
-pytest-benchmark = "*"
-ruff = "*"
-genbadge = {extras = ["all"], version = "^1.1.1"}
+[project.urls]
+Homepage = "https://www.django-unicorn.com"
+Repository = "https://github.com/adamghill/django-unicorn/"
+Documentation = "https://www.django-unicorn.com/docs/"
+Funding = "https://github.com/sponsors/adamghill"
 
 [tool.ruff]
-src = ["django_unicorn"]
+src = ["src"]
 exclude = ["example", "**/migrations/*"]
-target-version = "py38"
+target-version = "py310"
 line-length = 120
-lint.select = [
+
+[tool.ruff.lint]
+select = [
   "A",
   "ARG",
   "B",
@@ -90,7 +99,7 @@ lint.select = [
   "W",
   "YTT",
 ]
-lint.ignore = [
+ignore = [
   # Allow non-abstract empty methods in abstract base classes
   "B027",
   # Allow boolean positional values in function calls, like `dict.get(... True)`
@@ -104,7 +113,7 @@ lint.ignore = [
    # Ignore exception strings
   "EM101", "EM102",
 ]
-lint.unfixable = [
+unfixable = [
   # Don't touch unused imports
   "F401",
 ]
@@ -122,62 +131,38 @@ ban-relative-imports = "all"
 # Tests can use magic values, assertions, and relative imports
 "tests/**/*" = ["PLR2004", "S101", "TID252"]
 
-[tool.pytest.ini_options]
-addopts = "--quiet --failed-first --reuse-db --nomigrations -p no:warnings -m 'not slow' --benchmark-skip"
+[tool.pytest]
+addopts = [
+    "--quiet",
+    "--failed-first",
+    "--reuse-db",
+    "--nomigrations",
+    "-p no:warnings",
+    "-m (not slow and not integration and not playwright)",
+    "--benchmark-skip",
+]
 testpaths = [
     "tests"
 ]
 markers = [
     "slow: marks tests as slow",
+    "integration: marks tests as integration",
+    "playwright: marks tests as playwright",
 ]
-
-[tool.poe.tasks]
-r = { cmd = "example/manage.py runserver 0:8080", help = "Run the dev server for the example project" }
-mm = { cmd = "example/manage.py makemigrations", help = "Make migrations for the example project" }
-mi = { cmd = "example/manage.py migrate", help = "Migrate the example project" }
-md = ["mm", "mi"]
-m = { cmd = "example/manage.py", help = "manage.py for the example project" }
-tp = { cmd = "act -W .github/workflows/python.yml -j test", help = "Run the Python matrix test suite" }
-tj = { cmd = "npm run-script test", help = "Run the JavaScript unit tests" }
-ta = ["tp", "tj"]
-jb = { cmd = "npm run build", help = "Build the JavaScript library" }
-ji = { cmd = "npm install", help = "Install JS" }
-t = { cmd = "pytest -m 'not slow'", help = "Run Python unit tests" }
-tb = { cmd = "pytest tests/benchmarks/ --benchmark-autosave --benchmark-only", help = "Run Python unit tests with benchmarks" }
-tbc = { cmd = "pytest tests/benchmarks/ --benchmark-only --benchmark-compare", help = "Run Python unit tests with compared benchmarks" }
-tc = { cmd = "pytest --cov=django_unicorn", help = "Run tests with coverage" }
-cr = { cmd = "coverage report", help = "Show coverage report" }
-my = { cmd = "mypy .", help = "Run mypy" }
-rf = { cmd = "ruff check .", help = "Run ruff" }
-tm = ["rf", "tc", "my"]
-sa = { cmd = "sphinx-autobuild -W docs/source docs/build", help = "Sphinx autobuild" }
-sb = { cmd = "sphinx-build -W docs/source docs/build", help = "Build documentation" }
-build = ["rf", "tc", "ji", "tj", "jb", "sb"]
-publish = { shell = "poetry publish --build -r test && poetry publish" }
-
-[tool.mypy]
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module="cachetools.*"
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = "django_unicorn.cacher"
-disable_error_code = ["name-defined"]
-
-[[tool.mypy.overrides]]
-module = "django_unicorn.typing"
-disable_error_code = ["empty-body"]
-
-[[tool.mypy.overrides]]
-module = "decorator"
-ignore_missing_imports = true
 
 [tool.coverage.run]
 branch = true
 relative_files = true
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = [
+    "hatchling",
+    "hatch-vcs",
+]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/django_unicorn"]

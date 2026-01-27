@@ -4,7 +4,7 @@ import os
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = "p6b$i%36e_xg%*ok+55@uc(h9)#g+2fj#p%7g#-@y8s6+10q#7"
 DEBUG = True
-ALLOWED_HOSTS = ["localhost"]
+ALLOWED_HOSTS = ["localhost", "0.0.0.0"]
 
 
 INSTALLED_APPS = [
@@ -15,13 +15,13 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     # Internal apps
-    "books",
-    "coffee",
-    "www",
+    "example.books",
+    "example.coffee",
+    "example.www",
     # Include django-unicorn package
     "django_unicorn",
     # Include internal unicorn app
-    "unicorn",
+    "example.unicorn",
 ]
 
 MIDDLEWARE = [
@@ -34,7 +34,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = "project.urls"
+ROOT_URLCONF = "example.project.urls"
 
 TEMPLATES = [
     {
@@ -52,7 +52,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "project.wsgi.application"
+WSGI_APPLICATION = "example.project.wsgi.application"
 
 
 CACHES = {

@@ -1,6 +1,6 @@
 import test from "ava";
 import fetchMock from "fetch-mock";
-import { send } from "../../../django_unicorn/static/unicorn/js/messageSender.js";
+import { send } from "../../../src/django_unicorn/static/unicorn/js/messageSender.js";
 import { getComponent, getElement } from "../utils.js";
 
 test("click", (t) => {
@@ -315,7 +315,7 @@ test("event action loading class", (t) => {
   t.is(el.classList[0], "loading");
 });
 
-test.cb("event action loading attr 500 reverts", (t) => {
+test("event action loading attr 500 reverts", async (t) => {
   const html = `
 <div unicorn:id="5jypjiyb" unicorn:name="text-inputs" unicorn:checksum="GXzew3Km">
   <button unicorn:click='test()' u:loading.attr="disabled"></button>
@@ -334,14 +334,13 @@ test.cb("event action loading attr 500 reverts", (t) => {
   // mock the fetch
   global.fetch = fetchMock.sandbox().mock().post("/test/text-inputs", 500);
 
-  send(component, (_, __, err) => {
-    t.true(typeof el.attributes.disabled === "undefined");
-    fetchMock.reset();
-    t.end();
-  });
+  await send(component);
+
+  t.true(typeof el.attributes.disabled === "undefined");
+  fetchMock.reset();
 });
 
-test.cb("event action loading class 500 reverts", (t) => {
+test("event action loading class 500 reverts", async (t) => {
   const html = `
 <div unicorn:id="5jypjiyb" unicorn:name="text-inputs" unicorn:checksum="GXzew3Km">
   <button unicorn:click='test()' u:loading.class="loading-class"></button>
@@ -361,11 +360,10 @@ test.cb("event action loading class 500 reverts", (t) => {
   // mock the fetch
   global.fetch = fetchMock.sandbox().mock().post("/test/text-inputs", 500);
 
-  send(component, (_, __, err) => {
-    t.is(el.classList.length, 0);
-    fetchMock.reset();
-    t.end();
-  });
+  await send(component);
+
+  t.is(el.classList.length, 0);
+  fetchMock.reset();
 });
 
 test("event action loading remove class", (t) => {

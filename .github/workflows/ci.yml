@@ -26,23 +26,23 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Install Poetry
-        run: |
-          pipx install poetry
-          poetry config virtualenvs.path ~/.virtualenvs${{ env.PYTHON_VERSION }}
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
 
       - name: Set up Python ${{ env.PYTHON_VERSION }}
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-          cache: "poetry"
 
       - name: Install dependencies
         run: |
-          poetry install -E minify
+          uv sync --all-extras --dev
 
       - name: Produce the .coverage file
-        run: poetry run coverage run -m pytest
+        run: uv run coverage run -m pytest
 
       - name: Coverage comment
         id: coverage_comment

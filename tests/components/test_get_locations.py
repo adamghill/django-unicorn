@@ -11,11 +11,15 @@ def cache_clear():
 @pytest.fixture
 def clear_apps(settings):
     unicorn_apps = settings.UNICORN["APPS"]
-    del settings.UNICORN["APPS"]
+    unicorn_apps = settings.UNICORN.get("APPS")
+    if "APPS" in settings.UNICORN:
+        settings.UNICORN = {**settings.UNICORN}
+        del settings.UNICORN["APPS"]
 
     yield
 
-    settings.UNICORN["APPS"] = unicorn_apps
+    if unicorn_apps:
+        settings.UNICORN = {**settings.UNICORN, "APPS": unicorn_apps}
 
 
 def test_get_locations_kebab_case(cache_clear):  # noqa: ARG001
@@ -87,7 +91,7 @@ def test_get_locations_fully_qualified_with_dots_does_not_end_in_view(cache_clea
 
 
 def test_get_locations_apps_setting_tuple(settings, cache_clear):  # noqa: ARG001
-    settings.UNICORN["APPS"] = ("project",)
+    settings.UNICORN = {**settings.UNICORN, "APPS": ("project",)}
 
     expected = [
         ("project.components.hello_world", "HelloWorldView"),
@@ -99,9 +103,12 @@ def test_get_locations_apps_setting_tuple(settings, cache_clear):  # noqa: ARG00
 
 
 def test_get_locations_apps_setting_list(settings, cache_clear):  # noqa: ARG001
-    settings.UNICORN["APPS"] = [
-        "project",
-    ]
+    settings.UNICORN = {
+        **settings.UNICORN,
+        "APPS": [
+            "project",
+        ],
+    }
 
     expected = [("project.components.hello_world", "HelloWorldView"), ("components.hello_world", "HelloWorldView")]
     actual = get_locations("hello-world")
@@ -110,8 +117,9 @@ def test_get_locations_apps_setting_list(settings, cache_clear):  # noqa: ARG001
 
 
 def test_get_locations_apps_setting_set(settings, cache_clear):  # noqa: ARG001
-    settings.UNICORN["APPS"] = {
-        "project",
+    settings.UNICORN = {
+        **settings.UNICORN,
+        "APPS": {"project"},
     }
 
     expected = [
@@ -124,13 +132,13 @@ def test_get_locations_apps_setting_set(settings, cache_clear):  # noqa: ARG001
 
 
 def test_get_locations_apps_setting_invalid(settings, cache_clear):  # noqa: ARG001
-    settings.UNICORN["APPS"] = "project"
+    settings.UNICORN = {**settings.UNICORN, "APPS": "project"}
 
     with pytest.raises(AssertionError) as e:
         get_locations("hello-world")
 
     assert e.type is AssertionError
-    settings.UNICORN["APPS"] = ("unicorn",)
+    settings.UNICORN = {**settings.UNICORN, "APPS": ("unicorn",)}
 
 
 def test_get_locations_installed_app_with_app_config(settings, clear_apps, cache_clear):  # noqa: ARG001

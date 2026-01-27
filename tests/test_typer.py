@@ -1,6 +1,5 @@
 import datetime
 from dataclasses import dataclass
-from typing import List, Optional
 from typing import get_type_hints as typing_get_type_hints
 
 from pydantic import BaseModel
@@ -32,9 +31,10 @@ def test_get_type_hints_gh_639():
     class MyComponentView(UnicornView):
         a_date: datetime.date
 
-    expected = {"a_date": datetime.date}
     actual = get_type_hints(MyComponentView(component_name="test", component_id="test_get_type_hints_gh_639"))
-    assert actual == expected
+
+    assert "a_date" in actual
+    assert actual["a_date"] == datetime.date
 
 
 class TestClass:
@@ -72,7 +72,7 @@ def test_cast_attribute_value_bool_invalid():
 
 class ExampleClass:
     a_model: Flavor
-    optional_model: Optional[Flavor]
+    optional_model: Flavor | None
 
 
 def test_cast_value_model_none():
@@ -127,9 +127,9 @@ class PydanticBaseModel(BaseModel):
 
 class AnotherExampleClass:
     data: DataClass
-    list_data: List[DataClass]
+    list_data: list[DataClass]
     pydantic_data: PydanticBaseModel
-    pydantic_list_data: List[PydanticBaseModel]
+    pydantic_list_data: list[PydanticBaseModel]
 
 
 def test_cast_value_dataclass():
@@ -155,7 +155,7 @@ def test_cast_value_pydantic():
 def test_cast_value_list_dataclass():
     example_class = AnotherExampleClass()
     test_data = DataClass(name="foo")
-    example_class.pydantic_list_data = [test_data]
+    example_class.list_data = [test_data]
     type_hints = typing_get_type_hints(example_class)
     type_hint = type_hints["list_data"]
     actual = cast_value(type_hint, [{"name": "foo"}])

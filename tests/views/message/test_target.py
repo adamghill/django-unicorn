@@ -1,9 +1,9 @@
 import time
 
 import shortuuid
-from bs4 import BeautifulSoup
 
 from django_unicorn.components import UnicornView
+from django_unicorn.components.unicorn_template_response import get_root_element
 from django_unicorn.utils import generate_checksum
 
 
@@ -45,12 +45,8 @@ def test_message_generated_checksum_matches_dom_checksum(client):
     assert not body.get("partials")
     assert body.get("data", {}).get("clicked") is True
 
-    soup = BeautifulSoup(dom, features="html.parser")
-
-    for element in soup.find_all():
-        if "unicorn:checksum" in element.attrs:
-            assert element.attrs["unicorn:checksum"] == body.get("checksum")
-            break
+    root_element = get_root_element(dom)
+    assert root_element.attrib.get("unicorn:checksum") == body.get("checksum")
 
 
 def test_message_target_invalid(client):

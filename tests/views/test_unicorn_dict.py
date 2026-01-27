@@ -18,7 +18,7 @@ def test_set_property_from_data_dict():
 
 def test_set_property_from_data_nested_dict():
     component = DictPropertyView(component_name="test", component_id="test_set_property_from_data_nested_dict")
-    assert "nested_dictionary" == component.nested_dictionary.get("nested").get("name")
+    assert "nested_dictionary" == component.nested_dictionary["nested"].get("name")
 
     set_property_from_data(
         component,
@@ -26,4 +26,4 @@ def test_set_property_from_data_nested_dict():
         {"nested": {"name": "nested_dictionary_updated"}},
     )
 
-    assert "nested_dictionary_updated" == component.nested_dictionary.get("nested").get("name")
+    assert "nested_dictionary_updated" == component.nested_dictionary["nested"].get("name")

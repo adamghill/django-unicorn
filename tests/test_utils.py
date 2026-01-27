@@ -42,7 +42,7 @@ def test_generate_checksum_invalid(settings):
     settings.SECRET_KEY = "asdf"
 
     with pytest.raises(TypeError) as e:
-        generate_checksum([])
+        generate_checksum([])  # type: ignore
 
     assert e.exconly() == "TypeError: Invalid type: <class 'list'>"
 

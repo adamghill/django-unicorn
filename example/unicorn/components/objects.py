@@ -30,7 +30,7 @@ class BookField(UnicornField):
 
 
 class PydanticBook(BaseModel):
-    title = "American Gods"
+    title: str = "American Gods"
     publish_date: Optional[datetime] = datetime(1996, 9, 16)
 
 
@@ -44,9 +44,9 @@ class ObjectsView(UnicornView):
     date_example = now()
     date_example_with_typehint: datetime = now()
     dates_with_no_typehint = None
-    dates_with_old_typehint: List[datetime] = None
-    dates_with_new_typehint: list[datetime] = None
-    dates_with_list_typehint: list = None
+    dates_with_old_typehint: List[datetime] = None  # noqa: RUF012  # type: ignore
+    dates_with_new_typehint: list[datetime] = None  # type: ignore
+    dates_with_list_typehint: list = None  # type: ignore
     float_example: float = 1.1
     decimal_example = D("1.1")
     int_example = 4
@@ -80,9 +80,9 @@ class ObjectsView(UnicornView):
         self.dictionary = val
 
     def set_dictionary_2(self):
-        self.dictionary_2["1"] = "c"
-        self.dictionary_2["6"] = "d"
-        self.dictionary_2["11"] = "e"
+        self.dictionary_2["1"] = "c"  # type: ignore
+        self.dictionary_2["6"] = "d"  # type: ignore
+        self.dictionary_2["11"] = "e"  # type: ignore
 
     def add_one_to_float(self):
         self.float_example += 1

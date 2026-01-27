@@ -1,5 +1,4 @@
 from datetime import datetime, timezone
-from typing import Dict
 
 from django import forms
 from django.contrib import messages
@@ -132,7 +131,7 @@ class FakeAuthenticationComponent(UnicornView):
 
 class FakeComponentWithDictionary(UnicornView):
     template_name = "templates/test_component.html"
-    dictionary: Dict = None
+    dictionary: dict | None = None
 
     def test_method(self):
         pass
@@ -155,7 +154,7 @@ class FakeComponentWithError(UnicornView):
     template_name = "templates/test_component.html"
 
     def mount(self):
-        print(self.not_a_valid_attribute)  # noqa: T201
+        print(self.not_a_valid_attribute)  # type: ignore # noqa: T201
 
 
 count_updating = 0
@@ -199,3 +198,11 @@ class FakeComponentWithResolveMethods(UnicornView):
         count_resolved += 1
 
         assert count_resolved == 1, "count_resolved called more than once"
+
+
+class BugComponent(UnicornView):
+    template_name = "templates/test_component.html"
+    flavor: str = "initial"
+
+    def set_flavor(self, value: str = ""):
+        self.flavor = value

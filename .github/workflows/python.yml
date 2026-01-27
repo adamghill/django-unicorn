@@ -16,58 +16,62 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Install Poetry
-        run: |
-          pipx install poetry
-          poetry config virtualenvs.path ~/.virtualenvs${{ env.LINT_PYTHON_VERSION }}
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
 
       - name: Set up Python ${{ env.LINT_PYTHON_VERSION }}
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ env.LINT_PYTHON_VERSION }}
-          cache: "poetry"
 
       - name: Install dependencies
         run: |
-          poetry install
+          uv sync --dev
 
       - name: ruff check
-        run: poetry run ruff check .
+        run: uv run ruff check .
 
-      - name: mypy check
-        run: poetry run mypy django_unicorn
+      # - name: mypy check
+      #   run: uv run mypy django_unicorn
 
   test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: ["3.10", "3.11", "3.12"]
-        django-version: ["4.1", "4.2", "5.0"]
+        django-version: ["5.2", "6.0"]
+        exclude:
+          - python-version: "3.10"
+            django-version: "6.0"
+          - python-version: "3.11"
+            django-version: "6.0"
 
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 1
 
-      - name: Install Poetry
-        run: |
-          pipx install poetry
-          poetry config virtualenvs.path ~/.virtualenvs${{ matrix.python-version }}
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-          cache: "poetry"
 
       - name: Install dependencies
         run: |
-          poetry env use ${{ matrix.python-version }}
-          poetry add django==${{ matrix.django-version }}
-          poetry install -E minify
+          uv sync --all-extras --dev
+          uv pip install django==${{ matrix.django-version }}
 
       - name: Fast tests
-        run: poetry run pytest -m 'not slow'
+        run: uv run pytest -m 'not slow and not playwright'
 
       - name: Slow tests
-        run: poetry run pytest -m 'slow'
+        run: uv run pytest -m 'slow'

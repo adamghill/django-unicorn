@@ -29,10 +29,21 @@ def _set_serial(
     timeout,
     cache_backend="django.core.cache.backends.locmem.LocMemCache",
 ):
-    settings.UNICORN["SERIAL"]["ENABLED"] = enabled
-    settings.UNICORN["SERIAL"]["TIMEOUT"] = timeout
-    settings.UNICORN["CACHE_ALIAS"] = "default"
-    settings.CACHES["default"]["BACKEND"] = cache_backend
+    settings.UNICORN = {
+        **settings.UNICORN,
+        "SERIAL": {
+            **settings.UNICORN.get("SERIAL", {}),
+            "ENABLED": enabled,
+            "TIMEOUT": timeout,
+        },
+        "CACHE_ALIAS": "default",
+    }
+    settings.CACHES = {
+        **settings.CACHES,
+        "default": {
+            "BACKEND": cache_backend,
+        },
+    }
 
 
 def _message_runner(args):
