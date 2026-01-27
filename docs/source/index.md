@@ -8,14 +8,22 @@
 self
 getting-started
 installation
-components
 ```
 
 ```{toctree}
-:caption: Components
+:caption: Tutorials
 :maxdepth: 3
 :hidden:
 
+tutorials/intro
+```
+
+```{toctree}
+:caption: Overview
+:maxdepth: 3
+:hidden:
+
+components
 views
 templates
 actions
