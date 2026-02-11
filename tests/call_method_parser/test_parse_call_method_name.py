@@ -93,7 +93,7 @@ def test_string_with_single_quotes():
 
 def test_string_with_double_quotes():
     expected = ("set_name", ('He said "hello"',), {})
-    actual = parse_call_method_name('set_name(\'He said "hello"\')')
+    actual = parse_call_method_name("set_name('He said \"hello\"')")
 
     assert actual == expected
 
@@ -122,4 +122,3 @@ def test_string_with_mixed_quotes_and_parentheses():
     actual = parse_call_method_name("set_name('test(with \\'quotes\\' and \"double\")')")
 
     assert actual == expected
-

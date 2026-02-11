@@ -11,12 +11,13 @@ class M2MComponent(UnicornView):
 
     def mount(self):
         if self.component_args:
-             self.taste = Taste.objects.get(pk=self.component_args[0])
+            self.taste = Taste.objects.get(pk=self.component_args[0])
 
     def refresh(self):
         # usage: unicorn:poll="refresh"
         if self.taste:
             self.taste = Taste.objects.get(pk=self.taste.pk)
+
 
 @pytest.mark.django_db
 def test_m2m_overwriting(client):
