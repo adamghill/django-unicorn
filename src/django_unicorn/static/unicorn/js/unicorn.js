@@ -171,7 +171,10 @@ export function call(componentNameOrKey, methodName, ...args) {
   args.forEach((arg) => {
     if (typeof arg !== "undefined") {
       if (typeof arg === "string") {
-        argString = `${argString}'${arg}', `;
+        // Use JSON.stringify to properly escape quotes and special characters
+        // Then replace double quotes with single quotes for Python compatibility
+        const escapedArg = JSON.stringify(arg).slice(1, -1).replace(/\\"/g, '"').replace(/'/g, "\\'");
+        argString = `${argString}'${escapedArg}', `;
       } else {
         argString = `${argString}${arg}, `;
       }
