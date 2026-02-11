@@ -1,9 +1,11 @@
 import logging
 
+from django.core.signing import BadSignature
+from django.core.signing import loads as signing_loads
+
 from django_unicorn.call_method_parser import parse_call_method_name
 from django_unicorn.errors import UnicornViewError
 from django_unicorn.serializer import JSONDecodeError, loads
-from django_unicorn.utils import generate_checksum
 from django_unicorn.views.action import Action, CallMethod, Refresh, Reset, SyncInput, Toggle
 
 logger = logging.getLogger(__name__)
@@ -90,17 +92,22 @@ class ComponentRequest:
 
     def validate_checksum(self):
         """
-        Validates that the checksum in the request matches the data.
+        Validates that the checksum (signed data) in the request matches the data.
 
         Returns:
-            Raises `AssertionError` if the checksums don't match.
+            Raises `AssertionError` if the signature is invalid or doesn't match.
         """
         checksum = self.body.get("checksum")
 
         if not checksum:
             raise AssertionError("Missing checksum")
 
-        generated_checksum = generate_checksum(self.data)
-
-        if checksum != generated_checksum:
-            raise AssertionError("Checksum does not match")
+        # Verify the signature by attempting to unsign
+        try:
+            unsigned_data = signing_loads(checksum, salt="django-unicorn")
+            # Compare the unsigned data with the actual data
+            # For dict data, they should match exactly
+            if self.data != unsigned_data:
+                raise AssertionError("Checksum does not match")
+        except BadSignature:
+            raise AssertionError("Checksum does not match") from None
