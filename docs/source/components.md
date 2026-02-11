@@ -133,7 +133,36 @@ class HelloWorldView(UnicornView):
 
 ## Component key
 
-If there are multiple of the same components on the page, a `key` kwarg can be passed into the template. For example, `{% unicorn 'hello-world' key='helloWorldKey' %}`. This is useful when a unique reference to a component is required, but it is optional.
+If there are multiple of the same components on the page, a `key` kwarg can be passed into the template. For example, `{% unicorn 'hello-world' key='helloWorldKey' %}`.
+
+This is useful when a unique reference to a component is required, such as when calling a method from JavaScript.
+
+```html
+<!-- index.html -->
+<div>
+  <!-- First component: `key` is "first-hello-world" -->
+  {% unicorn 'hello-world' key='first-hello-world' %}
+</div>
+
+<div>
+  <!-- Second component: `key` is "second-hello-world" -->
+  {% unicorn 'hello-world' key='second-hello-world' %}
+</div>
+```
+
+To call a method on a specific component, pass the `key` as the first argument to `Unicorn.call()`.
+
+```html
+<!-- Call the `set_name` method on the component with the key "second-hello-world" -->
+<button onclick="Unicorn.call('second-hello-world', 'set_name');">
+  Set the name for the second component
+</button>
+```
+
+```{note}
+Component keys are optional and only needed when you need to distinguish between multiple instances of the same component on one page.
+```
+
 
 ## Component sub-folders
 
