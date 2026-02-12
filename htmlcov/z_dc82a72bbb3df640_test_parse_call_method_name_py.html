@@ -67,7 +67,7 @@
             <a id="nextFileLink" class="nav" href="z_dc82a72bbb3df640_test_parse_kwarg_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.13.1">coverage.py v7.13.1</a>,
-            created at 2026-02-12 01:07 +0000
+            created at 2026-02-12 01:43 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -191,7 +191,7 @@
     <p class="pln"><span class="n"><a id="t107" href="#t107">107</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t108" href="#t108">108</a></span><span class="t"><span class="key">def</span> <span class="nam">test_complex_chemical_name_issue_607</span><span class="op">(</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t109" href="#t109">109</a></span><span class="t">    <span class="str">"""Test for issue #607: string values with single quotes break function calls"""</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t110" href="#t110">110</a></span><span class="t">    <span class="nam">chemical_name</span> <span class="op">=</span> <span class="str">"Chloro(2-dicyclohexylphosphino-3,6-dimethoxy-2',4',6'-tri-i-propyl-1,1'-biphenyl)(2'-amino-1,1'-biphenyl-2-yl)palladium(II)"</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t110" href="#t110">110</a></span><span class="t">    <span class="nam">chemical_name</span> <span class="op">=</span> <span class="str">"Chloro(2-dicyclohexylphosphino-3,6-dimethoxy-2',4',6'-tri-i-propyl-1,1'-biphenyl)(2'-amino-1,1'-biphenyl-2-yl)palladium(II)"</span>  <span class="com"># noqa: E501</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t111" href="#t111">111</a></span><span class="t">    <span class="nam">expected</span> <span class="op">=</span> <span class="op">(</span><span class="str">"set_new_catalyst"</span><span class="op">,</span> <span class="op">(</span><span class="nam">chemical_name</span><span class="op">,</span><span class="op">)</span><span class="op">,</span> <span class="op">{</span><span class="op">}</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t112" href="#t112">112</a></span><span class="t">    <span class="nam">actual</span> <span class="op">=</span> <span class="nam">parse_call_method_name</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t113" href="#t113">113</a></span><span class="t">        <span class="str">"set_new_catalyst('Chloro(2-dicyclohexylphosphino-3,6-dimethoxy-2\\',"</span>&nbsp;</span><span class="r"></span></p>
@@ -215,7 +215,7 @@
             <a class="nav" href="z_dc82a72bbb3df640_test_parse_kwarg_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.13.1">coverage.py v7.13.1</a>,
-            created at 2026-02-12 01:07 +0000
+            created at 2026-02-12 01:43 +0000
         </p>
     </div>
 </footer>
