@@ -147,6 +147,7 @@ markers = [
     "slow: marks tests as slow",
     "integration: marks tests as integration",
     "playwright: marks tests as playwright",
+    "redis: marks tests as redis",
 ]
 
 [tool.coverage.run]

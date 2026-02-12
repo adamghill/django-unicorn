@@ -1,3 +1,4 @@
+import copy
 import logging
 
 from django.http import HttpRequest
@@ -45,6 +46,12 @@ class UnicornMessageHandler:
 
         requests = sorted(requests, key=lambda r: r.epoch)
         first_request = requests[0]
+
+        # Create a copy of the request before it is mutated by the dispatcher
+        # This is required because the dispatcher modifies the request object in-place (e.g. data)
+        # and the queue removal relies on the original object state (hash/pickle)
+        request_to_remove = copy.deepcopy(first_request)
+
         first_request.request = self.request
 
         try:
@@ -53,7 +60,7 @@ class UnicornMessageHandler:
         except RenderNotModifiedError:
             raise
         finally:
-            queue.remove(first_request)
+            queue.remove(request_to_remove)
 
         # Handle squashing of remaining requests
         remaining_requests = queue.get_all()

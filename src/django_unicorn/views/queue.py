@@ -34,6 +34,11 @@ class ComponentRequestQueue:
                 # Some implementations require arguments or work differently, so we wrap in try/except
                 return self.cache.get_client()
 
+        # Django 4+ RedisCache (django.core.cache.backends.redis.RedisCache)
+        if hasattr(self.cache, "_cache") and hasattr(self.cache._cache, "get_client"):
+            with contextlib.suppress(Exception):
+                return self.cache._cache.get_client()
+
         # Fallback inspection for `_client` (private but common in some wrappers)
         if hasattr(self.cache, "_client"):
             return self.cache._client
