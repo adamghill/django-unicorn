@@ -49,7 +49,7 @@
 | tests/benchmarks/serializer/\_\_init\_\_.py                          |        0 |        0 |        0 |        0 |    100% |           |
 | tests/benchmarks/serializer/test\_dumps.py                           |       53 |       19 |        0 |        0 |     64% |48-53, 57-79, 83-88, 92-118 |
 | tests/call\_method\_parser/test\_parse\_args.py                      |       96 |        0 |        0 |        0 |    100% |           |
-| tests/call\_method\_parser/test\_parse\_call\_method\_name.py        |       43 |        0 |        0 |        0 |    100% |           |
+| tests/call\_method\_parser/test\_parse\_call\_method\_name.py        |       64 |        0 |        0 |        0 |    100% |           |
 | tests/call\_method\_parser/test\_parse\_kwarg.py                     |       44 |        0 |        0 |        0 |    100% |           |
 | tests/components/test\_component.py                                  |      183 |        0 |        0 |        0 |    100% |           |
 | tests/components/test\_convert\_to\_dash\_case.py                    |        5 |        0 |        0 |        0 |    100% |           |
@@ -111,7 +111,7 @@
 | tests/views/utils/\_\_init\_\_.py                                    |        0 |        0 |        0 |        0 |    100% |           |
 | tests/views/utils/test\_construct\_model.py                          |       47 |       10 |        0 |        0 |     79% |     44-60 |
 | tests/views/utils/test\_set\_property\_from\_data.py                 |      139 |        2 |        0 |        0 |     99% |     29-30 |
-| **TOTAL**                                                            | **6132** |  **548** | **1028** |  **129** | **89%** |           |
+| **TOTAL**                                                            | **6153** |  **548** | **1028** |  **129** | **89%** |           |
 
 
 ## Setup coverage badge
