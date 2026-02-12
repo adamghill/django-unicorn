@@ -36,9 +36,11 @@
 
 ## Release
 
-1. Update `CHANGELOG.md`
-1. Tag the release: `git tag v0.63.0`
-1. Push the tag: `git push origin v0.63.0`
+1. Update `docs/source/changelog.md`
+1. Update version in `pyproject.toml`
+1. Commit changes
+1. Tag the release: `git tag 0.65.0`
+1. Push the tag: `git push origin --tags`
 1. The GitHub Action will automatically:
     - Build the JavaScript assets with the correct version
     - Build the Python package with the correct version
