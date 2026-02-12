@@ -37,6 +37,7 @@ partial-updates
 polling
 visibility
 messages
+pagination
 ```
 
 ```{toctree}
