@@ -32,7 +32,7 @@ except ImportError:
 
 def handle(component_request: ComponentRequest, component: UnicornView, payload: dict):
     # Import here to prevent cyclic import
-    from django_unicorn.views.utils import set_property_from_data
+    from django_unicorn.views.utils import set_property_from_data  # noqa: PLC0415
 
     call_method_name = payload.get("name", "")
 

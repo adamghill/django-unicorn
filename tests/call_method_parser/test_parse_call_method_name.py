@@ -107,7 +107,7 @@ def test_string_with_backslashes():
 
 def test_complex_chemical_name_issue_607():
     """Test for issue #607: string values with single quotes break function calls"""
-    chemical_name = "Chloro(2-dicyclohexylphosphino-3,6-dimethoxy-2',4',6'-tri-i-propyl-1,1'-biphenyl)(2'-amino-1,1'-biphenyl-2-yl)palladium(II)"
+    chemical_name = "Chloro(2-dicyclohexylphosphino-3,6-dimethoxy-2',4',6'-tri-i-propyl-1,1'-biphenyl)(2'-amino-1,1'-biphenyl-2-yl)palladium(II)"  # noqa: E501
     expected = ("set_new_catalyst", (chemical_name,), {})
     actual = parse_call_method_name(
         "set_new_catalyst('Chloro(2-dicyclohexylphosphino-3,6-dimethoxy-2\\',"
