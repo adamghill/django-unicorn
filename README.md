@@ -1,6 +1,6 @@
 # Repository Coverage
 
-[Full report](https://htmlpreview.github.io/?https://github.com/adamghill/django-unicorn/blob/python-coverage-comment-action-data/htmlcov/index.html)
+[Full report](https://htmlpreview.github.io/?https://github.com/django-commons/django-unicorn/blob/python-coverage-comment-action-data/htmlcov/index.html)
 
 | Name                                                                 |    Stmts |     Miss |   Branch |   BrPart |   Cover |   Missing |
 |--------------------------------------------------------------------- | -------: | -------: | -------: | -------: | ------: | --------: |
@@ -120,20 +120,20 @@ Below are examples of the badges you can use in your main branch `README` file.
 
 ### Direct image
 
-[![Coverage badge](https://raw.githubusercontent.com/adamghill/django-unicorn/python-coverage-comment-action-data/badge.svg)](https://htmlpreview.github.io/?https://github.com/adamghill/django-unicorn/blob/python-coverage-comment-action-data/htmlcov/index.html)
+[![Coverage badge](https://raw.githubusercontent.com/django-commons/django-unicorn/python-coverage-comment-action-data/badge.svg)](https://htmlpreview.github.io/?https://github.com/django-commons/django-unicorn/blob/python-coverage-comment-action-data/htmlcov/index.html)
 
 This is the one to use if your repository is private or if you don't want to customize anything.
 
 ### [Shields.io](https://shields.io) Json Endpoint
 
-[![Coverage badge](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/adamghill/django-unicorn/python-coverage-comment-action-data/endpoint.json)](https://htmlpreview.github.io/?https://github.com/adamghill/django-unicorn/blob/python-coverage-comment-action-data/htmlcov/index.html)
+[![Coverage badge](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/django-commons/django-unicorn/python-coverage-comment-action-data/endpoint.json)](https://htmlpreview.github.io/?https://github.com/django-commons/django-unicorn/blob/python-coverage-comment-action-data/htmlcov/index.html)
 
 Using this one will allow you to [customize](https://shields.io/endpoint) the look of your badge.
 It won't work with private repositories. It won't be refreshed more than once per five minutes.
 
 ### [Shields.io](https://shields.io) Dynamic Badge
 
-[![Coverage badge](https://img.shields.io/badge/dynamic/json?color=brightgreen&label=coverage&query=%24.message&url=https%3A%2F%2Fraw.githubusercontent.com%2Fadamghill%2Fdjango-unicorn%2Fpython-coverage-comment-action-data%2Fendpoint.json)](https://htmlpreview.github.io/?https://github.com/adamghill/django-unicorn/blob/python-coverage-comment-action-data/htmlcov/index.html)
+[![Coverage badge](https://img.shields.io/badge/dynamic/json?color=brightgreen&label=coverage&query=%24.message&url=https%3A%2F%2Fraw.githubusercontent.com%2Fdjango-commons%2Fdjango-unicorn%2Fpython-coverage-comment-action-data%2Fendpoint.json)](https://htmlpreview.github.io/?https://github.com/django-commons/django-unicorn/blob/python-coverage-comment-action-data/htmlcov/index.html)
 
 This one will always be the same color. It won't work for private repos. I'm not even sure why we included it.
 
