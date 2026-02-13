@@ -160,7 +160,7 @@ class Command(BaseCommand):
 """
             )
 
-            webbrowser.open("https://github.com/adamghill/django-unicorn", new=2)
+            webbrowser.open("https://github.com/django-commons/django-unicorn", new=2)
         else:
             self.stdout.write(
                 self.style.ERROR("That's a bummer, but I understand. I hope you will star it for me later!")

@@ -210,7 +210,7 @@ def test_handle_reply_yes_star(settings, tmp_path, monkeypatch, capsys):
 
     # Patch opening a webbrowser
     def webbrowser_open(url, **kwargs):  # noqa: ARG001
-        assert url == "https://github.com/adamghill/django-unicorn"
+        assert url == "https://github.com/django-commons/django-unicorn"
 
     monkeypatch.setattr("webbrowser.open", webbrowser_open)
 
