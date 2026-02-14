@@ -23,6 +23,38 @@ class ComponentResponse:
         self.return_data = return_data
         self.partials = partials or []
 
+    def _collect_all_calls(self) -> list[dict[str, Any]]:
+        """
+        Collect JavaScript calls from this component and all its children recursively.
+
+        Returns:
+            List of call dictionaries with 'fn' and 'args' keys.
+        """
+        all_calls = list(self.component.calls)  # Start with parent's calls
+
+        # Recursively collect from all children
+        all_calls.extend(self._collect_calls_from_component(self.component))
+
+        return all_calls
+
+    def _collect_calls_from_component(self, component: UnicornView) -> list[dict[str, Any]]:
+        """
+        Helper to recursively collect calls from a component's descendants.
+
+        Args:
+            component: The component to collect calls from.
+
+        Returns:
+            List of call dictionaries from all descendants.
+        """
+        calls = []
+        for child in component.children:
+            # Add this child's calls
+            calls.extend(child.calls)
+            # Recursively collect from this child's descendants
+            calls.extend(self._collect_calls_from_component(child))
+        return calls
+
     def get_data(self) -> dict[str, Any]:
         # Sort data so it's stable
         if self.component_request.data:
@@ -34,7 +66,7 @@ class ComponentResponse:
             "id": self.component_request.id,
             "data": self.component_request.data,
             "errors": self.component.errors,
-            "calls": self.component.calls,
+            "calls": self._collect_all_calls(),
             "checksum": generate_checksum(self.component_request.data),
         }
 
@@ -50,7 +82,7 @@ class ComponentResponse:
             if (
                 self.component_request.hash == rendered_component_hash
                 and (not self.return_data or not self.return_data.value)
-                and not self.component.calls
+                and not self._collect_all_calls()
             ):
                 if not self.component.parent and self.component.force_render is False:
                     raise RenderNotModifiedError()
