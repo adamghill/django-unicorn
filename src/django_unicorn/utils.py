@@ -1,11 +1,10 @@
-import hmac
 import logging
 from collections.abc import Callable, Sequence, Set
 from inspect import signature
 from pprint import pprint
+from typing import cast
 
-import shortuuid
-from django.conf import settings
+from django.core.signing import dumps
 from django.template import engines
 from django.template.backends.django import Template
 from django.utils.html import _json_script_escapes  # type: ignore
@@ -31,34 +30,25 @@ def html_element_to_string(element: html.HtmlElement, **kwargs) -> str:
 
 
 def generate_checksum(data: bytes | str | dict | None) -> str:
-    """Generates a checksum for the passed-in data.
+    """Generates a cryptographically signed checksum for the passed-in data.
+
+    Uses Django's signing framework to protect against tampering.
 
     Args:
         data: The raw input to generate the checksum against.
 
     Returns:
-        The generated checksum.
+        The generated signed checksum.
     """
-
-    data_bytes: bytes | None = None
-
     if isinstance(data, bytes):
-        data_bytes = data
-    elif isinstance(data, dict):
-        data_bytes = str.encode(str(data))
-    elif isinstance(data, str):
-        data_bytes = str.encode(data)
-    else:
+        # Convert bytes to string for consistency
+        data = data.decode("utf-8")
+    elif not isinstance(data, (str, dict)):
+        # Reject None and other invalid types
         raise TypeError(f"Invalid type: {type(data)}")
 
-    checksum = hmac.new(
-        str.encode(settings.SECRET_KEY),
-        data_bytes,
-        digestmod="sha256",
-    ).hexdigest()
-    checksum = shortuuid.uuid(checksum)[:8]
-
-    return checksum
+    # Sign the data using Django's signing framework
+    return dumps(cast(str | dict, data), salt="django-unicorn")
 
 
 def dicts_equal(dictionary_one: dict, dictionary_two: dict) -> bool:

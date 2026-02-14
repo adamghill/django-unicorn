@@ -1,4 +1,5 @@
 import pytest
+from django.core.signing import loads as signing_loads
 from django.template.backends.django import Template
 
 from django_unicorn.utils import (
@@ -13,29 +14,28 @@ from django_unicorn.utils import (
 def test_generate_checksum_bytes(settings):
     settings.SECRET_KEY = "asdf"
 
-    expected = "TfxFqcQL"
     actual = generate_checksum(b'{"name": "test"}')
-
-    assert expected == actual
+    # Verify it's a signed string that can be unsigned
+    unsigned = signing_loads(actual, salt="django-unicorn")
+    assert unsigned == '{"name": "test"}'
 
 
 def test_generate_checksum_str(settings):
     settings.SECRET_KEY = "asdf"
 
-    expected = "TfxFqcQL"
     actual = generate_checksum('{"name": "test"}')
-
-    assert expected == actual
+    # Verify it's a signed string that can be unsigned
+    unsigned = signing_loads(actual, salt="django-unicorn")
+    assert unsigned == '{"name": "test"}'
 
 
 def test_generate_checksum_dict(settings):
     settings.SECRET_KEY = "asdf"
 
-    # This is different than the above because `str(dict)` turns `{"name": "test"}` into `"{'name': 'test'}"`
-    expected = "JaV4PeA6"
     actual = generate_checksum({"name": "test"})
-
-    assert expected == actual
+    # Verify it's a signed dict that can be unsigned
+    unsigned = signing_loads(actual, salt="django-unicorn")
+    assert unsigned == {"name": "test"}
 
 
 def test_generate_checksum_invalid(settings):

@@ -1,10 +1,12 @@
 import time
+from typing import cast
 from uuid import uuid4
 
 import pytest
 from django.http import JsonResponse
 
 from django_unicorn.errors import ComponentClassLoadError, ComponentModuleLoadError
+from django_unicorn.utils import generate_checksum
 from django_unicorn.views import message
 
 
@@ -69,16 +71,17 @@ def test_message_bad_checksum(client):
 def test_message_no_component_id(client):
     data = {
         "data": {},
-        "checksum": "DVVk97cx",
         "epoch": time.time(),
     }
+    data["checksum"] = generate_checksum(cast(dict, data["data"]))
     response = post_json(client, data, url="/message/test-message-no-component-id")
 
     assert_json_error(response, "Missing component id")
 
 
 def test_message_no_epoch(client):
-    data = {"data": {}, "checksum": "DVVk97cx", "id": str(uuid4())}
+    data = {"data": {}, "id": str(uuid4())}
+    data["checksum"] = generate_checksum(cast(dict, data["data"]))
     response = post_json(client, data, url="/message/test-message-no-epoch")
 
     assert_json_error(response, "Missing epoch")
@@ -87,10 +90,10 @@ def test_message_no_epoch(client):
 def test_message_component_module_not_loaded(client):
     data = {
         "data": {},
-        "checksum": "DVVk97cx",
         "id": str(uuid4()),
         "epoch": time.time(),
     }
+    data["checksum"] = generate_checksum(cast(dict, data["data"]))
 
     with pytest.raises(ComponentModuleLoadError) as e:
         post_json(client, data, url="/message/test-message-module-not-loaded")
@@ -108,10 +111,10 @@ def test_message_component_module_not_loaded(client):
 def test_message_component_class_not_loaded(client):
     data = {
         "data": {},
-        "checksum": "DVVk97cx",
         "id": str(uuid4()),
         "epoch": time.time(),
     }
+    data["checksum"] = generate_checksum(cast(dict, data["data"]))
 
     with pytest.raises(ComponentClassLoadError) as e:
         post_json(
@@ -143,10 +146,10 @@ has no attribute 'FakeComponentNotThere'"
 def test_message_component_class_with_attribute_error(client):
     data = {
         "data": {},
-        "checksum": "DVVk97cx",
         "id": str(uuid4()),
         "epoch": time.time(),
     }
+    data["checksum"] = generate_checksum(cast(dict, data["data"]))
 
     with pytest.raises(ComponentClassLoadError) as e:
         post_json(
@@ -161,10 +164,10 @@ def test_message_component_class_with_attribute_error(client):
 def test_message_component_with_dash(client):
     data = {
         "data": {},
-        "checksum": "DVVk97cx",
         "id": str(uuid4()),
         "epoch": time.time(),
     }
+    data["checksum"] = generate_checksum(cast(dict, data["data"]))
 
     with pytest.raises(ComponentModuleLoadError) as e:
         post_json(client, data, url="/message/test-with-dash")
@@ -178,10 +181,10 @@ def test_message_component_with_dash(client):
 def test_message_component_with_dot(client):
     data = {
         "data": {},
-        "checksum": "DVVk97cx",
         "id": str(uuid4()),
         "epoch": time.time(),
     }
+    data["checksum"] = generate_checksum(cast(dict, data["data"]))
 
     with pytest.raises(ComponentClassLoadError) as e:
         post_json(client, data, url="/message/test.dot")
