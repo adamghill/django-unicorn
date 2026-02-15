@@ -8,6 +8,7 @@
 self
 getting-started
 installation
+tutorial
 components
 ```
 
@@ -37,6 +38,7 @@ partial-updates
 polling
 visibility
 messages
+pagination
 ```
 
 ```{toctree}
