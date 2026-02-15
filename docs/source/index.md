@@ -8,6 +8,7 @@
 self
 getting-started
 installation
+tutorial
 components
 ```
 
