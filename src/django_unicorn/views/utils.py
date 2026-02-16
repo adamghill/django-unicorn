@@ -45,6 +45,20 @@ def set_property_from_data(
     field = getattr(component_or_field, name)
     component_field_is_model_or_unicorn_field = _is_component_field_model_or_unicorn_field(component_or_field, name)
 
+    if isinstance(component_or_field, Model) and not isinstance(value, dict):
+        # If the component is a model, we might need to set a foreign key by its ID
+        try:
+            model_field = component_or_field._meta.get_field(name)
+
+            if model_field.is_relation and model_field.many_to_one:
+                if isinstance(value, Model):
+                    setattr(component_or_field, name, value)
+                else:
+                    setattr(component_or_field, model_field.attname, value)
+                return
+        except Exception:
+            pass
+
     # UnicornField and Models are always a dictionary (can be nested)
     if component_field_is_model_or_unicorn_field:
         # Re-get the field since it might have been set in `_is_component_field_model_or_unicorn_field`
