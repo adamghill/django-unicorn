@@ -3,7 +3,7 @@
 ## 0.65.0
 
 - Properly escape single quotes in Unicorn.call() arguments [#773](https://github.com/adamghill/django-unicorn/pull/773) by [JohananOppongAmoateng](https://github.com/JohananOppongAmoateng).
-- Automatally initialize components via MutationObserver [#760](https://github.com/adamghill/django-unicorn/pull/760) by [JohananOppongAmoateng](https://github.com/JohananOppongAmoateng).
+- Automatically initialize components via MutationObserver [#760](https://github.com/adamghill/django-unicorn/pull/760) by [JohananOppongAmoateng](https://github.com/JohananOppongAmoateng).
 - Support HTTP redirect from mount() [#767](https://github.com/adamghill/django-unicorn/pull/767) by [JohananOppongAmoateng](https://github.com/JohananOppongAmoateng).
 - Fix: `IndexError` when using a custom setter method with $event.target.value by [#761](https://github.com/adamghill/django-unicorn/pull/761) by [JohananOppongAmoateng](https://github.com/JohananOppongAmoateng).
 - Fix: correct debounce behavior with delay [#764](https://github.com/adamghill/django-unicorn/pull/764) by [JohananOppongAmoateng](https://github.com/JohananOppongAmoateng).

@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
 
     environment:
-      name: release
+      name: pypi
       url: https://pypi.org/project/django-unicorn/
 
     permissions:
