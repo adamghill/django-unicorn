@@ -454,3 +454,15 @@ A context variable can also be marked as `safe` in the template with the normal 
 </div>
 ```
 ````
+
+## Pickling and Caching
+
+Components are pickled and cached for the duration of the AJAX request. This means that any instance variable on the component must be pickleable.
+
+```{warning}
+Do not store unpickleable objects (e.g. generators) on the component instance.
+```
+
+If you need to use an unpickleable object, either convert it to a pickleable type (e.g. convert a generator to a list) or re-initialize it within the method that needs it without storing it on `self`.
+
+
