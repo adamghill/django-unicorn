@@ -36,6 +36,7 @@ class ComponentResponse:
             "errors": self.component.errors,
             "calls": self.component.calls,
             "checksum": generate_checksum(self.component_request.data),
+            "epoch": self.component_request.epoch,
         }
 
         render_not_modified = False

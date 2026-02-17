@@ -58,6 +58,9 @@ export class Component {
     this.initVisibility();
     this.initPolling();
 
+    // epoch is the time in milliseconds when the packet was created
+    this.latestActionEpoch = new Date().getTime();
+
     this.callCalls(args.calls);
   }
 
