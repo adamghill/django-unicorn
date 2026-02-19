@@ -30,6 +30,48 @@ class CallJavascriptView(UnicornView):
 
     def hello(self):
         self.call("hello", self.name)
+
+## Call Method on Other Component
+
+From a component, it is possible to call a method on another component. This is useful when you want to trigger a refresh or an update on another component.
+
+```html
+<!-- compare-list.html -->
+<div>
+  <!-- content -->
+</div>
+```
+
+```python
+# compare_list.py
+from django_unicorn.components import UnicornView
+
+class CompareListView(UnicornView):
+    def reload_state(self):
+        # do something
+        pass
+```
+
+```html
+<!-- source-checkbox.html -->
+<div>
+  <input type="checkbox" unicorn:model="is_checked" unicorn:change="toggle_check_state" />
+</div>
+```
+
+```python
+# source_checkbox.py
+from django_unicorn.components import UnicornView
+
+class SourceCheckboxView(UnicornView):
+    is_checked = False
+
+    def toggle_check_state(self):
+        self.is_checked = not self.is_checked
+        self.call("Unicorn.call", "compare-list", "reload_state")
+```
+
+The first argument to `call` is the name of the JavaScript function to call, which is `Unicorn.call`. The second argument is the name (or key) of the component to call. The third argument is the name of the method to call on that component.
 ```
 
 ## Trigger Model Update
