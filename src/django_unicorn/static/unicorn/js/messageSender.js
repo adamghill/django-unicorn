@@ -53,7 +53,7 @@ export function send(component, callback) {
 
       if (value instanceof File) {
         formData.append(key, value);
-      } else if (value instanceof FileList && value.length > 0) {
+      } else if (typeof FileList !== "undefined" && value instanceof FileList && value.length > 0) {
         Array.from(value).forEach((file, index) => {
           formData.append(`${key}[${index}]`, file);
         });
@@ -68,7 +68,7 @@ export function send(component, callback) {
       const value = action.payload.value;
       if (value instanceof File) {
         formData.append(fieldName, value);
-      } else if (value instanceof FileList && value.length > 0) {
+      } else if (typeof FileList !== "undefined" && value instanceof FileList && value.length > 0) {
         Array.from(value).forEach((file, index) => {
           formData.append(`${fieldName}[${index}]`, file);
         });
@@ -362,7 +362,7 @@ function hasFiles(component) {
   for (const key in component.data) {
     const value = component.data[key];
 
-    if (value instanceof File || (value instanceof FileList && value.length > 0)) {
+    if (value instanceof File || (typeof FileList !== "undefined" && value instanceof FileList && value.length > 0)) {
       return true;
     }
 
@@ -380,7 +380,7 @@ function hasFiles(component) {
     if (!action.payload) return false;
 
     return Object.values(action.payload).some(
-      (v) => (v instanceof File) || (v instanceof FileList && v.length > 0)
+      (v) => (v instanceof File) || (typeof FileList !== "undefined" && v instanceof FileList && v.length > 0)
     );
   });
 }
