@@ -1,4 +1,5 @@
 import json
+from typing import cast
 from unittest.mock import Mock
 
 import pytest
@@ -45,7 +46,7 @@ def test_component_request_parsing():
         "checksum": "fail",
     }
 
-    body["checksum"] = generate_checksum(str(body["data"]))
+    body["checksum"] = generate_checksum(cast(dict, body["data"]))
 
     request.body = json.dumps(body).encode("utf-8")
 
@@ -71,7 +72,7 @@ def test_component_request_action_parsing():
         ],
     }
 
-    body["checksum"] = generate_checksum(str(body["data"]))
+    body["checksum"] = generate_checksum(cast(dict, body["data"]))
     request.body = json.dumps(body).encode("utf-8")
 
     req = ComponentRequest(request, "test-component")

@@ -77,7 +77,7 @@ def test_message_call_method_redirect_with_message(client):
             }
         ],
         "data": data,
-        "checksum": generate_checksum(str(data)),
+        "checksum": generate_checksum(data),
         "id": shortuuid.uuid()[:8],
         "epoch": time.time(),
     }
