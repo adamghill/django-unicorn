@@ -338,6 +338,10 @@ export class Element {
           value.push(this.el.selectedOptions[i].value);
         }
       }
+      else if (this.el.type.toLowerCase() === "file") {
+        // Handle file inputs
+        value = this.el.files;
+      }
     }
 
     return value;

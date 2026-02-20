@@ -39,10 +39,40 @@ export function send(component, callback) {
   };
   headers[component.csrfTokenHeaderName] = getCsrfToken(component);
 
+  let bodyPayload;
+
+  if (hasFiles(component)) {
+    const formData = new FormData();
+
+    // Append entire JSON payload as a nested field
+    formData.append("body", JSON.stringify(body));
+
+    // Append data — but handle files properly
+    Object.keys(component.data).forEach((key) => {
+      const value = component.data[key];
+
+      if (value instanceof File) {
+        formData.append(key, value);
+      } else if (value instanceof FileList) {
+        Array.from(value).forEach((file, index) => {
+          formData.append(`${key}[${index}]`, file);
+        });
+      } 
+    });
+
+    bodyPayload = formData;
+
+    // IMPORTANT: remove content-type so browser sets multipart boundary
+    delete headers["Content-Type"];
+  } else {
+    bodyPayload = JSON.stringify(body);
+    headers["Content-Type"] = "application/json";
+  }
+
   return fetch(component.syncUrl, {
     method: "POST",
     headers,
-    body: JSON.stringify(body),
+    body: bodyPayload,
   })
     .then((response) => {
       if (response.ok) {
@@ -309,4 +339,31 @@ export function send(component, callback) {
         callback(null, null, err);
       }
     });
+}
+
+
+function hasFiles(component) {
+  // Check component.data
+  for (const key in component.data) {
+    const value = component.data[key];
+
+    if (value instanceof File || value instanceof FileList) {
+      return true;
+    }
+
+    if (Array.isArray(value)) {
+      if (value.some((v) => v instanceof File)) {
+        return true;
+      }
+    }
+  }
+
+  // Check actionQueue payloads
+  return component.actionQueue.some((action) => {
+    if (!action.payload) return false;
+
+    return Object.values(action.payload).some(
+      (v) => v instanceof File || v instanceof FileList
+    );
+  });
 }
