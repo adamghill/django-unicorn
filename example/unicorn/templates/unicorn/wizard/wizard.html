@@ -1,0 +1,19 @@
+{% load unicorn %}
+<div>
+  {% if step == 1 %}
+  {% unicorn "wizard/step1" id="step1" %}
+  {% elif step == 2 %}
+  {% unicorn "wizard/step2" id="step2" %}
+  {% elif step == 3 %}
+  <div>
+    Last step! {{ step }}
+  </div>
+
+  <div>
+    <button unicorn:click="previous()">Previous</button>
+    <button unicorn:click="start()">Start over</button>
+  </div>
+  {% else %}
+  UNKNOWN STEP! {{ step }}
+  {% endif %}
+</div>

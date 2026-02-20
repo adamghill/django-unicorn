@@ -1,10 +1,23 @@
 <div>
-    <button unicorn:click="$reset">Reset the component</button>
-    <br />
-    <br />
+  <button unicorn:click="$reset">Reset the component</button>
+  <button onclick="document.getElementById('name').value = 'asdf';">Plain JS set value on key1</button>
+  <button onclick="Unicorn.trigger('unicorn.components.hello_world.HelloWorldView', 'key1')">Trigger key1</button>
+  <br />
+  <br />
 
-    <label></label>
-    <input unicorn:model="name" type="text" id="name" unicorn:key="key1">
+  <label></label>
+  <input unicorn:model="name" type="text" id="name" unicorn:key="key1">
 
-    Hello, {{ name|default:'World' }}!
+  Hello, {{ name|default:'World' }}!
+
+  <div>
+    Request path context variable: '{{ request.path }}'
+  </div>
+
+  <script type="application/javascript">
+    window.addEventListener('DOMContentLoaded', (event) => {
+      Unicorn.addEventListener('updated', (component) => console.log('got updated', component));
+    });
+
+  </script>
 </div>

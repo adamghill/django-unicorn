@@ -1,5 +1,5 @@
 import test from "ava";
-import { contains } from "../../../django_unicorn/static/js/utils";
+import { contains } from "../../../src/django_unicorn/static/unicorn/js/utils.js";
 
 test("contains", (t) => {
   t.true(contains("abcdefg", "cde"));

@@ -2,7 +2,7 @@ import csv
 
 from django.core.management.base import BaseCommand, CommandError
 
-from ...models import Flavor
+from ...models import Favorite, Flavor
 
 
 class Command(BaseCommand):
@@ -20,3 +20,4 @@ class Command(BaseCommand):
                 parent = Flavor.objects.filter(name=parent_name).first()
                 flavor = Flavor(name=name, label=label, parent=parent)
                 flavor.save()
+                Favorite.objects.create(flavor=flavor)

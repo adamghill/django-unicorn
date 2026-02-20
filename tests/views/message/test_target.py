@@ -1,10 +1,9 @@
 import time
 
-import orjson
 import shortuuid
-from bs4 import BeautifulSoup
 
 from django_unicorn.components import UnicornView
+from django_unicorn.components.unicorn_template_response import get_root_element
 from django_unicorn.utils import generate_checksum
 
 
@@ -21,10 +20,14 @@ def test_message_generated_checksum_matches_dom_checksum(client):
     data = {"clicked": False}
     message = {
         "actionQueue": [
-            {"payload": {"name": "test_method"}, "type": "callMethod", "target": None,}
+            {
+                "payload": {"name": "test_method"},
+                "type": "callMethod",
+                "target": None,
+            }
         ],
         "data": data,
-        "checksum": generate_checksum(orjson.dumps(data)),
+        "checksum": generate_checksum(str(data)),
         "id": shortuuid.uuid()[:8],
         "epoch": time.time(),
     }
@@ -40,14 +43,10 @@ def test_message_generated_checksum_matches_dom_checksum(client):
 
     assert dom
     assert not body.get("partials")
-    assert body.get("data", {}).get("clicked") == True
+    assert body.get("data", {}).get("clicked") is True
 
-    soup = BeautifulSoup(dom, features="html.parser")
-
-    for element in soup.find_all():
-        if "unicorn:checksum" in element.attrs:
-            assert element.attrs["unicorn:checksum"] == body.get("checksum")
-            break
+    root_element = get_root_element(dom)
+    assert root_element.attrib.get("unicorn:checksum") == body.get("checksum")
 
 
 def test_message_target_invalid(client):
@@ -61,7 +60,7 @@ def test_message_target_invalid(client):
             }
         ],
         "data": data,
-        "checksum": generate_checksum(orjson.dumps(data)),
+        "checksum": generate_checksum(str(data)),
         "id": shortuuid.uuid()[:8],
         "epoch": time.time(),
     }
@@ -76,7 +75,7 @@ def test_message_target_invalid(client):
 
     assert body.get("dom")
     assert not body.get("partials")
-    assert body.get("data", {}).get("clicked") == True
+    assert body.get("data", {}).get("clicked") is True
 
 
 def test_message_target_id(client):
@@ -90,7 +89,7 @@ def test_message_target_id(client):
             }
         ],
         "data": data,
-        "checksum": generate_checksum(orjson.dumps(data)),
+        "checksum": generate_checksum(str(data)),
         "id": shortuuid.uuid()[:8],
         "epoch": time.time(),
     }
@@ -107,7 +106,7 @@ def test_message_target_id(client):
     assert len(body["partials"]) == 1
     assert body["partials"][0]["id"] == "test-target-id"
     assert body["partials"][0]["dom"] == '<div id="test-target-id"></div>'
-    assert body.get("data", {}).get("clicked") == True
+    assert body.get("data", {}).get("clicked") is True
 
 
 def test_message_target_only_id(client):
@@ -121,7 +120,7 @@ def test_message_target_only_id(client):
             }
         ],
         "data": data,
-        "checksum": generate_checksum(orjson.dumps(data)),
+        "checksum": generate_checksum(str(data)),
         "id": shortuuid.uuid()[:8],
         "epoch": time.time(),
     }
@@ -138,7 +137,7 @@ def test_message_target_only_id(client):
     assert len(body["partials"]) == 1
     assert body["partials"][0]["id"] == "test-target-id"
     assert body["partials"][0]["dom"] == '<div id="test-target-id"></div>'
-    assert body.get("data", {}).get("clicked") == True
+    assert body.get("data", {}).get("clicked") is True
 
 
 def test_message_target_only_key(client):
@@ -152,7 +151,7 @@ def test_message_target_only_key(client):
             }
         ],
         "data": data,
-        "checksum": generate_checksum(orjson.dumps(data)),
+        "checksum": generate_checksum(str(data)),
         "id": shortuuid.uuid()[:8],
         "epoch": time.time(),
     }
@@ -169,7 +168,7 @@ def test_message_target_only_key(client):
     assert len(body["partials"]) == 1
     assert body["partials"][0]["key"] == "test-target-key"
     assert body["partials"][0]["dom"] == '<div unicorn:key="test-target-key"></div>'
-    assert body.get("data", {}).get("clicked") == True
+    assert body.get("data", {}).get("clicked") is True
 
 
 def test_message_target_key(client):
@@ -183,7 +182,7 @@ def test_message_target_key(client):
             }
         ],
         "data": data,
-        "checksum": generate_checksum(orjson.dumps(data)),
+        "checksum": generate_checksum(str(data)),
         "id": shortuuid.uuid()[:8],
         "epoch": time.time(),
     }
@@ -200,4 +199,4 @@ def test_message_target_key(client):
     assert len(body["partials"]) == 1
     assert body["partials"][0]["key"] == "test-target-key"
     assert body["partials"][0]["dom"] == '<div unicorn:key="test-target-key"></div>'
-    assert body.get("data", {}).get("clicked") == True
+    assert body.get("data", {}).get("clicked") is True

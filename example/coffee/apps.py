@@ -1,5 +1,5 @@
 from django.apps import AppConfig
 
 
-class CoffeeConfig(AppConfig):
-    pass
+class Config(AppConfig):
+    name = "example.coffee"

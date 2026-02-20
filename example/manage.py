@@ -5,7 +5,9 @@ import sys
 
 
 def main():
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "project.settings")
+    # Add parent directory to sys.path so that 'example' can be imported as a package
+    sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "example.project.settings")
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:

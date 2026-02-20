@@ -1,20 +1,27 @@
 name: JavaScript
-on: [push]
+on:
+  push:
+  workflow_dispatch:
 
 jobs:
   test:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2.3.4
+      - uses: actions/checkout@v4.1.1
         with:
           fetch-depth: 1
 
       - name: Set up node
-        uses: actions/setup-node@v2.1.2
+        uses: actions/setup-node@v4.0.2
 
       - name: Install node packages
         run: npm install
+
+      - name: See if unicorn.min.js is up-to-date
+        run: |
+          npm run build
+          git diff --stat --exit-code
 
       - name: Test with ava
         run: npm run-script test

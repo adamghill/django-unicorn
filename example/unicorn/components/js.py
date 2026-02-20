@@ -18,9 +18,14 @@ class JsView(UnicornView):
     )
     selected_state = ""
     select2_datetime = now()
+    scroll_counter = 0
+    load_js = False
 
     def call_javascript(self):
         self.call("callAlert", "world")
+
+    def call_javascript_module(self):
+        self.call("HelloJs.hello", "world!")
 
     def get_now(self):
         self.select2_datetime = now()
@@ -32,6 +37,12 @@ class JsView(UnicornView):
         print("select_state called", val)
         print("select_state called idx", idx)
         self.selected_state = val
+
+    def increase_counter(self):
+        if self.scroll_counter >= 2:
+            return False
+
+        self.scroll_counter += 1
 
     def upload_file(self):
         print("UPLOAD")

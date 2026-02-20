@@ -5,9 +5,9 @@ class FilterView(UnicornView):
     search = ""
 
     def updated_search(self, query):
-        self.parent.load_table()
+        self.parent.load_table()  # type: ignore
 
         if query:
-            self.parent.flavors = list(
-                filter(lambda f: query.lower() in f.name.lower(), self.parent.flavors)
-            )
+            self.parent.flavors = list(filter(lambda f: query.lower() in f.name.lower(), self.parent.flavors))  # type: ignore
+
+        self.parent.force_render = True  # type: ignore

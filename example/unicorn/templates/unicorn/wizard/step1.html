@@ -1,0 +1,16 @@
+<div>
+  <h3>Step 1</h3>
+
+  <div>
+    <input type="text" u:model="name" />
+  </div>
+
+  <div>
+    Name: {{ name }}
+  </div>
+
+  <button unicorn:click="noop()">No-op</button>
+
+  <button unicorn:click="$parent.next()">Next</button>
+  <button unicorn:click="$parent.finish()">Finish</button>
+</div>

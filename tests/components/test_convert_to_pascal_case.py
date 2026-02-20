@@ -1,4 +1,4 @@
-from django_unicorn.components import convert_to_pascal_case
+from django_unicorn.components.unicorn_view import convert_to_pascal_case
 
 
 def test_convert_to_pascal_case():

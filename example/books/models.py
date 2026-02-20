@@ -1,7 +1,13 @@
-from django.db.models import Model
-from django.db.models.fields import CharField, DateField
+from django.db import models
 
 
-class Book(Model):
-    title = CharField(max_length=255)
-    date_published = DateField()
+class Book(models.Model):
+    TYPES = ((1, "Hardcover"), (2, "Softcover"))
+    title = models.CharField(max_length=255)
+    date_published = models.DateField()
+    type = models.IntegerField(choices=TYPES, default=1)
+
+
+class Author(models.Model):
+    name = models.CharField(max_length=1024)
+    books = models.ManyToManyField(Book)

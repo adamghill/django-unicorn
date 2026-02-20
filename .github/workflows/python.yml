@@ -1,49 +1,77 @@
 name: Python
-on: [push]
+
+on:
+  push:
+  workflow_dispatch:
+
+env:
+  LINT_PYTHON_VERSION: 3.11
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Set up Python ${{ env.LINT_PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.LINT_PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          uv sync --dev
+
+      - name: ruff check
+        run: uv run ruff check .
+
+      # - name: mypy check
+      #   run: uv run mypy django_unicorn
+
   test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.6, 3.7, 3.8, 3.9]
+        python-version: ["3.10", "3.11", "3.12"]
+        django-version: ["5.2", "6.0"]
+        exclude:
+          - python-version: "3.10"
+            django-version: "6.0"
+          - python-version: "3.11"
+            django-version: "6.0"
 
     steps:
-      - uses: actions/checkout@v2.3.4
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 1
 
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2.1.4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install Poetry
-        uses: abatilo/actions-poetry@v2.1.0
-
-      - name: Cache Poetry virtualenv
-        uses: actions/cache@v2.1.3
-        id: cache
-        with:
-          path: ~/.virtualenvs${{ matrix.python-version }}
-          key: poetry-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
-          restore-keys: |
-            poetry-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
-
-      - name: Set Poetry config
-        run: |
-          poetry config virtualenvs.in-project false
-          poetry config virtualenvs.path ~/.virtualenvs${{ matrix.python-version }}
-
       - name: Install dependencies
-        run: poetry install
-        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          uv sync --all-extras --dev
+          uv pip install django==${{ matrix.django-version }}
 
-      - name: black check
-        run: poetry run black . --check --exclude migrations
+      - name: Fast tests
+        run: uv run pytest -m 'not slow and not playwright'
 
-      - name: isort check
-        run: poetry run isort --settings pyproject.toml --check .
-
-      - name: Run all tests
-        run: poetry run nox
+      - name: Slow tests
+        run: uv run pytest -m 'slow'

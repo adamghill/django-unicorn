@@ -14,6 +14,7 @@ module.exports = {
     "import/no-unresolved": 0,
     "linebreak-style": 0,
     "comma-dangle": 0,
+    "import/extensions": ["error", "always", { ignorePackages: true }],
     "import/prefer-default-export": 0,
     "no-unused-expressions": ["error", { allowTernary: true }],
     "no-underscore-dangle": 0,

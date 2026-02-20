@@ -1,0 +1,26 @@
+{% extends "www/base.html" %}
+{% load unicorn %}
+
+{% block content %}
+
+<div unicorn:view>
+  <h2>Redirects</h2>
+
+  <div>
+    <a u:click="update_location">Update Location</a>
+    <br />
+    Current location count: {{ location_count }}
+  </div>
+
+  <div>
+    <a u:click="update_hash">Update Hash</a>
+    <br />
+    Current hash count: {{ hash_count }}
+  </div>
+
+  <div>
+    <a u:click="do_redirect">Redirect</a>
+  </div>
+</div>
+
+{% endblock content %}

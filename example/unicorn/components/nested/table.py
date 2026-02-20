@@ -1,6 +1,5 @@
-from coffee.models import Flavor
-
 from django_unicorn.components import UnicornView
+from example.coffee.models import Flavor
 
 
 class TableView(UnicornView):
@@ -8,6 +7,8 @@ class TableView(UnicornView):
     original_name = None
     flavors = Flavor.objects.none()
     is_editing = False
+    favorite_count = 0
+    show_filter = False
 
     def edit(self):
         self.is_editing = True
@@ -27,8 +28,14 @@ class TableView(UnicornView):
         self.load_table()
 
     def load_table(self):
-        self.flavors = Flavor.objects.all()[10:20]
+        self.flavors = Flavor.objects.select_related("favorite").all()[10:20]
+        self.favorite_count = sum([1 for f in self.flavors if hasattr(f, "favorite") and f.favorite.is_favorite])
+
+        def set_unedit(c):
+            if hasattr(c, "is_editing"):
+                c.is_editing = False
+            for cc in c.children:
+                set_unedit(cc)
 
         for child in self.children:
-            if hasattr(child, "is_editing"):
-                child.is_editing = False
+            set_unedit(child)

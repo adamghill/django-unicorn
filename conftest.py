@@ -1,6 +1,5 @@
-from django.conf import settings
-
 import pytest
+from django.conf import settings
 
 
 def pytest_configure():
@@ -8,18 +7,37 @@ def pytest_configure():
         {
             "BACKEND": "django.template.backends.django.DjangoTemplates",
             "DIRS": ["tests"],
+            "OPTIONS": {
+                "context_processors": [
+                    "django.template.context_processors.request",
+                    "django.contrib.messages.context_processors.messages",
+                ],
+            },
         }
     ]
-    databases = {"default": {"ENGINE": "django.db.backends.sqlite3",}}
+
+    databases = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+        }
+    }
 
     installed_apps = [
-        "example.coffee",
+        "django.contrib.sessions",
+        "django.contrib.messages",
+        "django.contrib.contenttypes",
+        "django.contrib.auth",
+        "django_unicorn",
+        "example.coffee.apps.Config",
+        "example.books.apps.Config",
     ]
 
     unicorn_settings = {
         "SERIAL": {"ENABLED": True, "TIMEOUT": 5},
         "CACHE_ALIAS": "default",
         "APPS": ("unicorn",),
+        "MINIFY_HTML": False,
+        "SCRIPT_LOCATION": "after",
     }
 
     caches = {
@@ -30,13 +48,21 @@ def pytest_configure():
     }
 
     settings.configure(
+        DEBUG=True,
+        SECRET_KEY="this-is-a-secret",
         TEMPLATES=templates,
-        ROOT_URLCONF="django_unicorn.urls",
+        MIDDLEWARE=[
+            "django.contrib.sessions.middleware.SessionMiddleware",
+            "django.contrib.messages.middleware.MessageMiddleware",
+        ],
+        ROOT_URLCONF="tests.urls",
         DATABASES=databases,
         INSTALLED_APPS=installed_apps,
         UNIT_TEST=True,
         UNICORN=unicorn_settings,
         CACHES=caches,
+        MESSAGE_STORAGE="django.contrib.messages.storage.session.SessionStorage",
+        SESSION_ENGINE="django.contrib.sessions.backends.file",
     )
 
 

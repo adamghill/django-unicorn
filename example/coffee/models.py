@@ -1,35 +1,44 @@
 import uuid
 
-from django.db.models import SET_NULL, FileField, ForeignKey, Model
-from django.db.models.fields import (
-    CharField,
-    DateField,
-    DateTimeField,
-    DecimalField,
-    DurationField,
-    FloatField,
-    TimeField,
-    UUIDField,
-)
+from django.db import models
 
 
-class Flavor(Model):
-    name = CharField(max_length=255)
-    label = CharField(max_length=255)
-    parent = ForeignKey("self", blank=True, null=True, on_delete=SET_NULL)
-    float_value = FloatField(blank=True, null=True)
-    decimal_value = DecimalField(blank=True, null=True, max_digits=10, decimal_places=2)
-    uuid = UUIDField(default=uuid.uuid4)
-    datetime = DateTimeField(blank=True, null=True)
-    date = DateField(blank=True, null=True)
-    time = TimeField(blank=True, null=True)
-    duration = DurationField(blank=True, null=True)
+class Flavor(models.Model):
+    name = models.CharField(max_length=255)
+    label = models.CharField(max_length=255)
+    parent = models.ForeignKey("self", blank=True, null=True, on_delete=models.SET_NULL)
+    float_value = models.FloatField(blank=True, null=True)
+    decimal_value = models.DecimalField(blank=True, null=True, max_digits=10, decimal_places=2)
+    uuid = models.UUIDField(default=uuid.uuid4)
+    datetime = models.DateTimeField(blank=True, null=True)
+    date = models.DateField(blank=True, null=True)
+    time = models.TimeField(blank=True, null=True)
+    duration = models.DurationField(blank=True, null=True)
 
     def __str__(self):
         return self.name
 
 
 class Document(Model):
-    description = CharField(max_length=255, blank=True)
-    document = FileField()
-    uploaded_at = DateTimeField(auto_now_add=True)
+    description = models.CharField(max_length=255, blank=True)
+    document = models.FileField()
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+
+class Favorite(models.Model):
+    is_favorite = models.BooleanField(default=False)
+    flavor = models.OneToOneField(Flavor, on_delete=models.CASCADE)
+
+
+class Taste(models.Model):
+    name = models.CharField(max_length=255)
+    flavor = models.ManyToManyField(Flavor)
+
+
+class Origin(models.Model):
+    name = models.CharField(max_length=255)
+    flavor = models.ManyToManyField(Flavor, related_name="origins")
+
+
+class NewFlavor(Flavor):
+    new_name = models.CharField(max_length=255)

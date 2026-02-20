@@ -1,9 +1,9 @@
 import test from "ava";
 import fetchMock from "fetch-mock";
 import { getComponent } from "../utils.js";
-import { send } from "../../../django_unicorn/static/js/messageSender.js";
+import { send } from "../../../src/django_unicorn/static/unicorn/js/messageSender.js";
 
-test.cb("call_method redirect", (t) => {
+test("call_method redirect", async (t) => {
   const html = `
 <input type="hidden" name="csrfmiddlewaretoken" value="asdf">
 <div unicorn:id="5jypjiyb" unicorn:name="text-inputs" unicorn:checksum="GXzew3Km">
@@ -34,15 +34,13 @@ test.cb("call_method redirect", (t) => {
   };
   global.fetch = fetchMock.sandbox().mock().post("/test/text-inputs", res);
 
-  send(component, (a, b, err) => {
-    t.true(err === null);
-    t.is(component.window.location.href, "http://www.google.com");
-    fetchMock.reset();
-    t.end();
-  });
+  await send(component);
+
+  t.is(component.window.location.href, "http://www.google.com");
+  fetchMock.reset();
 });
 
-test.cb("call_method refresh redirect", (t) => {
+test("call_method refresh redirect", async (t) => {
   const html = `
 <input type="hidden" name="csrfmiddlewaretoken" value="asdf">
 <div unicorn:id="5jypjiyb" unicorn:name="text-inputs" unicorn:checksum="GXzew3Km">
@@ -77,16 +75,18 @@ test.cb("call_method refresh redirect", (t) => {
   };
   global.fetch = fetchMock.sandbox().mock().post("/test/text-inputs", res);
 
-  send(component, (a, b, err) => {
-    t.true(err === null);
-    t.is(component.window.history.get(), "/test/text-inputs?some=query");
-    t.is(component.window.document.title, "new title");
-    fetchMock.reset();
-    t.end();
+  await new Promise((resolve) => {
+    send(component, (a, b, err) => {
+      t.true(err === null);
+      t.is(component.window.history.get(), "/test/text-inputs?some=query");
+      t.is(component.window.document.title, "new title");
+      fetchMock.reset();
+      resolve();
+    });
   });
 });
 
-test.cb("call_method hash", (t) => {
+test("call_method hash", async (t) => {
   const html = `
 <input type="hidden" name="csrfmiddlewaretoken" value="asdf">
 <div unicorn:id="5jypjiyb" unicorn:name="text-inputs" unicorn:checksum="GXzew3Km">
@@ -119,15 +119,17 @@ test.cb("call_method hash", (t) => {
   };
   global.fetch = fetchMock.sandbox().mock().post("/test/text-inputs", res);
 
-  send(component, (a, b, err) => {
-    t.true(err === null);
-    t.is(component.window.location.hash, "#somehash");
-    fetchMock.reset();
-    t.end();
+  await new Promise((resolve) => {
+    send(component, (a, b, err) => {
+      t.true(err === null);
+      t.is(component.window.location.hash, "#somehash");
+      fetchMock.reset();
+      resolve();
+    });
   });
 });
 
-test.cb("call_method forceModelUpdate is true", (t) => {
+test("call_method forceModelUpdate is true", async (t) => {
   const html = `
 <input type="hidden" name="csrfmiddlewaretoken" value="asdf">
 <div unicorn:id="5jypjiyb" unicorn:name="text-inputs" unicorn:checksum="GXzew3Km">
@@ -158,15 +160,17 @@ test.cb("call_method forceModelUpdate is true", (t) => {
   };
   global.fetch = fetchMock.sandbox().mock().post("/test/text-inputs", res);
 
-  send(component, (a, forceModelUpdates, err) => {
-    t.true(err === null);
-    t.true(forceModelUpdates);
-    fetchMock.reset();
-    t.end();
+  await new Promise((resolve) => {
+    send(component, (a, forceModelUpdates, err) => {
+      t.true(err === null);
+      t.true(forceModelUpdates);
+      fetchMock.reset();
+      resolve();
+    });
   });
 });
 
-test.cb("call_method partial.id", (t) => {
+test("call_method partial.id", async (t) => {
   // Annoyingly it appears that $('[unicorn\\:key='something']) doesn't
   // seem to work in JSDom, so this just tests targeting by id
   const html = `
@@ -181,7 +185,7 @@ test.cb("call_method partial.id", (t) => {
   const component = getComponent(html);
   let morphdomCount = 0;
   const morphdomMergers = [];
-  component.morphdom = (initial, merger, ___) => {
+  component.morpher.morph = (initial, merger, ___) => {
     morphdomCount += 1;
     morphdomMergers.push(merger);
   };
@@ -208,17 +212,19 @@ test.cb("call_method partial.id", (t) => {
   };
   global.fetch = fetchMock.sandbox().mock().post("/test/text-inputs", res);
 
-  send(component, (a, forceModelUpdates, err) => {
-    t.true(err === null);
-    t.is(morphdomCount, 1);
-    t.is(morphdomMergers.length, 1);
-    t.is(morphdomMergers[0], "<span id='clicker-id'>id partial!</span>");
-    fetchMock.reset();
-    t.end();
+  await new Promise((resolve) => {
+    send(component, (a, forceModelUpdates, err) => {
+      t.true(err === null);
+      t.is(morphdomCount, 1);
+      t.is(morphdomMergers.length, 1);
+      t.is(morphdomMergers[0], "<span id='clicker-id'>id partial!</span>");
+      fetchMock.reset();
+      resolve();
+    });
   });
 });
 
-test.cb("call_method partial target", (t) => {
+test("call_method partial target", async (t) => {
   // Annoyingly it appears that $('[unicorn\\:key='something']) doesn't
   // seem to work in JSDom, so this just tests targeting by id
   const html = `
@@ -233,7 +239,7 @@ test.cb("call_method partial target", (t) => {
   const component = getComponent(html);
   let morphdomCount = 0;
   const morphdomMergers = [];
-  component.morphdom = (initial, merger, ___) => {
+  component.morpher.morph = (initial, merger, ___) => {
     morphdomCount += 1;
     morphdomMergers.push(merger);
   };
@@ -259,12 +265,14 @@ test.cb("call_method partial target", (t) => {
   };
   global.fetch = fetchMock.sandbox().mock().post("/test/text-inputs", res);
 
-  send(component, (a, forceModelUpdates, err) => {
-    t.true(err === null);
-    t.is(morphdomCount, 1);
-    t.is(morphdomMergers.length, 1);
-    t.is(morphdomMergers[0], "<span id='clicker-id'>id partial!</span>");
-    fetchMock.reset();
-    t.end();
+  await new Promise((resolve) => {
+    send(component, (a, forceModelUpdates, err) => {
+      t.true(err === null);
+      t.is(morphdomCount, 1);
+      t.is(morphdomMergers.length, 1);
+      t.is(morphdomMergers[0], "<span id='clicker-id'>id partial!</span>");
+      fetchMock.reset();
+      resolve();
+    });
   });
 });

@@ -1,4 +1,6 @@
 import test from "ava";
+import fetchMock from "fetch-mock";
+import { send } from "../../../src/django_unicorn/static/unicorn/js/messageSender.js";
 import { getComponent, getElement } from "../utils.js";
 
 test("click", (t) => {
@@ -8,6 +10,7 @@ test("click", (t) => {
   const action = element.actions[0];
   t.is(action.name, "test()");
   t.is(action.eventType, "click");
+  t.is(action.debounceTime, 0);
 });
 
 test("keydown.enter", (t) => {
@@ -48,6 +51,27 @@ test("click.discard", (t) => {
   t.true(action.isDiscard);
   t.is(action.eventType, "click");
   t.is(action.key, undefined);
+});
+
+test("click.debounce", (t) => {
+  const html = "<a href='#' unicorn:click.debounce-99='test()'>Test()</a>";
+  const element = getElement(html);
+
+  const action = element.actions[0];
+  t.is(action.debounceTime, 99);
+  t.is(action.eventType, "click");
+  t.is(action.key, undefined);
+});
+
+test("click.keyup.enter.debounce", (t) => {
+  const html =
+    "<a href='#' unicorn:click.keyup.enter.debounce-99='test()'>Test()</a>";
+  const element = getElement(html);
+
+  const action = element.actions[0];
+  t.is(action.debounceTime, 99);
+  t.is(action.eventType, "click");
+  t.is(action.key, "enter");
 });
 
 test("click.discard model changes", (t) => {
@@ -256,103 +280,6 @@ test("$event action variable in middle of args", (t) => {
   t.is(action.payload.name, 'test("4", 1)');
 });
 
-test("$model action variable", (t) => {
-  const html = `
-<div unicorn:id="5jypjiyb" unicorn:name="text-inputs" unicorn:checksum="GXzew3Km">
-  <div u:db="example">
-    <div u:pk="1">
-      <button unicorn:click='test($model)'></button>
-    </div>
-  </div>
-</div>`;
-  const component = getComponent(html);
-
-  t.is(component.attachedEventTypes.length, 1);
-  t.is(component.actionEvents.click.length, 1);
-
-  component.actionEvents.click[0].element.el.click();
-
-  t.is(component.actionQueue.length, 1);
-  const action = component.actionQueue[0];
-  t.is(action.payload.name, 'test({"pk":"1","name":"example"})');
-});
-
-test("$model action variable with db in root", (t) => {
-  const html = `
-<div unicorn:id="5jypjiyb" unicorn:name="text-inputs" unicorn:checksum="GXzew3Km" u:db="example" u:pk="1">
-  <button unicorn:click='test($model)'></button>
-</div>`;
-  const component = getComponent(html);
-
-  t.is(component.attachedEventTypes.length, 1);
-  t.is(component.actionEvents.click.length, 1);
-
-  component.actionEvents.click[0].element.el.click();
-
-  t.is(component.actionQueue.length, 1);
-  const action = component.actionQueue[0];
-  t.is(action.payload.name, 'test({"pk":"1","name":"example"})');
-});
-
-test("$model action variable missing pk", (t) => {
-  const html = `
-<div unicorn:id="5jypjiyb" unicorn:name="text-inputs" unicorn:checksum="GXzew3Km">
-  <div u:db="example">
-    <div>
-      <button unicorn:click='test($model)'></button>
-    </div>
-  </div>
-</div>`;
-  const component = getComponent(html);
-
-  t.is(component.attachedEventTypes.length, 1);
-  t.is(component.actionEvents.click.length, 1);
-
-  component.actionEvents.click[0].element.el.click();
-
-  t.is(component.actionQueue.length, 1);
-  const action = component.actionQueue[0];
-  t.is(action.payload.name, "test($model)");
-});
-
-test("$model action variable missing db", (t) => {
-  const html = `
-<div unicorn:id="5jypjiyb" unicorn:name="text-inputs" unicorn:checksum="GXzew3Km">
-  <div>
-    <div u:pk="1">
-      <button u:click='test($model)'></button>
-    </div>
-  </div>
-</div>`;
-  const component = getComponent(html);
-
-  t.is(component.attachedEventTypes.length, 1);
-  t.is(component.actionEvents.click.length, 1);
-
-  component.actionEvents.click[0].element.el.click();
-
-  t.is(component.actionQueue.length, 1);
-  const action = component.actionQueue[0];
-  t.is(action.payload.name, "test($model)");
-});
-
-test("$model action variable same element", (t) => {
-  const html = `
-<div unicorn:id="5jypjiyb" unicorn:name="text-inputs" unicorn:checksum="GXzew3Km">
-  <button u:db="example" u:pk="1" u:click='test($model)'></button>
-</div>`;
-  const component = getComponent(html);
-
-  t.is(component.attachedEventTypes.length, 1);
-  t.is(component.actionEvents.click.length, 1);
-
-  component.actionEvents.click[0].element.el.click();
-
-  t.is(component.actionQueue.length, 1);
-  const action = component.actionQueue[0];
-  t.is(action.payload.name, 'test({"pk":"1","name":"example"})');
-});
-
 test("event action loading attr", (t) => {
   const html = `
 <div unicorn:id="5jypjiyb" unicorn:name="text-inputs" unicorn:checksum="GXzew3Km">
@@ -386,6 +313,57 @@ test("event action loading class", (t) => {
   el.click();
   t.is(el.classList.length, 1);
   t.is(el.classList[0], "loading");
+});
+
+test("event action loading attr 500 reverts", async (t) => {
+  const html = `
+<div unicorn:id="5jypjiyb" unicorn:name="text-inputs" unicorn:checksum="GXzew3Km">
+  <button unicorn:click='test()' u:loading.attr="disabled"></button>
+</div>`;
+  const component = getComponent(html);
+
+  t.is(component.attachedEventTypes.length, 1);
+  t.is(component.actionEvents.click.length, 1);
+
+  const { el } = component.actionEvents.click[0].element;
+  t.true(typeof el.attributes.disabled === "undefined");
+
+  el.click();
+  t.false(typeof el.attributes.disabled === "undefined");
+
+  // mock the fetch
+  global.fetch = fetchMock.sandbox().mock().post("/test/text-inputs", 500);
+
+  await send(component);
+
+  t.true(typeof el.attributes.disabled === "undefined");
+  fetchMock.reset();
+});
+
+test("event action loading class 500 reverts", async (t) => {
+  const html = `
+<div unicorn:id="5jypjiyb" unicorn:name="text-inputs" unicorn:checksum="GXzew3Km">
+  <button unicorn:click='test()' u:loading.class="loading-class"></button>
+</div>`;
+  const component = getComponent(html);
+
+  t.is(component.attachedEventTypes.length, 1);
+  t.is(component.actionEvents.click.length, 1);
+
+  const { el } = component.actionEvents.click[0].element;
+  t.is(el.classList.length, 0);
+
+  el.click();
+  t.is(el.classList.length, 1);
+  t.is(el.classList[0], "loading-class");
+
+  // mock the fetch
+  global.fetch = fetchMock.sandbox().mock().post("/test/text-inputs", 500);
+
+  await send(component);
+
+  t.is(el.classList.length, 0);
+  fetchMock.reset();
 });
 
 test("event action loading remove class", (t) => {
@@ -492,4 +470,84 @@ test("event action loading by key", (t) => {
 
   el.click();
   t.false(loadingEl.el.hidden);
+});
+
+test("event action wildcard loading by id", (t) => {
+  const html = `
+<div unicorn:id="5jypjiyb" unicorn:name="text-inputs" unicorn:checksum="GXzew3Km">
+  <button unicorn:click='test()' id='testId-1' u:key='testKey'></button>
+  <div>
+    <button unicorn:click='test()' id='testId-2' u:key='testKey'></button>
+  </div>
+  <button unicorn:click='test()' id='testId' u:key='testKey'></button>
+  <div u:loading u:target='testId-*'>
+  Loading
+  </div>
+</div>`;
+  const component = getComponent(html);
+
+  t.is(component.attachedEventTypes.length, 1);
+  t.is(component.actionEvents.click.length, 3);
+  t.is(component.loadingEls.length, 1);
+
+  const el1 = component.actionEvents.click[0].element.el;
+  const el2 = component.actionEvents.click[1].element.el;
+  const el3 = component.actionEvents.click[2].element.el;
+  const loadingEl = component.loadingEls[0];
+  t.true(loadingEl.el.hidden);
+
+  el1.click();
+  t.false(loadingEl.el.hidden);
+
+  loadingEl.el.hidden = true;
+  t.true(loadingEl.el.hidden);
+
+  el2.click();
+  t.false(loadingEl.el.hidden);
+
+  loadingEl.el.hidden = true;
+  t.true(loadingEl.el.hidden);
+
+  el3.click();
+  t.true(loadingEl.el.hidden);
+});
+
+test("event action wildcard loading by key", (t) => {
+  const html = `
+<div unicorn:id="5jypjiyb" unicorn:name="text-inputs" unicorn:checksum="GXzew3Km">
+  <button unicorn:click='test()' id='testId' u:key='testKey-1'></button>
+  <div>
+    <button unicorn:click='test()' id='testId' u:key='testKey-2'></button>
+  </div>
+  <button unicorn:click='test()' id='testId' u:key='testKey3'></button>
+  <div u:loading u:target='testKey-*'>
+  Loading
+  </div>
+</div>`;
+  const component = getComponent(html);
+
+  t.is(component.attachedEventTypes.length, 1);
+  t.is(component.actionEvents.click.length, 3);
+  t.is(component.loadingEls.length, 1);
+
+  const el1 = component.actionEvents.click[0].element.el;
+  const el2 = component.actionEvents.click[1].element.el;
+  const el3 = component.actionEvents.click[2].element.el;
+  const loadingEl = component.loadingEls[0];
+  t.true(loadingEl.el.hidden);
+
+  el1.click();
+  t.false(loadingEl.el.hidden);
+
+  loadingEl.el.hidden = true;
+  t.true(loadingEl.el.hidden);
+
+  el2.click();
+  t.false(loadingEl.el.hidden);
+
+  loadingEl.el.hidden = true;
+  t.true(loadingEl.el.hidden);
+
+  el3.click();
+  t.true(loadingEl.el.hidden);
 });

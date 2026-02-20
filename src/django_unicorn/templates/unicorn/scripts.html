@@ -1,0 +1,29 @@
+{% load static %}
+
+{{ MORPHER|json_script:"unicorn:settings:morpher" }}
+
+{% if MINIFIED %}
+<script src="{% static 'unicorn/js/unicorn.min.js' %}"></script>
+{% comment %} <script src="../static/unicorn/js/unicorn.min.js"></script> {% endcomment %}
+
+<script>
+  const url = "{% url 'django_unicorn:message' %}";
+  const morpherSettings = JSON.parse(document.getElementById("unicorn:settings:morpher").textContent);
+
+  Unicorn.init(url, "{{ CSRF_HEADER_NAME }}", "{{ CSRF_COOKIE_NAME }}", morpherSettings);
+
+</script>
+{% else %}
+<script type="module">
+  import * as Unicorn from "{% static 'unicorn/js/unicorn.js' %}";
+  import { getMorpher } from "{% static 'unicorn/js/morpher.js' %}";
+
+  // Set Unicorn to the global, so it can be used by components
+  window.Unicorn = Unicorn;
+
+  const url = "{% url 'django_unicorn:message' %}";
+  const morpherSettings = JSON.parse(document.getElementById("unicorn:settings:morpher").textContent);
+
+  Unicorn.init(url, "{{ CSRF_HEADER_NAME }}", "{{ CSRF_COOKIE_NAME }}", morpherSettings);
+</script>
+{% endif %}

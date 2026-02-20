@@ -1,115 +1,168 @@
 import pytest
 
-from django_unicorn.components import get_locations
+from django_unicorn.components.unicorn_view import get_locations
 
 
-def test_get_locations_kebab_case():
-    expected = [("HelloWorldView", "unicorn.components.hello_world")]
+@pytest.fixture
+def cache_clear():
+    get_locations.cache_clear()
+
+
+@pytest.fixture
+def clear_apps(settings):
+    unicorn_apps = settings.UNICORN["APPS"]
+    unicorn_apps = settings.UNICORN.get("APPS")
+    if "APPS" in settings.UNICORN:
+        settings.UNICORN = {**settings.UNICORN}
+        del settings.UNICORN["APPS"]
+
+    yield
+
+    if unicorn_apps:
+        settings.UNICORN = {**settings.UNICORN, "APPS": unicorn_apps}
+
+
+def test_get_locations_kebab_case(cache_clear):  # noqa: ARG001
+    expected = [("unicorn.components.hello_world", "HelloWorldView"), ("components.hello_world", "HelloWorldView")]
     actual = get_locations("hello-world")
 
     assert expected == actual
 
 
-def test_get_locations_with_slashes():
-    expected = [("TableView", "unicorn.components.nested.table")]
+def test_get_locations_with_slashes(cache_clear):  # noqa: ARG001
+    expected = [("unicorn.components.nested.table", "TableView"), ("components.nested.table", "TableView")]
     actual = get_locations("nested/table")
 
     assert expected == actual
 
 
-def test_get_locations_with_dots():
-    expected = [("table", "nested"), ("TableView", "unicorn.components.nested.table")]
+def test_get_locations_with_dots(cache_clear):  # noqa: ARG001
+    expected = [
+        ("nested", "table"),
+        ("unicorn.components.nested.table", "TableView"),
+        ("components.nested.table", "TableView"),
+    ]
     actual = get_locations("nested.table")
 
     assert expected == actual
 
 
-def test_get_locations_fully_qualified_with_dots():
+def test_get_locations_fully_qualified_with_dots(cache_clear):  # noqa: ARG001
     expected = [
-        ("HelloWorldView", "project.components.hello_world"),
+        ("project.components.hello_world", "HelloWorldView"),
     ]
     actual = get_locations("project.components.hello_world.HelloWorldView")
-    print(actual)
 
     assert expected == actual
 
 
-def test_get_locations_fully_qualified_with_slashes():
-    expected = [
-        ("HelloWorldView", "project.components.hello_world"),
-    ]
+def test_get_locations_fully_qualified_with_slashes(cache_clear):  # noqa: ARG001
+    expected = [("project.components.hello_world", "HelloWorldView")]
     actual = get_locations("project/components/hello_world.HelloWorldView")
 
     assert expected == actual
 
 
-def test_get_locations_fully_qualified_with_dots_ends_in_component():
+def test_get_locations_fully_qualified_with_dots_ends_in_component(cache_clear):  # noqa: ARG001
     expected = [
-        ("HelloWorldComponent", "project.components.hello_world"),
+        ("project.components.hello_world", "HelloWorldComponent"),
     ]
     actual = get_locations("project.components.hello_world.HelloWorldComponent")
 
     assert expected == actual
 
 
-def test_get_locations_fully_qualified_with_dots_does_not_end_in_view():
+def test_get_locations_fully_qualified_with_dots_does_not_end_in_view(cache_clear):  # noqa: ARG001
     """
-    The second entry in here is a mess.
+    The last 2 entries in here are a mess. This documents how things work correctly even though it is not the ideal.
     """
+
     expected = [
-        ("HelloWorldThing", "project.components.hello_world"),
+        ("project.components.hello_world", "HelloWorldThing"),
         (
-            "HelloworldthingView",
             "unicorn.components.project.components.hello_world.HelloWorldThing",
+            "HelloworldthingView",
         ),
+        ("components.project.components.hello_world.HelloWorldThing", "HelloworldthingView"),
     ]
     actual = get_locations("project.components.hello_world.HelloWorldThing")
 
     assert expected == actual
 
 
-def test_get_locations_apps_setting_tuple(settings):
-    settings.UNICORN["APPS"] = ("project",)
+def test_get_locations_apps_setting_tuple(settings, cache_clear):  # noqa: ARG001
+    settings.UNICORN = {**settings.UNICORN, "APPS": ("project",)}
 
     expected = [
-        ("HelloWorldView", "project.components.hello_world"),
+        ("project.components.hello_world", "HelloWorldView"),
+        ("components.hello_world", "HelloWorldView"),
     ]
     actual = get_locations("hello-world")
 
     assert expected == actual
 
 
-def test_get_locations_apps_setting_list(settings):
-    settings.UNICORN["APPS"] = [
-        "project",
-    ]
+def test_get_locations_apps_setting_list(settings, cache_clear):  # noqa: ARG001
+    settings.UNICORN = {
+        **settings.UNICORN,
+        "APPS": [
+            "project",
+        ],
+    }
 
-    expected = [
-        ("HelloWorldView", "project.components.hello_world"),
-    ]
+    expected = [("project.components.hello_world", "HelloWorldView"), ("components.hello_world", "HelloWorldView")]
     actual = get_locations("hello-world")
 
     assert expected == actual
 
 
-def test_get_locations_apps_setting_set(settings):
-    settings.UNICORN["APPS"] = {
-        "project",
+def test_get_locations_apps_setting_set(settings, cache_clear):  # noqa: ARG001
+    settings.UNICORN = {
+        **settings.UNICORN,
+        "APPS": {"project"},
     }
 
     expected = [
-        ("HelloWorldView", "project.components.hello_world"),
+        ("project.components.hello_world", "HelloWorldView"),
+        ("components.hello_world", "HelloWorldView"),
     ]
     actual = get_locations("hello-world")
 
     assert expected == actual
 
 
-def test_get_locations_apps_setting_invalid(settings):
-    settings.UNICORN["APPS"] = "project"
+def test_get_locations_apps_setting_invalid(settings, cache_clear):  # noqa: ARG001
+    settings.UNICORN = {**settings.UNICORN, "APPS": "project"}
 
     with pytest.raises(AssertionError) as e:
         get_locations("hello-world")
 
-    assert e.type == AssertionError
-    settings.UNICORN["APPS"] = ("unicorn",)
+    assert e.type is AssertionError
+    settings.UNICORN = {**settings.UNICORN, "APPS": ("unicorn",)}
+
+
+def test_get_locations_installed_app_with_app_config(settings, clear_apps, cache_clear):  # noqa: ARG001
+    settings.INSTALLED_APPS = [
+        "example.coffee.apps.Config",
+    ]
+
+    expected = [
+        ("example.coffee.components.hello_world", "HelloWorldView"),
+        ("components.hello_world", "HelloWorldView"),
+    ]
+    actual = get_locations("hello-world")
+
+    assert expected == actual
+
+
+def test_get_locations_installed_app_with_apps(settings, clear_apps, cache_clear):  # noqa: ARG001
+    # test when the app is in a subdirectory "apps"
+    settings.INSTALLED_APPS = [
+        "example.apps.main",
+    ]
+    expected_location = [
+        ("example.apps.main.components.sidebar_menu", "SidebarMenuView"),
+        ("components.sidebar_menu", "SidebarMenuView"),
+    ]
+    actual_location = get_locations("sidebar-menu")
+    assert expected_location == actual_location

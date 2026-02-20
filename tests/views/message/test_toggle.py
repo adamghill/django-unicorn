@@ -24,7 +24,7 @@ def test_message_toggle(client):
             {"type": "callMethod", "payload": {"name": "$toggle('check')"}},
         ],
         "data": data,
-        "checksum": generate_checksum(orjson.dumps(data)),
+        "checksum": generate_checksum(str(data)),
         "id": shortuuid.uuid()[:8],
         "epoch": time.time(),
     }
@@ -32,7 +32,7 @@ def test_message_toggle(client):
     body = _post_message_and_get_body(client, message)
 
     assert not body["errors"]
-    assert body["data"]["check"] == True
+    assert body["data"]["check"] is True
 
 
 def test_message_nested_toggle(client):
@@ -42,7 +42,7 @@ def test_message_nested_toggle(client):
             {"type": "callMethod", "payload": {"name": "$toggle('nested.check')"}},
         ],
         "data": data,
-        "checksum": generate_checksum(orjson.dumps(data)),
+        "checksum": generate_checksum(str(data)),
         "id": shortuuid.uuid()[:8],
         "epoch": time.time(),
     }
@@ -50,4 +50,4 @@ def test_message_nested_toggle(client):
     body = _post_message_and_get_body(client, message)
 
     assert not body["errors"]
-    assert body["data"]["nested"]["check"] == True
+    assert body["data"]["nested"]["check"] is True

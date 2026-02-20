@@ -1,7 +1,16 @@
 import { JSDOM } from "jsdom";
 import fetchMock from "fetch-mock";
-import { Element } from "../../django_unicorn/static/js/element.js";
-import { Component } from "../../django_unicorn/static/js/component.js";
+import { Element } from "../../src/django_unicorn/static/unicorn/js/element.js";
+import { Component } from "../../src/django_unicorn/static/unicorn/js/component.js";
+
+/**
+ * Mock some browser globals using a fake DOM
+ */
+export function setBrowserMocks() {
+  const dom = new JSDOM("<div></div>");
+  global.document = dom.window.document;
+  global.NodeFilter = dom.window.NodeFilter;
+}
 
 /**
  * Gets a fake DOM document based on the passed-in HTML fragement.
@@ -109,7 +118,7 @@ export function getComponent(html, id, name, data) {
     document: getDocument(html),
     messageUrl: "test",
     walker: walkDOM,
-    morphdom,
+    morpher: { morph: morphdom },
     window: {
       document: { title: "" },
       history: mockHistory,

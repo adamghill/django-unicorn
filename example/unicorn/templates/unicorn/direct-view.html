@@ -1,0 +1,13 @@
+{% extends "www/base.html" %}
+{% load unicorn %}
+
+{% block content %}
+
+<div unicorn:view>
+  <h2>Direct View</h2>
+
+  <input u:model="name" />
+  {{ name }}
+</div>
+
+{% endblock content %}
