@@ -57,12 +57,7 @@ def set_property_from_data(
                     setattr(component_or_field, model_field.attname, value)
                 return
         except Exception as exc:
-            logger.debug(
-                "Unable to assign '%s' on component '%s'",
-                model_field.attname,
-                type(component_or_field).__name__,
-                exc_info=exc,
-            )
+            logger.exception(exc)
 
     # UnicornField and Models are always a dictionary (can be nested)
     if component_field_is_model_or_unicorn_field:
