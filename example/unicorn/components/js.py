@@ -8,7 +8,9 @@ from ..forms import DocumentForm
 class JsView(UnicornView):
     form_class = DocumentForm
 
-    document = ""
+    document = None
+    upload_success = False
+    uploaded_filename = ""
 
     states = (
         "Alabama",
@@ -45,7 +47,13 @@ class JsView(UnicornView):
         self.scroll_counter += 1
 
     def upload_file(self):
-        print("UPLOAD")
+        self.upload_success = False
+        self.uploaded_filename = ""
+        if self.is_valid():
+            instance = self.form.save()
+            self.uploaded_filename = instance.document.name
+            self.upload_success = True
+            self.document = None  # clear the file input after a successful save
 
     class Meta:
         javascript_excludes = ("states",)
