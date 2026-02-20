@@ -47,17 +47,32 @@ export function send(component, callback) {
     // Append entire JSON payload as a nested field
     formData.append("body", JSON.stringify(body));
 
-    // Append data — but handle files properly
+    // Append files from component.data (e.g. set programmatically)
     Object.keys(component.data).forEach((key) => {
       const value = component.data[key];
 
       if (value instanceof File) {
         formData.append(key, value);
-      } else if (value instanceof FileList) {
+      } else if (value instanceof FileList && value.length > 0) {
         Array.from(value).forEach((file, index) => {
           formData.append(`${key}[${index}]`, file);
         });
-      } 
+      }
+    });
+
+    // Append files from syncInput action payloads (the normal path: file inputs
+    // store the FileList in the action payload, not in component.data).
+    (component.currentActionQueue || []).forEach((action) => {
+      if (action.type !== "syncInput" || !action.payload) return;
+      const fieldName = action.payload.name;
+      const value = action.payload.value;
+      if (value instanceof File) {
+        formData.append(fieldName, value);
+      } else if (value instanceof FileList && value.length > 0) {
+        Array.from(value).forEach((file, index) => {
+          formData.append(`${fieldName}[${index}]`, file);
+        });
+      }
     });
 
     bodyPayload = formData;
@@ -347,7 +362,7 @@ function hasFiles(component) {
   for (const key in component.data) {
     const value = component.data[key];
 
-    if (value instanceof File || value instanceof FileList) {
+    if (value instanceof File || (value instanceof FileList && value.length > 0)) {
       return true;
     }
 
@@ -358,12 +373,14 @@ function hasFiles(component) {
     }
   }
 
-  // Check actionQueue payloads
-  return component.actionQueue.some((action) => {
+  // Check currentActionQueue payloads — the queue is moved to currentActionQueue
+  // before hasFiles is called, so actionQueue is empty at this point.
+  const queue = component.currentActionQueue || [];
+  return queue.some((action) => {
     if (!action.payload) return false;
 
     return Object.values(action.payload).some(
-      (v) => v instanceof File || v instanceof FileList
+      (v) => (v instanceof File) || (v instanceof FileList && v.length > 0)
     );
   });
 }
