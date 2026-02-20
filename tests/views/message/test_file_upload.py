@@ -8,22 +8,21 @@ Tests for file upload support:
 
 import json
 import time
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 from django import forms
-from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.files.uploadedfile import InMemoryUploadedFile, SimpleUploadedFile
 
 from django_unicorn.components import UnicornView
 from django_unicorn.utils import generate_checksum
 from django_unicorn.views.action_parsers import sync_input
 from django_unicorn.views.request import ComponentRequest
-from tests.views.message.utils import post_and_get_response
-
 
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def make_body(data=None, action_queue=None, component_id="test-id-123"):
     if data is None:
@@ -52,6 +51,7 @@ def multipart_post(rf, url, body_dict, extra_files=None):
 # Inline fake components used for integration tests (accessible by dotted path)
 # ---------------------------------------------------------------------------
 
+
 class FakeFileForm(forms.Form):
     document = forms.FileField()
 
@@ -72,6 +72,7 @@ class FakeFileComponent(UnicornView):
 # ---------------------------------------------------------------------------
 # Unit: ComponentRequest multipart body parsing
 # ---------------------------------------------------------------------------
+
 
 def test_component_request_parses_multipart_json_body(rf):
     """ComponentRequest reads JSON from the 'body' POST field for multipart requests."""
@@ -121,6 +122,7 @@ def test_component_request_json_still_works(rf):
 # Unit: sync_input resolves files from request.FILES
 # ---------------------------------------------------------------------------
 
+
 def test_sync_input_resolves_single_file_from_files(rf):
     """sync_input replaces the empty-dict FileList placeholder with the real file."""
     data = {"document": {}}
@@ -141,7 +143,7 @@ def test_sync_input_resolves_single_file_from_files(rf):
     args = component._set_property.call_args[0]
     assert args[0] == "document"
     # RequestFactory wraps SimpleUploadedFile into InMemoryUploadedFile; check by name
-    from django.core.files.uploadedfile import InMemoryUploadedFile
+
     assert isinstance(args[1], InMemoryUploadedFile)
     assert args[1].name == "test.txt"
 
@@ -153,7 +155,9 @@ def test_sync_input_resolves_multiple_files_from_files(rf):
     file0 = SimpleUploadedFile("a.png", b"a", content_type="image/png")
     file1 = SimpleUploadedFile("b.png", b"b", content_type="image/png")
     request = multipart_post(
-        rf, "/message/test", body,
+        rf,
+        "/message/test",
+        body,
         extra_files={"photos[0]": file0, "photos[1]": file1},
     )
 
@@ -168,7 +172,7 @@ def test_sync_input_resolves_multiple_files_from_files(rf):
     args = component._set_property.call_args[0]
     assert args[0] == "photos"
     resolved = args[1]
-    from django.core.files.uploadedfile import InMemoryUploadedFile
+
     assert isinstance(resolved, list)
     assert len(resolved) == 2
     assert isinstance(resolved[0], InMemoryUploadedFile)
