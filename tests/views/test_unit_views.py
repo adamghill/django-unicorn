@@ -86,6 +86,7 @@ def test_component_response_structure():
     component = Mock(spec=Component)
     component.errors = {}
     component.calls = []
+    component.children = []
     component.parent = None
     component.force_render = False
 
